@@ -302,6 +302,7 @@ Untested browsers
 - Android 2.2 and below.
 - iOS 4 and below.
 - Opera Mini.
+- BlackBerry browsers
 - Lots of older versions of the desktop versions of Chrome, Firefox, Opera, and Safari probably work well with Teddy, but there hasn't yet been time to test them. If anyone wants to test them and post the results, it will be greatly appreciated.
 
 Browsers known to be partially broken
