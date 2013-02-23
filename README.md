@@ -228,8 +228,8 @@ Use Teddy in Node.js
 
 Teddy is designed for use with <a href='http://expressjs.com/'>Express</a> in Node.
 
-- First require the node modules `http`, `express`, and `teddy`.
-- Then initialize express and configure it to your liking.
+- First require the node modules `http`, `express`, and `teddy`
+- Then initialize express and configure it to your liking
 - In your express config, make sure to include this line: `app.engine('html', teddy.__express)`
 
 For a complete sample implementation, see the sample app here: <a href='sampleApps/nodeHelloWorld'>sampleApps/nodeHelloWorld</a>
@@ -239,10 +239,10 @@ Use Teddy client-side
 
 Server-side app:
 
-- Setup a Node.js app using the instructions above.
-- Precompile templates somewhere in your app using the `teddy.compile('templateName.html')` method.
+- Setup a Node.js app using the instructions above
+- Precompile templates somewhere in your app using the `teddy.compile('templateName.html')` method
 - Create a route that serves one or more precompiled templates as `text/javascript`
-- Optionally write the precompiled templates somewhere to disk and serve them as statics instead to optimize for performance.
+- Optionally write the precompiled templates somewhere to disk and serve them as statics instead to optimize for performance
 
 Client-side HTML:
 
@@ -252,7 +252,7 @@ Client-side HTML:
 
 Writing your client.js:
 
-- Define a model: `var model = {some: 'data'}` or optionally pull the JSON from the server, localStorage, or wherever.
+- Define a model: `var model = {some: 'data'}` or optionally pull the JSON from the server, localStorage, or wherever
 - Render a template client-side: `var rendered = teddy.render(teddy.compiledTemplates['template.html'], model)`
 - Render the template into the document somewhere, for instance: `document.body.insertAdjacentHTML('beforeend', rendered);`
 
