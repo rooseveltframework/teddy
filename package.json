@@ -17,12 +17,15 @@
     "template",
     "view"
   ],
-  "author": {
-    "name": "Eric Newport",
-    "email": "kethinov@gmail.com"
-  },
-  "license": "Creative Commons Attribution 3.0 Unported License http://creativecommons.org/licenses/by/3.0/deed.en_US",
+  "author": "Eric Newport <kethinov@gmail.com>",
+  "license": "Creative Commons Attribution 3.0 Unported License",
   "readmeFilename": "README.md",
-  "_id": "teddy@0.1.0",
-  "_from": "teddy@*"
+  "_from": "teddy@*",
+  "gitHead": "1dbbc4c73d7c8878cbe7fc0ba527c91018b4cea7",
+  "dependencies": {
+    "fs": "~0.0.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
 }
