@@ -74,6 +74,8 @@ Pass arguments to the template:
 </include>
 ```
 
+The arguments you've defined will be accessible as `{firstArgument}` and `{secondArgument}` in the child template `partial.html`.
+
 Conditionals
 =
 
