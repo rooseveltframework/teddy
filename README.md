@@ -47,7 +47,7 @@ Here's how:
 - Flow control tags: `<if>`, `<unless>`, `<elseif>`, `<elseunless>`, and `<else>` for basic templating logic.
 - A `<foreach>` tag for looping.
 - Server-side `{!comments!}` delimited by exclamation points just like `<!-- HTML comments -->`. Server-side comments are stripped out at the template compilation stage.
-- No funky symbols to memorize. Just `{variables}` and new HTML-like `<tags>`.
+- No funky symbols to memorize. Just `{variables}` for data and new HTML-like `<tags>` for rudimentary logic.
 
 Cool, but how exactly do those new tags work?
 =
