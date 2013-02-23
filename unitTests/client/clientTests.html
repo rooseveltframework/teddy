@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<!--
+/**
+ * Client-side unit tests for Teddy Templating Engine - This simple sample app parses a set of sample templates to ensure that all the features of Teddy are working correctly. Use this app to unit test changes to the templating engine or tinker with it to learn how Teddy works in general.
+ * @author Eric Newport (kethinov)
+ * @license Creative Commons Attribution 3.0 Unported License http://creativecommons.org/licenses/by/3.0/deed.en_US
+ */
+-->
+<html>
+<head>
+<meta charset='utf-8'/>
+<title>Teddy Templating Engine unit tests</title>
+<link href='lib/google-code-prettify/src/prettify.css' type='text/css' rel='stylesheet'/>
+<style>
+iframe{width:90%;height:640px;}
+.pass{color:#0a0;font-weight:bold;}
+.fail{color:#f00;font-weight:bold;}
+</style>
+</head>
+<body>
+<h1>Teddy Templating Engine unit tests</h1>
+
+<!--[if lte IE 9]>
+  <h2>Warning: IE9 and below are not supported in Teddy client-side templating.</h2>
+<![endif]-->
+
+<!-- include teddy library -->
+<script src='../../src/teddy.js'></script>
+
+<!-- include vkbeautify (for indenting display code) -->
+<script src='lib/vkbeautify.0.99.00.beta.js'></script>
+
+<!-- include prettify.js (for color coding display code) -->
+<script src='lib/google-code-prettify/src/prettify.js'></script>
+
+<!-- run unit tests -->
+<script src='clientTests.js'></script>
+
+</body>
+</html>

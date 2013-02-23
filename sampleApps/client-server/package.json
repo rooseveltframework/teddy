@@ -1,0 +1,11 @@
+{
+  "name": "express-teddy-sample-client-server-app",
+  "version": "0.1.0",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "*",
+    "teddy": "*"
+  }
+}

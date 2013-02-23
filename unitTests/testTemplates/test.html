@@ -1,0 +1,132 @@
+<include src='inc/headerfooter.html'>
+  <arg pageTitle>{pageTitle}</arg>
+  <arg pageContent>
+
+    <section class='variables'>
+      <h1>Simple variable</h1>
+      <p>{variableName}</p>
+    </section>
+    
+    {! server-side comment; not sent to the client !}
+    <!-- HTML comment; is sent to the client -->
+
+    <section class='includes'>
+      <h1>Includes</h1>
+      
+      <include src='inc/sampleIncludeWithoutArguments.html'></include>
+  
+      <include src='inc/sampleIncludeWithArguments.html'>
+        <arg firstArgument>Plain text argument</arg>
+        <arg secondArgument>
+          <span>Argument with HTML in it</span>
+        </arg>
+      </include>
+    </section>
+    
+    <section class='flowcontrol'>
+      <h1>Flow control</h1>
+      
+      <if something>
+        <p>The variable 'something' is present</p>
+      </if>
+      <else>
+        <p>The variable 'something' is not present</p>
+      </else>
+      
+      <if something='hello'>
+        <p>The variable 'something' is set to 'hello'</p>
+      </if>
+      <else>
+        <p>The variable 'something' is not set to 'hello'</p>
+      </else>
+      
+      <unless something>
+        <p>The variable 'something' is not present</p>
+      </unless>
+      <else>
+        <p>The variable 'something' is present</p>
+      </else>
+      
+      <if something>
+        <p>The variable 'something' is present</p>
+      </if>
+      <elseif somethingElse>
+        <p>The variable 'something' is not present, but 'somethingElse' is present</p>
+      </elseif>
+      <else>
+        <p>The variable 'something' is not present and neither is 'somethingElse'</p>
+      </else>
+      
+      <unless something>
+        <p>The variable 'something' is not present</p>
+      </unless>
+      <elseunless somethingElse>
+        <p>The variable 'something' is present, but 'somethingElse' is not present</p>
+      </elseunless>
+      <else>
+        <p>The variables 'something' and 'somethingElse' are both present</p>
+      </else>
+    </section>
+
+    <section class='looping'>
+      <h1>Looping</h1>
+      
+      <dl>
+        <dt>JS model:</dt>
+        <dd>letters = ['a', 'b', 'c'];</dd>
+        <dt>HTML template:</dt>
+        <dd>
+          <foreach val='letter' in='letters'>
+            <p>{letter}</p> {! outputs a, b, c !}
+          </foreach>
+        </dd>
+      </dl>
+
+      <dl>
+        <dt>JS model:</dt>
+        <dd>names = {jack: 'guy', jill: 'girl', hill: 'landscape'};</dd>
+        <dt>HTML template:</dt>
+        <dd>
+          <foreach key='name' val='description' in='names'>
+            <p>{name}</p> {! outputs jack, jill, hill !}
+            <p>{description}</p> {! outputs guy, girl, landscape !}
+          </foreach>
+        </dd>
+      </dl>
+      
+      <dl>
+        <dt>JS model:</dt>
+        <dd>objects = [{a:1, b:2, c:3}, {a:4, b:5, c:6}, {a:7, b:8, c:9}];</dd>
+        <dt>HTML template:</dt>
+        <dd>
+          <foreach key='i' val='item' in='objects'>
+            <p>{i}</p> {! outputs 0, 1, 2 !}
+            <p>{item.a}</p> {! outputs 1, 4, 7 !}
+            <p>{item.b}</p> {! outputs 2, 5, 8 !}
+            <p>{item.c}</p> {! outputs 3, 6, 9 !}
+          </foreach>
+        </dd>
+      </dl>
+
+      {! combining it all !}
+      <dl>
+        <dt>JS model:</dt>
+        <dd>objects = [{a:1, b:2, c:3}, {a:4, b:5, c:6}, {a:7, b:8, c:9}];</dd>
+        <dt>HTML template:</dt>
+        <dd>
+          <foreach val='item' in='objects'>
+            <if item.a='4'>
+              <p>item.a is 4</p>
+            </if>
+            <include src='inc/sampleIncludeWithArguments.html'>
+              <arg firstArgument>{item.b}</arg>
+              <arg secondArgument>
+                <span>{item.c}</span>
+              </arg>
+            </include>
+          </foreach>
+        </dd>
+      </dl>
+    </section>
+  </arg>
+</include>
