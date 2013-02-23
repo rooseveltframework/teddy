@@ -174,7 +174,7 @@ It can be iterated over like so:
 </foreach>
 ```
 
-We once again define an `in` attribute which we set to `in='names'` and a `val` attribute which we set to `val='description'` similar to the last exmaple. However this time we're iterated over a JS object with named keys instead of a simple indexed array, so it is useful to define a `key` attribute in the `<foreach>` tag to gain access to the name of the current iteration variable. We have defined it as `key='name'` in this example.
+We once again define an `in` attribute which we set to `in='names'` and a `val` attribute which we set to `val='description'` similar to the last example. However this time we've iterated over a JS object with named keys instead of a simple indexed array, so it is useful to define a `key` attribute in the `<foreach>` tag to gain access to the name of the current iteration variable. We have defined it as `key='name'` in this example.
 
 Even complex, hierarchical data structures can be iterated over. For instance, suppose this JS model:
 
@@ -291,8 +291,8 @@ Nothing is perfect, not even <a href='http://www.cracked.com/article_15895_the-5
 
 Any pull requests sent over dealing with any of these outstanding issues will graciously be accepted:
 
-- Node.js dependency library `xmldom` requires a patch to function correctly, so a fork has had to be included with Teddy. Please encourage @jindw to accept <a href='https://github.com/kethinov/xmldom/commit/afea22460fa7d846564285435e8f22d9181af97f'>this pull request</a> in order to make the master branch of `xmldom` support Teddy fully.
-- Client-side dependency `DOMParser HTML extension (polyfill)` also requires a patch to function correctly, so a fork has had to be included with Teddy. Please encourage @eligrey to merge <a href='https://gist.github.com/kethinov/4760460'>this fork</a> into his gist.
+- Node.js dependency library `xmldom` requires a patch to function correctly, so a fork had to be included with Teddy. Please encourage @jindw to accept <a href='https://github.com/kethinov/xmldom/commit/afea22460fa7d846564285435e8f22d9181af97f'>this pull request</a> in order to make the master branch of `xmldom` support Teddy fully.
+- Client-side dependency `DOMParser HTML extension (polyfill)` also requires a patch to function correctly, so a fork had to be included with Teddy. Please encourage @eligrey to merge <a href='https://gist.github.com/kethinov/4760460'>this fork</a> into his gist.
 - The unit tests are a bit primitive at the moment. Suggestions for improvement or pull requests with better tests will be much appreciated.
 - Source code view on client-side unit tests is broken in IE10 most likely due to a bug in dependency library vkbeautify.
 

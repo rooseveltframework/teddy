@@ -164,7 +164,7 @@ if (!sameOriginPolicy && !oldIE) {
       return true;
     }
     catch (e) {
-    console.log(e);
+      console.log(e);
       return false;
     }
   });

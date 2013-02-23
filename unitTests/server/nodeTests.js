@@ -91,3 +91,18 @@ unitTest('conditionals overall test', function() {
 unitTest('loops overall test', function() {
   return renderedTemplate.indexOf("<section class=\"looping\"><h1>Looping</h1><dl><dt>JS model:</dt><dd>letters = ['a', 'b', 'c'];</dd><dt>HTML template:</dt><dd><p>a</p><p>b</p><p>c</p></dd></dl><dl><dt>JS model:</dt><dd>names = {jack: 'guy', jill: 'girl', hill: 'landscape'};</dd><dt>HTML template:</dt><dd><p>jack</p><p>guy</p><p>jill</p><p>girl</p><p>hill</p><p>landscape</p></dd></dl><dl><dt>JS model:</dt><dd>objects = [{a:1, b:2, c:3}, {a:4, b:5, c:6}, {a:7, b:8, c:9}];</dd><dt>HTML template:</dt><dd><p>0</p><p>1</p><p>2</p><p>3</p><p>1</p><p>4</p><p>5</p><p>6</p><p>2</p><p>7</p><p>8</p><p>9</p></dd></dl><dl><dt>JS model:</dt><dd>objects = [{a:1, b:2, c:3}, {a:4, b:5, c:6}, {a:7, b:8, c:9}];</dd><dt>HTML template:</dt><dd><section class=\"sampleIncludeWithArguments\"><p>This is a sample included template with arguments.</p><dl><dt>firstArgument:</dt><dd>2</dd><dt>secondArgument:</dt><dd><span>3</span></dd></dl></section><p>item.a is 4</p><section class=\"sampleIncludeWithArguments\"><p>This is a sample included template with arguments.</p><dl><dt>firstArgument:</dt><dd>5</dd><dt>secondArgument:</dt><dd><span>6</span></dd></dl></section><section class=\"sampleIncludeWithArguments\"><p>This is a sample included template with arguments.</p><dl><dt>firstArgument:</dt><dd>8</dd><dt>secondArgument:</dt><dd><span>9</span></dd></dl></section></dd></dl></section>") > -1 ? true : false;
 });
+
+unitTest('packaged templates test', function() {
+  if (teddy.packagedTemplates['inc/sampleIncludeWithArguments.html'] !== "teddy.compiledTemplates['inc/sampleIncludeWithArguments.html']='<section class=\\'sampleIncludeWithArguments\\'><p>This is a sample included template with arguments.</p><dl><dt>firstArgument:</dt><dd>{firstArgument}</dd><dt>secondArgument:</dt><dd>{secondArgument}</dd></dl></section>';" || teddy.packagedTemplates['inc/sampleIncludeWithoutArguments.html'] !== "teddy.compiledTemplates['inc/sampleIncludeWithoutArguments.html']='<section class=\\'sampleIncludeWithoutArguments\\'><p>This is a sample included template without arguments.</p></section>';") {
+    return false;
+  }
+  try {
+    eval(teddy.packagedTemplates['inc/sampleIncludeWithArguments.html']);
+    eval(teddy.packagedTemplates['inc/sampleIncludeWithoutArguments.html']);
+    return true;
+  }
+  catch (e) {
+    console.log(e);
+    return false;
+  }
+});
