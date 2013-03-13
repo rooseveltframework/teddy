@@ -336,6 +336,7 @@ Dependencies
 Node.js dependencies:
 
 - <a href='http://nodejs.org/api/fs.html'>fs</a> (bundled with Node.js) - a default Node.js module which provides filesystem access
+- <a href='http://nodejs.org/api/path.html'>path</a> (bundled with Node.js) - a default Node.js module which is being used to normalize file paths
 - <a href='https://github.com/jindw/xmldom'>xmldom</a> (code <a href='https://github.com/kethinov/xmldom/commit/afea22460fa7d846564285435e8f22d9181af97f'>forked</a> and bundled) - W3C Standard based (XML DOM Level 2 Core) DOMParser and XMLSerializer for Node.js
 
 Client-side dependencies:

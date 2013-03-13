@@ -70,7 +70,7 @@
           // needed for express.js support
           if (model.settings) {
             if (model.settings.views) {
-              teddy.params.templateRoot = model.settings.views;
+              teddy.params.templateRoot = path.normalize(model.settings.views);
             }
           }
 
@@ -872,6 +872,7 @@
       // private utility vars
       isNode = ((typeof module).toLowerCase() !== 'undefined' && module.exports) ? true : false,
       fs,
+      path,
       xmldom,
       parser,
       serializer,
@@ -884,6 +885,7 @@
 
     // node module dependencies
     fs = require('fs');
+    path = require('path');
     xmldom = require('./xmldom-teddyfork'); // TODO: get author of xmldom master branch to accept this pull request https://github.com/kethinov/xmldom/commit/afea22460fa7d846564285435e8f22d9181af97f so we don't need to bundle a forked xmldom anymore
 
     // define parser and serializer from xmldom
