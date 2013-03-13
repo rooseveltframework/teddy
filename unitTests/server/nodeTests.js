@@ -18,6 +18,8 @@ var teddy = require('../../src/teddy'),
       something: 'Some content',
       somethingElse: true,
       variableName: 'Hello world!',
+      varWithVarInside: 'Variable with a variable inside: {subVar}',
+      subVar: 'And another: {variableName}',
       pageTitle: 'Teddy Templating Engine unit tests'
     },
     
@@ -65,7 +67,7 @@ unitTest('<style> tag test', function() {
 });
 
 unitTest('{variable} test', function() {
-  return renderedTemplate.indexOf('<section class="variables"><h1>Simple variable</h1><p>Hello world!</p></section>') > -1 ? true : false;
+  return renderedTemplate.indexOf('<section class="variables"><h1>Simple variable</h1><p>Hello world!</p><h2>Variable with a variable in it</h2><p>Variable with a variable inside: And another: Hello world!</p></section>') > -1 ? true : false;
 });
 
 unitTest('{! server-side comment !} test', function() {

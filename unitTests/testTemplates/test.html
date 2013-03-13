@@ -5,10 +5,18 @@
     <section class='variables'>
       <h1>Simple variable</h1>
       <p>{variableName}</p>
+      <h2>Variable with a variable in it</h2>
+      <p>{varWithVarInside}</p>
     </section>
     
     {! server-side comment; not sent to the client !}
     <!-- HTML comment; is sent to the client -->
+
+    {!
+      multiline
+      server-side
+      comment
+    !}
 
     <section class='includes'>
       <h1>Includes</h1>

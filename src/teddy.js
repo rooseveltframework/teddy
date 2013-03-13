@@ -47,7 +47,7 @@
           }
           
           // remove {! comments !} and unnecessary whitespace
-          teddy.compiledTemplates[name] = template.replace(/{!(.*?)!}/g, '').replace(/[\f\n\r\t\v]*/g, '').replace(/\s{2,}/g, ' ').replace(/> </g, '><');
+          teddy.compiledTemplates[name] = template.replace(/[\f\n\r\t\v]*/g, '').replace(/{!(.*?)!}/g, '').replace(/\s{2,}/g, ' ').replace(/> </g, '><');
           
           // write eval'able js ready to send over to the client
           teddy.packagedTemplates[name] = 'teddy.compiledTemplates[\''+name+'\']=\''+teddy.compiledTemplates[name].replace(/'/g, '\\\'')+'\';';
@@ -228,43 +228,61 @@
         // finds alls {vars} in a given document and replaces them with values from the model
         parseVars: function(doc, model) {
           var docstring = (typeof doc).toLowerCase() === 'string' ? doc : serializer.serializeToString(doc), // not using serializer.serializeToString because this method can be called on a fully formed document and we don't want to exclude the root elements
-              curls = docstring ? docstring.split('{') : false,
-              numCurls = curls.length,
+              curls,
+              numCurls,
               curl,
               varname,
-              i;
+              i,
+              varList,
+              lastVarList,
+              iterations = 0;
 
-          if (curls) {
-            for (i = 0; i < numCurls; i++) {
-              curl = curls[(i + 1)];
-              if (curl) {
-                varname = curl.split('}')[0].toLowerCase();
-                if (varname) {
-                  try {
-                    eval('docstring = teddy.renderVar(docstring, varname, model.'+varname.replace(/"/g, '\\"')+');');
-                  }
-                  catch (e) {
-                    if (teddy.params.verbosity > 1) {
-                      console.log('Warning: a {variable} was found with an invalid syntax: {' + varname + '}');
-                      if (teddy.params.verbosity > 2) {
-                        console.log('JS error thrown: ' + e);
+          do {
+            lastVarList = varList;
+            varList = [];
+            curls = docstring ? docstring.split('{') : false;
+            numCurls = curls.length;
+
+            if (curls) {
+              for (i = 0; i < numCurls; i++) {
+                curl = curls[(i + 1)];
+                if (curl) {
+                  varname = curl.split('}')[0].toLowerCase();
+                  if (varname) {
+                    varList.push(varname);
+                    try {
+                      eval('docstring = teddy.renderVar(docstring, varname, model.'+varname.replace(/"/g, '\\"')+');');
+                    }
+                    catch (e) {
+                      if (teddy.params.verbosity > 1) {
+                        console.log('Warning: a {variable} was found with an invalid syntax: {' + varname + '}');
+                        if (teddy.params.verbosity > 2) {
+                          console.log('JS error thrown: ' + e);
+                        }
                       }
                     }
                   }
                 }
               }
             }
-            return docstring;
-          }
-          else {
-            if (teddy.params.verbosity > 1 && (typeof doc).toLowerCase() !== 'object') {
-              console.log('Warning: teddy.parseVars called with invalid doc specified. Ignoring call.');
-              return false;
-            }
             else {
+              if (teddy.params.verbosity > 1 && (typeof doc).toLowerCase() !== 'object') {
+                console.log('Warning: teddy.parseVars called with invalid doc specified. Ignoring call.');
+                return false;
+              }
+              else {
+                return docstring;
+              }
+            }
+            
+            iterations++;
+            if (iterations > 999) {
+              console.log('Warning: teddy.parseVars gave up after parsing variables over 999 layers deep. You may have a recursive variable loop.');
               return docstring;
             }
           }
+          while (JSON.stringify(varList) !== JSON.stringify(lastVarList));
+          return docstring;
         },
 
 
