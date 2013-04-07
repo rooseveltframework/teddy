@@ -10,7 +10,7 @@
 // include dependencies
 var http = require('http'),             // node's http server
     express = require('express'),       // express http server
-    teddy = require('../../src/teddy'), // teddy (remove the '../../src/' if acquired from npm)
+    teddy = require('../../teddy'), // teddy (remove the '../../' if acquired from npm)
     app = express();                    // initialize express
 
 // configure express

@@ -86,7 +86,8 @@
           }
 
           // declare vars
-          var compiledTemplate = teddy.compiledTemplates[template], errors, renderedTemplate;
+          var compiledTemplate = teddy.compiledTemplates[template] || teddy.compiledTemplates[template + '.html'],
+              errors, renderedTemplate;
 
           // create dom object out of template string
           if (compiledTemplate) {
@@ -103,7 +104,7 @@
           renderedTemplate = teddy.runUnknownElementParentSiblingHack(renderedTemplate);
 
           // since includes can introduce new conditionals, we loop until they're all dealt with
-          while (teddy.findNonLoopedConditionals(renderedTemplate)[0] || teddy.findNonLoopedInclude(renderedTemplate)[0]) {
+          while (teddy.findNonLoopedConditionals(renderedTemplate)[0] || teddy.findNonLoopedOneLineConditionals(renderedTemplate)[0] || teddy.findNonLoopedInclude(renderedTemplate)[0]) {
 
             // parse non-looped conditionals
             renderedTemplate = teddy.parseConditionals(renderedTemplate, model);
@@ -170,7 +171,8 @@
         parseConditionals: function(doc, model) {
           var el,
               result,
-              conditionals = teddy.findNonLoopedConditionals(doc), // skips conditionals within <foreach> tags
+              conditionals = teddy.findNonLoopedConditionals(doc),      // skips conditionals within <foreach> tags
+              oneliners = teddy.findNonLoopedOneLineConditionals(doc),  // ditto
               length,
               i;
           
@@ -182,6 +184,16 @@
             teddy.replaceProcessedElement(el, result);
           }
       
+          // process whitelisted one-line conditionals
+          length = oneliners.length;
+          for (i = 0; i < length; i++) {
+            el = oneliners[i];
+            result = teddy.renderOneLineConditional(el, model);
+            if (isNode) {
+              teddy.replaceProcessedElement(el, result);
+            }
+          }
+
           return doc;
         },
         
@@ -427,8 +439,8 @@
                   el = parser.parseFromString(parsedLoop, 'text/html');
 
                   // since includes can introduce new conditionals, we loop until they're all dealt with
-                  while (teddy.findNonLoopedConditionals(el)[0] || teddy.findNonLoopedInclude(el)[0]) {
-        
+                  while (teddy.findNonLoopedConditionals(el)[0] || teddy.findNonLoopedOneLineConditionals(el)[0] || teddy.findNonLoopedInclude(el)[0]) {
+
                     // find conditionals within the loop and process them
                     el = teddy.parseConditionals(el, model);
   
@@ -511,7 +523,40 @@
           }
         },
       
-        // determines if a condition is true for <if>, <unless>, <elseif>, and <elseunless>
+        // parses a single one line conditional
+        renderOneLineConditional: function(el, model) {
+          if (el) {
+            var conditionContent,
+                newAttr,
+                attrVal;
+
+            if (teddy.evalCondition(el, model)) {
+              conditionContent = el.getAttribute('true');
+            }
+            else {
+              conditionContent = el.getAttribute('false');
+            }
+
+            el.removeAttribute('true');
+            el.removeAttribute('false');
+
+            newAttr = conditionContent.split('=');
+            attrVal = newAttr[1].replace(/"/g, '').replace(/'/g, '');
+            newAttr = newAttr[0];
+
+            el.setAttribute(newAttr, attrVal);
+
+            return el;
+          }
+          else {
+            if (teddy.params.verbosity > 1) {
+              console.log('Warning: teddy.renderOneLineConditional() called for an if attribtue with no condition supplied.');
+            }
+            return false;
+          }
+        },
+      
+        // determines if a condition is true for <if>, <unless>, <elseif>, and <elseunless>, and one-liners
         evalCondition: function(el, model) {
         
           // some browsers annoyingly add an xmlns attribtue to pretty much everything when parsing HTML through DOMParser's parseFromString method. since xmlns attributes mess up the syntax for Teddy conditionals, we have to remove any xmlns attributes present before evaluating the condtional 
@@ -519,6 +564,9 @@
         
           var conditionType = el.nodeName.toLowerCase(),
               conditionAttr = el.attributes[0],
+              attributes = el.attributes,
+              i,
+              length = attributes.length,
               condition,
               conditionVal,
               modelVal;
@@ -527,8 +575,26 @@
             return true;
           }
           else {
-            condition = conditionAttr.nodeName.toLowerCase();
-            conditionVal = conditionAttr.value;
+            if (conditionType == 'if' || conditionType == 'unless' || conditionType == 'elseif' || conditionType == 'elseunless') {
+              condition = conditionAttr.nodeName.toLowerCase();
+              conditionVal = conditionAttr.value;
+            }
+            
+            // one-liner
+            else {
+              conditionType = 'onelineif';
+              for (i = 0; i < length; i++) {
+                conditionAttr = attributes[i];
+                condition = conditionAttr.nodeName;
+                if (condition.substr(0, 3) == 'if-') {
+                  conditionVal = conditionAttr.value;
+                  el.removeAttribute(condition); // so there's no attempt to parse it later
+                  condition = condition.split('if-')[1];
+                  break;
+                }
+              }
+            }
+
             try {
               eval('modelVal = model.'+condition+';'); // necessary because condition could be multilayered, e.g. "model.foo.bar.blah"
             }
@@ -543,8 +609,8 @@
             }
           }
 
-          if (conditionType == 'if' || conditionType == 'elseif') {
-            if (condition == conditionVal.toLowerCase() || conditionVal === '') {
+          if (conditionType == 'if' || conditionType == 'onelineif' || conditionType == 'elseif') {
+            if (condition == conditionVal.toLowerCase() || conditionVal === '' || (conditionType == 'onelineif' && 'if-' + condition == conditionVal.toLowerCase())) {
               return modelVal ? true : false;
             }
             else if (modelVal == conditionVal) {
@@ -673,6 +739,43 @@
             }
             else {
               notDone = false; // we're done, break loop
+            }
+          }
+
+          return conditionals;
+        },
+
+        // finds all one line conditionals that are not within any <foreach> tags
+        findNonLoopedOneLineConditionals: function(doc) {
+          var el,
+              parent,
+              conditionals = [],
+              ifs = doc.getElementsByTagName('*'),
+              length = ifs.length,
+              skip = false,
+              i;
+
+          for (i = 0; i < length; i ++) {
+            el = ifs[i];
+            parent = el ? el.parentNode : false;
+            if (!el.getAttribute('true') && !el.getAttribute('false')) {
+              skip = true;
+            }
+            while (parent && !skip) {
+              if (parent.nodeName) {
+                if (parent.nodeName.toLowerCase() == 'foreach') {
+                  if (!parent.getAttribute('looped')) { // exemption check
+                    skip = true;
+                  }
+                }
+              }
+              parent = parent.parentNode;
+            }
+            if (el && !skip) {
+              conditionals.push(el);
+            }
+            else {
+              skip = false;
             }
           }
 
@@ -904,7 +1007,7 @@
     // node module dependencies
     fs = require('fs');
     path = require('path');
-    xmldom = require('./xmldom-teddyfork'); // TODO: get author of xmldom master branch to accept this pull request https://github.com/kethinov/xmldom/commit/afea22460fa7d846564285435e8f22d9181af97f so we don't need to bundle a forked xmldom anymore
+    xmldom = require('xmldom');
 
     // define parser and serializer from xmldom
     parser = new xmldom.DOMParser({

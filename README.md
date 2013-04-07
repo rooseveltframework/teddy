@@ -1,5 +1,5 @@
 teddy.js
-=
+===
 
 Teddy is an easy-to-read, HTML-based, mostly logic-less DOM templating engine with support for both server-side and client-side templating.
 
@@ -8,14 +8,14 @@ It uses new HTML-like `<tags>` for rudimentary templating logic and Teddy Roosev
 <img src='assets/teddy.jpg' alt=''/>
 
 Why yet another templating engine?
-=
+===
 
 Good question.
 
 Here's why:
 
 Funky symbol hell
-=
+===
 
 Are you tired of all those cryptic templating systems out there that look like this?
 
@@ -34,7 +34,7 @@ Want something simpler and more readable so you can stop wasting time memorizing
 Well you're not the only one.
 
 Teddy, symbol-buster extraordinaire
-=
+===
 
 Teddy the trust-buster was a man of the common people, curtailing the abuse of monopolists.
 
@@ -55,7 +55,7 @@ Cool, but how exactly do those new tags work?
 They're real simple. Let's run through them.
 
 Includes
-=
+===
 
 Include another template:
 
@@ -77,7 +77,7 @@ Pass arguments to the template:
 The arguments you've defined will be accessible as `{firstArgument}` and `{secondArgument}` in the child template `partial.html`.
 
 Conditionals
-=
+===
 
 Check for the presence of a variable:
 
@@ -140,8 +140,27 @@ An `<unless>` statement structure with an `<elseunless>` tag which is evaluated 
 </else>
 ```
 
+One line ifs
+===
+
+If you need a more concise conditional just to control which attributes are applied to a given element, then use this syntax:
+
+```html
+<p if-something true="class='something-is-present'" false="class='something-is-not-present'">One line if.</p>
+```
+
+In that structure, the attribute `if-something` checks to see if the variable `something` is present. If so, the attribute delcared in the `true` attribute is written to the element. If not, the attribute declared in the `false` attribute is written to the element.
+
+Like the `<if>` tag you can check for both the presence of a variable as well as its variable. To check the value of a variable, use this syntax:
+
+```html
+<p if-something='hello' true="class='something-is-hello'" false="class='something-is-not-hello'">One line if.</p>
+```
+
+It's important to note that whichever quotes you use on the outside of your `true` or `false` attributes must be reverse on the inside. So if you use single quotes on the outside, use double quotes on the inside.
+
 Loops
-=
+===
 
 Assume the following JS model:
 
@@ -194,7 +213,7 @@ For the above array of objects, we can combine the techniques illustrated above 
 ```
 
 A complex example combining all tag types
-=
+===
 
 Supposing the following JS model again:
 
@@ -219,12 +238,12 @@ We could perform many complex operations simultaneously. For instance, we could 
 ```
 
 Okay, I get it, how can I make my app parse Teddy templates?
-=
+===
 
 Teddy can run both as a Node.js module or as a client-side JS library.
 
 Use Teddy in Node.js
-=
+===
 
 Teddy is designed for use with <a href='http://expressjs.com/'>Express</a> in Node.
 
@@ -235,7 +254,7 @@ Teddy is designed for use with <a href='http://expressjs.com/'>Express</a> in No
 For a complete sample implementation, see the sample app here: <a href='sampleApps/nodeHelloWorld'>sampleApps/nodeHelloWorld</a>
 
 Use Teddy client-side
-=
+===
 
 Server-side app:
 
@@ -259,7 +278,7 @@ Writing your client.js:
 For a complete sample implementation, see the sample app here: <a href='sampleApps/client-server'>sampleApps/client-server</a>
 
 Notable intentional design choices and limitations 
-=
+===
 
 - All variables in Teddy templates are case-insensitive because HTML is case-insensitive.
 - Unlike some other templating systems, Teddy will not automatically escape HTML entities contained within variables.
@@ -267,7 +286,7 @@ Notable intentional design choices and limitations
 - Teddy's browser support and client-side performance is largely tied to how well `DOMParser` and `XMLSerializer` are implemented (if at all) in the target browser.
 
 Client-side browser support
-=
+===
 
 Supported desktop browsers:
 
@@ -285,19 +304,18 @@ Supported mobile browsers:
 - iOS 5+
 
 Known issues
-=
+===
 
 Nothing is perfect, not even <a href='http://www.cracked.com/article_15895_the-5-most-badass-presidents-all-time_p5.html'>the most badass President of all-time</a>.
 
 Any pull requests sent over dealing with any of these outstanding issues will graciously be accepted:
 
-- Node.js dependency library `xmldom` requires a patch to function correctly, so a fork had to be included with Teddy. Please encourage @jindw to accept <a href='https://github.com/kethinov/xmldom/commit/afea22460fa7d846564285435e8f22d9181af97f'>this pull request</a> in order to make the master branch of `xmldom` support Teddy fully.
 - Client-side dependency `DOMParser HTML extension (polyfill)` also requires a patch to function correctly, so a fork had to be included with Teddy. Please encourage @eligrey to merge <a href='https://gist.github.com/kethinov/4760460'>this fork</a> into his gist.
 - The unit tests are a bit primitive at the moment. Suggestions for improvement or pull requests with better tests will be much appreciated.
 - Source code view on client-side unit tests is broken in IE10 most likely due to a bug in dependency library vkbeautify.
 
 Untested browsers
-=
+===
 
 - Android 2.2 and below.
 - iOS 4 and below.
@@ -306,20 +324,20 @@ Untested browsers
 - Lots of older versions of the desktop versions of Chrome, Firefox, Opera, and Safari probably work well with Teddy, but there hasn't yet been time to test them. If anyone wants to test them and post the results, it will be greatly appreciated.
 
 Browsers known to be partially broken
-=
+===
 
 - Android 2.3's default browser and most likely all prior versions fail the `<title>` and `<style>` tag tests because `doc.documentElement.innerHTML` fails to return the `<head>` tag or its contents. However, if you only intend to use Teddy for partials containing markup fragments rather than full documents, then this bug shouldn't affect you.
 - Opera Mobile fails the conditionals overall unit test due to an as yet uninvestigated bug, but all other tests pass. Opera Mobile also has overall terrible performance with Teddy, which may be related.
 
 Browsers known to be totally broken
-=
+===
 
 - IE9 is totally broken because IE9's implementation of `DOMParser` sucks and @eligrey's `DOMParser HTML extension (polyfill)` doesn't work in IE9 and below.
 - Windows Phone 7's browser: same reason as IE9.
 - IE8 and below are totally broken because they have no implementation whatsoever of DOMParser.
 
 Helped wanted!
-=
+===
 
 There are many ways to improve Teddy, such as:
 
@@ -330,14 +348,40 @@ There are many ways to improve Teddy, such as:
 
 Thanks to any and all who find Teddy useful.
 
+How to run the unit tests
+===
+
+Want to hack teddy's code but don't want to break something and cause a regression in the process? Run the supplies unit tests to sanity check existing features.
+
+Start by cloning the git repo:
+
+```
+git clone git@github.com:kethinov/teddy.git
+cd teddy
+```
+
+Install dependencies for the server test:
+
+```
+npm install .
+```
+
+Run server test:
+
+```
+cd unitTests/server
+node nodeTests.js
+```
+
+
 Dependencies
-=
+===
 
 Node.js dependencies:
 
 - <a href='http://nodejs.org/api/fs.html'>fs</a> (bundled with Node.js) - a default Node.js module which provides filesystem access
 - <a href='http://nodejs.org/api/path.html'>path</a> (bundled with Node.js) - a default Node.js module which is being used to normalize file paths
-- <a href='https://github.com/jindw/xmldom'>xmldom</a> (code <a href='https://github.com/kethinov/xmldom/commit/afea22460fa7d846564285435e8f22d9181af97f'>forked</a> and bundled) - W3C Standard based (XML DOM Level 2 Core) DOMParser and XMLSerializer for Node.js
+- <a href='https://github.com/jindw/xmldom'>xmldom</a> - W3C Standard based (XML DOM Level 2 Core) DOMParser and XMLSerializer for Node.js
 
 Client-side dependencies:
 
@@ -353,6 +397,6 @@ Client-side unit test dependencies:
 - <a href='http://www.eslinstructor.net/vkbeautify/'>vkBeautify</a> (bundled) - used to indent rendered template in unitTests/client/clientTests.html
 
 License
-=
+===
 
 All original code in Teddy is licensed under the <a href='http://creativecommons.org/licenses/by/3.0/deed.en_US'>Creative Commons Attribution 3.0 Unported License</a>. Commercial and noncommercial use is permitted with attribution.
