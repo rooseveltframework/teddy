@@ -1,6 +1,6 @@
 {
   "name": "teddy",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Teddy Templating Engine",
   "main": "src/teddy.js",
   "repository": {
@@ -8,8 +8,6 @@
     "url": "git://github.com/kethinov/teddy.git"
   },
   "devDependencies": {
-    "fs": "*",
-    "path": "*",
     "xmldom": "*"
   },
   "keywords": [
@@ -24,6 +22,9 @@
   "readmeFilename": "README.md",
   "_from": "teddy@*",
   "gitHead": "1dbbc4c73d7c8878cbe7fc0ba527c91018b4cea7",
+  "dependencies": {
+    "xmldom": "*"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   }
