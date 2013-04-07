@@ -1,8 +1,8 @@
 {
   "name": "teddy",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "Teddy Templating Engine",
-  "main": "src/teddy.js",
+  "main": "teddy.js",
   "repository": {
     "type": "git",
     "url": "git://github.com/kethinov/teddy.git"
