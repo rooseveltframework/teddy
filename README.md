@@ -352,7 +352,7 @@ Thanks to any and all who find Teddy useful.
 How to run the unit tests
 ===
 
-Want to hack teddy's code but don't want to break something and cause a regression in the process? Run the supplies unit tests to sanity check existing features.
+Want to hack teddy's code but don't want to break something and cause a regression in the process? Run the supplied unit tests to sanity check existing features.
 
 Start by cloning the git repo:
 
