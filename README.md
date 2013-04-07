@@ -151,13 +151,13 @@ If you need a more concise conditional just to control which attributes are appl
 
 In that structure, the attribute `if-something` checks to see if the variable `something` is present. If so, the attribute delcared in the `true` attribute is written to the element. If not, the attribute declared in the `false` attribute is written to the element.
 
-Like the `<if>` tag you can check for both the presence of a variable as well as its variable. To check the value of a variable, use this syntax:
+Like the `<if>` tag you can check for both the presence of a variable as well as its value. To check the value of a variable, use this syntax:
 
 ```html
 <p if-something='hello' true="class='something-is-hello'" false="class='something-is-not-hello'">One line if.</p>
 ```
 
-It's important to note that whichever quotes you use on the outside of your `true` or `false` attributes must be reverse on the inside. So if you use single quotes on the outside, use double quotes on the inside.
+It's important to note that whichever quotes you use on the outside of your `true` or `false` attributes must be reversed on the inside. So if you use single quotes on the outside, then use double quotes on the inside.
 
 Loops
 ===
