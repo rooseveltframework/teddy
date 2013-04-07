@@ -1,6 +1,6 @@
 {
   "name": "teddy",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Teddy Templating Engine",
   "main": "src/teddy.js",
   "repository": {

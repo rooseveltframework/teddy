@@ -541,10 +541,16 @@
             el.removeAttribute('false');
 
             newAttr = conditionContent.split('=');
-            attrVal = newAttr[1].replace(/"/g, '').replace(/'/g, '');
+            attrVal = newAttr[1];
             newAttr = newAttr[0];
 
-            el.setAttribute(newAttr, attrVal);
+            if (attrVal) {
+              attrVal = attrVal.replace(/"/g, '').replace(/'/g, '');
+              el.setAttribute(newAttr, attrVal);
+            }
+            else {
+              el.setAttribute(newAttr, '');
+            }
 
             return el;
           }

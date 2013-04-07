@@ -373,6 +373,7 @@ cd unitTests/server
 node nodeTests.js
 ```
 
+To run the client tests, open `unitTests/client/clientTests.html` and follow its instructions.
 
 Dependencies
 ===
