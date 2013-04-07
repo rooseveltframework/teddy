@@ -228,6 +228,7 @@ We could perform many complex operations simultaneously. For instance, we could 
   <if item.a='4'>
     <p>item.a is 4</p>
   </if>
+  <p if-item.b='5' true="class='item-b-is-five'" false='hidden'>item.b is 5</p>
   <include src='partial.html'>
     <arg firstArgument>{item.b}</arg>
     <arg secondArgument>
