@@ -1,6 +1,6 @@
 {
   "name": "teddy",
-  "version": "0.2.2",
+  "version": "0.2.4",
   "description": "Teddy Templating Engine",
   "main": "src/teddy.js",
   "repository": {
@@ -24,10 +24,6 @@
   "readmeFilename": "README.md",
   "_from": "teddy@*",
   "gitHead": "1dbbc4c73d7c8878cbe7fc0ba527c91018b4cea7",
-  "dependencies": {
-    "fs": "~0.0.0",
-    "xmldom": "~0.0.0"
-  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   }
