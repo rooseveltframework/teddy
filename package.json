@@ -26,7 +26,6 @@
   "gitHead": "1dbbc4c73d7c8878cbe7fc0ba527c91018b4cea7",
   "dependencies": {
     "fs": "~0.0.0",
-    "path": "~0.0.0",
     "xmldom": "~0.0.0"
   },
   "scripts": {
