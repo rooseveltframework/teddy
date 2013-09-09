@@ -22,7 +22,7 @@ var teddy = require('../../teddy'),
       subVar: 'And another: {variableName}',
       pageTitle: 'Teddy Templating Engine unit tests'
     },
-    
+
     // unit tester function
     unitTest = function(testName, testFunc) {
       try {

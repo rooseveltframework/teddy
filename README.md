@@ -14,20 +14,44 @@ Good question.
 
 Here's why:
 
-Funky symbol hell
+Other popular templating engines are too cryptic
 ===
 
-Are you tired of all those cryptic templating systems out there that look like this?
+Are you tired of all those unnecessarily cryptic templating systems out there that look like this?
 
-<img src='assets/mustache.png' alt=''/>
+```html
+<h1>{{header}}</h1>
+{{#bug}}
+{{/bug}}
+
+{{#items}}
+  {{#first}}
+    <li><strong>{{name}}</strong></li>
+  {{/first}}
+  {{#link}}
+    <li><a href="{{url}}">{{name}}</a></li>
+  {{/link}}
+{{/items}}
+
+{{#empty}}
+  <p>The list is empty.</p>
+{{/empty}}
+```
 
 ...Or this?
 
-<img src='assets/handlebars.png' alt=''/>
+```html
+{{#each comments}}
+<h2><a href="/posts/{{../permalink}}#{{id}}">{{title}}</a></h2>
+<div>{{body}}</div>
+{{/each}}
+```
 
 ...Or this?
 
-<img src='assets/dust.png' alt=''/>
+```html
+{#names}{.}{@idx}{.}{/idx}{@sep}, {/sep}{/names}
+```
 
 Want something simpler and more readable so you can stop wasting time memorizing what all those funky symbols do and just get work done?
 
@@ -36,9 +60,9 @@ Well you're not the only one.
 Teddy, symbol-buster extraordinaire
 ===
 
-Teddy the trust-buster was a man of the common people, curtailing the abuse of monopolists.
+Teddy the trust-buster was a man of the people, curtailing the abuse of monopolists. As <a href='http://www.cracked.com/article_15895_the-5-most-badass-presidents-all-time_p5.html'>the most badass President of all-time</a>, there's no way he'd put up with all this indecipherable templating nonsense.
 
-Teddy the templating engine is an engine of the common people, curtailing the abuse of indecipherable templating systems.
+As such, Teddy the templating engine is an engine of the people, curtailing the abuse of indecipherable templating systems.
 
 Here's how:
 
@@ -49,10 +73,10 @@ Here's how:
 - Server-side `{!comments!}` delimited by exclamation points just like `<!-- HTML comments -->`. Server-side comments are stripped out at the template compilation stage.
 - No funky symbols to memorize. Just `{variables}` for data and new HTML-like `<tags>` for rudimentary logic.
 
-Cool, but how exactly do those new tags work?
-=
+Documentation
+===
 
-They're real simple. Let's run through them.
+Here's some examples of to write Teddy templates:
 
 Includes
 ===
@@ -238,7 +262,7 @@ We could perform many complex operations simultaneously. For instance, we could 
 </foreach>
 ```
 
-Okay, I get it, how can I make my app parse Teddy templates?
+How to include the Teddy templating engine into your app
 ===
 
 Teddy can run both as a Node.js module or as a client-side JS library.
@@ -253,6 +277,12 @@ Teddy is designed for use with <a href='http://expressjs.com/'>Express</a> in No
 - In your express config, make sure to include this line: `app.engine('html', teddy.__express)`
 
 For a complete sample implementation, see the sample app here: <a href='sampleApps/nodeHelloWorld'>sampleApps/nodeHelloWorld</a>
+
+Or try out the Roosevelt web framework
+===
+
+If you're looking for a more fully-featured web framework to build web apps with using Teddy templates, then try out Teddy's companion, <a href='https://github.com/kethinov/roosevelt'>Roosevelt</a>.
+
 
 Use Teddy client-side
 ===
@@ -291,35 +321,28 @@ Client-side browser support
 
 Supported desktop browsers:
 
+- Android browser 4.0+
 - Chrome 24+
 - Firefox 18+
-- Opera 12+
 - Internet Explorer 10+
+- iOS Safari 5+
+- Opera 12+
 - Safari 6+
-
-Supported mobile browsers:
-
-- Android Chrome 18+
-- Android Firefox 18+
-- Android 4.0+ default browser
-- iOS 5+
 
 Known issues
 ===
 
-Nothing is perfect, not even <a href='http://www.cracked.com/article_15895_the-5-most-badass-presidents-all-time_p5.html'>the most badass President of all-time</a>.
-
 Any pull requests sent over dealing with any of these outstanding issues will graciously be accepted:
 
-- Client-side dependency `DOMParser HTML extension (polyfill)` requires a patch to function correctly, so a fork had to be included with Teddy. Please encourage @eligrey to merge <a href='https://gist.github.com/kethinov/4760460'>this fork</a> into his gist.
-- The unit tests are a bit primitive at the moment. Suggestions for improvement or pull requests with better tests will be much appreciated.
+- Teddy is beta software. Not many apps have been written using it yet, so it's entirely possible that there will be some significant bugs.
 - Source code view on client-side unit tests is broken in IE10 most likely due to a bug in dependency library vkbeautify.
+- The unit tests are a bit primitive at the moment. Suggestions for improvement or pull requests with better tests will be much appreciated.
 
 Untested browsers
 ===
 
-- Android 2.2 and below.
-- iOS 4 and below.
+- Android browser 2.2 and below.
+- iOS Safari 4 and below.
 - Opera Mini.
 - BlackBerry browsers.
 - Lots of older versions of the desktop versions of Chrome, Firefox, Opera, and Safari probably work well with Teddy, but there hasn't yet been time to test them. If anyone wants to test them and post the results, it will be greatly appreciated.
@@ -327,8 +350,8 @@ Untested browsers
 Browsers known to be partially broken
 ===
 
-- Android 2.3's default browser and most likely all prior versions fail the `<title>` and `<style>` tag tests because `doc.documentElement.innerHTML` fails to return the `<head>` tag or its contents. However, if you only intend to use Teddy for partials containing markup fragments rather than full documents, then this bug shouldn't affect you.
-- Opera Mobile fails the conditionals overall unit test due to an as yet uninvestigated bug, but all other tests pass. Opera Mobile also has overall terrible performance with Teddy, which may be related.
+- Older Android 2.3 browsers and most likely all prior versions fail the `<title>` and `<style>` tag tests because `doc.documentElement.innerHTML` fails to return the `<head>` tag or its contents. However, if you only intend to use Teddy for partials containing markup fragments rather than full documents, then this bug shouldn't affect you.
+- Older Presto-powered Opera Mobile versions fail the conditionals overall unit test due to an as yet uninvestigated bug, but all other tests pass. Such Opera Mobile versions also have overall terrible performance with Teddy, which may be related.
 
 Browsers known to be totally broken
 ===
@@ -347,8 +370,6 @@ There are many ways to improve Teddy, such as:
 - Porting Teddy's JS parser so Teddy templates can be used in other languages, like PHP, Python, Java, etc.
 - Submitting pull requests with suggestions for refactoring or performance optimization.
 
-Thanks to any and all who find Teddy useful.
-
 How to run the unit tests
 ===
 
@@ -364,7 +385,7 @@ cd teddy
 Install dependencies for the server test:
 
 ```
-npm install .
+npm install
 ```
 
 Run server test:
@@ -381,13 +402,11 @@ Dependencies
 
 Node.js dependencies:
 
-- <a href='http://nodejs.org/api/fs.html'>fs</a> (bundled with Node.js) - a default Node.js module which provides filesystem access
-- <a href='http://nodejs.org/api/path.html'>path</a> (bundled with Node.js) - a default Node.js module which is being used to normalize file paths
 - <a href='https://github.com/jindw/xmldom'>xmldom</a> - W3C Standard based (XML DOM Level 2 Core) DOMParser and XMLSerializer for Node.js
 
 Client-side dependencies:
 
-- <a href='https://gist.github.com/eligrey/1129031'>DOMParser HTML extension</a> (code <a href='https://gist.github.com/kethinov/4760460'>forked</a> and bundled) - polyfill for DOMParser parseFromString for certain browsers
+- <a href='https://gist.github.com/eligrey/1129031'>DOMParser HTML extension</a> - polyfill for DOMParser parseFromString for certain browsers
 
 Node.js unit test dependencies:
 

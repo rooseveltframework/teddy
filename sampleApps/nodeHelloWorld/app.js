@@ -10,7 +10,7 @@
 // include dependencies
 var http = require('http'),             // node's http server
     express = require('express'),       // express http server
-    teddy = require('../../teddy'), // teddy (remove the '../../' if acquired from npm)
+    teddy = require('../../teddy'),     // teddy (remove the '../../' if acquired from npm)
     app = express();                    // initialize express
 
 // configure express
@@ -31,7 +31,7 @@ app.get('/', function(req, res) {
     title: 'Teddy Templating Engine sample app',
     hello: 'Hello World!'
   };
-  
+
   // express will now use teddy to parse index.html using the supplied model
   res.render('index.html', model);
 });

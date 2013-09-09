@@ -8,7 +8,7 @@
       <h2>Variable with a variable in it</h2>
       <p>{varWithVarInside}</p>
     </section>
-    
+
     {! server-side comment; not sent to the client !}
     <!-- HTML comment; is sent to the client -->
 
@@ -20,9 +20,9 @@
 
     <section class='includes'>
       <h1>Includes</h1>
-      
+
       <include src='inc/sampleIncludeWithoutArguments.html'></include>
-  
+
       <include src='inc/sampleIncludeWithArguments.html'>
         <arg firstArgument>Plain text argument</arg>
         <arg secondArgument>
@@ -30,31 +30,31 @@
         </arg>
       </include>
     </section>
-    
+
     <section class='flowcontrol'>
       <h1>Flow control</h1>
-      
+
       <if something>
         <p>The variable 'something' is present</p>
       </if>
       <else>
         <p>The variable 'something' is not present</p>
       </else>
-      
+
       <if something='hello'>
         <p>The variable 'something' is set to 'hello'</p>
       </if>
       <else>
         <p>The variable 'something' is not set to 'hello'</p>
       </else>
-      
+
       <unless something>
         <p>The variable 'something' is not present</p>
       </unless>
       <else>
         <p>The variable 'something' is present</p>
       </else>
-      
+
       <if something>
         <p>The variable 'something' is present</p>
       </if>
@@ -64,7 +64,7 @@
       <else>
         <p>The variable 'something' is not present and neither is 'somethingElse'</p>
       </else>
-      
+
       <unless something>
         <p>The variable 'something' is not present</p>
       </unless>
@@ -78,14 +78,14 @@
 
     <section class='onelineifs'>
       <h1>One line ifs</h1>
-      
+
       <p if-something true="class='something-is-present'" false="class='something-is-not-present'">One line if.</p>
       <p if-something='hello' true="class='something-is-hello'" false="class='something-is-not-hello'">One line if.</p>
     </section>
 
     <section class='looping'>
       <h1>Looping</h1>
-      
+
       <dl>
         <dt>JS model:</dt>
         <dd>letters = ['a', 'b', 'c'];</dd>
@@ -108,7 +108,7 @@
           </foreach>
         </dd>
       </dl>
-      
+
       <dl>
         <dt>JS model:</dt>
         <dd>objects = [{a:1, b:2, c:3}, {a:4, b:5, c:6}, {a:7, b:8, c:9}];</dd>
