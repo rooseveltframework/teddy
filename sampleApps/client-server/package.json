@@ -1,11 +1,20 @@
 {
   "name": "express-teddy-sample-client-server-app",
+  "description": "",
+  "author": "",
   "version": "0.1.0",
-  "scripts": {
-    "start": "node server.js"
-  },
+  "homepage": "",
+  "license": "",
+  "main": "server.js",
+  "readmeFilename": "README.md",
   "dependencies": {
     "express": "*",
     "teddy": "*"
+  },
+  "jshintConfig": {},
+  "private": true,
+  "repository": {},
+  "scripts": {
+    "start": "node server.js"
   }
 }

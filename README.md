@@ -62,7 +62,7 @@ Teddy, symbol-buster extraordinaire
 
 Teddy the trust-buster was a man of the people, curtailing the abuse of monopolists. As <a href='http://www.cracked.com/article_15895_the-5-most-badass-presidents-all-time_p5.html'>the most badass President of all-time</a>, there's no way he'd put up with all this indecipherable templating nonsense.
 
-As such, Teddy the templating engine is an engine of the people, curtailing the abuse of indecipherable templating systems.
+As such, Teddy the templating engine is an engine of the people, curtailing the abuse of indecipherable templating systems. Teddy trust-buster extraordinaire is now symbol-buster extraordinaire. 
 
 Here's how:
 
@@ -70,7 +70,7 @@ Here's how:
 - An `<include>` tag for layout templates and partials which accepts arguments via child `<arg>` elements.
 - Flow control tags: `<if>`, `<unless>`, `<elseif>`, `<elseunless>`, and `<else>` for basic templating logic.
 - A `<foreach>` tag for looping.
-- Server-side `{!comments!}` delimited by exclamation points just like `<!-- HTML comments -->`. Server-side comments are stripped out at the template compilation stage.
+- Server-side `{!comments!}` delimited by exclamation points in a fashion similar to `<!-- HTML comments -->`. Server-side comments are stripped out at the template compilation stage.
 - No funky symbols to memorize. Just `{variables}` for data and new HTML-like `<tags>` for rudimentary logic.
 
 Documentation
@@ -173,7 +173,17 @@ If you need a more concise conditional just to control which attributes are appl
 <p if-something true="class='something-is-present'" false="class='something-is-not-present'">One line if.</p>
 ```
 
-In that structure, the attribute `if-something` checks to see if the variable `something` is present. If so, the attribute delcared in the `true` attribute is written to the element. If not, the attribute declared in the `false` attribute is written to the element.
+In that structure, the attribute `if-something` checks to see if the variable `something` is present. If so, the class delcared in the `true` attribute is written to the element, resulting in the following output:
+
+```html
+<p class='something-is-present'>One line if.</p>
+```
+
+If not, the class declared in the `false` attribute is written to the element, resulting in the following output:
+
+```html
+<p class='something-is-not-present'>One line if.</p>
+```
 
 Like the `<if>` tag you can check for both the presence of a variable as well as its value. To check the value of a variable, use this syntax:
 
@@ -181,7 +191,7 @@ Like the `<if>` tag you can check for both the presence of a variable as well as
 <p if-something='hello' true="class='something-is-hello'" false="class='something-is-not-hello'">One line if.</p>
 ```
 
-It's important to note that whichever quotes you use on the outside of your `true` or `false` attributes must be reversed on the inside. So if you use single quotes on the outside, then use double quotes on the inside.
+It's important to note that whichever type of quotes you use on the outside of your `true` or `false` attributes must be reversed on the inside. So if you use single quotes on the outside, then you must use double quotes on the inside.
 
 Loops
 ===
@@ -262,29 +272,21 @@ We could perform many complex operations simultaneously. For instance, we could 
 </foreach>
 ```
 
-How to include the Teddy templating engine into your app
-===
-
-Teddy can run both as a Node.js module or as a client-side JS library.
-
-Use Teddy in Node.js
+Using Teddy in Node.js
 ===
 
 Teddy is designed for use with <a href='http://expressjs.com/'>Express</a> in Node.
 
-- First require the node modules `http`, `express`, and `teddy`
+- First require the node modules `express`, and `teddy`
 - Then initialize express and configure it to your liking
 - In your express config, make sure to include this line: `app.engine('html', teddy.__express)`
 
 For a complete sample implementation, see the sample app here: <a href='sampleApps/nodeHelloWorld'>sampleApps/nodeHelloWorld</a>
 
-Or try out the Roosevelt web framework
-===
-
-If you're looking for a more fully-featured web framework to build web apps with using Teddy templates, then try out Teddy's companion, <a href='https://github.com/kethinov/roosevelt'>Roosevelt</a>.
+Or if you're looking for a more fully-featured web framework to build web apps with using Teddy templates, then try out Teddy's companion, <a href='https://github.com/kethinov/roosevelt'>Roosevelt</a>.
 
 
-Use Teddy client-side
+Using Teddy with client-side JS
 ===
 
 Server-side app:
@@ -403,7 +405,7 @@ Node.js dependencies:
 
 Client-side dependencies:
 
-- <a href='https://gist.github.com/eligrey/1129031'>DOMParser HTML extension</a> - polyfill for DOMParser parseFromString for certain browsers
+- <a href='https://gist.github.com/eligrey/1129031'>DOMParser HTML extension</a> (bundled) - polyfill for DOMParser parseFromString for certain browsers
 
 Node.js unit test dependencies:
 

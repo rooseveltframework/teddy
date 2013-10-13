@@ -21,8 +21,8 @@
  * <pre>
  * {
  *   sourceCode: "print 'Hello '\n  + 'World';",
- *   //                 1         2
- *   //       012345678901234 5678901234567
+ *   //                     1          2
+ *   //           012345678901234 5678901234567
  *   spans: [0, #1, 6, #2, 14, #3, 15, #4]
  * }
  * </pre>
@@ -39,9 +39,11 @@
  * </p>
  *
  * @param {Node} node an HTML DOM subtree containing source-code.
+ * @param {boolean} isPreformatted true if white-space in text nodes should
+ *    be considered significant.
  * @return {Object} source code and the text nodes in which they occur.
  */
-function extractSourceSpans(node) {
+function extractSourceSpans(node, isPreformatted) {
   var nocode = /(?:^|\s)nocode(?:\s|$)/;
 
   var chunks = [];
@@ -49,44 +51,33 @@ function extractSourceSpans(node) {
   var spans = [];
   var k = 0;
 
-  var whitespace;
-  if (node.currentStyle) {
-    whitespace = node.currentStyle.whiteSpace;
-  } else if (window.getComputedStyle) {
-    whitespace = document.defaultView.getComputedStyle(node, null)
-        .getPropertyValue('white-space');
-  }
-  var isPreformatted = whitespace && 'pre' === whitespace.substring(0, 3);
-
   function walk(node) {
-    switch (node.nodeType) {
-      case 1:  // Element
-        if (nocode.test(node.className)) { return; }
-        for (var child = node.firstChild; child; child = child.nextSibling) {
-          walk(child);
+    var type = node.nodeType;
+    if (type == 1) {  // Element
+      if (nocode.test(node.className)) { return; }
+      for (var child = node.firstChild; child; child = child.nextSibling) {
+        walk(child);
+      }
+      var nodeName = node.nodeName.toLowerCase();
+      if ('br' === nodeName || 'li' === nodeName) {
+        chunks[k] = '\n';
+        spans[k << 1] = length++;
+        spans[(k++ << 1) | 1] = node;
+      }
+    } else if (type == 3 || type == 4) {  // Text
+      var text = node.nodeValue;
+      if (text.length) {
+        if (!isPreformatted) {
+          text = text.replace(/[ \t\r\n]+/g, ' ');
+        } else {
+          text = text.replace(/\r\n?/g, '\n');  // Normalize newlines.
         }
-        var nodeName = node.nodeName;
-        if ('BR' === nodeName || 'LI' === nodeName) {
-          chunks[k] = '\n';
-          spans[k << 1] = length++;
-          spans[(k++ << 1) | 1] = node;
-        }
-        break;
-      case 3: case 4:  // Text
-        var text = node.nodeValue;
-        if (text.length) {
-          if (!isPreformatted) {
-            text = text.replace(/[ \t\r\n]+/g, ' ');
-          } else {
-            text = text.replace(/\r\n?/g, '\n');  // Normalize newlines.
-          }
-          // TODO: handle tabs here?
-          chunks[k] = text;
-          spans[k << 1] = length;
-          length += text.length;
-          spans[(k++ << 1) | 1] = node;
-        }
-        break;
+        // TODO: handle tabs here?
+        chunks[k] = text;
+        spans[k << 1] = length;
+        length += text.length;
+        spans[(k++ << 1) | 1] = node;
+      }
     }
   }
 

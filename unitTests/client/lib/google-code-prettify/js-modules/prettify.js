@@ -53,7 +53,10 @@
  */
 
 // JSLint declarations
-/*global console, document, navigator, setTimeout, window */
+/*global console, document, navigator, setTimeout, window, define */
+
+/** @define {boolean} */
+var IN_GLOBAL_SCOPE = true;
 
 /**
  * Split {@code prettyPrint} into multiple timeouts so as not to interfere with
@@ -62,33 +65,57 @@
  */
 window['PR_SHOULD_USE_CONTINUATION'] = true;
 
+/**
+ * Pretty print a chunk of code.
+ * @param {string} sourceCodeHtml The HTML to pretty print.
+ * @param {string} opt_langExtension The language name to use.
+ *     Typically, a filename extension like 'cpp' or 'java'.
+ * @param {number|boolean} opt_numberLines True to number lines,
+ *     or the 1-indexed number of the first line in sourceCodeHtml.
+ * @return {string} code as html, but prettier
+ */
+var prettyPrintOne;
+/**
+ * Find all the {@code <pre>} and {@code <code>} tags in the DOM with
+ * {@code class=prettyprint} and prettify them.
+ *
+ * @param {Function} opt_whenDone called when prettifying is done.
+ * @param {HTMLElement|HTMLDocument} opt_root an element or document
+ *   containing all the elements to pretty print.
+ *   Defaults to {@code document.body}.
+ */
+var prettyPrint;
+
+
 (function () {
+  var win = window;
   // Keyword lists for various languages.
   // We use things that coerce to strings to make them compact when minified
   // and to defeat aggressive optimizers that fold large string constants.
   var FLOW_CONTROL_KEYWORDS = ["break,continue,do,else,for,if,return,while"];
   var C_KEYWORDS = [FLOW_CONTROL_KEYWORDS,"auto,case,char,const,default," + 
-      "double,enum,extern,float,goto,int,long,register,short,signed,sizeof," +
-      "static,struct,switch,typedef,union,unsigned,void,volatile"];
+      "double,enum,extern,float,goto,inline,int,long,register,short,signed," +
+      "sizeof,static,struct,switch,typedef,union,unsigned,void,volatile"];
   var COMMON_KEYWORDS = [C_KEYWORDS,"catch,class,delete,false,import," +
       "new,operator,private,protected,public,this,throw,true,try,typeof"];
   var CPP_KEYWORDS = [COMMON_KEYWORDS,"alignof,align_union,asm,axiom,bool," +
-      "concept,concept_map,const_cast,constexpr,decltype," +
-      "dynamic_cast,explicit,export,friend,inline,late_check," +
-      "mutable,namespace,nullptr,reinterpret_cast,static_assert,static_cast," +
-      "template,typeid,typename,using,virtual,where"];
+      "concept,concept_map,const_cast,constexpr,decltype,delegate," +
+      "dynamic_cast,explicit,export,friend,generic,late_check," +
+      "mutable,namespace,nullptr,property,reinterpret_cast,static_assert," +
+      "static_cast,template,typeid,typename,using,virtual,where"];
   var JAVA_KEYWORDS = [COMMON_KEYWORDS,
-      "abstract,boolean,byte,extends,final,finally,implements,import," +
-      "instanceof,null,native,package,strictfp,super,synchronized,throws," +
-      "transient"];
+      "abstract,assert,boolean,byte,extends,final,finally,implements,import," +
+      "instanceof,interface,null,native,package,strictfp,super,synchronized," +
+      "throws,transient"];
   var CSHARP_KEYWORDS = [JAVA_KEYWORDS,
       "as,base,by,checked,decimal,delegate,descending,dynamic,event," +
-      "fixed,foreach,from,group,implicit,in,interface,internal,into,is,lock," +
-      "object,out,override,orderby,params,partial,readonly,ref,sbyte,sealed," +
-      "stackalloc,string,select,uint,ulong,unchecked,unsafe,ushort,var"];
+      "fixed,foreach,from,group,implicit,in,internal,into,is,let," +
+      "lock,object,out,override,orderby,params,partial,readonly,ref,sbyte," +
+      "sealed,stackalloc,string,select,uint,ulong,unchecked,unsafe,ushort," +
+      "var,virtual,where"];
   var COFFEE_KEYWORDS = "all,and,by,catch,class,else,extends,false,finally," +
       "for,if,in,is,isnt,loop,new,no,not,null,of,off,on,or,return,super,then," +
-      "true,try,unless,until,when,while,yes";
+      "throw,true,try,unless,until,when,while,yes";
   var JSCRIPT_KEYWORDS = [COMMON_KEYWORDS,
       "debugger,eval,export,function,get,null,set,undefined,var,with," +
       "Infinity,NaN"];
@@ -103,12 +130,15 @@ window['PR_SHOULD_USE_CONTINUATION'] = true;
       "def,defined,elsif,end,ensure,false,in,module,next,nil,not,or,redo," +
       "rescue,retry,self,super,then,true,undef,unless,until,when,yield," +
       "BEGIN,END"];
+   var RUST_KEYWORDS = [FLOW_CONTROL_KEYWORDS, "as,assert,const,copy,drop," +
+      "enum,extern,fail,false,fn,impl,let,log,loop,match,mod,move,mut,priv," +
+      "pub,pure,ref,self,static,struct,true,trait,type,unsafe,use"];
   var SH_KEYWORDS = [FLOW_CONTROL_KEYWORDS, "case,done,elif,esac,eval,fi," +
       "function,in,local,set,then,until"];
   var ALL_KEYWORDS = [
-      CPP_KEYWORDS, CSHARP_KEYWORDS, JSCRIPT_KEYWORDS, PERL_KEYWORDS +
+      CPP_KEYWORDS, CSHARP_KEYWORDS, JSCRIPT_KEYWORDS, PERL_KEYWORDS,
       PYTHON_KEYWORDS, RUBY_KEYWORDS, SH_KEYWORDS];
-  var C_TYPES = /^(DIR|FILE|vector|(de|priority_)?queue|list|stack|(const_)?iterator|(multi)?(set|map)|bitset|u?(int|float)\d*)/;
+  var C_TYPES = /^(DIR|FILE|vector|(de|priority_)?queue|list|stack|(const_)?iterator|(multi)?(set|map)|bitset|u?(int|float)\d*)\b/;
 
   // token style names.  correspond to css classes
   /**
@@ -142,7 +172,7 @@ window['PR_SHOULD_USE_CONTINUATION'] = true;
    */
   var PR_PUNCTUATION = 'pun';
   /**
-   * token style for a punctuation string.
+   * token style for plain text.
    * @const
    */
   var PR_PLAIN = 'pln';
@@ -450,12 +480,13 @@ window['PR_SHOULD_USE_CONTINUATION'] = true;
         } else {
           // Stop C preprocessor declarations at an unclosed open comment
           shortcutStylePatterns.push(
-              [PR_COMMENT, /^#(?:(?:define|elif|else|endif|error|ifdef|include|ifndef|line|pragma|undef|warning)\b|[^\r\n]*)/,
+              [PR_COMMENT, /^#(?:(?:define|e(?:l|nd)if|else|error|ifn?def|include|line|pragma|undef|warning)\b|[^\r\n]*)/,
                null, '#']);
         }
+        // #include <stdio.h>
         fallthroughStylePatterns.push(
             [PR_STRING,
-             /^<(?:(?:(?:\.\.\/)*|\/?)(?:[\w-]+(?:\/[\w-]+)+)?[\w-]+\.h|[a-z]\w*)>/,
+             /^<(?:(?:(?:\.\.\/)*|\/?)(?:[\w-]+(?:\/[\w-]+)+)?[\w-]+\.h(?:h|pp|\+\+)?|[a-z]\w*)>/,
              null]);
       } else {
         shortcutStylePatterns.push([PR_COMMENT, /^#[^\r\n]*/, null, '#']);
@@ -466,7 +497,18 @@ window['PR_SHOULD_USE_CONTINUATION'] = true;
       fallthroughStylePatterns.push(
           [PR_COMMENT, /^\/\*[\s\S]*?(?:\*\/|$)/, null]);
     }
-    if (options['regexLiterals']) {
+    var regexLiterals = options['regexLiterals'];
+    if (regexLiterals) {
+      /**
+       * @const
+       */
+      var regexExcls = regexLiterals > 1
+        ? ''  // Multiline regex literals
+        : '\n\r';
+      /**
+       * @const
+       */
+      var regexAny = regexExcls ? '.' : '[\\S\\s]';
       /**
        * @const
        */
@@ -474,18 +516,19 @@ window['PR_SHOULD_USE_CONTINUATION'] = true;
           // A regular expression literal starts with a slash that is
           // not followed by * or / so that it is not confused with
           // comments.
-          '/(?=[^/*])'
+          '/(?=[^/*' + regexExcls + '])'
           // and then contains any number of raw characters,
-          + '(?:[^/\\x5B\\x5C]'
+          + '(?:[^/\\x5B\\x5C' + regexExcls + ']'
           // escape sequences (\x5C),
-          +    '|\\x5C[\\s\\S]'
+          +    '|\\x5C' + regexAny
           // or non-nesting character sets (\x5B\x5D);
-          +    '|\\x5B(?:[^\\x5C\\x5D]|\\x5C[\\s\\S])*(?:\\x5D|$))+'
+          +    '|\\x5B(?:[^\\x5C\\x5D' + regexExcls + ']'
+          +             '|\\x5C' + regexAny + ')*(?:\\x5D|$))+'
           // finally closed by a /.
           + '/');
       fallthroughStylePatterns.push(
           ['lang-regex',
-           new RegExp('^' + REGEXP_PRECEDER_PATTERN + '(' + REGEX_LITERAL + ')')
+           RegExp('^' + REGEXP_PRECEDER_PATTERN + '(' + REGEX_LITERAL + ')')
            ]);
     }
 
@@ -503,6 +546,48 @@ window['PR_SHOULD_USE_CONTINUATION'] = true;
     }
 
     shortcutStylePatterns.push([PR_PLAIN,       /^\s+/, null, ' \r\n\t\xA0']);
+
+    var punctuation =
+      // The Bash man page says
+
+      // A word is a sequence of characters considered as a single
+      // unit by GRUB. Words are separated by metacharacters,
+      // which are the following plus space, tab, and newline: { }
+      // | & $ ; < >
+      // ...
+      
+      // A word beginning with # causes that word and all remaining
+      // characters on that line to be ignored.
+
+      // which means that only a '#' after /(?:^|[{}|&$;<>\s])/ starts a
+      // comment but empirically
+      // $ echo {#}
+      // {#}
+      // $ echo \$#
+      // $#
+      // $ echo }#
+      // }#
+
+      // so /(?:^|[|&;<>\s])/ is more appropriate.
+
+      // http://gcc.gnu.org/onlinedocs/gcc-2.95.3/cpp_1.html#SEC3
+      // suggests that this definition is compatible with a
+      // default mode that tries to use a single token definition
+      // to recognize both bash/python style comments and C
+      // preprocessor directives.
+
+      // This definition of punctuation does not include # in the list of
+      // follow-on exclusions, so # will not be broken before if preceeded
+      // by a punctuation character.  We could try to exclude # after
+      // [|&;<>] but that doesn't seem to cause many major problems.
+      // If that does turn out to be a problem, we should change the below
+      // when hc is truthy to include # in the run of punctuation characters
+      // only when not followint [|&;<>].
+      '^.[^\\s\\w.$@\'"`/\\\\]*';
+    if (options['regexLiterals']) {
+      punctuation += '(?!\s*\/)';
+    }
+
     fallthroughStylePatterns.push(
         // TODO(mikesamuel): recognize non-latin letters and numerals in idents
         [PR_LITERAL,     /^@[a-z_$][a-z_$@0-9]*/i, null],
@@ -521,9 +606,10 @@ window['PR_SHOULD_USE_CONTINUATION'] = true;
              // with an optional modifier like UL for unsigned long
              + '[a-z]*', 'i'),
          null, '0123456789'],
-        // Don't treat escaped quotes in bash as starting strings.  See issue 144.
+        // Don't treat escaped quotes in bash as starting strings.
+        // See issue 144.
         [PR_PLAIN,       /^\\[\s\S]?/, null],
-        [PR_PUNCTUATION, /^.[^\s\w\.$@\'\"\`\/\#\\]*/, null]);
+        [PR_PUNCTUATION, new RegExp(punctuation), null]);
 
     return createSimpleLexer(shortcutStylePatterns, fallthroughStylePatterns);
   }
@@ -563,7 +649,7 @@ window['PR_SHOULD_USE_CONTINUATION'] = true;
       var ext = fileExtensions[i];
       if (!langHandlerRegistry.hasOwnProperty(ext)) {
         langHandlerRegistry[ext] = handler;
-      } else if (window['console']) {
+      } else if (win['console']) {
         console['warn']('cannot override language handler %s', ext);
       }
     }
@@ -643,30 +729,30 @@ window['PR_SHOULD_USE_CONTINUATION'] = true;
           'keywords': SH_KEYWORDS,
           'hashComments': true,
           'multiLineStrings': true
-        }), ['bsh', 'csh', 'sh']);
+        }), ['bash', 'bsh', 'csh', 'sh']);
   registerLangHandler(sourceDecorator({
           'keywords': PYTHON_KEYWORDS,
           'hashComments': true,
           'multiLineStrings': true,
           'tripleQuotedStrings': true
-        }), ['cv', 'py']);
+        }), ['cv', 'py', 'python']);
   registerLangHandler(sourceDecorator({
           'keywords': PERL_KEYWORDS,
           'hashComments': true,
           'multiLineStrings': true,
-          'regexLiterals': true
+          'regexLiterals': 2  // multiline regex literals
         }), ['perl', 'pl', 'pm']);
   registerLangHandler(sourceDecorator({
           'keywords': RUBY_KEYWORDS,
           'hashComments': true,
           'multiLineStrings': true,
           'regexLiterals': true
-        }), ['rb']);
+        }), ['rb', 'ruby']);
   registerLangHandler(sourceDecorator({
           'keywords': JSCRIPT_KEYWORDS,
           'cStyleComments': true,
           'regexLiterals': true
-        }), ['js']);
+        }), ['javascript', 'js']);
   registerLangHandler(sourceDecorator({
           'keywords': COFFEE_KEYWORDS,
           'hashComments': 3,  // ### style block comments
@@ -675,14 +761,20 @@ window['PR_SHOULD_USE_CONTINUATION'] = true;
           'tripleQuotedStrings': true,
           'regexLiterals': true
         }), ['coffee']);
-  registerLangHandler(createSimpleLexer([], [[PR_STRING, /^[\s\S]+/]]), ['regex']);
+  registerLangHandler(sourceDecorator({
+          'keywords': RUST_KEYWORDS,
+          'cStyleComments': true,
+          'multilineStrings': true
+        }), ['rc', 'rs', 'rust']);
+  registerLangHandler(
+      createSimpleLexer([], [[PR_STRING, /^[\s\S]+/]]), ['regex']);
 
   function applyDecorator(job) {
     var opt_langExtension = job.langExtension;
 
     try {
       // Extract tags, and convert the source code to plain text.
-      var sourceAndSpans = extractSourceSpans(job.sourceNode);
+      var sourceAndSpans = extractSourceSpans(job.sourceNode, job.pre);
       /** Plain text. @type {string} */
       var source = sourceAndSpans.sourceCode;
       job.sourceCode = source;
@@ -696,40 +788,58 @@ window['PR_SHOULD_USE_CONTINUATION'] = true;
       // modifying the sourceNode in place.
       recombineTagsAndDecorations(job);
     } catch (e) {
-      if ('console' in window) {
-        console['log'](e && e['stack'] ? e['stack'] : e);
+      if (win['console']) {
+        console['log'](e && e['stack'] || e);
       }
     }
   }
 
   /**
+   * Pretty print a chunk of code.
    * @param sourceCodeHtml {string} The HTML to pretty print.
    * @param opt_langExtension {string} The language name to use.
    *     Typically, a filename extension like 'cpp' or 'java'.
    * @param opt_numberLines {number|boolean} True to number lines,
    *     or the 1-indexed number of the first line in sourceCodeHtml.
    */
-  function prettyPrintOne(sourceCodeHtml, opt_langExtension, opt_numberLines) {
-    var container = document.createElement('PRE');
+  function $prettyPrintOne(sourceCodeHtml, opt_langExtension, opt_numberLines) {
+    var container = document.createElement('div');
     // This could cause images to load and onload listeners to fire.
     // E.g. <img onerror="alert(1337)" src="nosuchimage.png">.
     // We assume that the inner HTML is from a trusted source.
-    container.innerHTML = sourceCodeHtml;
+    // The pre-tag is required for IE8 which strips newlines from innerHTML
+    // when it is injected into a <pre> tag.
+    // http://stackoverflow.com/questions/451486/pre-tag-loses-line-breaks-when-setting-innerhtml-in-ie
+    // http://stackoverflow.com/questions/195363/inserting-a-newline-into-a-pre-tag-ie-javascript
+    container.innerHTML = '<pre>' + sourceCodeHtml + '</pre>';
+    container = container.firstChild;
     if (opt_numberLines) {
-      numberLines(container, opt_numberLines);
+      numberLines(container, opt_numberLines, true);
     }
 
     var job = {
       langExtension: opt_langExtension,
       numberLines: opt_numberLines,
-      sourceNode: container
+      sourceNode: container,
+      pre: 1
     };
     applyDecorator(job);
     return container.innerHTML;
   }
 
-  function prettyPrint(opt_whenDone) {
-    function byTagName(tn) { return document.getElementsByTagName(tn); }
+   /**
+    * Find all the {@code <pre>} and {@code <code>} tags in the DOM with
+    * {@code class=prettyprint} and prettify them.
+    *
+    * @param {Function} opt_whenDone called when prettifying is done.
+    * @param {HTMLElement|HTMLDocument} opt_root an element or document
+    *   containing all the elements to pretty print.
+    *   Defaults to {@code document.body}.
+    */
+  function $prettyPrint(opt_whenDone, opt_root) {
+    var root = opt_root || document.body;
+    var doc = root.ownerDocument || document;
+    function byTagName(tn) { return root.getElementsByTagName(tn); }
     // fetch a list of nodes to rewrite
     var codeSegments = [byTagName('pre'), byTagName('code'), byTagName('xmp')];
     var elements = [];
@@ -752,59 +862,124 @@ window['PR_SHOULD_USE_CONTINUATION'] = true;
 
     var langExtensionRe = /\blang(?:uage)?-([\w.]+)(?!\S)/;
     var prettyPrintRe = /\bprettyprint\b/;
+    var prettyPrintedRe = /\bprettyprinted\b/;
+    var preformattedTagNameRe = /pre|xmp/i;
+    var codeRe = /^code$/i;
+    var preCodeXmpRe = /^(?:pre|code|xmp)$/i;
+    var EMPTY = {};
 
     function doWork() {
-      var endTime = (window['PR_SHOULD_USE_CONTINUATION'] ?
+      var endTime = (win['PR_SHOULD_USE_CONTINUATION'] ?
                      clock['now']() + 250 /* ms */ :
                      Infinity);
       for (; k < elements.length && clock['now']() < endTime; k++) {
         var cs = elements[k];
-        var className = cs.className;
-        if (className.indexOf('prettyprint') >= 0) {
-          // If the classes includes a language extensions, use it.
-          // Language extensions can be specified like
-          //     <pre class="prettyprint lang-cpp">
-          // the language extension "cpp" is used to find a language handler as
-          // passed to PR.registerLangHandler.
-          // HTML5 recommends that a language be specified using "language-"
-          // as the prefix instead.  Google Code Prettify supports both.
-          // http://dev.w3.org/html5/spec-author-view/the-code-element.html
-          var langExtension = className.match(langExtensionRe);
-          // Support <pre class="prettyprint"><code class="language-c">
-          var wrapper;
-          if (!langExtension && (wrapper = childContentWrapper(cs))
-              && "CODE" === wrapper.tagName) {
-            langExtension = wrapper.className.match(langExtensionRe);
-          }
 
-          if (langExtension) {
-            langExtension = langExtension[1];
+        // Look for a preceding comment like
+        // <?prettify lang="..." linenums="..."?>
+        var attrs = EMPTY;
+        {
+          for (var preceder = cs; (preceder = preceder.previousSibling);) {
+            var nt = preceder.nodeType;
+            // <?foo?> is parsed by HTML 5 to a comment node (8)
+            // like <!--?foo?-->, but in XML is a processing instruction
+            var value = (nt === 7 || nt === 8) && preceder.nodeValue;
+            if (value
+                ? !/^\??prettify\b/.test(value)
+                : (nt !== 3 || /\S/.test(preceder.nodeValue))) {
+              // Skip over white-space text nodes but not others.
+              break;
+            }
+            if (value) {
+              attrs = {};
+              value.replace(
+                  /\b(\w+)=([\w:.%+-]+)/g,
+                function (_, name, value) { attrs[name] = value; });
+              break;
+            }
           }
+        }
+
+        var className = cs.className;
+        if ((attrs !== EMPTY || prettyPrintRe.test(className))
+            // Don't redo this if we've already done it.
+            // This allows recalling pretty print to just prettyprint elements
+            // that have been added to the page since last call.
+            && !prettyPrintedRe.test(className)) {
 
           // make sure this is not nested in an already prettified element
           var nested = false;
           for (var p = cs.parentNode; p; p = p.parentNode) {
-            if ((p.tagName === 'pre' || p.tagName === 'code' ||
-                 p.tagName === 'xmp') &&
-                p.className && p.className.indexOf('prettyprint') >= 0) {
+            var tn = p.tagName;
+            if (preCodeXmpRe.test(tn)
+                && p.className && prettyPrintRe.test(p.className)) {
               nested = true;
               break;
             }
           }
           if (!nested) {
+            // Mark done.  If we fail to prettyprint for whatever reason,
+            // we shouldn't try again.
+            cs.className += ' prettyprinted';
+
+            // If the classes includes a language extensions, use it.
+            // Language extensions can be specified like
+            //     <pre class="prettyprint lang-cpp">
+            // the language extension "cpp" is used to find a language handler
+            // as passed to PR.registerLangHandler.
+            // HTML5 recommends that a language be specified using "language-"
+            // as the prefix instead.  Google Code Prettify supports both.
+            // http://dev.w3.org/html5/spec-author-view/the-code-element.html
+            var langExtension = attrs['lang'];
+            if (!langExtension) {
+              langExtension = className.match(langExtensionRe);
+              // Support <pre class="prettyprint"><code class="language-c">
+              var wrapper;
+              if (!langExtension && (wrapper = childContentWrapper(cs))
+                  && codeRe.test(wrapper.tagName)) {
+                langExtension = wrapper.className.match(langExtensionRe);
+              }
+
+              if (langExtension) { langExtension = langExtension[1]; }
+            }
+
+            var preformatted;
+            if (preformattedTagNameRe.test(cs.tagName)) {
+              preformatted = 1;
+            } else {
+              var currentStyle = cs['currentStyle'];
+              var defaultView = doc.defaultView;
+              var whitespace = (
+                  currentStyle
+                  ? currentStyle['whiteSpace']
+                  : (defaultView
+                     && defaultView.getComputedStyle)
+                  ? defaultView.getComputedStyle(cs, null)
+                  .getPropertyValue('white-space')
+                  : 0);
+              preformatted = whitespace
+                  && 'pre' === whitespace.substring(0, 3);
+            }
+
             // Look for a class like linenums or linenums:<n> where <n> is the
             // 1-indexed number of the first line.
-            var lineNums = cs.className.match(/\blinenums\b(?::(\d+))?/);
-            lineNums = lineNums
-                  ? lineNums[1] && lineNums[1].length ? +lineNums[1] : true
-                  : false;
-            if (lineNums) { numberLines(cs, lineNums); }
+            var lineNums = attrs['linenums'];
+            if (!(lineNums = lineNums === 'true' || +lineNums)) {
+              lineNums = className.match(/\blinenums\b(?::(\d+))?/);
+              lineNums =
+                lineNums
+                ? lineNums[1] && lineNums[1].length
+                  ? +lineNums[1] : true
+                : false;
+            }
+            if (lineNums) { numberLines(cs, lineNums, preformatted); }
 
             // do the pretty printing
             prettyPrintingJob = {
               langExtension: langExtension,
               sourceNode: cs,
-              numberLines: lineNums
+              numberLines: lineNums,
+              pre: preformatted
             };
             applyDecorator(prettyPrintingJob);
           }
@@ -813,7 +988,7 @@ window['PR_SHOULD_USE_CONTINUATION'] = true;
       if (k < elements.length) {
         // finish up in a continuation
         setTimeout(doWork, 250);
-      } else if (opt_whenDone) {
+      } else if ('function' === typeof opt_whenDone) {
         opt_whenDone();
       }
     }
@@ -821,26 +996,11 @@ window['PR_SHOULD_USE_CONTINUATION'] = true;
     doWork();
   }
 
-   /**
-    * Find all the {@code <pre>} and {@code <code>} tags in the DOM with
-    * {@code class=prettyprint} and prettify them.
-    *
-    * @param {Function?} opt_whenDone if specified, called when the last entry
-    *     has been finished.
-    */
-  window['prettyPrintOne'] = prettyPrintOne;
-   /**
-    * Pretty print a chunk of code.
-    *
-    * @param {string} sourceCodeHtml code as html
-    * @return {string} code as html, but prettier
-    */
-  window['prettyPrint'] = prettyPrint;
-   /**
-    * Contains functions for creating and registering new language handlers.
-    * @type {Object}
-    */
-  window['PR'] = {
+  /**
+   * Contains functions for creating and registering new language handlers.
+   * @type {Object}
+   */
+  var PR = win['PR'] = {
         'createSimpleLexer': createSimpleLexer,
         'registerLangHandler': registerLangHandler,
         'sourceDecorator': sourceDecorator,
@@ -856,6 +1016,32 @@ window['PR_SHOULD_USE_CONTINUATION'] = true;
         'PR_SOURCE': PR_SOURCE,
         'PR_STRING': PR_STRING,
         'PR_TAG': PR_TAG,
-        'PR_TYPE': PR_TYPE
+        'PR_TYPE': PR_TYPE,
+        'prettyPrintOne':
+           IN_GLOBAL_SCOPE
+             ? (win['prettyPrintOne'] = $prettyPrintOne)
+             : (prettyPrintOne = $prettyPrintOne),
+        'prettyPrint': prettyPrint =
+           IN_GLOBAL_SCOPE
+             ? (win['prettyPrint'] = $prettyPrint)
+             : (prettyPrint = $prettyPrint)
       };
+
+  // Make PR available via the Asynchronous Module Definition (AMD) API.
+  // Per https://github.com/amdjs/amdjs-api/wiki/AMD:
+  // The Asynchronous Module Definition (AMD) API specifies a
+  // mechanism for defining modules such that the module and its
+  // dependencies can be asynchronously loaded.
+  // ...
+  // To allow a clear indicator that a global define function (as
+  // needed for script src browser loading) conforms to the AMD API,
+  // any global define function SHOULD have a property called "amd"
+  // whose value is an object. This helps avoid conflict with any
+  // other existing JavaScript code that could have defined a define()
+  // function that does not conform to the AMD API.
+  if (typeof define === "function" && define['amd']) {
+    define("google-code-prettify", [], function () {
+      return PR; 
+    });
+  }
 })();

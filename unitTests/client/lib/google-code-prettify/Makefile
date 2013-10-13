@@ -1,48 +1,40 @@
-CLOSURE_COMPILER=java -jar closure-compiler/compiler.jar \
-	      --warning_level VERBOSE \
-	      --charset UTF-8 \
-	      --language_in ECMASCRIPT5 \
-	      --compilation_level ADVANCED_OPTIMIZATIONS
+SHELL := /bin/bash
 
-YUI_COMPRESSOR=java -jar yui-compressor/yuicompressor-2.4.4.jar \
+CLOSURE_COMPILER=java -jar tools/closure-compiler/compiler.jar \
+	      --warning_level VERBOSE \
+	      --language_in ECMASCRIPT5 \
+	      --compilation_level ADVANCED_OPTIMIZATIONS \
+	      --charset US-ASCII
+# Don't specify --charset=UTF-8.  If we do, then non-ascii codepoints
+# that do not correspond to line terminators are converted
+# to UTF-8 sequences instead of being emitted as ASCII.
+# This makes the resulting JavaScript less portable.
+
+YUI_COMPRESSOR=java -jar tools/yui-compressor/yuicompressor-2.4.4.jar \
 	      --charset UTF-8
 
 TAR_ROOT=distrib/google-code-prettify
 
-all: src/prettify.js distrib
+all: distrib
 
 clean:
-	rm -rf distrib.tstamp distrib src/prettify.js
+	rm -rf distrib.tstamp distrib src/prettify.js src/run_prettify.js
 
 src/prettify.js: js-modules/*.js js-modules/*.pl
-	@if [ -e $@ ]; then chmod +w $@; fi
-	@perl -e '\
-	  sub readInclude($$$$) {\
-	    my $$prefix = $$_[0];\
-	    my $$name = "js-modules/" . $$_[1];\
-	    my $$buf = "";\
-	    if ($$name =~ /\.pl$$/) {\
-	      open(IN, "|perl $$name") or die "$$name: $$!";\
-	    } else {\
-	      open(IN, "<$$name") or die "$$name: $$!";\
-	    }\
-	    while (<IN>) {\
-	      $$buf .= "$$prefix$$_";\
-	    }\
-	    return $$buf;\
-	  }' \
-	  -pe 's/^(\s*)include\("([^"]+)"\);/readInclude($$1, $$2)/ge' \
-	  js-modules/prettify.js \
-	  > src/prettify.js \
-	  || rm src/prettify.js
-	@if [ -e $@ ]; then chmod -w $@; fi
+	@if [ -e "$@" ]; then chmod +w "$@"; fi
+	@perl js-modules/js_include.pl "$$(basename $@)" > "$@"
+	@if [ -e "$@" ]; then chmod -w "$@"; fi
 
-distrib: distrib.tstamp distrib/prettify-small.tgz \
-	 distrib/prettify-small.tar.bz2
-	@wc -c distrib/prettify-small.{tar.bz2,tgz} \
+src/run_prettify.js: js-modules/*.js js-modules/*.pl
+	@if [ -e "$@" ]; then chmod +w "$@"; fi
+	@perl js-modules/js_include.pl "$$(basename $@)" > "$@"
+	@if [ -e "$@" ]; then chmod -w "$@"; fi
+
+distrib: distrib.tstamp distrib/prettify-small.tgz distrib/prettify-small.zip distrib/prettify-small.tar.bz2
+	@wc -c distrib/prettify-small.{tar.bz2,tgz,zip} \
 	    | grep -v total
 
-distrib.tstamp: src/*.js src/*.css
+distrib.tstamp: src/prettify.js src/run_prettify.js src/*.js src/*.css
 	@echo Compiling
 	@mkdir -p $(TAR_ROOT)
 	@for f in src/*.css; do \
@@ -52,15 +44,24 @@ distrib.tstamp: src/*.js src/*.css
 	      | grep -v total; \
 	done
 	@$(CLOSURE_COMPILER) --js src/prettify.js \
-	    --externs closure-compiler/console-externs.js \
-	    | perl -e 'binmode STDIN, ":utf8";' -pe 's/\xA0/\\xa0/' \
+	    --externs tools/closure-compiler/console-externs.js \
+	    --externs tools/closure-compiler/amd-externs.js \
+	    --define IN_GLOBAL_SCOPE=true \
+	    --output_wrapper='!function(){%output%}()' \
 	    > $(TAR_ROOT)/prettify.js
 	@wc -c src/prettify.js $(TAR_ROOT)/prettify.js \
+	    | grep -v total
+	@$(CLOSURE_COMPILER) --js src/run_prettify.js \
+	    --externs tools/closure-compiler/console-externs.js \
+	    --externs tools/closure-compiler/amd-externs.js \
+	    --define IN_GLOBAL_SCOPE=false \
+	    --output_wrapper='!function(){%output%}()' \
+	    > $(TAR_ROOT)/run_prettify.js
+	@wc -c src/run_prettify.js $(TAR_ROOT)/run_prettify.js \
 	    | grep -v total
 	@for f in src/lang*.js; do \
 	  if [ $$f -nt $(TAR_ROOT)/$$(basename $$f) ]; then \
 	    $(CLOSURE_COMPILER) --js $$f --externs js-modules/externs.js \
-	        | perl -e 'binmode STDIN, ":utf8";' -pe 's/\xA0/\\xa0/' \
 	        | perl -pe 's/\bPR\.PR_ATTRIB_NAME\b/"atn"/g; \
 			    s/\bPR\.PR_ATTRIB_VALUE\b/"atv"/g; \
 			    s/\bPR\.PR_COMMENT\b/"com"/g; \
@@ -79,13 +80,32 @@ distrib.tstamp: src/*.js src/*.css
 	done
 	@touch distrib.tstamp
 
+lang-aliases : lang-aliases.tstamp
+lang-aliases.tstamp : distrib.tstamp
+	@tools/lang-handler-aliases.sh \
+            distrib/sources/google-code-prettify/src \
+	  | perl -ne 'system("cp $$1 $$2") if m/^(\S+) (\S+)$$/ && ! -e $$2' \
+	  && touch lang-aliases.tstamp
+
 %.tgz: %.tar
 	@gzip -c -9 $^ > $@
 
 %.tar.bz2: %.tar
-	@bzip2 -9f $^
+	@bzip2 -k -9f $^
 
 distrib/prettify-small.tar: distrib.tstamp
+	tar cf $@ -C distrib google-code-prettify
+
+distrib/prettify-small.zip: distrib.tstamp
 	@pushd distrib >& /dev/null; \
-	tar cf ../$@ google-code-prettify; \
+	rm -f ../$@; \
+	zip -q -9 -r ../$@ google-code-prettify; \
 	popd >& /dev/null
+
+distrib/prettify.tar: distrib.tstamp
+	mkdir -p distrib/sources/google-code-prettify
+	cp -fr CHANGES.html COPYING README.html Makefile \
+	  examples js-modules src styles tests tools \
+	  distrib/sources/google-code-prettify
+	tar cf distrib/prettify.tar -C distrib/sources google-code-prettify
+

@@ -1,12 +1,3 @@
-/**
- * Sample client-server Express app using Teddy (server portion)
- * @author Eric Newport (kethinov)
- * @license Creative Commons Attribution 3.0 Unported License http://creativecommons.org/licenses/by/3.0/deed.en_US
- */
-
-/*! @source https://github.com/kethinov/teddy */
-/*jshint camelcase: true, curly: true, eqeqeq: false, forin: false, strict: false, trailing: true, evil: true, devel: true, node: true */
-
 // include dependencies
 var http = require('http'),             // node's http server
     express = require('express'),       // express http server
@@ -35,14 +26,14 @@ app.get('/', function(req, res) {
     title: 'Teddy Templating Engine sample app',
     hello: 'Hello World!'
   };
-  
+
   // express will now use teddy to parse index.html using the supplied model
   res.render('index.html', model);
 });
 
 // define controller method for precompiled templates
 app.get('/precompiled', function(req, res) {
-  
+
   // precompile the precompiled templates
   teddy.compile('one.html');
   teddy.compile('two.html');

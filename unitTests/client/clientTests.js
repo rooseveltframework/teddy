@@ -110,7 +110,7 @@ if (!sameOriginPolicy && !oldIE) {
   });
 
   unitTest('&lt;style&gt; tag test', function() {
-    return idoc.getElementsByTagName('style')[0].innerHTML.replace(/ xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g, '') == 'body{font-family: monospace;}' ? true : false;
+    return idoc.getElementsByTagName('style')[0].innerHTML.replace(/ xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g, '') == ' body{font-family: monospace;} ' ? true : false;
   });
 
   unitTest('{variable} test', function() {

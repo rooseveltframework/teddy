@@ -1,12 +1,3 @@
-/**
- * Sample Express app using Teddy
- * @author Eric Newport (kethinov)
- * @license Creative Commons Attribution 3.0 Unported License http://creativecommons.org/licenses/by/3.0/deed.en_US
- */
-
-/*! @source https://github.com/kethinov/teddy */
-/*jshint camelcase: true, curly: true, eqeqeq: false, forin: false, strict: false, trailing: true, evil: true, devel: true, node: true */
-
 // include dependencies
 var http = require('http'),             // node's http server
     express = require('express'),       // express http server

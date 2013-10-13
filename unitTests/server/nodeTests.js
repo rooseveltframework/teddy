@@ -54,7 +54,7 @@ unitTest('<title> tag test', function() {
 });
 
 unitTest('<style> tag test', function() {
-  return renderedTemplate.indexOf('<style>body{font-family: monospace;}</style>') > -1 ? true : false;
+  return renderedTemplate.indexOf('<style> body{font-family: monospace;} </style>') > -1 ? true : false;
 });
 
 unitTest('{variable} test', function() {

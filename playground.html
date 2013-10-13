@@ -1,30 +1,23 @@
 <!DOCTYPE html>
-<!--
-/**
- * Teddy Templating Engine playground
- * @author Eric Newport (kethinov)
- * @license Creative Commons Attribution 3.0 Unported License http://creativecommons.org/licenses/by/3.0/deed.en_US
- */
-/*! @source https://github.com/kethinov/teddy */
--->
 <html>
 <head>
 <meta charset='utf-8'/>
 <title>Teddy Templating Engine playground</title>
 </head>
 <body>
-<header>
-  <hgroup>
-    <h1>Teddy Templating Engine playground</h1>
-  </hgroup>
-</header>
+  <main>
+    <header>
+      <hgroup>
+        <h1>Teddy Templating Engine playground</h1>
+      </hgroup>
+    </header>
 
-<p>Play around with client-side templating on this page.</p>
-<noscript><p><strong>Javascript must be enabled for client-side templating to work.</strong></p></noscript>
+    <p>Play around with client-side templating on this page.</p>
+    <noscript><p><strong>Javascript must be enabled for client-side templating to work.</strong></p></noscript>
 
-<dl>
-<dt>Template:</dt>
-<dd><textarea rows='11' cols='43' id='src'><if hello>
+    <dl>
+      <dt>Template:</dt>
+      <dd><textarea rows='11' cols='43' id='src'><if hello>
 <p>{hello}</p>
 </if>
 
@@ -34,51 +27,52 @@
 <else>
 <p>no blah!</p>
 </else></textarea></dd>
-<dt>JSON model:</dt>
-<dd><textarea rows='11' cols='43' id='json'>{"hello":"hello world!"}</textarea></dd>
-</dl>
+      <dt>JSON model:</dt>
+      <dd><textarea rows='11' cols='43' id='json'>{"hello":"hello world!"}</textarea></dd>
+    </dl>
 
-<p><button id='render'>Render!</button></p>
-<dl>
-<dt>Rendered iframe:</dt>
-<dd id='rendered'></dd>
-</dl>
+    <p><button id='render'>Render!</button></p>
+    <dl>
+      <dt>Rendered iframe:</dt>
+      <dd id='rendered'></dd>
+    </dl>
+  </main>
 
-<!-- include teddy library -->
-<script src='teddy.js'></script>
+  <!-- include teddy library -->
+  <script src='teddy.js'></script>
 
-<script>
-(function() {
-  var i = document.createElement('iframe');
-  i.id = 'renderedframe';
-  document.getElementById('rendered').appendChild(i);
-  
-  document.getElementById('render').onclick = function() {
-    var json, rendered, idoc;
-    
-    try {
-      teddy.compile(document.getElementById('src').value, 'playground');
-    }
-    catch (e) {
-      console.log(e);
-      alert('Teddy could not compile the template! Check console log for the error.');
-    }
+  <script>
+  (function() {
+    var i = document.createElement('iframe');
+    i.id = 'renderedframe';
+    document.getElementById('rendered').appendChild(i);
 
-    try {
-      json = JSON.parse(document.getElementById('json').value);
-    }
-    catch (e) {
-      console.log(e);
-      alert('Teddy could not parse your JSON! Check console log for the error.');
-    }
-    rendered = teddy.render('playground', json);
+    document.getElementById('render').onclick = function() {
+      var json, rendered, idoc;
 
-    idoc = document.getElementById('renderedframe').contentWindow.document;
-    idoc.open();
-    idoc.write(rendered);
-    idoc.close();
-  };
-})();
-</script>
+      try {
+        teddy.compile(document.getElementById('src').value, 'playground');
+      }
+      catch (e) {
+        console.log(e);
+        alert('Teddy could not compile the template! Check console log for the error.');
+      }
+
+      try {
+        json = JSON.parse(document.getElementById('json').value);
+      }
+      catch (e) {
+        console.log(e);
+        alert('Teddy could not parse your JSON! Check console log for the error.');
+      }
+      rendered = teddy.render('playground', json);
+
+      idoc = document.getElementById('renderedframe').contentWindow.document;
+      idoc.open();
+      idoc.write(rendered);
+      idoc.close();
+    };
+  })();
+  </script>
 </body>
 </html>

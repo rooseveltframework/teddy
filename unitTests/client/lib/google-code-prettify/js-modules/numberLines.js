@@ -6,25 +6,16 @@
  *     HTMLOListElement, and each line is moved into a separate list item.
  *     This requires cloning elements, so the input might not have unique
  *     IDs after numbering.
+ * @param {boolean} isPreformatted true iff white-space in text nodes should
+ *     be treated as significant.
  */
-function numberLines(node, opt_startLineNum) {
+function numberLines(node, opt_startLineNum, isPreformatted) {
   var nocode = /(?:^|\s)nocode(?:\s|$)/;
   var lineBreak = /\r\n?|\n/;
 
   var document = node.ownerDocument;
 
-  var whitespace;
-  if (node.currentStyle) {
-    whitespace = node.currentStyle.whiteSpace;
-  } else if (window.getComputedStyle) {
-    whitespace = document.defaultView.getComputedStyle(node, null)
-        .getPropertyValue('white-space');
-  }
-  // If it's preformatted, then we need to split lines on line breaks
-  // in addition to <BR>s.
-  var isPreformatted = whitespace && 'pre' === whitespace.substring(0, 3);
-
-  var li = document.createElement('LI');
+  var li = document.createElement('li');
   while (node.firstChild) {
     li.appendChild(node.firstChild);
   }
@@ -33,42 +24,37 @@ function numberLines(node, opt_startLineNum) {
   var listItems = [li];
 
   function walk(node) {
-    switch (node.nodeType) {
-      case 1:  // Element
-        if (nocode.test(node.className)) { break; }
-        if ('BR' === node.nodeName) {
-          breakAfter(node);
-          // Discard the <BR> since it is now flush against a </LI>.
-          if (node.parentNode) {
-            node.parentNode.removeChild(node);
-          }
-        } else {
-          for (var child = node.firstChild; child; child = child.nextSibling) {
-            walk(child);
-          }
+    var type = node.nodeType;
+    if (type == 1 && !nocode.test(node.className)) {  // Element
+      if ('br' === node.nodeName) {
+        breakAfter(node);
+        // Discard the <BR> since it is now flush against a </LI>.
+        if (node.parentNode) {
+          node.parentNode.removeChild(node);
         }
-        break;
-      case 3: case 4:  // Text
-        if (isPreformatted) {
-          var text = node.nodeValue;
-          var match = text.match(lineBreak);
-          if (match) {
-            var firstLine = text.substring(0, match.index);
-            node.nodeValue = firstLine;
-            var tail = text.substring(match.index + match[0].length);
-            if (tail) {
-              var parent = node.parentNode;
-              parent.insertBefore(
-                  document.createTextNode(tail), node.nextSibling);
-            }
-            breakAfter(node);
-            if (!firstLine) {
-              // Don't leave blank text nodes in the DOM.
-              node.parentNode.removeChild(node);
-            }
-          }
+      } else {
+        for (var child = node.firstChild; child; child = child.nextSibling) {
+          walk(child);
         }
-        break;
+      }
+    } else if ((type == 3 || type == 4) && isPreformatted) {  // Text
+      var text = node.nodeValue;
+      var match = text.match(lineBreak);
+      if (match) {
+        var firstLine = text.substring(0, match.index);
+        node.nodeValue = firstLine;
+        var tail = text.substring(match.index + match[0].length);
+        if (tail) {
+          var parent = node.parentNode;
+          parent.insertBefore(
+            document.createTextNode(tail), node.nextSibling);
+        }
+        breakAfter(node);
+        if (!firstLine) {
+          // Don't leave blank text nodes in the DOM.
+          node.parentNode.removeChild(node);
+        }
+      }
     }
   }
 
@@ -128,7 +114,7 @@ function numberLines(node, opt_startLineNum) {
     listItems[0].setAttribute('value', opt_startLineNum);
   }
 
-  var ol = document.createElement('OL');
+  var ol = document.createElement('ol');
   ol.className = 'linenums';
   var offset = Math.max(0, ((opt_startLineNum - 1 /* zero index */)) | 0) || 0;
   for (var i = 0, n = listItems.length; i < n; ++i) {
