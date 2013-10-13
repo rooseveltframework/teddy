@@ -1,42 +1,33 @@
-/**
- * Node.js unit tests for Teddy Templating Engine - This simple sample app parses a set of sample templates to ensure that all the features of Teddy are working correctly. Use this app to unit test changes to the templating engine or tinker with it to learn how Teddy works in general.
- * @author Eric Newport (kethinov)
- * @license Creative Commons Attribution 3.0 Unported License http://creativecommons.org/licenses/by/3.0/deed.en_US
- */
-
-/*! @source https://github.com/kethinov/teddy */
-/*jshint camelcase: true, curly: true, eqeqeq: false, forin: false, strict: false, trailing: true, evil: true, devel: true, node: true */
-
 console.log("\nRunning Teddy server-side tests");
 
 var teddy = require('../../teddy'),
-    renderedTemplate = '',
-    model = {
-      letters: ['a', 'b', 'c'],
-      names: {jack: 'guy', jill: 'girl', hill: 'landscape'},
-      objects: [{a:1, b:2, c:3}, {a:4, b:5, c:6}, {a:7, b:8, c:9}],
-      something: 'Some content',
-      somethingElse: true,
-      variableName: 'Hello world!',
-      varWithVarInside: 'Variable with a variable inside: {subVar}',
-      subVar: 'And another: {variableName}',
-      pageTitle: 'Teddy Templating Engine unit tests'
-    },
+renderedTemplate = '',
+model = {
+  letters: ['a', 'b', 'c'],
+  names: {jack: 'guy', jill: 'girl', hill: 'landscape'},
+  objects: [{a:1, b:2, c:3}, {a:4, b:5, c:6}, {a:7, b:8, c:9}],
+  something: 'Some content',
+  somethingElse: true,
+  variableName: 'Hello world!',
+  varWithVarInside: 'Variable with a variable inside: {subVar}',
+  subVar: 'And another: {variableName}',
+  pageTitle: 'Teddy Templating Engine unit tests'
+},
 
-    // unit tester function
-    unitTest = function(testName, testFunc) {
-      try {
-        if (testFunc()) {
-          console.log('PASS: '+testName);
-        }
-        else {
-          console.log('FAIL: '+testName);
-        }
-      }
-      catch (e) {
-        console.log('FAIL: '+testName+' JS Error: '+e);
-      }
-    };
+// unit tester function
+unitTest = function(testName, testFunc) {
+  try {
+    if (testFunc()) {
+      console.log('PASS: '+testName);
+    }
+    else {
+      console.log('FAIL: '+testName);
+    }
+  }
+  catch (e) {
+    console.log('FAIL: '+testName+' JS Error: '+e);
+  }
+};
 
 // @param verbosity
 // Possible values: none, concise (default), verbose, DEBUG
@@ -112,3 +103,5 @@ unitTest('packaged templates test', function() {
     return false;
   }
 });
+
+console.log();

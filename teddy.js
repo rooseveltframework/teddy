@@ -1,13 +1,3 @@
-/**
- * Teddy Templating Engine; Javascript Parser
- * @author Eric Newport (kethinov)
- * @license Creative Commons Attribution 3.0 Unported License http://creativecommons.org/licenses/by/3.0/deed.en_US
- */
-
-/*! @source https://github.com/kethinov/teddy */
-/*jshint camelcase: true, curly: true, indent: 2, caseindent: true, eqeqeq: false, forin: false, strict: false, trailing: true, evil: true, devel: true, node: true */
-/*global XMLSerializer */
-
 (function() {
 
   // @namespace
@@ -644,23 +634,10 @@
     // replaces a single {var} with its value from a given model
     renderVar: function(str, varname, varval) {
       if (str) {
-
         // hack to typecast to string
         varname = '' + varname;
         varval = '' + varval;
-
-        try {
-          eval('str = str.replace(/{'+varname.replace(/"/g, '\\"')+'}/gi, "'+varval.replace(/"/g, '\\"')+'");');
-        }
-        catch (e) {
-          if (teddy.params.verbosity > 1) {
-            console.log('Warning: a {variable} was found with an invalid syntax: {' + varname + '}');
-            if (teddy.params.verbosity > 2) {
-              console.log('JS error thrown: ' + e);
-            }
-          }
-        }
-        return str;
+        return str.replace(new RegExp('{'+varname+'}', 'gi'), varval);
       }
       else {
         if (teddy.params.verbosity > 1) {
@@ -1026,7 +1003,6 @@
       }
     });
     serializer = new xmldom.XMLSerializer();
-
   }
 
   // set env specific vars for client-side
@@ -1050,10 +1026,9 @@
        * Modified for use in Teddy by Eric Newport (kethinov)
        * Public domain.
        * NO WARRANTY EXPRESSED OR IMPLIED. USE AT YOUR OWN RISK.
+       *
+       * @source https://gist.github.com/kethinov/4760460
        */
-
-      /*! @source https://gist.github.com/kethinov/4760460 */
-      /*global document, DOMParser*/
 
       (function(DOMParser) {
         "use strict";

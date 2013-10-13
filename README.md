@@ -389,8 +389,7 @@ npm install
 Run server test:
 
 ```
-cd unitTests/server
-node nodeTests.js
+npm test
 ```
 
 To run the client tests, open `unitTests/client/clientTests.html` and follow its instructions.
