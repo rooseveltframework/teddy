@@ -62,7 +62,7 @@ Teddy, symbol-buster extraordinaire
 
 Teddy the trust-buster was a man of the people, curtailing the abuse of monopolists. As <a href='http://www.cracked.com/article_15895_the-5-most-badass-presidents-all-time_p5.html'>the most badass President of all-time</a>, there's no way he'd put up with all this indecipherable templating nonsense.
 
-As such, Teddy the templating engine is an engine of the people, curtailing the abuse of indecipherable templating systems. Teddy trust-buster extraordinaire is now symbol-buster extraordinaire. 
+As such, Teddy the templating engine is an engine of the people, curtailing the abuse of indecipherable templating systems. Teddy trust-buster extraordinaire is now symbol-buster extraordinaire.
 
 Here's how:
 
@@ -310,7 +310,7 @@ Writing your client.js:
 
 For a complete sample implementation, see the sample app here: <a href='sampleApps/client-server'>sampleApps/client-server</a>
 
-Notable intentional design choices and limitations 
+Notable intentional design choices and limitations
 ===
 
 - All variables in Teddy templates are case-insensitive because HTML is case-insensitive.
@@ -338,7 +338,7 @@ Known issues
 - Source code view on client-side unit tests is broken in IE10 most likely due to a bug in dependency library vkbeautify.
 - The unit tests are a bit primitive at the moment. Suggestions for improvement or pull requests with better tests will be much appreciated.
 
-Untested browsers
+Notable untested browsers
 ===
 
 - Android browser 2.2 and below.
