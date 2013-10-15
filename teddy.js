@@ -536,12 +536,14 @@
         attrVal = newAttr[1];
         newAttr = newAttr[0];
 
-        if (attrVal) {
-          attrVal = attrVal.replace(/"/g, '').replace(/'/g, '');
-          el.setAttribute(newAttr, attrVal);
-        }
-        else {
-          el.setAttribute(newAttr, '');
+        if (newAttr) {
+          if (attrVal) {
+            attrVal = attrVal.replace(/"/g, '').replace(/'/g, '');
+            el.setAttribute(newAttr, attrVal);
+          }
+          else {
+            el.setAttribute(newAttr, '');
+          }
         }
 
         return el;
