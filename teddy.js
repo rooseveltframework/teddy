@@ -68,6 +68,9 @@
       // flatten model to produce case-insensitivity (needed because HTML is case-insensitive)
       model = teddy.flattenModel(model);
 
+      // store original copy of model so it can be reset after being temporarily modified
+      teddy._baseModel = JSON.parse(JSON.stringify(model));
+
       // remove templateRoot from template name if necessary
       template = template.replace(teddy.params.templateRoot, '');
 
@@ -113,6 +116,10 @@
       // processes all remaining {vars}
       renderedTemplate = teddy.parseVars(renderedTemplate, model); // last one converts it to a string
 
+      // clean up temp vars
+      teddy._contextModels = [];
+      teddy._baseModel = {};
+
       // execute callback if present, otherwise simply return the rendered template string
       if ((typeof callback).toLowerCase() === 'function') {
         if (!errors) {
@@ -143,6 +150,7 @@
         if (el) {
           notDone = true;
           result = teddy.renderInclude(el);
+          model = teddy._baseModel; // restore original model
           if (result.newDoc) {
             doc = result;
           }
@@ -172,6 +180,7 @@
       for (i = 0; i < length; i++) {
         el = conditionals[i];
         result = teddy.renderConditional(el, model);
+        model = teddy._baseModel; // restore original model
         teddy.replaceProcessedElement(el, result);
       }
 
@@ -180,6 +189,7 @@
       for (i = 0; i < length; i++) {
         el = oneliners[i];
         result = teddy.renderOneLineConditional(el, model);
+        model = teddy._baseModel; // restore original model
         if (isNode) {
           teddy.replaceProcessedElement(el, result);
         }
@@ -199,6 +209,7 @@
         if (el) {
           notDone = true;
           result = teddy.renderForeach(el, model);
+          model = teddy._baseModel; // restore original model
           teddy.replaceProcessedElement(el, result);
         }
         else {
@@ -295,7 +306,7 @@
 
     // parses a single <include> tag
     renderInclude: function(el) {
-      var src, incdoc, args, argl, arg, argname, argval, i, newDoc;
+      var src, incdoc, args, argl, arg, argname, argval, i, newDoc, localModel = {};
 
       if (el) {
         src = el.getAttribute('src');
@@ -355,11 +366,19 @@
 
               // replace template string argument {var} with argument value
               incdoc = teddy.renderVar(incdoc, argname, argval);
+
+              // add arg to local model
+              localModel[argname] = argval;
             }
           }
 
           // create a dom object out of parsed template string
           incdoc = parser.parseFromString(incdoc, 'text/html');
+
+          if (argl) {
+            // apply local model to child conditionals and loops
+            incdoc = teddy.tagLocalModels(incdoc, localModel);
+          }
 
           // marks whether or not the included document is a new document or a partial
           incdoc.newDoc = newDoc;
@@ -373,6 +392,39 @@
         }
         return false;
       }
+    },
+
+    // finds all <if>, <elseif>, <unless>, <elseunless>, one line ifs, and <foreach> tags and applies their local models
+    tagLocalModels: function(doc, extraModel) {
+      var el,
+          els = doc.getElementsByTagName('*'),
+          length = els.length,
+          i,
+          modelNumber,
+          nodeName;
+
+      modelNumber = teddy._contextModels.push(extraModel);
+
+      for (i = 0; i < length; i++) {
+        el = els[i];
+        nodeName = el.nodeName.toLowerCase();
+        if (el.getAttribute('true') || el.getAttribute('false') || nodeName == 'if' || nodeName == 'elseif' || nodeName == 'unless' || nodeName == 'elseunless' || nodeName == 'foreach') {
+          el.setAttribute('data-local-model', modelNumber);
+        }
+      }
+
+      return doc;
+    },
+
+    // retrieve local model from cache and apply it to full model for parsing
+    applyLocalModel: function(el, model) {
+      var modelNumber = parseInt(el.getAttribute('data-local-model')) - 1, localModel = teddy._contextModels[modelNumber], i;
+      if (modelNumber && localModel) {
+        for (i in localModel) {
+          model[i] = localModel[i];
+        }
+      }
+      return model;
     },
 
     // parses a single <foreach> tag
@@ -409,6 +461,9 @@
           }
           else {
 
+            // add local vars to model
+            model = teddy.applyLocalModel(el, model);
+
             // tells parseConditionals that this foreach is safe to process conditionals in
             el.setAttribute('looped', 'true');
 
@@ -444,6 +499,9 @@
               parsedLoop = teddy.stringifyElement(newEl);
             }
 
+            // restore original model
+            model = teddy._baseModel;
+
             return newEl;
           }
         }
@@ -463,6 +521,9 @@
             nextSibling = el,
             nextSiblingName = nextSibling.nodeName.toLowerCase(),
             conditionContent;
+
+        // add local vars to model
+        model = teddy.applyLocalModel(el, model);
 
         while (!satisfiedCondition) {
 
@@ -503,9 +564,16 @@
 
           // no further siblings; no further conditions to test
           else {
+
+            // restore original model
+            model = teddy._baseModel;
+
             return false;
           }
         }
+
+        // restore original model
+        model = teddy._baseModel;
       }
       else {
         if (teddy.params.verbosity > 1) {
@@ -521,6 +589,10 @@
         var conditionContent,
             newAttr,
             attrVal;
+
+        // add local vars to model
+        model = teddy.applyLocalModel(el, model);
+        el.removeAttribute('data-local-model');
 
         if (teddy.evalCondition(el, model)) {
           conditionContent = el.getAttribute('true');
@@ -546,6 +618,9 @@
           }
         }
 
+        // restore original model
+        model = teddy._baseModel;
+
         return el;
       }
       else {
@@ -562,6 +637,9 @@
       // some browsers annoyingly add an xmlns attribtue to pretty much everything when parsing HTML through DOMParser's parseFromString method. since xmlns attributes mess up the syntax for Teddy conditionals, we have to remove any xmlns attributes present before evaluating the condtional
       el.removeAttribute('xmlns');
 
+      // also have to remove data-local-model due to a Firefox bug
+      el.removeAttribute('data-local-model');
+
       var conditionType = el.nodeName.toLowerCase(),
           conditionAttr = el.attributes[0],
           attributes = el.attributes,
@@ -577,7 +655,7 @@
       else {
         if (conditionType == 'if' || conditionType == 'unless' || conditionType == 'elseif' || conditionType == 'elseunless') {
           condition = conditionAttr.nodeName.toLowerCase();
-          conditionVal = conditionAttr.value;
+          conditionVal = conditionAttr.value.trim();
         }
 
         // one-liner
@@ -658,7 +736,7 @@
           skip = false,
           i;
 
-      for (i = 0; i < length; i ++) {
+      for (i = 0; i < length; i++) {
         el = tags[i];
         parent = el ? el.parentNode : false;
         while (parent && !skip) {
@@ -696,7 +774,7 @@
           i;
 
       while (notDone) {
-        for (i = 0; i < length; i ++) {
+        for (i = 0; i < length; i++) {
           el = ifs[i];
           parent = el ? el.parentNode : false;
           while (parent && !skip) {
@@ -742,7 +820,7 @@
           skip = false,
           i;
 
-      for (i = 0; i < length; i ++) {
+      for (i = 0; i < length; i++) {
         el = ifs[i];
         parent = el ? el.parentNode : false;
         if (!el.getAttribute('true') && !el.getAttribute('false')) {
@@ -948,6 +1026,8 @@
       templateRoot: './'
     },
 
+    // stores local models for later consumption by template logic tags
+    _contextModels: [],
 
     /**
      * Mutator methods for Teddy object public member vars

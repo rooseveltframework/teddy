@@ -2,7 +2,7 @@
   "name": "teddy",
   "description": "Teddy Templating Engine",
   "author": "Eric Newport <kethinov@gmail.com>",
-  "version": "0.2.15",
+  "version": "0.2.16",
   "homepage": "https://github.com/kethinov/teddy",
   "license": "Creative Commons Attribution 3.0 Unported License",
   "main": "teddy.js",
@@ -32,6 +32,6 @@
   "_from": "teddy@*",
   "gitHead": "1dbbc4c73d7c8878cbe7fc0ba527c91018b4cea7",
   "scripts": {
-    "test": "cd unitTests/server && node nodeTests.js && cd ../../ && echo \"jshint test results:\n\" && jshint teddy.js sampleApps/client-server/client/client.js sampleApps/client-server/server.js sampleApps/nodeHelloWorld/app.js unitTests/client/clientTests.js unitTests/server/nodeTests.js"
+    "test": "echo \"jshint test results:\n\" && jshint --show-non-errors teddy.js sampleApps/client-server/client/client.js sampleApps/client-server/server.js sampleApps/nodeHelloWorld/app.js unitTests/client/clientTests.js unitTests/server/nodeTests.js && cd unitTests/server && node nodeTests.js"
   }
 }

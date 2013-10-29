@@ -321,8 +321,6 @@ Notable intentional design choices and limitations
 Client-side browser support
 ===
 
-Supported desktop browsers:
-
 - Android browser 4.0+
 - Chrome 24+
 - Firefox 18+
