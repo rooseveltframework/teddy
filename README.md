@@ -1,4 +1,4 @@
-teddy.js
+teddy.js [![NPM version](https://badge.fury.io/js/teddy.png)](http://badge.fury.io/js/teddy)
 ===
 
 Teddy is an easy-to-read, HTML-based, mostly logic-less DOM templating engine with support for both server-side and client-side templating.
