@@ -90,12 +90,12 @@ unitTest('loops overall test', function() {
 });
 
 unitTest('packaged templates test', function() {
-  if (teddy.packagedTemplates['inc/sampleIncludeWithArguments.html'] !== "teddy.compiledTemplates['inc/sampleIncludeWithArguments.html']='<section class=\\'sampleIncludeWithArguments\\'><p>This is a sample included template with arguments.</p><dl><dt>firstArgument:</dt><dd>{firstArgument}</dd><dt>secondArgument:</dt><dd>{secondArgument}</dd><dt>thirdArgument: </dt><if thirdArgument><dd>{thirdArgument}</dd></if><else><dd>not present</dd></else></dl></section>';" || teddy.packagedTemplates['inc/sampleIncludeWithoutArguments.html'] !== "teddy.compiledTemplates['inc/sampleIncludeWithoutArguments.html']='<section class=\\'sampleIncludeWithoutArguments\\'><p>This is a sample included template without arguments.</p></section>';") {
+  if (teddy.packagedTemplates['inc/sampleIncludeWithArguments'] !== "teddy.compiledTemplates['inc/sampleIncludeWithArguments']='<section class=\\'sampleIncludeWithArguments\\'><p>This is a sample included template with arguments.</p><dl><dt>firstArgument:</dt><dd>{firstArgument}</dd><dt>secondArgument:</dt><dd>{secondArgument}</dd><dt>thirdArgument: </dt><if thirdArgument><dd>{thirdArgument}</dd></if><else><dd>not present</dd></else></dl></section>';" || teddy.packagedTemplates['inc/sampleIncludeWithoutArguments'] !== "teddy.compiledTemplates['inc/sampleIncludeWithoutArguments']='<section class=\\'sampleIncludeWithoutArguments\\'><p>This is a sample included template without arguments.</p></section>';") {
     return false;
   }
   try {
-    eval(teddy.packagedTemplates['inc/sampleIncludeWithArguments.html']);
-    eval(teddy.packagedTemplates['inc/sampleIncludeWithoutArguments.html']);
+    eval(teddy.packagedTemplates['inc/sampleIncludeWithArguments']);
+    eval(teddy.packagedTemplates['inc/sampleIncludeWithoutArguments']);
     return true;
   }
   catch (e) {

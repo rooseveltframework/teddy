@@ -1,4 +1,4 @@
-<include src='inc/headerfooter.html'>
+<include src='inc/headerfooter'>
   <arg pageTitle>{pageTitle}</arg>
   <arg pageContent>
 
@@ -21,9 +21,9 @@
     <section class='includes'>
       <h1>Includes</h1>
 
-      <include src='inc/sampleIncludeWithoutArguments.html'></include>
+      <include src='inc/sampleIncludeWithoutArguments'></include>
 
-      <include src='inc/sampleIncludeWithArguments.html'>
+      <include src='inc/sampleIncludeWithArguments'>
         <arg firstArgument>Plain text argument</arg>
         <arg secondArgument>
           <span>Argument with HTML in it</span>
@@ -135,7 +135,7 @@
               <p>item.a is 4</p>
             </if>
             <p if-item.b='5' true="class='item-b-is-five'" false='hidden'>item.b is 5</p>
-            <include src='inc/sampleIncludeWithArguments.html'>
+            <include src='inc/sampleIncludeWithArguments'>
               <arg firstArgument>{item.b}</arg>
               <arg secondArgument>
                 <span>{item.c}</span>

@@ -19,7 +19,15 @@
       // convert filepath into a template string if we're in node
       if (isNode) {
         try {
-          template = fs.readFileSync(teddy.params.templateRoot + name, 'utf8');
+          var fname = teddy.params.templateRoot + name;
+
+          // append extension if supplied file doesn't exist
+          if (!fs.existsSync(fname)) {
+            fname += '.html';
+          }
+
+          // attempt readFile
+          template = fs.readFileSync(fname, 'utf8');
         }
         catch (e) {
           if (teddy.params.verbosity) {

@@ -87,6 +87,12 @@ Include another template:
 <include src='partial.html'></include>
 ```
 
+Or use the no extension shorthand (Teddy will append the `.html` extension for you):
+
+```html
+<include src='partial'></include>
+```
+
 Pass arguments to the template:
 
 ```html
