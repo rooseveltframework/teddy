@@ -901,6 +901,19 @@
     // makes a JSON structure's keys all lower case (all variables in Teddy templates are case-insensitive because HTML is case-insensitive)
     flattenModel: function(model) {
       var newModel = {}, i, item;
+
+      // sanity check for circular data
+      try {
+        JSON.stringify(model);
+      }
+      catch (e) {
+        if (e == 'TypeError: Converting circular structure to JSON') {
+          console.log(e);
+          console.log('Fatal error: do not pass data models to Teddy that have a circular structure.');
+        }
+        return newModel;
+      }
+
       for (i in model) {
         item = model[i];
         if ((typeof item).toLowerCase() === 'object') {
