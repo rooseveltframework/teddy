@@ -423,4 +423,4 @@ Client-side unit test dependencies:
 License
 ===
 
-All original code in Teddy is licensed under the <a href='http://creativecommons.org/licenses/by/3.0/deed.en_US'>Creative Commons Attribution 3.0 Unported License</a>. Commercial and noncommercial use is permitted with attribution.
+All original code in Teddy is licensed under the <a href='http://creativecommons.org/licenses/by/4.0/'>Creative Commons Attribution 4.0 International License</a>. Commercial and noncommercial use is permitted with attribution.
