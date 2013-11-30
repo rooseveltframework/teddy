@@ -21,11 +21,11 @@ unitTest = function(testName, testFunc) {
       console.log('PASS: '+testName);
     }
     else {
-      console.log('FAIL: '+testName);
+      console.error('FAIL: '+testName);
     }
   }
   catch (e) {
-    console.log('FAIL: '+testName+' JS Error: '+e);
+    console.error('FAIL: '+testName+' JS Error: '+e);
   }
 };
 
@@ -99,7 +99,7 @@ unitTest('packaged templates test', function() {
     return true;
   }
   catch (e) {
-    console.log(e);
+    console.error(e);
     return false;
   }
 });
