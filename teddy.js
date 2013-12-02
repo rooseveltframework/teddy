@@ -25,6 +25,12 @@
           if (!fs.existsSync(fname)) {
             fname += '.html';
           }
+          if (!fs.existsSync(fname)) {
+            fname = name;
+          }
+          if (!fs.existsSync(fname)) {
+            fname += '.html';
+          }
 
           // attempt readFile
           template = fs.readFileSync(fname, 'utf8');
