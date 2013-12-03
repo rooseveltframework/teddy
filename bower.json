@@ -1,0 +1,28 @@
+{
+  "name": "teddy",
+  "description": "Teddy Templating Engine",
+  "author": "Eric Newport <kethinov@gmail.com>",
+  "version": "0.2.22",
+  "homepage": "https://github.com/kethinov/teddy",
+  "license": "Creative Commons Attribution 4.0 International License",
+  "main": "teddy.js",
+  "readmeFilename": "README.md",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/kethinov/teddy.git"
+  },
+  "keywords": [
+    "teddy.js",
+    "node.js",
+    "teddy",
+    "template",
+    "view"
+  ],
+  "ignore": [
+    "package.json",
+    "playground.html",
+    "README.md",
+    "sampleApps",
+    "unitTests"
+  ]
+}
