@@ -10,26 +10,23 @@
 
     // compiles a template (removes {! comments !} and unnecessary whitespace)
     compile: function(template, name) {
+      var fname;
 
       // remove templateRoot from template name if necessary
       if (!name) {
         name = template.replace(teddy.params.templateRoot, '');
       }
 
+      // append extension if not present
+      if (name.slice(-5) !== '.html') {
+        name += '.html';
+      }
+
       // convert filepath into a template string if we're in node
       if (isNode) {
         try {
-          var fname = teddy.params.templateRoot + name;
-
-          // append extension if supplied file doesn't exist
-          if (!fs.existsSync(fname)) {
-            fname += '.html';
-          }
-          if (!fs.existsSync(fname)) {
-            fname = name;
-          }
-          if (!fs.existsSync(fname)) {
-            fname += '.html';
+          if (!fs.existsSync(name)) {
+            fname = teddy.params.templateRoot + name;
           }
 
           // attempt readFile
@@ -88,13 +85,18 @@
       // remove templateRoot from template name if necessary
       template = template.replace(teddy.params.templateRoot, '');
 
+      // append extension if not present
+      if (template.slice(-5) !== '.html') {
+        template += '.html';
+      }
+
       // compile template if necessary
       if (!teddy.compiledTemplates[template]) {
         teddy.compile(template);
       }
 
       // declare vars
-      var compiledTemplate = teddy.compiledTemplates[template] || teddy.compiledTemplates[template + '.html'],
+      var compiledTemplate = teddy.compiledTemplates[template],
           errors, renderedTemplate;
 
       // create dom object out of template string
@@ -332,6 +334,11 @@
           return false;
         }
         else {
+
+          // append extension if not present
+          if (src.slice(-5) !== '.html') {
+            src += '.html';
+          }
 
           // compile included template if necessary
           if (!teddy.compiledTemplates[src]) {
