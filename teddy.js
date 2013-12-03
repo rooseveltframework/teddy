@@ -17,11 +17,6 @@
         name = template.replace(teddy.params.templateRoot, '');
       }
 
-      // append extension if not present
-      if (name.slice(-5) !== '.html') {
-        name += '.html';
-      }
-
       // convert filepath into a template string if we're in node
       if (isNode) {
         try {
@@ -38,6 +33,11 @@
           }
           return false;
         }
+      }
+
+      // append extension if not present
+      if (name.slice(-5) !== '.html') {
+        name += '.html';
       }
 
       // it's assumed that the argument is already a template string if we're not in node
@@ -85,14 +85,14 @@
       // remove templateRoot from template name if necessary
       template = template.replace(teddy.params.templateRoot, '');
 
-      // append extension if not present
-      if (template.slice(-5) !== '.html') {
-        template += '.html';
-      }
-
       // compile template if necessary
       if (!teddy.compiledTemplates[template]) {
         teddy.compile(template);
+      }
+
+      // append extension if not present
+      if (template.slice(-5) !== '.html') {
+        template += '.html';
       }
 
       // declare vars
