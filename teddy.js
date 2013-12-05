@@ -35,17 +35,17 @@
         }
       }
 
-      // append extension if not present
-      if (name.slice(-5) !== '.html') {
-        name += '.html';
-      }
-
       // it's assumed that the argument is already a template string if we're not in node
       else if ((typeof template).toLowerCase() !== 'string') {
         if (teddy.params.verbosity > 1) {
           console.log('Warning: teddy.compile attempted to compile a template which is not a string.');
         }
         return false;
+      }
+
+      // append extension if not present
+      if (name.slice(-5) !== '.html') {
+        name += '.html';
       }
 
       // remove {! comments !} and unnecessary whitespace

@@ -3,7 +3,7 @@ teddy.js [![NPM version](https://badge.fury.io/js/teddy.png)](http://badge.fury.
 
 Teddy is an easy-to-read, HTML-based, mostly logic-less DOM templating engine with support for both server-side and client-side templating.
 
-It uses new HTML-like `<tags>` for rudimentary templating logic and Teddy Roosevelt's facial hair for `{variables}`.
+It uses HTML-like `<tags>` for rudimentary templating logic and Teddy Roosevelt's facial hair for `{variables}`.
 
 <img src='assets/teddy.jpg' alt=''/>
 
