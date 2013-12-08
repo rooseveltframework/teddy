@@ -2,13 +2,17 @@
   "name": "teddy",
   "description": "Teddy Templating Engine",
   "author": "Eric Newport <kethinov@gmail.com>",
-  "version": "0.2.27",
+  "version": "0.2.28",
   "homepage": "https://github.com/kethinov/teddy",
   "license": "Creative Commons Attribution 4.0 International License",
   "main": "teddy.js",
   "readmeFilename": "README.md",
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "engineStrict": true,
   "dependencies": {
-    "xmldom": "*"
+    "xmldom": "~0.1.16"
   },
   "jshintConfig": {
     "camelcase": true,
@@ -17,6 +21,9 @@
     "evil": true,
     "indent": 2,
     "node": true
+  },
+  "devDependencies ": {
+    "jshint": "*"
   },
   "repository": {
     "type": "git",
