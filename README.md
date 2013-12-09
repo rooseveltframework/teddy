@@ -1,4 +1,4 @@
-teddy.js [![NPM version](https://badge.fury.io/js/teddy.png)](http://badge.fury.io/js/teddy)
+teddy.js [![NPM version](https://badge.fury.io/js/teddy.png)](http://badge.fury.io/js/teddy) [![Dependency Status](https://gemnasium.com/kethinov/teddy.png)](https://gemnasium.com/kethinov/teddy) [![Gittip](http://img.shields.io/gittip/kethinov.png)](https://www.gittip.com/kethinov/)
 ===
 
 Teddy is an easy-to-read, HTML-based, mostly logic-less DOM templating engine with support for both server-side and client-side templating.
