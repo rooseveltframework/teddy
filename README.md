@@ -25,7 +25,7 @@ Table of contents
 - [Notable intentional design choices and limitations](#notable-intentional-design-choices-and-limitations)
 - [Client-side browser support](#client-side-browser-support)
   - [Notable untested browsers](#notable-untested-browsers)
-  - [Browsers known to be partially broken](#notable-untested-browsers)
+  - [Browsers known to be partially broken](#browsers-known-to-be-partially-broken)
   - [Browsers known to be totally broken](#browsers-known-to-be-totally-broken)
 - [Other known issues](#other-known-issues)
 - [Helped wanted!](#helped-wanted)
