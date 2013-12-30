@@ -86,7 +86,7 @@
       template = template.replace(teddy.params.templateRoot, '');
 
       // compile template if necessary
-      if (!teddy.compiledTemplates[template]) {
+      if (!teddy.compiledTemplates[template] || teddy.params.compileAtEveryRender) {
         teddy.compile(template);
       }
 
@@ -429,7 +429,7 @@
       for (i = 0; i < length; i++) {
         el = els[i];
         nodeName = el.nodeName.toLowerCase();
-        if (el.getAttribute('true') || el.getAttribute('false') || nodeName == 'if' || nodeName == 'elseif' || nodeName == 'unless' || nodeName == 'elseunless' || nodeName == 'foreach') {
+        if (el.getAttribute('true') || el.getAttribute('false') || nodeName === 'if' || nodeName === 'elseif' || nodeName === 'unless' || nodeName === 'elseunless' || nodeName === 'foreach') {
           el.setAttribute('data-local-model', modelNumber);
         }
       }
@@ -569,11 +569,11 @@
             nextSibling = nextSibling.nextSibling;
             nextSiblingName = nextSibling ? nextSibling.nodeName.toLowerCase() : false;
             while (nextSibling) {
-              if (nextSiblingName == 'if' || nextSiblingName == 'unless') {
+              if (nextSiblingName === 'if' || nextSiblingName === 'unless') {
                 satisfiedCondition = true; // none of the conditions were true
                 break;
               }
-              else if (nextSiblingName == 'elseif' || nextSiblingName == 'elseunless' || nextSiblingName == 'else') {
+              else if (nextSiblingName === 'elseif' || nextSiblingName === 'elseunless' || nextSiblingName === 'else') {
                 el = nextSibling; // advance parent loop
                 break;
               }
@@ -670,11 +670,11 @@
           conditionVal,
           modelVal;
 
-      if (conditionType == 'else') {
+      if (conditionType === 'else') {
         return true;
       }
       else {
-        if (conditionType == 'if' || conditionType == 'unless' || conditionType == 'elseif' || conditionType == 'elseunless') {
+        if (conditionType === 'if' || conditionType === 'unless' || conditionType === 'elseif' || conditionType === 'elseunless') {
           condition = conditionAttr.nodeName.toLowerCase();
           conditionVal = conditionAttr.value.trim();
         }
@@ -685,7 +685,7 @@
           for (i = 0; i < length; i++) {
             conditionAttr = attributes[i];
             condition = conditionAttr.nodeName;
-            if (condition.substr(0, 3) == 'if-') {
+            if (condition.substr(0, 3) === 'if-') {
               conditionVal = conditionAttr.value;
               el.removeAttribute(condition); // so there's no attempt to parse it later
               condition = condition.split('if-')[1];
@@ -708,8 +708,8 @@
         }
       }
 
-      if (conditionType == 'if' || conditionType == 'onelineif' || conditionType == 'elseif') {
-        if (condition == conditionVal.toLowerCase() || conditionVal === '' || (conditionType == 'onelineif' && 'if-' + condition == conditionVal.toLowerCase())) {
+      if (conditionType === 'if' || conditionType === 'onelineif' || conditionType === 'elseif') {
+        if (condition === conditionVal.toLowerCase() || conditionVal === '' || (conditionType === 'onelineif' && 'if-' + condition === conditionVal.toLowerCase())) {
           return modelVal ? true : false;
         }
         else if (modelVal == conditionVal) {
@@ -720,7 +720,7 @@
         }
       }
       else {
-        if (condition == conditionVal.toLowerCase() || conditionVal === '') {
+        if (condition === conditionVal.toLowerCase() || conditionVal === '') {
           return modelVal ? false : true;
         }
         else if (modelVal != conditionVal) {
@@ -762,7 +762,7 @@
         parent = el ? el.parentNode : false;
         while (parent && !skip) {
           if (parent.nodeName) {
-            if (parent.nodeName.toLowerCase() == 'foreach') {
+            if (parent.nodeName.toLowerCase() === 'foreach') {
               if (!parent.getAttribute('looped')) {
                 skip = true;
               }
@@ -800,7 +800,7 @@
           parent = el ? el.parentNode : false;
           while (parent && !skip) {
             if (parent.nodeName) {
-              if (parent.nodeName.toLowerCase() == 'foreach') {
+              if (parent.nodeName.toLowerCase() === 'foreach') {
                 if (!parent.getAttribute('looped')) { // exemption check
                   skip = true;
                 }
@@ -849,7 +849,7 @@
         }
         while (parent && !skip) {
           if (parent.nodeName) {
-            if (parent.nodeName.toLowerCase() == 'foreach') {
+            if (parent.nodeName.toLowerCase() === 'foreach') {
               if (!parent.getAttribute('looped')) { // exemption check
                 skip = true;
               }
@@ -920,7 +920,7 @@
         JSON.stringify(model);
       }
       catch (e) {
-        if (e == 'TypeError: Converting circular structure to JSON') {
+        if (e === 'TypeError: Converting circular structure to JSON') {
           console.log(e);
           console.log('Fatal error: do not pass data models to Teddy that have a circular structure.');
         }
@@ -1057,7 +1057,8 @@
     // default values for parameters sent to teddy
     params: {
       verbosity: 1,
-      templateRoot: './'
+      templateRoot: './',
+      compileAtEveryRender: false
     },
 
     // stores local models for later consumption by template logic tags
@@ -1088,6 +1089,11 @@
     // mutator method to set template root param; must be a string
     setTemplateRoot: function(v) {
       teddy.params.templateRoot = String(v);
+    },
+
+    // turn on or off the setting to compile templates at every render
+    compileAtEveryRender: function(v) {
+      teddy.params.compileAtEveryRender = Boolean(v);
     }
   },
 
