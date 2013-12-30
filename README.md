@@ -7,6 +7,32 @@ It uses HTML-like `<tags>` for rudimentary templating logic and Teddy Roosevelt'
 
 <img src='assets/teddy.jpg' alt=''/>
 
+Table of contents
+===
+
+- [Why yet another templating engine?](#why-yet-another-templating-engine)
+  - [Other popular templating engines are too cryptic](#other-popular-templating-engines-are-too-cryptic)
+- [Teddy, symbol-buster extraordinaire](#teddy-symbol-buster-extraordinaire)
+- [Documentation](#documentation)
+  - [Includes](#includes)
+  - [Conditionals](#conditionals)
+  - [One line ifs](#one-line-ifs)
+  - [Loops](#loops)
+  - [A complex example combining all tag types](#a-complex-example-combining-all-tag-types)
+- [Using Teddy in Node.js](#using-teddy-in-nodejs)
+- [Using Teddy with client-side JS](#using-teddy-with-client-side-js)
+- [API documentation](#api-documentation)
+- [Notable intentional design choices and limitations](#notable-intentional-design-choices-and-limitations)
+- [Client-side browser support](#client-side-browser-support)
+  - [Notable untested browsers](#notable-untested-browsers)
+  - [Browsers known to be partially broken](#notable-untested-browsers)
+  - [Browsers known to be totally broken](#browsers-known-to-be-totally-broken)
+- [Other known issues](#other-known-issues)
+- [Helped wanted!](#helped-wanted)
+- [How to run the unit tests](#how-to-run-the-unit-tests)
+- [Dependencies](#dependencies)
+- [License](#license)
+
 Why yet another templating engine?
 ===
 
@@ -15,7 +41,7 @@ Good question.
 Here's why:
 
 Other popular templating engines are too cryptic
-===
+---
 
 Are you tired of all those unnecessarily cryptic templating systems out there that look like this?
 
@@ -316,6 +342,47 @@ Writing your client.js:
 
 For a complete sample implementation, see the sample app here: <a href='sampleApps/client-server'>sampleApps/client-server</a>
 
+API documentation
+===
+
+<table>
+    <thead>
+        <tr>
+            <th>Param</th>
+            <th>Description</th>
+            <th>Default</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <th><code>compile</code></th>
+            <td>Compile a template. This method returns a compiled template. It also populates these two arrays:<ul><li><code>teddy.compiledTemplates</code>: Array indexed by template file path and file name.</li><li><code>teddy.packagedTemplates</code>: Same as compiledTemplates, except it stores packaged templates instead of compiled templates. Packaged templates are templates compiled on the server and sent to the client as raw JS statements that can be simply eval'd client-side rather than compiled client-side.</td>
+            <td>none</td>
+        </tr>
+        <tr>
+            <th><code>render</code></th>
+            <td>Render a template. This method will compile the template if it has not already been compiled.</td>
+            <td>none</td>
+        </tr>
+        <tr>
+            <th><code>setTemplateRoot</code></th>
+            <td>Set the location of your templates directory.</td>
+            <td><code>./</code></td>
+        </tr>
+        <tr>
+            <th><code>setVerbosity</code></th>
+            <td>Sets the level of verbosity in Teddy's console logs.<ul><li><code>0</code>: No logging.</li><li><code>1</code>: Concise logging. Usually just logs serious errors.</li><li><code>2</code>: Verbose logging. Logs even minor errors.</li><li><code>3</code>: Debug mode. Very verbose.</li></ul>Call <code>teddy.setVerbosity(v)</code> where <code>v</code> equals a new value to change the default.</td>
+            <td><code>1</code> (consise)</td>
+        </tr>
+        <tr>
+            <th><code>compileAtEveryRender</code></th>
+            <td>When this setting is enabled, Teddy will compile the template at each render rather than caching previous compiles. <em>(Not recommended in production for performanc reasons.)</em></td>
+            <td><code>false</code></td>
+        </tr>
+    </tbody>
+</table>
+
+
 Notable intentional design choices and limitations
 ===
 
@@ -335,15 +402,8 @@ Client-side browser support
 - Opera 12+
 - Safari 6+
 
-Known issues
-===
-
-- Teddy is beta software. Not many apps have been written using it yet, so it's entirely possible that there will be some significant bugs.
-- Source code view on client-side unit tests is broken in IE10 most likely due to a bug in dependency library vkbeautify.
-- The unit tests are a bit primitive at the moment. Suggestions for improvement or pull requests with better tests will be much appreciated.
-
 Notable untested browsers
-===
+---
 
 - Android browser 2.2 and below.
 - iOS Safari 4 and below.
@@ -352,17 +412,25 @@ Notable untested browsers
 - Lots of older versions of the desktop versions of Chrome, Firefox, Opera, and Safari probably work well with Teddy, but there hasn't yet been time to test them. If anyone wants to test them and post the results, it will be greatly appreciated.
 
 Browsers known to be partially broken
-===
+---
 
 - Older Android 2.3 browsers and most likely all prior versions fail the `<title>` and `<style>` tag tests because `doc.documentElement.innerHTML` fails to return the `<head>` tag or its contents. However, if you only intend to use Teddy for partials containing markup fragments rather than full documents, then this bug shouldn't affect you.
 - Older Presto-powered Opera Mobile versions fail the conditionals overall unit test due to an as yet uninvestigated bug, but all other tests pass. Such Opera Mobile versions also have overall terrible performance with Teddy, which may be related.
 
 Browsers known to be totally broken
-===
+---
 
 - IE9 is totally broken because IE9's implementation of `DOMParser` sucks and @eligrey's `DOMParser HTML extension (polyfill)` doesn't work in IE9 and below.
 - Windows Phone 7's browser: same reason as IE9.
 - IE8 and below are totally broken because they have no implementation whatsoever of DOMParser.
+
+Other known issues
+===
+
+- Teddy is beta software. Not many apps have been written using it yet, so it's entirely possible that there will be some significant bugs.
+- Source code view on client-side unit tests is broken in IE10 most likely due to a bug in dependency library vkbeautify.
+- The unit tests are a bit primitive at the moment. Suggestions for improvement or pull requests with better tests will be much appreciated.
+
 
 Helped wanted!
 ===
