@@ -105,7 +105,7 @@ Documentation
 Here's some examples of to write Teddy templates:
 
 Includes
-===
+---
 
 Include another template:
 
@@ -133,7 +133,7 @@ Pass arguments to the template:
 The arguments you've defined will be accessible as `{firstArgument}` and `{secondArgument}` in the child template `partial.html`.
 
 Conditionals
-===
+---
 
 Check for the presence of a variable:
 
@@ -197,7 +197,7 @@ An `<unless>` statement structure with an `<elseunless>` tag which is evaluated 
 ```
 
 One line ifs
-===
+---
 
 If you need a more concise conditional just to control which attributes are applied to a given element, then use this syntax:
 
@@ -226,7 +226,7 @@ Like the `<if>` tag you can check for both the presence of a variable as well as
 It's important to note that whichever type of quotes you use on the outside of your `true` or `false` attributes must be reversed on the inside. So if you use single quotes on the outside, then you must use double quotes on the inside.
 
 Loops
-===
+---
 
 Assume the following JS model:
 
@@ -279,7 +279,7 @@ For the above array of objects, we can combine the techniques illustrated above 
 ```
 
 A complex example combining all tag types
-===
+---
 
 Supposing the following JS model again:
 
