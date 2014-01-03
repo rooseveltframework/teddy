@@ -341,7 +341,7 @@
           }
 
           // compile included template if necessary
-          if (!teddy.compiledTemplates[src]) {
+          if (!teddy.compiledTemplates[src] || teddy.params.compileAtEveryRender) {
             teddy.compile(src);
           }
 
