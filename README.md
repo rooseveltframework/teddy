@@ -5,7 +5,7 @@ Teddy is an easy-to-read, HTML-based, mostly logic-less DOM templating engine wi
 
 It uses HTML-like `<tags>` for rudimentary templating logic and Teddy Roosevelt's facial hair for `{variables}`.
 
-<img src='assets/teddy.jpg' alt=''/>
+![Teddy Roosevelt's facial hair is a curly brace.](https://raw.github.com/kethinov/teddy/master/assets/teddy.jpg "Teddy Roosevelt's facial hair is a curly brace.")
 
 Table of contents
 ===
@@ -86,7 +86,7 @@ Well you're not the only one.
 Teddy, symbol-buster extraordinaire
 ===
 
-Teddy the trust-buster was a man of the people, curtailing the abuse of monopolists. As <a href='http://www.cracked.com/article_15895_the-5-most-badass-presidents-all-time_p5.html'>the most badass President of all-time</a>, there's no way he'd put up with all this indecipherable templating nonsense.
+Teddy the trust-buster was a man of the people, curtailing the abuse of monopolists. As [the most badass President of all-time](http://www.cracked.com/article_15895_the-5-most-badass-presidents-all-time_p5.html), there's no way he'd put up with all this indecipherable templating nonsense.
 
 As such, Teddy the templating engine is an engine of the people, curtailing the abuse of indecipherable templating systems. Teddy trust-buster extraordinaire is now symbol-buster extraordinaire.
 
@@ -307,15 +307,15 @@ We could perform many complex operations simultaneously. For instance, we could 
 Using Teddy in Node.js
 ===
 
-Teddy is designed for use with <a href='http://expressjs.com/'>Express</a> in Node.
+Teddy is designed for use with [Express](http://expressjs.com) in [Node.js](http://nodejs.org).
 
 - First require the node modules `express`, and `teddy`
 - Then initialize express and configure it to your liking
 - In your express config, make sure to include this line: `app.engine('html', teddy.__express)`
 
-For a complete sample implementation, see the sample app here: <a href='sampleApps/nodeHelloWorld'>sampleApps/nodeHelloWorld</a>
+For a complete sample implementation, see the sample app here: [sampleApps/nodeHelloWorld](https://github.com/kethinov/teddy/tree/master/sampleApps/nodeHelloWorld).
 
-Or if you're looking for a more fully-featured web framework to build web apps with using Teddy templates, then try out Teddy's companion, <a href='https://github.com/kethinov/roosevelt'>Roosevelt</a>.
+Or if you're looking for a more fully-featured web framework to build web apps with using Teddy templates, then try out Teddy's companion, [Roosevelt](https://github.com/kethinov/roosevelt).
 
 
 Using Teddy with client-side JS
@@ -340,48 +340,22 @@ Writing your client.js:
 - Render a template client-side: `var rendered = teddy.render(teddy.compiledTemplates['template.html'], model)`
 - Render the template into the document somewhere, for instance: `document.body.insertAdjacentHTML('beforeend', rendered);`
 
-For a complete sample implementation, see the sample app here: <a href='sampleApps/client-server'>sampleApps/client-server</a>
+For a complete sample implementation, see the sample app here: [sampleApps/client-server](https://github.com/kethinov/teddy/tree/master/sampleApps/client-server).
 
 API documentation
 ===
 
-<table>
-    <thead>
-        <tr>
-            <th>Param</th>
-            <th>Description</th>
-            <th>Default</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <th><code>compile</code></th>
-            <td>Compile a template. This method returns a compiled template. It also populates these two arrays:<ul><li><code>teddy.compiledTemplates</code>: Array indexed by template file path and file name.</li><li><code>teddy.packagedTemplates</code>: Same as compiledTemplates, except it stores packaged templates instead of compiled templates. Packaged templates are templates compiled on the server and sent to the client as raw JS statements that can be simply eval'd client-side rather than compiled client-side.</td>
-            <td>none</td>
-        </tr>
-        <tr>
-            <th><code>render</code></th>
-            <td>Render a template. This method will compile the template if it has not already been compiled.</td>
-            <td>none</td>
-        </tr>
-        <tr>
-            <th><code>setTemplateRoot</code></th>
-            <td>Set the location of your templates directory.</td>
-            <td><code>./</code></td>
-        </tr>
-        <tr>
-            <th><code>setVerbosity</code></th>
-            <td>Sets the level of verbosity in Teddy's console logs.<ul><li><code>0</code>: No logging.</li><li><code>1</code>: Concise logging. Usually just logs serious errors.</li><li><code>2</code>: Verbose logging. Logs even minor errors.</li><li><code>3</code>: Debug mode. Very verbose.</li></ul>Call <code>teddy.setVerbosity(v)</code> where <code>v</code> equals a new value to change the default.</td>
-            <td><code>1</code> (consise)</td>
-        </tr>
-        <tr>
-            <th><code>compileAtEveryRender</code></th>
-            <td>When this setting is enabled, Teddy will compile the template at each render rather than caching previous compiles. <em>(Not recommended in production for performanc reasons.)</em></td>
-            <td><code>false</code></td>
-        </tr>
-    </tbody>
-</table>
-
+- `compile('some/template.html')`: Compile a template. This method returns a compiled template. It also populates these two arrays:
+  - `teddy.compiledTemplates`: Array indexed by template file path and file name.
+  - `teddy.packagedTemplates`: Same as compiledTemplates, except it stores packaged templates instead of compiled templates. Packaged templates are templates compiled on the server and sent to the client as raw JS statements that can be simply eval'd client-side rather than compiled client-side.
+- `render('some/template.html')`: Render a template. This method will compile the template if it has not already been compiled.
+- `setTemplateRoot('some/location')`: Set the location of your templates directory. The default is the current directory.
+- `setVerbosity(n)`: Sets the level of verbosity in Teddy's console logs. Call `teddy.setVerbosity(n)` where `n` equals one of the below values to change the default:
+  - `0`: No logging.
+  - `1`: The default. Concise logging. Usually just logs serious errors.
+  - `2`: Verbose logging. Logs even minor errors.
+  - `3`: Debug mode. Very verbose.
+- `compileAtEveryRender(true / false)`: When this setting is enabled, Teddy will compile the template at each render rather than caching previous compiles. *(Not recommended in production for performance reasons.)*
 
 Notable intentional design choices and limitations
 ===
@@ -389,7 +363,7 @@ Notable intentional design choices and limitations
 - All variables in Teddy templates are case-insensitive because HTML is case-insensitive.
 - Unlike some other templating systems, Teddy will not automatically escape HTML entities contained within variables. You should filter such things if desired at the code level and pass the results to the templates through the model as readable variables.
 - Teddy adheres to a mostly logic-less templates philosophy. `<if>` and `<unless>` statements in Teddy can only check for a single variable's presence or its precise value. They cannot evaluate complex logic; there are no ands, ors, xors, parentheticals, or math operators. Teddy is of the opinion that complex logic doesn't belong in templates. Evaluate such logic at the code level and pass the results to the templates through the model as readable variables.
-- Teddy's client-side performance and browser support is largely tied to how well <a href='https://developer.mozilla.org/en-US/docs/Web/API/DOMParser'>DOMParser</a> and <a href='https://developer.mozilla.org/en-US/docs/XMLSerializer'>XMLSerializer</a> are implemented (if at all) in the target browser.
+- Teddy's client-side performance and browser support is largely tied to how well [DOMParser](https://developer.mozilla.org/en-US/docs/Web/API/DOMParser) and [XMLSerializer](https://developer.mozilla.org/en-US/docs/XMLSerializer) are implemented (if at all) in the target browser.
 
 Client-side browser support
 ===
@@ -430,7 +404,6 @@ Other known issues
 - Teddy is beta software. Not many apps have been written using it yet, so it's entirely possible that there will be some significant bugs.
 - Source code view on client-side unit tests is broken in IE10 most likely due to a bug in dependency library vkbeautify.
 - The unit tests are a bit primitive at the moment. Suggestions for improvement or pull requests with better tests will be much appreciated.
-
 
 Helped wanted!
 ===
@@ -473,11 +446,11 @@ Dependencies
 
 Node.js dependencies:
 
-- <a href='https://github.com/jindw/xmldom'>xmldom</a> - W3C Standard based (XML DOM Level 2 Core) DOMParser and XMLSerializer for Node.js
+- [xmldom](https://github.com/jindw/xmldom) - W3C Standard based (XML DOM Level 2 Core) DOMParser and XMLSerializer for Node.js
 
 Client-side dependencies:
 
-- <a href='https://gist.github.com/eligrey/1129031'>DOMParser HTML extension</a> (bundled) - polyfill for DOMParser parseFromString for certain browsers
+- [DOMParser HTML extension](https://gist.github.com/eligrey/1129031)</a> (bundled) - polyfill for DOMParser parseFromString for certain browsers
 
 Node.js unit test dependencies:
 
@@ -485,10 +458,10 @@ Node.js unit test dependencies:
 
 Client-side unit test dependencies:
 
-- <a href='https://code.google.com/p/google-code-prettify/'>prettify.js</a> (bundled) - used to syntax highlight rendered template in unitTests/client/clientTests.html
-- <a href='http://www.eslinstructor.net/vkbeautify/'>vkBeautify</a> (bundled) - used to indent rendered template in unitTests/client/clientTests.html
+- [prettify.js](https://code.google.com/p/google-code-prettify)</a> (bundled) - used to syntax highlight rendered template in unitTests/client/clientTests.html
+- [vkBeautify](http://www.eslinstructor.net/vkbeautify) (bundled) - used to indent rendered template in unitTests/client/clientTests.html
 
 License
 ===
 
-All original code in Teddy is licensed under the <a href='http://creativecommons.org/licenses/by/4.0/'>Creative Commons Attribution 4.0 International License</a>. Commercial and noncommercial use is permitted with attribution.
+All original code in Teddy is licensed under the [Creative Commons Attribution 4.0 International License](http://creativecommons.org/licenses/by/4.0)</a>. Commercial and noncommercial use is permitted with attribution.
