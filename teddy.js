@@ -461,7 +461,7 @@
             loopContent = '',
             parsedLoop = '',
             item,
-            newEl = parser.parseFromString('', 'text/html');
+            newEl;
 
         if (!val) {
           if (teddy.params.verbosity) {
