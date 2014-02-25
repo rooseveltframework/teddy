@@ -1,4 +1,5 @@
 (function() {
+  'use strict';
 
   // @namespace
   var teddy = {
@@ -29,7 +30,7 @@
         }
         catch (e) {
           if (teddy.params.verbosity) {
-            console.log('Warning: teddy.compile threw an exception while attempting to compile a template: ' + e);
+            console.warn('teddy.compile threw an exception while attempting to compile a template: ' + e);
           }
           return false;
         }
@@ -38,7 +39,7 @@
       // it's assumed that the argument is already a template string if we're not in node
       else if ((typeof template).toLowerCase() !== 'string') {
         if (teddy.params.verbosity > 1) {
-          console.log('Warning: teddy.compile attempted to compile a template which is not a string.');
+          console.warn('teddy.compile attempted to compile a template which is not a string.');
         }
         return false;
       }
@@ -60,7 +61,7 @@
 
       // needed because sigh
       if (oldIE) {
-        console.log('Fatal error: Teddy does not support client-side templating on IE9 or below.');
+        console.error('Teddy does not support client-side templating on IE9 or below.');
         return false;
       }
 
@@ -105,7 +106,7 @@
       }
       else {
         if (teddy.params.verbosity) {
-          console.log('Warning: teddy.render attempted to render a template which doesn\'t exist: ' + template);
+          console.warn('teddy.render attempted to render a template which doesn\'t exist: ' + template);
         }
         return false;
       }
@@ -288,9 +289,9 @@
                 }
                 catch (e) {
                   if (teddy.params.verbosity > 1) {
-                    console.log('Warning: a {variable} was found with an invalid syntax: {' + varname + '}');
+                    console.warn('a {variable} was found with an invalid syntax: {' + varname + '}');
                     if (teddy.params.verbosity > 2) {
-                      console.log('JS error thrown: ' + e);
+                      console.warn('JS error thrown: ' + e);
                     }
                   }
                 }
@@ -300,7 +301,7 @@
         }
         else {
           if (teddy.params.verbosity > 1 && (typeof doc).toLowerCase() !== 'object') {
-            console.log('Warning: teddy.parseVars called with invalid doc specified. Ignoring call.');
+            console.warn('teddy.parseVars called with invalid doc specified. Ignoring call.');
             return false;
           }
           else {
@@ -310,7 +311,7 @@
 
         iterations++;
         if (iterations > 999) {
-          console.log('Warning: teddy.parseVars gave up after parsing variables over 999 layers deep. You may have a recursive variable loop.');
+          console.warn('teddy.parseVars gave up after parsing variables over 999 layers deep. You may have a recursive variable loop.');
           return docstring;
         }
       }
@@ -332,7 +333,7 @@
 
         if (!src) {
           if (teddy.params.verbosity) {
-            console.log('Warning: <include> element found with no src attribute. Ignoring elment.');
+            console.warn('<include> element found with no src attribute. Ignoring elment.');
           }
           return false;
         }
@@ -356,7 +357,7 @@
 
           if (!incdoc) {
             if (teddy.params.verbosity) {
-              console.log('Warning: <include> element found which references a nonexistent template ("' + src + '"). Ignoring elment.');
+              console.warn('<include> element found which references a nonexistent template ("' + src + '"). Ignoring elment.');
             }
             return false;
           }
@@ -368,7 +369,7 @@
             arg = args[i];
             if (arg.nodeName.toLowerCase() !== 'arg' && !arg.getAttribute('data-unknownelementhack')) {
               if (teddy.params.verbosity) {
-                console.log('Warning: child element found within a <include src="'+src+'"> that wasn\'t an <arg> element.');
+                console.warn('child element found within a <include src="'+src+'"> that wasn\'t an <arg> element.');
               }
             }
             else {
@@ -380,7 +381,7 @@
               }
               else {
                 if (teddy.params.verbosity) {
-                  console.log('Warning: <arg> element found with no attribute. Ignoring parent <include> element. (<include src="'+src+'">)');
+                  console.warn('<arg> element found with no attribute. Ignoring parent <include> element. (<include src="'+src+'">)');
                 }
                 return false;
               }
@@ -412,7 +413,7 @@
       }
       else {
         if (teddy.params.verbosity > 1) {
-          console.log('Warning: teddy.renderInclude() called for an <include> element that does not exist.');
+          console.warn('teddy.renderInclude() called for an <include> element that does not exist.');
         }
         return false;
       }
@@ -465,13 +466,13 @@
 
         if (!val) {
           if (teddy.params.verbosity) {
-            console.log('Warning: <foreach> element found with no "val" attribute. Ignoring elment.');
+            console.warn('<foreach> element found with no "val" attribute. Ignoring elment.');
           }
           return false;
         }
         else if (!collection) {
           if (teddy.params.verbosity) {
-            console.log('Warning: <foreach> element found with no "in" attribute. Ignoring elment.');
+            console.warn('<foreach> element found with no "in" attribute. Ignoring elment.');
           }
           return false;
         }
@@ -479,7 +480,7 @@
           collection = model[collection];
           if (!collection) {
             if (teddy.params.verbosity) {
-              console.log('Warning: <foreach> element found with undefined value specified for "in" attribute. Ignoring elment.');
+              console.warn('<foreach> element found with undefined value specified for "in" attribute. Ignoring elment.');
             }
             return false;
           }
@@ -532,7 +533,7 @@
       }
       else {
         if (teddy.params.verbosity > 1) {
-          console.log('Warning: teddy.renderForeach() called for a <foreach> element that does not exist.');
+          console.warn('teddy.renderForeach() called for a <foreach> element that does not exist.');
         }
         return false;
       }
@@ -601,7 +602,7 @@
       }
       else {
         if (teddy.params.verbosity > 1) {
-          console.log('Warning: teddy.renderConditional() called for a <if> or <unless> element with no condition supplied.');
+          console.warn('teddy.renderConditional() called for a <if> or <unless> element with no condition supplied.');
         }
         return false;
       }
@@ -649,7 +650,7 @@
       }
       else {
         if (teddy.params.verbosity > 1) {
-          console.log('Warning: teddy.renderOneLineConditional() called for an if attribtue with no condition supplied.');
+          console.warn('teddy.renderOneLineConditional() called for an if attribtue with no condition supplied.');
         }
         return false;
       }
@@ -702,9 +703,9 @@
         }
         catch (e) {
           if (teddy.params.verbosity) {
-            console.log('Warning: teddy.evalCondition() supplied a nonexistent model var: model.'+condition);
+            console.warn('teddy.evalCondition() supplied a nonexistent model var: model.'+condition);
             if (teddy.params.verbosity > 1) {
-              console.log(e);
+              console.warn(e);
             }
           }
           return false;
@@ -745,7 +746,7 @@
       }
       else {
         if (teddy.params.verbosity > 1) {
-          console.log('Warning: an empty string was passed to teddy.renderVar.');
+          console.warn('an empty string was passed to teddy.renderVar.');
         }
       }
     },
@@ -908,7 +909,7 @@
       }
       else {
         if (teddy.params.verbosity > 1) {
-          console.log('Warning: teddy.stringifyElementChildren called on a non-DOM object');
+          console.warn('teddy.stringifyElementChildren called on a non-DOM object');
         }
         return false;
       }
@@ -924,8 +925,8 @@
       }
       catch (e) {
         if (e === 'TypeError: Converting circular structure to JSON') {
-          console.log(e);
-          console.log('Fatal error: do not pass data models to Teddy that have a circular structure.');
+          console.error(e);
+          console.error('do not pass data models to Teddy that have a circular structure.');
         }
         return newModel;
       }
@@ -944,7 +945,7 @@
     replaceProcessedElement: function(el, result) {
       if (!el) {
         if (teddy.params.verbosity > 1) {
-          console.log('Warning: teddy.replaceProcessedElement called without being supplied a valid element to replace');
+          console.warn('teddy.replaceProcessedElement called without being supplied a valid element to replace');
         }
         return false;
       }
@@ -956,7 +957,7 @@
       }
       else {
         if (teddy.params.verbosity > 1) {
-          console.log('Warning: teddy.replaceProcessedElement called on an object without a parentNode');
+          console.warn('teddy.replaceProcessedElement called on an object without a parentNode');
         }
         return false;
       }
@@ -990,7 +991,7 @@
       }
       else {
         if (teddy.params.verbosity > 1) {
-          console.log('Warning: teddy.replaceProcessedElement called without being supplied a result');
+          console.warn('teddy.replaceProcessedElement called without being supplied a result');
         }
         return false;
       }
@@ -1028,21 +1029,21 @@
     // suppresses xml warnings (because Teddy is a made-up HTML syntax)
     DOMParserWarningHandler: function(e) {
       if (teddy.params.verbosity > 2) {
-        console.log('DEBUG Warning: DOMParser issued the following warning: ' + e);
+        console.warn('DOMParser issued the following warning: ' + e);
       }
     },
 
     // logs xml errors
     DOMParserErrorHandler: function(e) {
       if (teddy.params.verbosity) {
-        console.log(e);
+        console.warn(e);
       }
     },
 
     // logs file I/O errors in node.js
     readFileError: function(e) {
       if (teddy.params.verbosity) {
-        console.log('Warning: teddy.compile attempting to compile a template which doesn\'t exist: ' + e);
+        console.warn('teddy.compile attempting to compile a template which doesn\'t exist: ' + e);
       }
     },
 
@@ -1140,6 +1141,12 @@
     oldIE = oldIE.getElementsByTagName('i').length === 1 ? true : false;
 
     if (!oldIE) {
+      // IE does not populate console unless the developer tools are opened
+      if (typeof console === 'undefined') {
+        window.console = {};
+        console.log = console.warn = console.error = function() {};
+      }
+
       parser = new DOMParser();
       serializer = new XMLSerializer();
 
@@ -1156,8 +1163,6 @@
        */
 
       (function(DOMParser) {
-        "use strict";
-
         var DOMParserProto = DOMParser.prototype,
             realParseFromString = DOMParserProto.parseFromString;
 
