@@ -102,7 +102,7 @@ Here's how:
 Documentation
 ===
 
-Here's some examples of to write Teddy templates:
+Here's some examples of how to write Teddy templates:
 
 Includes
 ---
