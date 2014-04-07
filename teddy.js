@@ -692,7 +692,7 @@
             if (condition.substr(0, 3) === 'if-') {
               conditionVal = conditionAttr.value;
               el.removeAttribute(condition); // so there's no attempt to parse it later
-              condition = condition.split('if-')[1];
+              condition = condition.split('if-')[1].toLowerCase();
               break;
             }
           }
