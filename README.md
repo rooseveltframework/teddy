@@ -13,7 +13,7 @@ Table of contents
 - [Why yet another templating engine?](#why-yet-another-templating-engine)
   - [Other popular templating engines are too cryptic](#other-popular-templating-engines-are-too-cryptic)
 - [Teddy, symbol-buster extraordinaire](#teddy-symbol-buster-extraordinaire)
-- [Documentation](#documentation)
+- [How to write Teddy templates](#how-to-write-teddy-templates)
   - [Includes](#includes)
   - [Conditionals](#conditionals)
   - [One line ifs](#one-line-ifs)
@@ -24,11 +24,6 @@ Table of contents
 - [API documentation](#api-documentation)
 - [Notable intentional design choices and limitations](#notable-intentional-design-choices-and-limitations)
 - [Client-side browser support](#client-side-browser-support)
-  - [Notable untested browsers](#notable-untested-browsers)
-  - [Browsers known to be partially broken](#browsers-known-to-be-partially-broken)
-  - [Browsers known to be totally broken](#browsers-known-to-be-totally-broken)
-- [Other known issues](#other-known-issues)
-- [Helped wanted!](#helped-wanted)
 - [How to run the unit tests](#how-to-run-the-unit-tests)
 - [Dependencies](#dependencies)
 - [License](#license)
@@ -99,7 +94,7 @@ Here's how:
 - Server-side `{!comments!}` delimited by exclamation points in a fashion similar to `<!-- HTML comments -->`. Server-side comments are stripped out at the template compilation stage.
 - No funky symbols to memorize. Just `{variables}` for data and new HTML-like `<tags>` for rudimentary logic.
 
-Documentation
+How to write Teddy templates
 ===
 
 Here's some examples of how to write Teddy templates:
@@ -364,6 +359,7 @@ Notable intentional design choices and limitations
 - Unlike some other templating systems, Teddy will not automatically escape HTML entities contained within variables. You should filter such things if desired at the code level and pass the results to the templates through the model as readable variables.
 - Teddy adheres to a mostly logic-less templates philosophy. `<if>` and `<unless>` statements in Teddy can only check for a single variable's presence or its precise value. They cannot evaluate complex logic; there are no ands, ors, xors, parentheticals, or math operators. Teddy is of the opinion that complex logic doesn't belong in templates. Evaluate such logic at the code level and pass the results to the templates through the model as readable variables.
 - Teddy's client-side performance and browser support is largely tied to how well [DOMParser](https://developer.mozilla.org/en-US/docs/Web/API/DOMParser) and [XMLSerializer](https://developer.mozilla.org/en-US/docs/XMLSerializer) are implemented (if at all) in the target browser.
+- Teddy is beta software! Not many apps have been written using Teddy yet, so it's entirely possible that there will be some significant bugs.
 
 Client-side browser support
 ===
@@ -375,45 +371,6 @@ Client-side browser support
 - iOS Safari 5+
 - Opera 12+
 - Safari 6+
-
-Notable untested browsers
----
-
-- Android browser 2.2 and below.
-- iOS Safari 4 and below.
-- Opera Mini.
-- BlackBerry browsers.
-- Lots of older versions of the desktop versions of Chrome, Firefox, Opera, and Safari probably work well with Teddy, but there hasn't yet been time to test them. If anyone wants to test them and post the results, it will be greatly appreciated.
-
-Browsers known to be partially broken
----
-
-- Older Android 2.3 browsers and most likely all prior versions fail the `<title>` and `<style>` tag tests because `doc.documentElement.innerHTML` fails to return the `<head>` tag or its contents. However, if you only intend to use Teddy for partials containing markup fragments rather than full documents, then this bug shouldn't affect you.
-- Older Presto-powered Opera Mobile versions fail the conditionals overall unit test due to an as yet uninvestigated bug, but all other tests pass. Such Opera Mobile versions also have overall terrible performance with Teddy, which may be related.
-
-Browsers known to be totally broken
----
-
-- IE9 is totally broken because IE9's implementation of `DOMParser` sucks and @eligrey's `DOMParser HTML extension (polyfill)` doesn't work in IE9 and below.
-- Windows Phone 7's browser: same reason as IE9.
-- IE8 and below are totally broken because they have no implementation whatsoever of DOMParser.
-
-Other known issues
-===
-
-- Teddy is beta software. Not many apps have been written using it yet, so it's entirely possible that there will be some significant bugs.
-- Source code view on client-side unit tests is broken in IE10 most likely due to a bug in dependency library vkbeautify.
-- The unit tests are a bit primitive at the moment. Suggestions for improvement or pull requests with better tests will be much appreciated.
-
-Helped wanted!
-===
-
-There are many ways to improve Teddy, such as:
-
-- Testing some of the untested browsers.
-- Helping to fix some of the things noted above.
-- Porting Teddy's JS parser so Teddy templates can be used in other languages, like PHP, Python, Java, etc.
-- Submitting pull requests with suggestions for refactoring or performance optimization.
 
 How to run the unit tests
 ===
