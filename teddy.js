@@ -1,4 +1,4 @@
-(function() {
+(function(global) {
   'use strict';
 
   // @namespace
@@ -269,7 +269,12 @@
           i,
           varList,
           lastVarList,
-          iterations = 0;
+          iterations = 0,
+          curVar,
+          dots,
+          numDots,
+          d,
+          doRender;
 
       do {
         lastVarList = varList;
@@ -284,16 +289,25 @@
               varname = curl.split('}')[0].toLowerCase();
               if (varname) {
                 varList.push(varname);
-                try {
-                  eval('docstring = teddy.renderVar(docstring, varname, model.'+varname.replace(/"/g, '\\"')+');');
-                }
-                catch (e) {
-                  if (teddy.params.verbosity > 1) {
-                    console.warn('a {variable} was found with an invalid syntax: {' + varname + '}');
-                    if (teddy.params.verbosity > 2) {
-                      console.warn('JS error thrown: ' + e);
+                dots = varname.split('.');
+                numDots = dots.length;
+                curVar = model;
+                doRender = true;
+                for (d = 0; d < numDots; d++) {
+                  curVar = curVar[dots[d]];
+                  if (!curVar) {
+                    if (teddy.params.verbosity > 1) {
+                      console.warn('a {variable} was found with an invalid syntax: {' + varname + '}');
+                      if (teddy.params.verbosity > 2) {
+                        console.warn('JS error thrown: ' + e);
+                      }
                     }
+                    doRender = false;
+                    break;
                   }
+                }
+                if (doRender) {
+                  docstring = teddy.renderVar(docstring, varname, curVar);
                 }
               }
             }
@@ -672,7 +686,11 @@
           length = attributes.length,
           condition,
           conditionVal,
-          modelVal;
+          modelVal,
+          curVar,
+          dots,
+          numDots,
+          d;
 
       if (conditionType === 'else') {
         return true;
@@ -698,18 +716,22 @@
           }
         }
 
-        try {
-          eval('modelVal = model.'+condition+';'); // necessary because condition could be multilayered, e.g. "model.foo.bar.blah"
-        }
-        catch (e) {
-          if (teddy.params.verbosity) {
-            console.warn('teddy.evalCondition() supplied a nonexistent model var: model.'+condition);
+        dots = condition.split('.');
+        numDots = dots.length;
+        curVar = model;
+        for (d = 0; d < numDots; d++) {
+          curVar = curVar[dots[d]];
+          if (!curVar) {
             if (teddy.params.verbosity > 1) {
-              console.warn(e);
+              console.warn('teddy.evalCondition() supplied a nonexistent model var: model.'+condition);
+              if (teddy.params.verbosity > 2) {
+                console.warn(e);
+              }
+              return false;
             }
           }
-          return false;
         }
+        modelVal = curVar;
       }
 
       if (conditionType === 'if' || conditionType === 'onelineif' || conditionType === 'elseif') {
@@ -1133,7 +1155,7 @@
 
   // set env specific vars for client-side
   else {
-    this.teddy = teddy;
+    global.teddy = teddy;
 
     // test for old IE
     oldIE = document.createElement('p');
@@ -1194,4 +1216,4 @@
       }(DOMParser));
     }
   }
-})();
+})(this);
