@@ -4,15 +4,11 @@ var http = require('http'),             // node's http server
     teddy = require('../../teddy'),     // teddy (remove the '../../' if acquired from npm)
     app = express();                    // initialize express
 
-// configure express
-app.configure(function() {
+// set templating engine
+app.engine('html', teddy.__express);
 
-  // set templating engine
-  app.engine('html', teddy.__express);
-
-  // set templates directory
-  app.set('views', 'client/');
-});
+// set templates directory
+app.set('views', 'client/');
 
 // map statics
 app.use('/lib', express.static('../../'));

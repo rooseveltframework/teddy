@@ -10,19 +10,18 @@
      */
 
     // compiles a template (removes {! comments !} and unnecessary whitespace)
-    compile: function(template, name) {
-      var fname;
-
-      // remove templateRoot from template name if necessary
-      if (!name) {
-        name = template.replace(teddy.params.templateRoot, '');
-      }
+    compile: function(template) {
+      var fname = '',
+          name = '' + template.replace(teddy.params.templateRoot, '');
 
       // convert filepath into a template string if we're in node
       if (isNode) {
         try {
-          if (!fs.existsSync(name)) {
-            fname = teddy.params.templateRoot + name;
+          if (fs.existsSync(template)) {
+            fname = template;
+          }
+          else {
+            fname = teddy.params.templateRoot + template;
           }
 
           // attempt readFile
@@ -295,7 +294,7 @@
                 doRender = true;
                 for (d = 0; d < numDots; d++) {
                   curVar = curVar[dots[d]];
-                  if (!curVar) {
+                  if ((typeof curVar).toLowerCase() === 'undefined') {
                     if (teddy.params.verbosity > 1) {
                       console.warn('a {variable} was found with an invalid syntax: {' + varname + '}');
                       if (teddy.params.verbosity > 2) {
@@ -721,7 +720,7 @@
         curVar = model;
         for (d = 0; d < numDots; d++) {
           curVar = curVar[dots[d]];
-          if (!curVar) {
+          if ((typeof curVar).toLowerCase() === 'undefined') {
             if (teddy.params.verbosity > 1) {
               console.warn('teddy.evalCondition() supplied a nonexistent model var: model.'+condition);
               if (teddy.params.verbosity > 2) {
