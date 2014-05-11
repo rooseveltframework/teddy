@@ -340,18 +340,18 @@ For a complete sample implementation, see the sample app here: [sampleApps/clien
 API documentation
 ===
 
-- `compile(path)`: Compile a template server-side by referencing a file name. This method returns a compiled template. It also populates these two arrays:
+- `teddy.compile(path)`: Compile a template server-side by referencing a file name. This method returns a compiled template. It also populates these two arrays:
   - `teddy.compiledTemplates`: Array indexed by template file path and file name.
   - `teddy.packagedTemplates`: Same as compiledTemplates, except it stores packaged templates instead of compiled templates. Packaged templates are templates compiled on the server and sent to the client as raw JS statements that can be simply eval'd client-side rather than compiled client-side.
-- `compile(templateString, templateName)`: Compile a template directly by passing a string rather than a file name. Give the template a name using the second argument. This method returns a compiled template. It also populates the two arrays mentioned above, but instead indexes them by your chosen templateName, as path is not relevant.
-- `render(templateNameOrPath)`: Render a template. This method will compile the template if it has not already been compiled.
-- `setTemplateRoot(path)`: Set the location of your templates directory. The default is the current directory.
-- `setVerbosity(n)`: Sets the level of verbosity in Teddy's console logs. Call `teddy.setVerbosity(n)` where `n` equals one of the below values to change the default:
+- `teddy.compile(templateString, templateName)`: Compile a template directly by passing a string rather than a file name. Give the template a name using the second argument. This method returns a compiled template. It also populates the two arrays mentioned above, but instead indexes them by your chosen templateName, as path is not relevant.
+- `teddy.render(templateNameOrPath)`: Render a template. This method will compile the template if it has not already been compiled.
+- `teddy.setTemplateRoot(path)`: Set the location of your templates directory. The default is the current directory.
+- `teddy.setVerbosity(n)`: Sets the level of verbosity in Teddy's console logs. Call `teddy.setVerbosity(n)` where `n` equals one of the below values to change the default:
   - `0`: No logging.
   - `1`: The default. Concise logging. Usually just logs serious errors.
   - `2`: Verbose logging. Logs even minor errors.
   - `3`: Debug mode. Very verbose.
-- `compileAtEveryRender(true)`: When this setting is enabled, Teddy will compile the template at each render rather than caching previous compiles. Default is false. *(Not recommended to enable in production for performance reasons.)*
+- `teddy.compileAtEveryRender(true)`: When this setting is enabled, Teddy will compile the template at each render rather than caching previous compiles. Default is false. *(Not recommended to enable in production for performance reasons.)*
 
 Notable intentional design choices and limitations
 ===
