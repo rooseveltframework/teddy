@@ -1031,7 +1031,10 @@
 
       for (i = 0; i < l; i++) {
         el = problemElements[i];
-        docString = docString.replace(new RegExp('<' + el + ' ', 'gi'), '<teddy-' + el + ' ').replace(new RegExp('</' + el + '>', 'gi'), '</teddy-' + el + '>');
+        docString = docString
+        .replace(new RegExp('<' + el + ' ', 'gi'), '<teddy-' + el + ' ')
+        .replace(new RegExp('<' + el + '>', 'gi'), '<teddy-' + el + '>')
+        .replace(new RegExp('</' + el + '>', 'gi'), '</teddy-' + el + '>');
       }
 
       return docString;
@@ -1042,7 +1045,10 @@
 
       for (i = 0; i < l; i++) {
         el = problemElements[i];
-        docString = docString.replace(new RegExp('<teddy-' + el + ' ', 'gi'), '<' + el + ' ').replace(new RegExp('</teddy-' + el + '>', 'gi'), '</' + el + '>');
+        docString = docString
+        .replace(new RegExp('<teddy-' + el + ' ', 'gi'), '<' + el + ' ')
+        .replace(new RegExp('<teddy-' + el + '>', 'gi'), '<' + el + '>')
+        .replace(new RegExp('</teddy-' + el + '>', 'gi'), '</' + el + '>');
       }
 
       return docString;
@@ -1120,7 +1126,7 @@
     _contextModels: [],
 
     // list of elements to temporarily rename during parsing
-    _problemElements: ['table'],
+    _problemElements: ['table', 'caption', 'colgroup', 'col', 'thead', 'tfoot', 'tbody', 'tr', 'th', 'td'],
 
     /**
      * Mutator methods for Teddy object public member vars

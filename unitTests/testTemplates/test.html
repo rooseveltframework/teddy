@@ -145,5 +145,43 @@
         </dd>
       </dl>
     </section>
+
+    {! this test ensures issues #15, #16, and #17 remain closed !}
+    <section class='tableTest'>
+      <table>
+        <caption>Sample Table - High Scores</caption>
+          {!
+            colgroups won't work until this pull request is merged into xmldom https://github.com/jindw/xmldom/pull/91
+            <colgroup>
+              <col width='80'>
+              <col width='100'>
+              <col width='320'>
+            </colgroup>
+          !}
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th>Score</th>
+            </tr>
+          </thead>
+          <tfoot>
+            <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th>Score</th>
+            </tr>
+          </tfoot>
+          <tbody>
+            <foreach val='letter' key='i' in='letters'>
+              <tr>
+                <td>{i}</td>
+                <td>player <strong>{letter}</strong></td>
+                <td>over 9000!</td>
+              </tr>
+            </foreach>
+          </tbody>
+      </table>
+    </section>
   </arg>
 </include>
