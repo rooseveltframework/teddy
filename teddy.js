@@ -10,9 +10,13 @@
      */
 
     // compiles a template (removes {! comments !} and unnecessary whitespace)
-    compile: function(template) {
-      var fname = '',
-          name = '' + template.replace(teddy.params.templateRoot, '');
+    compile: function(template, name) {
+      var fname = '';
+
+      // remove templateRoot from template name if necessary
+      if (!name) {
+        name = template.replace(teddy.params.templateRoot, '');
+      }
 
       // convert filepath into a template string if we're in node
       if (isNode) {

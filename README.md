@@ -340,17 +340,18 @@ For a complete sample implementation, see the sample app here: [sampleApps/clien
 API documentation
 ===
 
-- `compile('some/template.html')`: Compile a template. This method returns a compiled template. It also populates these two arrays:
+- `compile(path)`: Compile a template server-side by referencing a file name. This method returns a compiled template. It also populates these two arrays:
   - `teddy.compiledTemplates`: Array indexed by template file path and file name.
   - `teddy.packagedTemplates`: Same as compiledTemplates, except it stores packaged templates instead of compiled templates. Packaged templates are templates compiled on the server and sent to the client as raw JS statements that can be simply eval'd client-side rather than compiled client-side.
-- `render('some/template.html')`: Render a template. This method will compile the template if it has not already been compiled.
-- `setTemplateRoot('some/location')`: Set the location of your templates directory. The default is the current directory.
+- `compile(templateString, templateName)`: Compile a template directly by passing a string rather than a file name. Give the template a name using the second argument. This method returns a compiled template and also populates the two arrays mentioned above.
+- `render(templateNameOrPath)`: Render a template. This method will compile the template if it has not already been compiled.
+- `setTemplateRoot(path)`: Set the location of your templates directory. The default is the current directory.
 - `setVerbosity(n)`: Sets the level of verbosity in Teddy's console logs. Call `teddy.setVerbosity(n)` where `n` equals one of the below values to change the default:
   - `0`: No logging.
   - `1`: The default. Concise logging. Usually just logs serious errors.
   - `2`: Verbose logging. Logs even minor errors.
   - `3`: Debug mode. Very verbose.
-- `compileAtEveryRender(true / false)`: When this setting is enabled, Teddy will compile the template at each render rather than caching previous compiles. *(Not recommended in production for performance reasons.)*
+- `compileAtEveryRender(true)`: When this setting is enabled, Teddy will compile the template at each render rather than caching previous compiles. Default is false. *(Not recommended to enable in production for performance reasons.)*
 
 Notable intentional design choices and limitations
 ===
