@@ -183,5 +183,33 @@
           </tbody>
       </table>
     </section>
+
+    {! this test ensures issue #3 remains closed !}
+    <section class='textNodeElementTest'>
+      <script>
+        <if something>
+          /* `something` present */
+        </if>
+        <else>
+          /* `something` not present */
+        </else>
+      </script>
+      <textarea rows='9' cols='9' name='textareaTest'>
+        <if something>
+          something
+        </if>
+        <else>
+          not something
+        </else>
+      </textarea>
+      <select name='selectTest'>
+        <if something>
+          <option value='something'>something</option>
+        </if>
+        <else>
+          <option value='not something'>not something</option>
+        </else>
+      </select>
+    </section>
   </arg>
 </include>

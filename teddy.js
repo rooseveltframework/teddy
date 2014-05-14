@@ -1126,7 +1126,16 @@
     _contextModels: [],
 
     // list of elements to temporarily rename during parsing
-    _problemElements: ['table', 'caption', 'colgroup', 'col', 'thead', 'tfoot', 'tbody', 'tr', 'th', 'td'],
+    _problemElements: [
+      // table elements are problematic because they whitelist allowable child elements
+      'table', 'caption', 'colgroup', 'col', 'thead', 'tfoot', 'tbody', 'tr', 'th', 'td',
+
+      // text node-only elements are problematic because they don't permit child elements
+      'script', 'textarea', 'title',
+
+      // <option> is a text node-only element and <select> / <datalist> only permits certain child elements
+      'select', 'datalist', 'option', 'optgroup'
+    ],
 
     /**
      * Mutator methods for Teddy object public member vars
