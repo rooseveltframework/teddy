@@ -154,7 +154,6 @@ if (!sameOriginPolicy && !oldIE) {
   });
 
   unitTest('text node-only element test', function() {
-    console.log(idoc.getElementsByClassName('textNodeElementTest')[0].innerHTML.replace(/ xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g, ''));
     return idoc.getElementsByClassName('textNodeElementTest')[0].innerHTML.replace(/ xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g, '') == "<script>/* `something` present */ </script><textarea rows=\"9\" cols=\"9\" name=\"textareaTest\">something </textarea><select name=\"selectTest\"><option value=\"something\">something</option></select>" ? true : false;
   });
 
