@@ -153,6 +153,11 @@ if (!sameOriginPolicy && !oldIE) {
     return idoc.getElementsByClassName('tableTest')[0].innerHTML.replace(/ xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g, '') == "<table><caption>Sample Table - High Scores</caption><thead><tr><th>#</th><th>Name</th><th>Score</th></tr></thead><tfoot><tr><th>#</th><th>Name</th><th>Score</th></tr></tfoot><tbody><tr><td>0</td><td>player <strong>a</strong></td><td>over 9000!</td></tr><tr><td>1</td><td>player <strong>b</strong></td><td>over 9000!</td></tr><tr><td>2</td><td>player <strong>c</strong></td><td>over 9000!</td></tr></tbody></table>" ? true : false;
   });
 
+  unitTest('text node-only element test', function() {
+    console.log(idoc.getElementsByClassName('textNodeElementTest')[0].innerHTML.replace(/ xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g, ''));
+    return idoc.getElementsByClassName('textNodeElementTest')[0].innerHTML.replace(/ xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g, '') == "<script>/* `something` present */ </script><textarea rows=\"9\" cols=\"9\" name=\"textareaTest\">something </textarea><select name=\"selectTest\"><option value=\"something\">something</option></select>" ? true : false;
+  });
+
   unitTest('packaged templates test', function() {
     if (teddy.packagedTemplates['inc/sampleIncludeWithArguments.html'] !== "teddy.compiledTemplates['inc/sampleIncludeWithArguments.html']='<section class=\\'sampleIncludeWithArguments\\'><p>This is a sample included template with arguments.</p><dl><dt>firstArgument:</dt><dd>{firstArgument}</dd><dt>secondArgument:</dt><dd>{secondArgument}</dd><dt>thirdArgument: </dt><if thirdArgument><dd>{thirdArgument}</dd></if><else><dd>not present</dd></else></dl></section>';" || teddy.packagedTemplates['inc/sampleIncludeWithoutArguments.html'] !== "teddy.compiledTemplates['inc/sampleIncludeWithoutArguments.html']='<section class=\\'sampleIncludeWithoutArguments\\'><p>This is a sample included template without arguments.</p></section>';") {
       return false;
