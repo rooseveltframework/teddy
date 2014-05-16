@@ -197,25 +197,25 @@ One line ifs
 If you need a more concise conditional just to control which attributes are applied to a given element, then use this syntax:
 
 ```html
-<p if-something true="class='something-is-present'" false="class='something-is-not-present'">One line if.</p>
+<p if-something true="class='present'" false="class='not-present'">One line if.</p>
 ```
 
 In that structure, the attribute `if-something` checks to see if the variable `something` is present. If so, the class delcared in the `true` attribute is written to the element, resulting in the following output:
 
 ```html
-<p class='something-is-present'>One line if.</p>
+<p class='present'>One line if.</p>
 ```
 
 If not, the class declared in the `false` attribute is written to the element, resulting in the following output:
 
 ```html
-<p class='something-is-not-present'>One line if.</p>
+<p class='not-present'>One line if.</p>
 ```
 
 Like the `<if>` tag you can check for both the presence of a variable as well as its value. To check the value of a variable, use this syntax:
 
 ```html
-<p if-something='hello' true="class='something-is-hello'" false="class='something-is-not-hello'">One line if.</p>
+<p if-something='hello' true="class='hello'" false="class='not-hello'">One line if.</p>
 ```
 
 It's important to note that whichever type of quotes you use on the outside of your `true` or `false` attributes must be reversed on the inside. So if you use single quotes on the outside, then you must use double quotes on the inside.
