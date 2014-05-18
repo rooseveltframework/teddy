@@ -365,13 +365,14 @@ Notable intentional design choices and limitations
 Client-side browser support
 ===
 
-- Android browser 4.0+
-- Chrome 24+
-- Firefox 18+
+Teddy is supported on:
+
+- Recent versions of Chrome
+- Recent versions of Firefox
+- Recent versions of Opera
+- Recent versions of Safari
+- Android browser 4.x+
 - Internet Explorer 10+
-- iOS Safari 5+
-- Opera 12+
-- Safari 6+
 
 How to run the unit tests
 ===

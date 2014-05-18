@@ -95,7 +95,7 @@ unitTest('table test', function() {
 });
 
 unitTest('text node-only element test', function() {
-  return renderedTemplate.indexOf("<section class=\"textNodeElementTest\"><script> /* `something` present */ </script><textarea  name=\"textareaTest\" rows=\"9\" cols=\"9\"> something </textarea><select name=\"selectTest\"><option value=\"something\">something</option></select></section>") > -1 ? true : false;
+  return renderedTemplate.indexOf("<section class=\"textNodeElementTest\"><script> /* `something` present */ </script><textarea name=\"textareaTest\" rows=\"9\" cols=\"9\"> something </textarea><select name=\"selectTest\"><option value=\"something\">something</option></select></section>") > -1 ? true : false;
 });
 
 unitTest('dynamic includes and conditionals test', function() {

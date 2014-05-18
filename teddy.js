@@ -308,19 +308,25 @@
                 dots = varname.split('.');
                 numDots = dots.length;
                 curVar = model;
-                doRender = true;
-                for (d = 0; d < numDots; d++) {
-                  curVar = curVar[dots[d]];
-                  if ((typeof curVar).toLowerCase() === 'undefined') {
-                    if (teddy.params.verbosity > 1) {
-                      console.warn('a {variable} was found with an invalid syntax: {' + varname + '}');
-                      if (teddy.params.verbosity > 2) {
-                        console.warn('JS error thrown: ' + e);
+                if (curVar) {
+                  doRender = true;
+                  for (d = 0; d < numDots; d++) {
+                    curVar = curVar[dots[d]];
+                    if ((typeof curVar).toLowerCase() === 'undefined') {
+                      if (teddy.params.verbosity > 1) {
+                        console.warn('a {variable} was found with an invalid syntax: {' + varname + '}');
                       }
+                      doRender = false;
+                      break;
                     }
-                    doRender = false;
-                    break;
                   }
+                }
+                else {
+                  if (teddy.params.verbosity > 1) {
+                    console.warn('a {variable} was found with an invalid syntax do to undefined model: {' + varname + '}');
+                  }
+                  doRender = false;
+                  break;
                 }
                 if (doRender) {
                   docstring = teddy.renderVar(docstring, varname, curVar);
@@ -738,17 +744,22 @@
         dots = condition.split('.');
         numDots = dots.length;
         curVar = model;
-        for (d = 0; d < numDots; d++) {
-          curVar = curVar[dots[d]];
-          if ((typeof curVar).toLowerCase() === 'undefined') {
-            if (teddy.params.verbosity > 1) {
-              console.warn('teddy.evalCondition() supplied a nonexistent model var: model.'+condition);
-              if (teddy.params.verbosity > 2) {
-                console.warn(e);
+        if (curVar) {
+          for (d = 0; d < numDots; d++) {
+            curVar = curVar[dots[d]];
+            if ((typeof curVar).toLowerCase() === 'undefined') {
+              if (teddy.params.verbosity > 1) {
+                console.warn('teddy.evalCondition() supplied a nonexistent model var: model.'+condition);
               }
               return false;
             }
           }
+        }
+        else {
+          if (teddy.params.verbosity > 1) {
+            console.warn('teddy.evalCondition() supplied an empty model');
+          }
+          return false;
         }
         modelVal = curVar;
       }
