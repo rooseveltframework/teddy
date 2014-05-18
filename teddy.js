@@ -107,11 +107,12 @@
       var compiledTemplate = teddy.compiledTemplates[template],
           errors, renderedTemplate;
 
-      // some elements have special rules and must be normalized first by temporarily converting them into unknown elements
-      compiledTemplate = teddy.temporarilyRenameProblemElements(compiledTemplate);
-
       // create dom object out of template string
       if (compiledTemplate) {
+
+        // some elements have special rules and must be normalized first by temporarily converting them into unknown elements
+        compiledTemplate = teddy.temporarilyRenameProblemElements(compiledTemplate);
+
         renderedTemplate = parser.parseFromString(compiledTemplate, 'text/html');
       }
       else {
@@ -182,7 +183,7 @@
         el = teddy.findNonLoopedInclude(doc)[0];
         if (el) {
           notDone = true;
-          result = teddy.renderInclude(el);
+          result = teddy.renderInclude(el, model);
           model = teddy._baseModel; // restore original model
           if (result.newDoc) {
             doc = result;
@@ -289,6 +290,8 @@
           d,
           doRender;
 
+      docstring = docstring.replace(/%7B/g, '{').replace(/%7D/g, '}'); // hack for gecko
+
       do {
         lastVarList = varList;
         varList = [];
@@ -352,7 +355,7 @@
      */
 
     // parses a single <include> tag
-    renderInclude: function(el) {
+    renderInclude: function(el, model) {
       var src, incdoc, args, argl, arg, argname, argval, i, newDoc, localModel = {};
 
       if (el) {
@@ -365,6 +368,9 @@
           return false;
         }
         else {
+
+          // parse variables which may be included in src attribute
+          src = teddy.parseVars(src, model);
 
           // append extension if not present
           if (src.slice(-5) !== '.html') {
@@ -711,7 +717,7 @@
       else {
         if (conditionType === 'if' || conditionType === 'unless' || conditionType === 'elseif' || conditionType === 'elseunless') {
           condition = conditionAttr.nodeName.toLowerCase();
-          conditionVal = conditionAttr.value.trim();
+          conditionVal = teddy.parseVars(conditionAttr.value.trim(), model);
         }
 
         // one-liner
@@ -721,7 +727,7 @@
             conditionAttr = attributes[i];
             condition = conditionAttr.nodeName;
             if (condition.substr(0, 3) === 'if-') {
-              conditionVal = conditionAttr.value;
+              conditionVal = teddy.parseVars(conditionAttr.value, model);
               el.removeAttribute(condition); // so there's no attempt to parse it later
               condition = condition.split('if-')[1].toLowerCase();
               break;
