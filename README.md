@@ -351,6 +351,7 @@ API documentation
   - `1`: The default. Concise logging. Usually just logs serious errors.
   - `2`: Verbose logging. Logs even minor errors.
   - `3`: Debug mode. Very verbose.
+- `teddy.strictParser(true)`: When this setting is enabled, Teddy will throw an exception if the template is not well formed. Default is false. *(Not recommended to enable in production as throwing exceptions could cause downtime.)*
 - `teddy.compileAtEveryRender(true)`: When this setting is enabled, Teddy will compile the template at each render rather than caching previous compiles. Default is false. *(Not recommended to enable in production for performance reasons.)*
 
 Notable intentional design choices and limitations

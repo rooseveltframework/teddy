@@ -1109,14 +1109,28 @@
     // suppresses xml warnings (because Teddy is a made-up HTML syntax)
     DOMParserWarningHandler: function(e) {
       if (teddy.params.verbosity > 2) {
-        console.warn('DOMParser issued the following warning: ' + e);
+        console.warn('Teddy\'s DOMParser issued the following warning:');
+        console.warn(e);
       }
     },
 
     // logs xml errors
     DOMParserErrorHandler: function(e) {
       if (teddy.params.verbosity) {
+        console.warn('Teddy\'s DOMParser issued the following warning:');
         console.warn(e);
+      }
+    },
+
+    // fatal errors
+    DOMParserFatalErrorHandler: function(e) {
+      if (teddy.params.strictParser) {
+        console.error('Teddy\'s DOMParser experienced a fatal error:');
+        throw e;
+      }
+      else {
+        console.error('Teddy\'s DOMParser experienced a fatal error:');
+        console.error(e);
       }
     },
 
@@ -1142,6 +1156,7 @@
     params: {
       verbosity: 1,
       templateRoot: './',
+      strictParser: false,
       compileAtEveryRender: false
     },
 
@@ -1187,6 +1202,11 @@
       teddy.params.templateRoot = String(v);
     },
 
+    // turn on or off the setting to throw an exception if the template is not well formed
+    strictParser: function(v) {
+      teddy.params.strictParser = Boolean(v);
+    },
+
     // turn on or off the setting to compile templates at every render
     compileAtEveryRender: function(v) {
       teddy.params.compileAtEveryRender = Boolean(v);
@@ -1217,7 +1237,7 @@
       errorHandler: {
         warning: teddy.DOMParserWarningHandler,
         error: teddy.DOMParserErrorHandler,
-        fatalError: teddy.DOMParserErrorHandler
+        fatalError: teddy.DOMParserFatalErrorHandler
       }
     });
     serializer = new xmldom.XMLSerializer();
