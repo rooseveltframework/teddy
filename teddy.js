@@ -747,12 +747,6 @@
         if (curVar) {
           for (d = 0; d < numDots; d++) {
             curVar = curVar[dots[d]];
-            if ((typeof curVar).toLowerCase() === 'undefined') {
-              if (teddy.params.verbosity > 1) {
-                console.warn('teddy.evalCondition() supplied a nonexistent model var: model.'+condition);
-              }
-              return false;
-            }
           }
         }
         else {
