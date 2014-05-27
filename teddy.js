@@ -483,7 +483,7 @@
     // retrieve local model from cache and apply it to full model for parsing
     applyLocalModel: function(el, model) {
       var modelNumber = parseInt(el.getAttribute('data-local-model')), localModel = teddy._contextModels[modelNumber - 1], i;
-      if (modelNumber && localModel) {
+      if ((modelNumber - 1) && localModel) {
         for (i in localModel) {
           model[i] = localModel[i];
         }
