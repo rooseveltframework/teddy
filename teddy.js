@@ -483,7 +483,7 @@
     // retrieve local model from cache and apply it to full model for parsing
     applyLocalModel: function(el, model) {
       var modelNumber = parseInt(el.getAttribute('data-local-model')), localModel = teddy._contextModels[modelNumber - 1], i;
-      if (modelNumber && localModel) {
+      if ((modelNumber - 1) && localModel) {
         for (i in localModel) {
           model[i] = localModel[i];
         }
@@ -705,81 +705,136 @@
       el.removeAttribute('data-local-model');
 
       var conditionType = el.nodeName.toLowerCase(),
-          conditionAttr = el.attributes[0],
+          attrCount = 0,
+          conditionAttr,
           attributes = el.attributes,
-          i,
           length = attributes.length,
+          i,
           condition,
           conditionVal,
           modelVal,
           curVar,
           dots,
           numDots,
-          d;
+          d,
+          notDone = true,
+          condResult,
+          truthStack = [],
+          evalStatement = function() {
+            condition = conditionAttr.nodeName.toLowerCase();
+
+            if (condition === 'or' || condition === 'and' || condition === 'xor') {
+              return condition; // this is a logical operator, not a condition to evaluate
+            }
+
+            conditionVal = teddy.parseVars(conditionAttr.value.trim(), model);
+
+            dots = condition.split('.');
+            numDots = dots.length;
+            curVar = model;
+            if (curVar) {
+              for (d = 0; d < numDots; d++) {
+                curVar = curVar[dots[d]];
+              }
+            }
+            else {
+              if (teddy.params.verbosity > 1) {
+                console.warn('teddy.evalCondition() supplied an empty model');
+              }
+              return false;
+            }
+            modelVal = curVar;
+
+            if (conditionType === 'if' || conditionType === 'onelineif' || conditionType === 'elseif') {
+              if (condition === conditionVal.toLowerCase() || conditionVal === '' || (conditionType === 'onelineif' && 'if-' + condition === conditionVal.toLowerCase())) {
+                if (modelVal) {
+                  return condition.charAt(0) === '!' ? false : true;
+                }
+                else {
+                  return condition.charAt(0) === '!' ? true : false;
+                }
+              }
+              else if (modelVal == conditionVal) {
+                return condition.charAt(0) === '!' ? false : true;
+              }
+              else {
+                return condition.charAt(0) === '!' ? true : false;
+              }
+            }
+            else {
+              if (condition === conditionVal.toLowerCase() || conditionVal === '') {
+                if (modelVal) {
+                  return condition.charAt(0) === '!' ? true : false;
+                }
+                else {
+                  return condition.charAt(0) === '!' ? false : true;
+                }
+              }
+              else if (modelVal != conditionVal) {
+                return condition.charAt(0) === '!' ? false : true;
+              }
+              else {
+                return condition.charAt(0) === '!' ? true : false;
+              }
+            }
+          };
 
       if (conditionType === 'else') {
         return true;
       }
-      else {
-        if (conditionType === 'if' || conditionType === 'unless' || conditionType === 'elseif' || conditionType === 'elseunless') {
-          condition = conditionAttr.nodeName.toLowerCase();
-          conditionVal = teddy.parseVars(conditionAttr.value.trim(), model);
-        }
-
-        // one-liner
-        else {
-          conditionType = 'onelineif';
-          for (i = 0; i < length; i++) {
-            conditionAttr = attributes[i];
-            condition = conditionAttr.nodeName;
-            if (condition.substr(0, 3) === 'if-') {
-              conditionVal = teddy.parseVars(conditionAttr.value, model);
-              el.removeAttribute(condition); // so there's no attempt to parse it later
-              condition = condition.split('if-')[1].toLowerCase();
-              break;
-            }
+      else if (conditionType !== 'if' && conditionType !== 'unless' && conditionType !== 'elseif' && conditionType !== 'elseunless') {
+        // it's a one-liner
+        conditionType = 'onelineif';
+        for (i = 0; i < length; i++) {
+          conditionAttr = attributes[i];
+          condition = conditionAttr.nodeName;
+          if (condition.substr(0, 3) === 'if-') {
+            conditionVal = teddy.parseVars(conditionAttr.value, model);
+            el.removeAttribute(condition); // so there's no attempt to parse it later
+            condition = condition.split('if-')[1].toLowerCase();
+            break;
           }
         }
-
-        dots = condition.split('.');
-        numDots = dots.length;
-        curVar = model;
-        if (curVar) {
-          for (d = 0; d < numDots; d++) {
-            curVar = curVar[dots[d]];
-          }
-        }
-        else {
-          if (teddy.params.verbosity > 1) {
-            console.warn('teddy.evalCondition() supplied an empty model');
-          }
-          return false;
-        }
-        modelVal = curVar;
+        conditionAttr = el.attributes[attrCount];
+        return evalStatement();
       }
 
-      if (conditionType === 'if' || conditionType === 'onelineif' || conditionType === 'elseif') {
-        if (condition === conditionVal.toLowerCase() || conditionVal === '' || (conditionType === 'onelineif' && 'if-' + condition === conditionVal.toLowerCase())) {
-          return modelVal ? true : false;
-        }
-        else if (modelVal == conditionVal) {
-          return true;
-        }
-        else {
-          return false;
-        }
-      }
-      else {
-        if (condition === conditionVal.toLowerCase() || conditionVal === '') {
-          return modelVal ? false : true;
-        }
-        else if (modelVal != conditionVal) {
-          return true;
+      // regular conditional, could be multipart
+      do {
+
+        // examine each of the condition attributes
+        conditionAttr = el.attributes[attrCount];
+        if (conditionAttr) {
+          truthStack.push(evalStatement());
+          attrCount++;
         }
         else {
-          return false;
+          notDone = false;
+          length = truthStack.length;
         }
       }
+      while (notDone);
+
+      console.log(el.attributes[attrCount - 1].nodeName);
+
+      // loop through the results
+      for (i = 0; i < length; i++) {
+        condition = truthStack[i];
+        condResult = condResult !== undefined ? condResult : truthStack[i - 1];
+        if (condition === 'and') {
+          condResult = Boolean(condResult && truthStack[i + 1]);
+        }
+        else if (condition === 'or') {
+          condResult = Boolean(condResult || truthStack[i + 1]);
+        }
+        else if (condition === 'xor') {
+          condResult = Boolean((condResult && !truthStack[i + 1]) || (!condResult && truthStack[i + 1]));
+        }
+      }
+
+      console.log(condResult);
+      console.log();
+      return condResult;
     },
 
     // replaces a single {var} with its value from a given model
