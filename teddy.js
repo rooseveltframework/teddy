@@ -721,13 +721,17 @@
           condResult,
           truthStack = [],
           evalStatement = function() {
-            condition = conditionAttr.nodeName.toLowerCase();
+            if (!condition) {
+              condition = conditionAttr.nodeName.toLowerCase();
+            }
 
             if (condition === 'or' || condition === 'and' || condition === 'xor') {
               return condition; // this is a logical operator, not a condition to evaluate
             }
 
-            conditionVal = teddy.parseVars(conditionAttr.value.trim(), model);
+            if (conditionVal === undefined) {
+              conditionVal = teddy.parseVars(conditionAttr.value.trim(), model);
+            }
 
             dots = condition.split('.');
             numDots = dots.length;
@@ -748,33 +752,33 @@
             if (conditionType === 'if' || conditionType === 'onelineif' || conditionType === 'elseif') {
               if (condition === conditionVal.toLowerCase() || conditionVal === '' || (conditionType === 'onelineif' && 'if-' + condition === conditionVal.toLowerCase())) {
                 if (modelVal) {
-                  return condition.charAt(0) === '!' ? false : true;
+                  return condition.substr(0, 3) === 'not:' ? false : true;
                 }
                 else {
-                  return condition.charAt(0) === '!' ? true : false;
+                  return condition.substr(0, 3) === 'not:' ? true : false;
                 }
               }
               else if (modelVal == conditionVal) {
-                return condition.charAt(0) === '!' ? false : true;
+                return condition.substr(0, 3) === 'not:' ? false : true;
               }
               else {
-                return condition.charAt(0) === '!' ? true : false;
+                return condition.substr(0, 3) === 'not:' ? true : false;
               }
             }
             else {
               if (condition === conditionVal.toLowerCase() || conditionVal === '') {
                 if (modelVal) {
-                  return condition.charAt(0) === '!' ? true : false;
+                  return condition.substr(0, 3) === 'not:' ? true : false;
                 }
                 else {
-                  return condition.charAt(0) === '!' ? false : true;
+                  return condition.substr(0, 3) === 'not:' ? false : true;
                 }
               }
               else if (modelVal != conditionVal) {
-                return condition.charAt(0) === '!' ? false : true;
+                return condition.substr(0, 3) === 'not:' ? false : true;
               }
               else {
-                return condition.charAt(0) === '!' ? true : false;
+                return condition.substr(0, 3) === 'not:' ? true : false;
               }
             }
           };
@@ -805,6 +809,8 @@
         // examine each of the condition attributes
         conditionAttr = el.attributes[attrCount];
         if (conditionAttr) {
+          condition = undefined;
+          conditionVal = undefined;
           truthStack.push(evalStatement());
           attrCount++;
         }
@@ -814,8 +820,6 @@
         }
       }
       while (notDone);
-
-      console.log(el.attributes[attrCount - 1].nodeName);
 
       // loop through the results
       for (i = 0; i < length; i++) {
@@ -828,13 +832,16 @@
           condResult = Boolean(condResult || truthStack[i + 1]);
         }
         else if (condition === 'xor') {
+          console.log(serializer.serializeToString(el));
+          console.log(condResult);
+          console.log(truthStack[i + 1]);
+          console.log(!truthStack[i + 1]);
+          console.log(truthStack);
           condResult = Boolean((condResult && !truthStack[i + 1]) || (!condResult && truthStack[i + 1]));
         }
       }
 
-      console.log(condResult);
-      console.log();
-      return condResult;
+      return condResult !== undefined ? condResult : condition;
     },
 
     // replaces a single {var} with its value from a given model

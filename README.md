@@ -17,6 +17,7 @@ Table of contents
 - [How to write Teddy templates](https://github.com/kethinov/teddy#how-to-write-teddy-templates)
   - [Includes](https://github.com/kethinov/teddy#includes)
   - [Conditionals](https://github.com/kethinov/teddy#conditionals)
+  - [Boolean logic](https://github.com/kethinov/teddy#boolean-logic)
   - [One line ifs](https://github.com/kethinov/teddy#one-line-ifs)
   - [Loops](https://github.com/kethinov/teddy#loops)
   - [A complex example combining all tag types](https://github.com/kethinov/teddy#a-complex-example-combining-all-tag-types)
@@ -190,6 +191,47 @@ An `<unless>` statement structure with an `<elseunless>` tag which is evaluated 
 <else>
   <p>The variables 'something' and 'somethingElse' are both present</p>
 </else>
+```
+
+Boolean logic
+---
+
+Boolean logic operators are evaluated left to right.
+
+`or` operator:
+
+```html
+<if something or somethingElse>
+  <p>This will render if either 'something' or 'somethingElse' is present.</p>
+</if>
+```
+
+`and` operator
+
+```html
+<if something and somethingElse>
+  <p>This will render if 'something' is present and 'somethingElse' is present too.</p>
+</if>
+```
+
+`xor` operator:
+
+```html
+<if something xor somethingElse>
+  <p>This will render if either 'something' is present or 'somethingElse' is present, but it will not render if both are present.</p>
+.</p>
+</if>
+<else>
+  <p>This will render if 'something' is present and 'somethingElse' is present too.</p>
+</else>
+```
+
+`not:` prefix:
+
+```html
+<if not:something>
+  <p>This will render if 'something' is not present.</p>
+</if>
 ```
 
 One line ifs
