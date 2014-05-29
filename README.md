@@ -402,7 +402,7 @@ Notable intentional design choices and limitations
 
 - All variables in Teddy templates are case-insensitive because HTML is case-insensitive.
 - Unlike some other templating systems, Teddy will not automatically escape HTML entities contained within variables. You should filter such things if desired at the code level and pass the results to the templates through the model as readable variables.
-- Teddy adheres to a mostly logic-less templates philosophy. `<if>` and `<unless>` statements in Teddy can only check for a single variable's presence or its precise value. They cannot evaluate complex logic; there are no ands, ors, xors, parentheticals, or math operators. Teddy is of the opinion that complex logic doesn't belong in templates. Evaluate such logic at the code level and pass the results to the templates through the model as readable variables.
+- Teddy adheres to a mostly logic-less templates philosophy. Teddy is of the opinion that complex logic beyond what Teddy tags are capable of generally doesn't belong in templates. Evaluate such logic at the code level and pass the results to the templates through the model as readable variables.
 - Teddy's client-side performance and browser support is largely tied to how well [DOMParser](https://developer.mozilla.org/en-US/docs/Web/API/DOMParser) and [XMLSerializer](https://developer.mozilla.org/en-US/docs/XMLSerializer) are implemented (if at all) in the target browser.
 - Teddy is beta software! Not many apps have been written using Teddy yet, so it's entirely possible that there will be some significant bugs.
 
