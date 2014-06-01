@@ -142,6 +142,10 @@ if (!sameOriginPolicy && !oldIE) {
     return idoc.getElementsByClassName('flowcontrol')[0].innerHTML.replace(/ xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g, '') == "<h1>Flow control</h1><p>The variable 'something' is present</p><p>The variable 'something' is not set to 'hello'</p><p>The variable 'something' is present</p><p>The variable 'something' is present</p><p>The variables 'something' and 'somethingElse' are both present</p>" ? true : false;
   });
 
+  unitTest('boolean logic test', function() {
+    return idoc.getElementsByClassName('booleanLogic')[0].innerHTML.replace(/ xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g, '') == "<p>or: true</p><p>and: false</p><p>xor: false</p><p>not: false</p><p>and + or: true</p>" ? true : false;
+  });
+
   unitTest('one line if test', function() {
     return idoc.getElementsByClassName('onelineifs')[0].innerHTML.replace(/ xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g, '') == "<h1>One line ifs</h1><p class=\"something-is-present\">One line if.</p><p class=\"something-is-not-hello\">One line if.</p>" ? true : false;
   });

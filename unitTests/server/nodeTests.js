@@ -82,6 +82,10 @@ unitTest('conditionals overall test', function() {
   return renderedTemplate.indexOf("<section class=\"flowcontrol\"><h1>Flow control</h1><p>The variable 'something' is present</p><p>The variable 'something' is not set to 'hello'</p><p>The variable 'something' is present</p><p>The variable 'something' is present</p><p>The variables 'something' and 'somethingElse' are both present</p></section>") > -1 ? true : false;
 });
 
+unitTest('boolean logic test', function() {
+  return renderedTemplate.indexOf("<section class=\"booleanLogic\"><p>or: true</p><p>and: false</p><p>xor: false</p><p>not: false</p><p>and + or: true</p></section>") > -1 ? true : false;
+});
+
 unitTest('one line if test', function() {
   return renderedTemplate.indexOf("<section class=\"onelineifs\"><h1>One line ifs</h1><p class=\"something-is-present\">One line if.</p><p class=\"something-is-not-hello\">One line if.</p></section>") > -1 ? true : false;
 });

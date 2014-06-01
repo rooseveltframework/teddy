@@ -77,6 +77,44 @@
       </else>
     </section>
 
+    <section class='booleanLogic'>
+
+          {! true !}   {! false !}
+      <if something or notDefined>
+        <p>or: true</p>
+      </if>
+
+          {! true !}    {! false !}
+      <if something and notDefined>
+        <p>should not render</p>
+      </if>
+      <else>
+        <p>and: false</p>
+      </else>
+
+          {! true !}    {! true !}
+      <if something xor somethingElse>
+        <p>should not render</p>
+      </if>
+      <else>
+        <p>xor: false</p>
+      </else>
+
+          {! false !}
+      <if not:something>
+        <p>should not render</p>
+      </if>
+      <else>
+        <p>not: false</p>
+      </else>
+
+          {! true !}    {! false !}   {! true !}
+      <if something and notDefined or somethingElse>
+        <p>and + or: true</p>
+      </if>
+
+    </section>
+
     <section class='onelineifs'>
       <h1>One line ifs</h1>
 
