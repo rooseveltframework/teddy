@@ -813,6 +813,10 @@
           conditionVal = undefined;
           truthStack.push(evalStatement());
           attrCount++;
+          if (reordersAttributes) {
+            console.warn('teddy.evalCondition() does not support boolean logic in this browser. See https://github.com/kethinov/teddy/issues/23');
+            notDone = false;
+          }
         }
         else {
           notDone = false;
@@ -1276,7 +1280,8 @@
   xmldom,
   parser,
   serializer,
-  oldIE;
+  oldIE,
+  reordersAttributes;
 
   // set env specific vars for node.js
   if (isNode) {
@@ -1360,6 +1365,9 @@
           }
         };
       }(DOMParser));
+
+      // test to see if the browser reorders attributes (e.g. IE)
+      reordersAttributes = parser.parseFromString(serializer.serializeToString(parser.parseFromString('<if o t>', 'text/html')), 'text/html').getElementsByTagName('if')[0].attributes[0].nodeName === 't';
     }
   }
 })(this);
