@@ -1137,7 +1137,7 @@
       return docString;
     },
 
-    // hack to work around Opera and MSIE bug in which DOMParser's parseFromString method incorrectly parses empty UnknownElements. Since <include> tags can sometimes not have children, this hack is necessary for Opera and IE compatibility. This bug was reported to Opera as bug DSK-381933. Attempted to report the bug to Microsoft too, but they don't appear to have a way of doing that.
+    // hack to work around Opera and MSIE bug in which DOMParser's parseFromString method incorrectly parses empty UnknownElements. Since <include> tags can sometimes not have children, this hack is necessary for Opera and IE compatibility.
     runUnknownElementParentSiblingHack: function(doc) {
       if (!isNode) {
         var includes, inlength, i, el, hack, hasBug = parser.parseFromString(serializer.serializeToString(parser.parseFromString('<z></z><p></p>', 'text/html')), 'text/html').getElementsByTagName('z')[0].firstChild;
