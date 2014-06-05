@@ -219,7 +219,6 @@ Boolean logic operators are evaluated left to right.
 ```html
 <if something xor somethingElse>
   <p>This will render if either 'something' is present or 'somethingElse' is present, but it will not render if both are present.</p>
-.</p>
 </if>
 <else>
   <p>This will render if 'something' is present and 'somethingElse' is present too.</p>
