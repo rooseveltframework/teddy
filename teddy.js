@@ -482,8 +482,12 @@
 
     // retrieve local model from cache and apply it to full model for parsing
     applyLocalModel: function(el, model) {
-      var modelNumber = parseInt(el.getAttribute('data-local-model')), localModel = teddy._contextModels[modelNumber - 1], i;
-      if ((modelNumber - 1) && localModel) {
+      var attr = el.getAttribute('data-local-model'),
+          modelNumber = ('' + attr).length ? parseInt(attr) : -1,
+          localModel = teddy._contextModels[modelNumber - 1],
+          i;
+
+      if (localModel) {
         for (i in localModel) {
           model[i] = localModel[i];
         }
@@ -836,11 +840,6 @@
           condResult = Boolean(condResult || truthStack[i + 1]);
         }
         else if (condition === 'xor') {
-          console.log(serializer.serializeToString(el));
-          console.log(condResult);
-          console.log(truthStack[i + 1]);
-          console.log(!truthStack[i + 1]);
-          console.log(truthStack);
           condResult = Boolean((condResult && !truthStack[i + 1]) || (!condResult && truthStack[i + 1]));
         }
       }
