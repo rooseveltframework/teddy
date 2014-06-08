@@ -500,7 +500,7 @@
       if (el) {
         var key = el.getAttribute('key'),
             val = el.getAttribute('val'),
-            collection = el.getAttribute('in'),
+            collection = ('' + el.getAttribute('in')).toLowerCase(),
             i,
             loopContent = '',
             parsedLoop = '',
