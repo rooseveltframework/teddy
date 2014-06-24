@@ -115,7 +115,7 @@ if (!sameOriginPolicy && !oldIE) {
   });
 
   unitTest('{variable} test', function() {
-    return idoc.getElementsByClassName('variables')[0].innerHTML.replace(/ xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g, '') == '<h1>Simple variable</h1><p>Hello world!</p><h2>Variable with a variable in it</h2><p>Variable with a variable inside: And another: Hello world!</p>' ? true : false;
+    return idoc.getElementsByClassName('variables')[0].innerHTML.replace(/ xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g, '') == ' <h1>Simple variable</h1> <p>Hello world!</p> <h2>Variable with a variable in it</h2> <p>Variable with a variable inside: And another: Hello world!</p> ' ? true : false;
   });
 
   unitTest('{! server-side comment !} test', function() {
@@ -127,49 +127,53 @@ if (!sameOriginPolicy && !oldIE) {
   });
 
   unitTest('&lt;include&gt; without arguments test', function() {
-    return idoc.getElementsByClassName('sampleIncludeWithoutArguments')[0].innerHTML.replace(/ xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g, '') == '<p>This is a sample included template without arguments.</p>' ? true : false;
+    return idoc.getElementsByClassName('sampleIncludeWithoutArguments')[0].innerHTML.replace(/ xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g, '') == ' <p>This is a sample included template without arguments.</p>' ? true : false;
   });
 
   unitTest('&lt;include&gt; with arguments test', function() {
-    return idoc.getElementsByClassName('sampleIncludeWithArguments')[0].innerHTML.replace(/ xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g, '') == '<p>This is a sample included template with arguments.</p><dl><dt>firstArgument:</dt><dd>Plain text argument</dd><dt>secondArgument:</dt><dd><span>Argument with HTML in it</span></dd><dt>thirdArgument: </dt><dd>Plain text argument to be checked via an if statement</dd></dl>' ? true : false;
+    return idoc.getElementsByClassName('sampleIncludeWithArguments')[0].innerHTML.replace(/ xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g, '') == ' <p>This is a sample included template with arguments.</p> <dl> <dt>firstArgument:</dt> <dd>Plain text argument</dd> <dt>secondArgument:</dt> <dd> <span>Argument with HTML in it</span> </dd> <dt>thirdArgument: </dt> <dd>Plain text argument to be checked via an if statement</dd> </dl>' ? true : false;
   });
 
   unitTest('&lt;includes&gt; overall test', function() {
-    return idoc.getElementsByClassName('includes')[0].innerHTML.replace(/ xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g, '') == '<h1>Includes</h1><section class="sampleIncludeWithoutArguments"><p>This is a sample included template without arguments.</p></section><section class="sampleIncludeWithArguments"><p>This is a sample included template with arguments.</p><dl><dt>firstArgument:</dt><dd>Plain text argument</dd><dt>secondArgument:</dt><dd><span>Argument with HTML in it</span></dd><dt>thirdArgument: </dt><dd>Plain text argument to be checked via an if statement</dd></dl></section>' ? true : false;
+    return idoc.getElementsByClassName('includes')[0].innerHTML.replace(/ xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g, '') == ' <h1>Includes</h1> <section class="sampleIncludeWithoutArguments"> <p>This is a sample included template without arguments.</p></section> <section class="sampleIncludeWithArguments"> <p>This is a sample included template with arguments.</p> <dl> <dt>firstArgument:</dt> <dd>Plain text argument</dd> <dt>secondArgument:</dt> <dd> <span>Argument with HTML in it</span> </dd> <dt>thirdArgument: </dt> <dd>Plain text argument to be checked via an if statement</dd> </dl></section> ' ? true : false;
   });
 
   unitTest('conditionals overall test', function() {
-    return idoc.getElementsByClassName('flowcontrol')[0].innerHTML.replace(/ xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g, '') == "<h1>Flow control</h1><p>The variable 'something' is present</p><p>The variable 'something' is not set to 'hello'</p><p>The variable 'something' is present</p><p>The variable 'something' is present</p><p>The variables 'something' and 'somethingElse' are both present</p>" ? true : false;
+    return idoc.getElementsByClassName('flowcontrol')[0].innerHTML.replace(/ xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g, '') == " <h1>Flow control</h1> <p>The variable 'something' is present</p> <p>The variable 'something' is not set to 'hello'</p> <p>The variable 'something' is present</p> <p>The variable 'something' is present</p> <p>The variables 'something' and 'somethingElse' are both present</p> " ? true : false;
   });
 
   unitTest('boolean logic test', function() {
-    return idoc.getElementsByClassName('booleanLogic')[0].innerHTML.replace(/ xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g, '') == "<p>or: true</p><p>and: false</p><p>xor: false</p><p>not: false</p><p>and + or: true</p>" ? true : false;
+    return idoc.getElementsByClassName('booleanLogic')[0].innerHTML.replace(/ xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g, '') == " <p>or: true</p> <p>and: false</p> <p>xor: false</p> <p>not: false</p> <p>and + or: true</p> " ? true : false;
   });
 
   unitTest('one line if test', function() {
-    return idoc.getElementsByClassName('onelineifs')[0].innerHTML.replace(/ xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g, '') == "<h1>One line ifs</h1><p class=\"something-is-present\">One line if.</p><p class=\"something-is-not-hello\">One line if.</p>" ? true : false;
+    return idoc.getElementsByClassName('onelineifs')[0].innerHTML.replace(/ xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g, '') == ' <h1>One line ifs</h1> <p class="something-is-present">One line if.</p> <p class="something-is-not-hello">One line if.</p> ' ? true : false;
   });
 
   unitTest('loops overall test', function() {
-    return idoc.getElementsByClassName('looping')[0].innerHTML.replace(/ xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g, '') == "<h1>Looping</h1><dl><dt>JS model:</dt><dd>letters = ['a', 'b', 'c'];</dd><dt>HTML template:</dt><dd><p>a</p><p>b</p><p>c</p></dd></dl><dl><dt>JS model:</dt><dd>names = {jack: 'guy', jill: 'girl', hill: 'landscape'};</dd><dt>HTML template:</dt><dd><p>jack</p><p>guy</p><p>jill</p><p>girl</p><p>hill</p><p>landscape</p></dd></dl><dl><dt>JS model:</dt><dd>objects = [{a:1, b:2, c:3}, {a:4, b:5, c:6}, {a:7, b:8, c:9}];</dd><dt>HTML template:</dt><dd><p>0</p><p>1</p><p>2</p><p>3</p><p>1</p><p>4</p><p>5</p><p>6</p><p>2</p><p>7</p><p>8</p><p>9</p></dd></dl><dl><dt>JS model:</dt><dd>objects = [{a:1, b:2, c:3}, {a:4, b:5, c:6}, {a:7, b:8, c:9}];</dd><dt>HTML template:</dt><dd><p hidden=\"\">item.b is 5</p><section class=\"sampleIncludeWithArguments\"><p>This is a sample included template with arguments.</p><dl><dt>firstArgument:</dt><dd>2</dd><dt>secondArgument:</dt><dd><span>3</span></dd><dt>thirdArgument: </dt><dd>not present</dd></dl></section><p>item.a is 4</p><p class=\"item-b-is-five\">item.b is 5</p><section class=\"sampleIncludeWithArguments\"><p>This is a sample included template with arguments.</p><dl><dt>firstArgument:</dt><dd>5</dd><dt>secondArgument:</dt><dd><span>6</span></dd><dt>thirdArgument: </dt><dd>not present</dd></dl></section><p hidden=\"\">item.b is 5</p><section class=\"sampleIncludeWithArguments\"><p>This is a sample included template with arguments.</p><dl><dt>firstArgument:</dt><dd>8</dd><dt>secondArgument:</dt><dd><span>9</span></dd><dt>thirdArgument: </dt><dd>not present</dd></dl></section></dd></dl>" ? true : false;
+    return idoc.getElementsByClassName('looping')[0].innerHTML.replace(/ xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g, '') == " <h1>Looping</h1> <dl> <dt>JS model:</dt> <dd>letters = ['a', 'b', 'c'];</dd> <dt>HTML template:</dt> <dd> <p>a</p> <p>b</p> <p>c</p> </dd> </dl> <dl> <dt>JS model:</dt> <dd>names = {jack: 'guy', jill: 'girl', hill: 'landscape'};</dd> <dt>HTML template:</dt> <dd> <p>jack</p> <p>guy</p> <p>jill</p> <p>girl</p> <p>hill</p> <p>landscape</p> </dd> </dl> <dl> <dt>JS model:</dt> <dd>objects = [{a:1, b:2, c:3}, {a:4, b:5, c:6}, {a:7, b:8, c:9}];</dd> <dt>HTML template:</dt> <dd> <p>0</p> <p>1</p> <p>2</p> <p>3</p> <p>1</p> <p>4</p> <p>5</p> <p>6</p> <p>2</p> <p>7</p> <p>8</p> <p>9</p> </dd> </dl> <dl> <dt>JS model:</dt> <dd>objects = [{a:1, b:2, c:3}, {a:4, b:5, c:6}, {a:7, b:8, c:9}];</dd> <dt>HTML template:</dt> <dd> <p hidden=\"\">item.b is 5</p> <section class=\"sampleIncludeWithArguments\"> <p>This is a sample included template with arguments.</p> <dl> <dt>firstArgument:</dt> <dd>2</dd> <dt>secondArgument:</dt> <dd> <span>3</span> </dd> <dt>thirdArgument: </dt> <dd>not present</dd> </dl></section> <p>item.a is 4</p> <p class=\"item-b-is-five\">item.b is 5</p> <section class=\"sampleIncludeWithArguments\"> <p>This is a sample included template with arguments.</p> <dl> <dt>firstArgument:</dt> <dd>5</dd> <dt>secondArgument:</dt> <dd> <span>6</span> </dd> <dt>thirdArgument: </dt> <dd>not present</dd> </dl></section> <p hidden=\"\">item.b is 5</p> <section class=\"sampleIncludeWithArguments\"> <p>This is a sample included template with arguments.</p> <dl> <dt>firstArgument:</dt> <dd>8</dd> <dt>secondArgument:</dt> <dd> <span>9</span> </dd> <dt>thirdArgument: </dt> <dd>not present</dd> </dl></section> </dd> </dl> " ? true : false;
   });
 
   unitTest('table test', function() {
-    return idoc.getElementsByClassName('tableTest')[0].innerHTML.replace(/ xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g, '') == "<table><caption>Sample Table - High Scores</caption><thead><tr><th>#</th><th>Name</th><th>Score</th></tr></thead><tfoot><tr><th>#</th><th>Name</th><th>Score</th></tr></tfoot><tbody><tr><td>0</td><td>player <strong>a</strong></td><td>over 9000!</td></tr><tr><td>1</td><td>player <strong>b</strong></td><td>over 9000!</td></tr><tr><td>2</td><td>player <strong>c</strong></td><td>over 9000!</td></tr></tbody></table>" ? true : false;
+    return idoc.getElementsByClassName('tableTest')[0].innerHTML.replace(/ xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g, '') == " <table> <caption>Sample Table - High Scores</caption> <thead> <tr> <th>#</th> <th>Name</th> <th>Score</th> </tr> </thead> <tfoot> <tr> <th>#</th> <th>Name</th> <th>Score</th> </tr> </tfoot> <tbody> <tr> <td>0</td> <td>player <strong>a</strong></td> <td>over 9000!</td> </tr> <tr> <td>1</td> <td>player <strong>b</strong></td> <td>over 9000!</td> </tr> <tr> <td>2</td> <td>player <strong>c</strong></td> <td>over 9000!</td> </tr> </tbody> </table> " ? true : false;
+  });
+
+  unitTest('inline tag whitespace test', function() {
+    return idoc.getElementsByClassName('inlineTagWhitespace')[0].innerHTML.replace(/ xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g, '') == " <p><span>Hello</span> <span>world</span></p> " ? true : false;
   });
 
   unitTest('text node-only element test', function() {
     var output = idoc.getElementsByClassName('textNodeElementTest')[0].innerHTML.replace(/ xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g, '');
-    return  output == "<script>/* `something` present */ </script><textarea name=\"textareaTest\" rows=\"9\" cols=\"9\">something </textarea><select name=\"selectTest\"><option value=\"something\">something</option></select>" ||
-            output == "<script> /* `something` present */ </script><textarea name=\"textareaTest\" rows=\"9\" cols=\"9\"> something </textarea><select name=\"selectTest\"><option value=\"something\">something</option></select>" ? true : false;
+    return  output == " <script>/* `something` present */ </script> <textarea name=\"textareaTest\" rows=\"9\" cols=\"9\">something </textarea> <select name=\"selectTest\"> <option value=\"something\">something</option> </select> " ||
+            output == " <script> /* `something` present */ </script> <textarea name=\"textareaTest\" rows=\"9\" cols=\"9\"> something </textarea> <select name=\"selectTest\"> <option value=\"something\">something</option> </select> " ? true : false;
   });
 
   unitTest('dynamic includes and conditionals test', function() {
-    return idoc.getElementsByClassName('dynamicInclude')[0].innerHTML.replace(/ xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g, '') == "<section class=\"sampleIncludeWithoutArguments\"><p>This is a sample included template without arguments.</p></section>" ? true : false;
+    return idoc.getElementsByClassName('dynamicInclude')[0].innerHTML.replace(/ xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g, '') == ' <section class="sampleIncludeWithoutArguments"> <p>This is a sample included template without arguments.</p></section> ' ? true : false;
   });
 
   unitTest('packaged templates test', function() {
-    if (teddy.packagedTemplates['inc/sampleIncludeWithArguments.html'] !== "teddy.compiledTemplates['inc/sampleIncludeWithArguments.html']='<section class=\\'sampleIncludeWithArguments\\'><p>This is a sample included template with arguments.</p><dl><dt>firstArgument:</dt><dd>{firstArgument}</dd><dt>secondArgument:</dt><dd>{secondArgument}</dd><dt>thirdArgument: </dt><if thirdArgument><dd>{thirdArgument}</dd></if><else><dd>not present</dd></else></dl></section>';" || teddy.packagedTemplates['inc/sampleIncludeWithoutArguments.html'] !== "teddy.compiledTemplates['inc/sampleIncludeWithoutArguments.html']='<section class=\\'sampleIncludeWithoutArguments\\'><p>This is a sample included template without arguments.</p></section>';") {
+    if (teddy.packagedTemplates['inc/sampleIncludeWithArguments.html'] !== "teddy.compiledTemplates['inc/sampleIncludeWithArguments.html']='<section class=\\'sampleIncludeWithArguments\\'> <p>This is a sample included template with arguments.</p> <dl> <dt>firstArgument:</dt> <dd>{firstArgument}</dd> <dt>secondArgument:</dt> <dd>{secondArgument}</dd> <dt>thirdArgument: </dt> <if thirdArgument> <dd>{thirdArgument}</dd> </if> <else> <dd>not present</dd> </else> </dl></section>';" || teddy.packagedTemplates['inc/sampleIncludeWithoutArguments.html'] !== "teddy.compiledTemplates['inc/sampleIncludeWithoutArguments.html']='<section class=\\'sampleIncludeWithoutArguments\\'> <p>This is a sample included template without arguments.</p></section>';") {
       return false;
     }
     try {
