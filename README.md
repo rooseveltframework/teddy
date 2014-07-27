@@ -92,7 +92,7 @@ Here's how:
 - More concise `{variable}` syntax. One curly bracket. Not two, not three, no pound signs, no question marks, no backticks, no gang signs, and no hieroglyphs.
 - An `<include>` tag for layout templates and partials which accepts arguments via child `<arg>` elements.
 - Flow control tags: `<if>`, `<unless>`, `<elseif>`, `<elseunless>`, and `<else>` for basic templating logic.
-- A `<foreach>` tag for looping.
+- A `<loop>` tag for looping.
 - Server-side `{!comments!}` delimited by exclamation points in a fashion similar to `<!-- HTML comments -->`. Server-side comments are stripped out at the template compilation stage.
 - No funky symbols to memorize. Just `{variables}` for data and new HTML-like `<tags>` for rudimentary logic.
 
@@ -274,12 +274,12 @@ letters = ['a', 'b', 'c'];
 It can be iterated over like so:
 
 ```html
-<foreach val='letter' in='letters'>
+<loop through='letters' val='letter'>
   <p>{letter}</p> <!-- outputs a, b, c -->
-</foreach>
+</loop>
 ```
 
-In the above example `in='letters'` defines the JS model being iterated over and `val='letter'` defines a local variable for the current `letter` being iterated over.
+In the above example `through='letters'` defines the JS model being iterated over and `val='letter'` defines a local variable for the current `letter` being iterated over.
 
 When looping over more complex data structures, sometimes you will need access to both the key and the value of your array or object. For instance, suppose this JS model:
 
@@ -290,13 +290,13 @@ names = {jack: 'guy', jill: 'girl', hill: 'landscape'};
 It can be iterated over like so:
 
 ```html
-<foreach key='name' val='description' in='names'>
+<loop through='names' key='name' val='description'>
   <p>{name}</p> <!-- outputs jack, jill, hill -->
   <p>{description}</p> <!-- outputs guy, girl, landscape -->
-</foreach>
+</loop>
 ```
 
-We once again define an `in` attribute which we set to `in='names'` and a `val` attribute which we set to `val='description'` similar to the last example. However this time we've iterated over a JS object with named keys instead of a simple indexed array, so it is useful to define a `key` attribute in the `<foreach>` tag to gain access to the name of the current iteration variable. We have defined it as `key='name'` in this example.
+We once again define a `through` attribute which we set to `through='names'` and a `val` attribute which we set to `val='description'` similar to the last example. However this time we've iterated over a JS object with named keys instead of a simple indexed array, so it is useful to define a `key` attribute in the `<loop>` tag to gain access to the name of the current iteration variable. We have defined it as `key='name'` in this example.
 
 Even complex, hierarchical data structures can be iterated over. For instance, suppose this JS model:
 
@@ -307,13 +307,15 @@ objects = [{a:1, b:2, c:3}, {a:4, b:5, c:6}, {a:7, b:8, c:9}];
 For the above array of objects, we can combine the techniques illustrated above to display each member of the hierarchy in sequence:
 
 ```html
-<foreach key='i' val='item' in='objects'>
+<loop through='objects' key='i' val='item'>
   <p>{i}</p> <!-- outputs 0, 1, 2 -->
   <p>{item.a}</p> <!-- outputs 1, 4, 7 -->
   <p>{item.b}</p> <!-- outputs 2, 5, 8 -->
   <p>{item.c}</p> <!-- outputs 3, 6, 9 -->
-</foreach>
+</loop>
 ```
+
+*Note: you can also use `in` in place of `through` if you like a more concise syntax.*
 
 A complex example combining all tag types
 ---
@@ -324,10 +326,10 @@ Supposing the following JS model again:
 objects = [{a:1, b:2, c:3}, {a:4, b:5, c:6}, {a:7, b:8, c:9}];
 ```
 
-We could perform many complex operations simultaneously. For instance, we could iterate over it with a `<foreach>` and then at each iteration perform an `<if>` statement and `<include>` a partial:
+We could perform many complex operations simultaneously. For instance, we could iterate over it with a `<loop>` and then at each iteration perform an `<if>` statement and `<include>` a partial:
 
 ```html
-<foreach val='item' in='objects'>
+<loop through='objects' val='item'>
   <if item.a='4'>
     <p>item.a is 4</p>
   </if>
@@ -338,7 +340,7 @@ We could perform many complex operations simultaneously. For instance, we could 
       <span>{item.c}</span>
     </arg>
   </include>
-</foreach>
+</loop>
 ```
 
 Using Teddy in Node.js
@@ -394,6 +396,7 @@ API documentation
   - `2`: Verbose logging. Logs even minor errors.
   - `3`: Debug mode. Very verbose.
 - `teddy.strictParser(true)`: When this setting is enabled, Teddy will throw an exception if the template is not well formed. Default is false. *(Not recommended to enable in production as throwing exceptions could cause downtime.)*
+- `teddy.enableForeachTag(true)`: When this setting is enabled, Teddy will allow the old `<foreach>` tag syntax. Default is false. *(Not recommended to enable as the `foreach` tag will likely be deprecated in the future.)*
 - `teddy.compileAtEveryRender(true)`: When this setting is enabled, Teddy will compile the template at each render rather than caching previous compiles. Default is false. *(Not recommended to enable in production for performance reasons.)*
 
 Notable intentional design choices and limitations

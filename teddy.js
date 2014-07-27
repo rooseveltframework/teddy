@@ -203,7 +203,7 @@
     parseConditionals: function(doc, model) {
       var el,
           result,
-          conditionals = teddy.findNonLoopedConditionals(doc),      // skips conditionals within <foreach> tags
+          conditionals = teddy.findNonLoopedConditionals(doc),      // skips conditionals within loop tags
           oneliners = teddy.findNonLoopedOneLineConditionals(doc),  // ditto
           length,
           i;
@@ -231,17 +231,29 @@
       return doc;
     },
 
-    // finds all <foreach> tags and renders them
+    // finds all loop tags and renders them
     parseLoops: function(doc, model) {
       var el,
           notDone = true,
-          result;
+          result,
+          nextEl;
 
+      if (teddy.params.enableForeachTag) {
+        nextEl = function() {
+          return doc.getElementsByTagName('foreach')[0];
+        };
+      }
+      else {
+        nextEl = function() {
+          return doc.getElementsByTagName('loop')[0];
+        };
+      }
+      
       while (notDone) {
-        el = doc.getElementsByTagName('foreach')[0];
+        el = nextEl();
         if (el) {
           notDone = true;
-          result = teddy.renderForeach(el, model);
+          result = teddy.renderLoop(el, model);
           model = teddy._baseModel; // restore original model
           teddy.replaceProcessedElement(el, result);
         }
@@ -459,7 +471,7 @@
       }
     },
 
-    // finds all <if>, <elseif>, <unless>, <elseunless>, one line ifs, and <foreach> tags and applies their local models
+    // finds all <if>, <elseif>, <unless>, <elseunless>, one line ifs, and loop tags and applies their local models
     tagLocalModels: function(doc, extraModel) {
       var el,
           els = doc.getElementsByTagName('*'),
@@ -473,7 +485,7 @@
       for (i = 0; i < length; i++) {
         el = els[i];
         nodeName = el.nodeName.toLowerCase();
-        if (el.getAttribute('true') || el.getAttribute('false') || nodeName === 'if' || nodeName === 'elseif' || nodeName === 'unless' || nodeName === 'elseunless' || nodeName === 'foreach') {
+        if (el.getAttribute('true') || el.getAttribute('false') || nodeName === 'if' || nodeName === 'elseif' || nodeName === 'unless' || nodeName === 'elseunless' || nodeName === 'loop' || nodeName === 'foreach') {
           el.setAttribute('data-local-model', modelNumber);
         }
       }
@@ -496,12 +508,12 @@
       return model;
     },
 
-    // parses a single <foreach> tag
-    renderForeach: function(el, model) {
+    // parses a single loop tag
+    renderLoop: function(el, model) {
       if (el) {
         var key = el.getAttribute('key'),
             val = el.getAttribute('val'),
-            collection = ('' + el.getAttribute('in')).toLowerCase(),
+            collection = (('' + el.getAttribute('through')) || ('' + el.getAttribute('in'))).toLowerCase(),
             i,
             loopContent = '',
             parsedLoop = '',
@@ -510,13 +522,13 @@
 
         if (!val) {
           if (teddy.params.verbosity) {
-            console.warn('<foreach> element found with no "val" attribute. Ignoring elment.');
+            console.warn('loop element found with no "val" attribute. Ignoring elment.');
           }
           return false;
         }
         else if (!collection) {
           if (teddy.params.verbosity) {
-            console.warn('<foreach> element found with no "in" attribute. Ignoring elment.');
+            console.warn('loop element found with no "through" or "in" attribute. Ignoring elment.');
           }
           return false;
         }
@@ -524,7 +536,7 @@
           collection = model[collection];
           if (!collection) {
             if (teddy.params.verbosity) {
-              console.warn('<foreach> element found with undefined value specified for "in" attribute. Ignoring elment.');
+              console.warn('loop element found with undefined value specified for "through" or "in" attribute. Ignoring elment.');
             }
             return false;
           }
@@ -533,7 +545,7 @@
             // add local vars to model
             model = teddy.applyLocalModel(el, model);
 
-            // tells parseConditionals that this foreach is safe to process conditionals in
+            // tells parseConditionals that this loop is safe to process conditionals in
             el.setAttribute('looped', 'true');
 
             loopContent = teddy.stringifyElementChildren(el);
@@ -577,7 +589,7 @@
       }
       else {
         if (teddy.params.verbosity > 1) {
-          console.warn('teddy.renderForeach() called for a <foreach> element that does not exist.');
+          console.warn('teddy.renderLoop() called for a loop element that does not exist.');
         }
         return false;
       }
@@ -861,7 +873,7 @@
       }
     },
 
-    // finds an <include> tag that is not within any <foreach> tag
+    // finds an <include> tag that is not within any loop tag
     findNonLoopedInclude: function(doc) {
       var el,
           parent,
@@ -876,7 +888,7 @@
         parent = el ? el.parentNode : false;
         while (parent && !skip) {
           if (parent.nodeName) {
-            if (parent.nodeName.toLowerCase() === 'foreach') {
+            if (parent.nodeName.toLowerCase() === 'loop' || parent.nodeName.toLowerCase() === 'foreach') {
               if (!parent.getAttribute('looped')) {
                 skip = true;
               }
@@ -896,7 +908,7 @@
       return includes;
     },
 
-    // finds all <if> and <unless> tags that are not within any <foreach> tags
+    // finds all <if> and <unless> tags that are not within any loop tags
     findNonLoopedConditionals: function(doc) {
       var el,
           parent,
@@ -914,7 +926,7 @@
           parent = el ? el.parentNode : false;
           while (parent && !skip) {
             if (parent.nodeName) {
-              if (parent.nodeName.toLowerCase() === 'foreach') {
+              if (parent.nodeName.toLowerCase() === 'loop' || parent.nodeName.toLowerCase() === 'foreach') {
                 if (!parent.getAttribute('looped')) { // exemption check
                   skip = true;
                 }
@@ -945,7 +957,7 @@
       return conditionals;
     },
 
-    // finds all one line conditionals that are not within any <foreach> tags
+    // finds all one line conditionals that are not within any loop tags
     findNonLoopedOneLineConditionals: function(doc) {
       var el,
           parent,
@@ -963,7 +975,7 @@
         }
         while (parent && !skip) {
           if (parent.nodeName) {
-            if (parent.nodeName.toLowerCase() === 'foreach') {
+            if (parent.nodeName.toLowerCase() === 'loop' || parent.nodeName.toLowerCase() === 'foreach') {
               if (!parent.getAttribute('looped')) { // exemption check
                 skip = true;
               }
@@ -1215,6 +1227,7 @@
       verbosity: 1,
       templateRoot: './',
       strictParser: false,
+      enableForeachTag: false,
       compileAtEveryRender: false
     },
 
@@ -1263,6 +1276,11 @@
     // turn on or off the setting to throw an exception if the template is not well formed
     strictParser: function(v) {
       teddy.params.strictParser = Boolean(v);
+    },
+
+    // turn on or off support for the <foreach> tag
+    enableForeachTag: function(v) {
+      teddy.params.enableForeachTag = Boolean(v);
     },
 
     // turn on or off the setting to compile templates at every render

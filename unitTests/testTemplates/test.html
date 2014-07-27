@@ -129,9 +129,9 @@
         <dd>letters = ['a', 'b', 'c'];</dd>
         <dt>HTML template:</dt>
         <dd>
-          <foreach val='letter' in='letters'>
+          <loop through='letters' val='letter'>
             <p>{letter}</p> {! outputs a, b, c !}
-          </foreach>
+          </loop>
         </dd>
       </dl>
 
@@ -140,10 +140,10 @@
         <dd>names = {jack: 'guy', jill: 'girl', hill: 'landscape'};</dd>
         <dt>HTML template:</dt>
         <dd>
-          <foreach key='name' val='description' in='names'>
+          <loop through='names' key='name' val='description'>
             <p>{name}</p> {! outputs jack, jill, hill !}
             <p>{description}</p> {! outputs guy, girl, landscape !}
-          </foreach>
+          </loop>
         </dd>
       </dl>
 
@@ -152,12 +152,12 @@
         <dd>objects = [{a:1, b:2, c:3}, {a:4, b:5, c:6}, {a:7, b:8, c:9}];</dd>
         <dt>HTML template:</dt>
         <dd>
-          <foreach key='i' val='item' in='objects'>
+          <loop through='objects' key='i' val='item'>
             <p>{i}</p> {! outputs 0, 1, 2 !}
             <p>{item.a}</p> {! outputs 1, 4, 7 !}
             <p>{item.b}</p> {! outputs 2, 5, 8 !}
             <p>{item.c}</p> {! outputs 3, 6, 9 !}
-          </foreach>
+          </loop>
         </dd>
       </dl>
 
@@ -167,7 +167,7 @@
         <dd>objects = [{a:1, b:2, c:3}, {a:4, b:5, c:6}, {a:7, b:8, c:9}];</dd>
         <dt>HTML template:</dt>
         <dd>
-          <foreach val='item' in='objects'>
+          <loop through='objects' val='item'>
             <if item.a='4'>
               <p>item.a is 4</p>
             </if>
@@ -178,7 +178,7 @@
                 <span>{item.c}</span>
               </arg>
             </include>
-          </foreach>
+          </loop>
         </dd>
       </dl>
     </section>
@@ -210,13 +210,13 @@
             </tr>
           </tfoot>
           <tbody>
-            <foreach val='letter' key='i' in='letters'>
+            <loop through='letters' val='letter' key='i'>
               <tr>
                 <td>{i}</td>
                 <td>player <strong>{letter}</strong></td>
                 <td>over 9000!</td>
               </tr>
-            </foreach>
+            </loop>
           </tbody>
       </table>
     </section>
