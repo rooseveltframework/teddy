@@ -106,7 +106,7 @@ Variables
 
 Display a variable by simply writing `{varName}` anywhere in the template.
 
-HTML entities such as `<`, `>`, `&`, and `"` will be escaped.
+HTML entities such as `<`, `>`, `&`, `'`, and `"` will be escaped.
 
 If you want to suppress this escaping, write your variable like this: `{varName|s}`.
 
