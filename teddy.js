@@ -291,6 +291,7 @@
           numCurls,
           curl,
           varname,
+          ovarname,
           i,
           varList,
           lastVarList,
@@ -314,6 +315,8 @@
             curl = curls[(i + 1)];
             if (curl) {
               varname = curl.split('}')[0].toLowerCase();
+              ovarname = varname;
+              varname = varname.replace(new RegExp('`', 'g'), '').replace(new RegExp('\\|s', 'g'), '');
               if (varname) {
                 varList.push(varname);
                 dots = varname.split('.');
@@ -340,7 +343,7 @@
                   break;
                 }
                 if (doRender) {
-                  docstring = teddy.renderVar(docstring, varname, curVar);
+                  docstring = teddy.renderVar(docstring, ovarname, curVar);
                 }
               }
             }
@@ -441,7 +444,7 @@
                 argval = teddy.stringifyElementChildren(arg);
 
                 // replace template string argument {var} with argument value
-                incdoc = teddy.renderVar(incdoc, argname, argval);
+                incdoc = teddy.renderVar(incdoc, argname, argval, true);
 
                 // add arg to local model
                 localModel[argname] = argval;
@@ -859,12 +862,27 @@
     },
 
     // replaces a single {var} with its value from a given model
-    renderVar: function(str, varname, varval) {
+    renderVar: function(str, varname, varval, escapeOverride) {
       if (str) {
         // hack to typecast to string
         varname = '' + varname;
         varval = '' + varval;
-        return str.replace(new RegExp('{'+varname+'}', 'gi'), varval);
+        
+        // todo: deal with whitespace, see issue #28 and see compile and render methods
+        /*
+        if (varname.charAt(0) !== '`' || varname.charAt(varname.length - 1) !== '`') {
+          
+        }
+        */
+        
+        // escape html entities
+        if (varname.slice(-2) !== '|s' && varname.slice(-3) !== '|s`') {
+          if (!escapeOverride) {
+            varval = varval.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+          }
+        }
+
+        return str.replace(new RegExp('{' + varname.replace(/\|/g, '\\|') + '}', 'gi'), varval);
       }
       else {
         if (teddy.params.verbosity > 1) {

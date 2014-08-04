@@ -260,5 +260,11 @@
     <section class='inlineTagWhitespace'>
       <p><span>Hello</span> <span>world</span></p>
     </section>
+
+    {! this test ensures issue #29 remains closed !}
+    <section class='varEscaping'>
+      <p>{escapeTest}</p>
+      <p>{escapeTest|s}</p>
+    </section>
   </arg>
 </include>

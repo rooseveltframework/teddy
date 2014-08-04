@@ -19,7 +19,8 @@ model = {
   varWithVarInside: 'Variable with a variable inside: {subVar}',
   subVar: 'And another: {variableName}',
   pageTitle: 'Teddy Templating Engine unit tests',
-  dynamicInclude: 'sampleIncludeWithoutArguments'
+  dynamicInclude: 'sampleIncludeWithoutArguments',
+  escapeTest: '<span>raw html</span>'
 },
 
 // utility vars
@@ -116,6 +117,10 @@ if (!sameOriginPolicy && !oldIE) {
 
   unitTest('{variable} test', function() {
     return idoc.getElementsByClassName('variables')[0].innerHTML.replace(/ xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g, '') == ' <h1>Simple variable</h1> <p>Hello world!</p> <h2>Variable with a variable in it</h2> <p>Variable with a variable inside: And another: Hello world!</p> ' ? true : false;
+  });
+
+  unitTest('{variable} escape test', function() {
+    return idoc.getElementsByClassName('varEscaping')[0].innerHTML.replace(/ xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g, '') == ' <p>&lt;span&gt;raw html&lt;/span&gt;</p> <p><span>raw html</span></p> ' ? true : false;
   });
 
   unitTest('{! server-side comment !} test', function() {
