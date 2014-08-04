@@ -15,6 +15,7 @@ Table of contents
   - [Other popular templating engines are too cryptic](https://github.com/kethinov/teddy#other-popular-templating-engines-are-too-cryptic)
 - [Teddy, symbol-buster extraordinaire](https://github.com/kethinov/teddy#teddy-symbol-buster-extraordinaire)
 - [How to write Teddy templates](https://github.com/kethinov/teddy#how-to-write-teddy-templates)
+  - [Variables](https://github.com/kethinov/teddy#variables)
   - [Includes](https://github.com/kethinov/teddy#includes)
   - [Conditionals](https://github.com/kethinov/teddy#conditionals)
   - [Boolean logic](https://github.com/kethinov/teddy#boolean-logic)
