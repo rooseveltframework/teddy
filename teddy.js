@@ -878,7 +878,7 @@
         // escape html entities
         if (varname.slice(-2) !== '|s' && varname.slice(-3) !== '|s`') {
           if (!escapeOverride) {
-            varval = varval.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+            varval = varval.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&#34;').replace(/'/g, '&#39;');
           }
         }
 
