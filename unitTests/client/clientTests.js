@@ -13,6 +13,7 @@ model = {
   letters: ['a', 'b', 'c'],
   names: {jack: 'guy', jill: 'girl', hill: 'landscape'},
   objects: [{a:1, b:2, c:3}, {a:4, b:5, c:6}, {a:7, b:8, c:9}],
+  objectOfObjects: {one: {a:1, b:2, c:3}, two:{a:4, b:5, c:6}, three:{a:7, b:8, c:9}},
   something: 'Some content',
   somethingElse: true,
   variableName: 'Hello world!',
@@ -159,12 +160,16 @@ if (!sameOriginPolicy && !oldIE) {
     return idoc.getElementsByClassName('looping')[0].innerHTML.replace(/ xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g, '') == " <h1>Looping</h1> <dl> <dt>JS model:</dt> <dd>letters = ['a', 'b', 'c'];</dd> <dt>HTML template:</dt> <dd> <p>a</p> <p>b</p> <p>c</p> </dd> </dl> <dl> <dt>JS model:</dt> <dd>names = {jack: 'guy', jill: 'girl', hill: 'landscape'};</dd> <dt>HTML template:</dt> <dd> <p>jack</p> <p>guy</p> <p>jill</p> <p>girl</p> <p>hill</p> <p>landscape</p> </dd> </dl> <dl> <dt>JS model:</dt> <dd>objects = [{a:1, b:2, c:3}, {a:4, b:5, c:6}, {a:7, b:8, c:9}];</dd> <dt>HTML template:</dt> <dd> <p>0</p> <p>1</p> <p>2</p> <p>3</p> <p>1</p> <p>4</p> <p>5</p> <p>6</p> <p>2</p> <p>7</p> <p>8</p> <p>9</p> </dd> </dl> <dl> <dt>JS model:</dt> <dd>objects = [{a:1, b:2, c:3}, {a:4, b:5, c:6}, {a:7, b:8, c:9}];</dd> <dt>HTML template:</dt> <dd> <p hidden=\"\">item.b is 5</p> <section class=\"sampleIncludeWithArguments\"> <p>This is a sample included template with arguments.</p> <dl> <dt>firstArgument:</dt> <dd>2</dd> <dt>secondArgument:</dt> <dd> <span>3</span> </dd> <dt>thirdArgument: </dt> <dd>not present</dd> </dl></section> <p>item.a is 4</p> <p class=\"item-b-is-five\">item.b is 5</p> <section class=\"sampleIncludeWithArguments\"> <p>This is a sample included template with arguments.</p> <dl> <dt>firstArgument:</dt> <dd>5</dd> <dt>secondArgument:</dt> <dd> <span>6</span> </dd> <dt>thirdArgument: </dt> <dd>not present</dd> </dl></section> <p hidden=\"\">item.b is 5</p> <section class=\"sampleIncludeWithArguments\"> <p>This is a sample included template with arguments.</p> <dl> <dt>firstArgument:</dt> <dd>8</dd> <dt>secondArgument:</dt> <dd> <span>9</span> </dd> <dt>thirdArgument: </dt> <dd>not present</dd> </dl></section> </dd> </dl> " ? true : false;
   });
 
-  unitTest('table test', function() {
-    return idoc.getElementsByClassName('tableTest')[0].innerHTML.replace(/ xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g, '') == " <table> <caption>Sample Table - High Scores</caption> <thead> <tr> <th>#</th> <th>Name</th> <th>Score</th> </tr> </thead> <tfoot> <tr> <th>#</th> <th>Name</th> <th>Score</th> </tr> </tfoot> <tbody> <tr> <td>0</td> <td>player <strong>a</strong></td> <td>over 9000!</td> </tr> <tr> <td>1</td> <td>player <strong>b</strong></td> <td>over 9000!</td> </tr> <tr> <td>2</td> <td>player <strong>c</strong></td> <td>over 9000!</td> </tr> </tbody> </table> " ? true : false;
+  unitTest('looping through nested object test', function() {
+    return idoc.getElementsByClassName('nestedObjectLoops')[0].innerHTML.replace(/ xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g, '') == " <p>a: 4</p> <p>b: 5</p> <p>c: 6</p> " ? true : false;
   });
 
   unitTest('inline tag whitespace test', function() {
     return idoc.getElementsByClassName('inlineTagWhitespace')[0].innerHTML.replace(/ xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g, '') == " <p><span>Hello</span> <span>world</span></p> " ? true : false;
+  });
+
+  unitTest('table test', function() {
+    return idoc.getElementsByClassName('tableTest')[0].innerHTML.replace(/ xmlns=\"http:\/\/www.w3.org\/1999\/xhtml\"/g, '') == " <table> <caption>Sample Table - High Scores</caption> <thead> <tr> <th>#</th> <th>Name</th> <th>Score</th> </tr> </thead> <tfoot> <tr> <th>#</th> <th>Name</th> <th>Score</th> </tr> </tfoot> <tbody> <tr> <td>0</td> <td>player <strong>a</strong></td> <td>over 9000!</td> </tr> <tr> <td>1</td> <td>player <strong>b</strong></td> <td>over 9000!</td> </tr> <tr> <td>2</td> <td>player <strong>c</strong></td> <td>over 9000!</td> </tr> </tbody> </table> " ? true : false;
   });
 
   unitTest('text node-only element test', function() {

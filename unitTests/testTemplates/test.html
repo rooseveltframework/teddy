@@ -266,5 +266,12 @@
       <p>{escapeTest}</p>
       <p>{escapeTest|s}</p>
     </section>
+
+    {! this test ensures issue #30 remains closed !}
+    <section class='nestedObjectLoops'>
+      <loop through='objectOfObjects.two' key='i' val='val'>
+        <p>{i}: {val}</p>
+      </loop>
+    </section>
   </arg>
 </include>
