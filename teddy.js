@@ -24,8 +24,11 @@
           if (fs.existsSync(template)) {
             fname = template;
           }
-          else {
+          else if (fs.existsSync(teddy.params.templateRoot + template)) {
             fname = teddy.params.templateRoot + template;
+          }
+          else {
+            fname = teddy.params.templateRoot + '/' + template;
           }
 
           // attempt readFile
@@ -33,7 +36,7 @@
         }
         catch (e) {
           if (teddy.params.verbosity) {
-            console.warn('teddy.compile threw an exception while attempting to compile a template: ' + e);
+            console.error('teddy.compile threw an exception while attempting to compile a template: ' + e);
           }
           return false;
         }
@@ -65,9 +68,34 @@
     // parses a template
     render: function(template, model, callback) {
 
+      // overload conosle logs
+      console.oldLog = console.log;
+      console.oldWarn = console.warn;
+      console.oldError = console.error;
+      teddy._consoleLogs = '';
+      teddy._consoleWarnings = '';
+      teddy._consoleErrors = '';
+      console.log = function(value) {
+        console.oldLog(value);
+        teddy._consoleLogs += '<li>' + teddy.escapeHtmlEntities(value) + '</li>';
+      };
+      console.warn = function(value) {
+        console.oldWarn(value);
+        teddy._consoleWarnings += '<li>' + teddy.escapeHtmlEntities(value) + '</li>';
+      };
+      console.error = function(value) {
+        console.oldError(value);
+        teddy._consoleErrors += '<li>' + teddy.escapeHtmlEntities(value) + '</li>';
+      };
+
       // needed because sigh
       if (oldIE) {
         console.error('Teddy does not support client-side templating on IE9 or below.');
+        
+        // reset console
+        console.log = console.oldLog;
+        console.warn = console.oldWarn;
+        console.error = console.oldError;
         return false;
       }
 
@@ -118,6 +146,11 @@
         if (teddy.params.verbosity) {
           console.warn('teddy.render attempted to render a template which doesn\'t exist: ' + template);
         }
+
+        // reset console
+        console.log = console.oldLog;
+        console.warn = console.oldWarn;
+        console.error = console.oldError;
         return false;
       }
 
@@ -152,6 +185,32 @@
       // clean up temp vars
       teddy._contextModels = [];
       teddy._baseModel = {};
+      
+      // if we have no template and we have errors, render an error page
+      if (!renderedTemplate && (teddy._consoleErrors || teddy._consoleWarnings)) {
+        renderedTemplate = "<!DOCTYPE html><html lang='en'><head><meta charset='utf-8'><meta http-equiv='Content-Type' content='text/html; charset=utf-8'><title>Parse error</title></head><body>";
+        renderedTemplate += '<h2>Teddy template parse errors:</h2>';
+        if (teddy._consoleErrors) {
+          renderedTemplate += '<ul>';
+          renderedTemplate += teddy._consoleErrors;
+          renderedTemplate += '</ul>';
+        }
+        renderedTemplate += '<h2>Teddy template parse warnings:</h2>';
+        if (teddy._consoleWarnings) {
+          renderedTemplate += '<ul>';
+          renderedTemplate += teddy._consoleWarnings;
+          renderedTemplate += '</ul>';
+        }
+        renderedTemplate += '</body></html>';
+        teddy._consoleLogs = '';
+        teddy._consoleWarnings = '';
+        teddy._consoleErrors = '';
+      }
+
+      // reset console
+      console.log = console.oldLog;
+      console.warn = console.oldWarn;
+      console.error = console.oldError;
 
       // execute callback if present, otherwise simply return the rendered template string
       if ((typeof callback).toLowerCase() === 'function') {
@@ -407,9 +466,10 @@
           incdoc = teddy.compiledTemplates[src];
 
           // determine if it's a new document
-          newDoc = (incdoc.toLowerCase().indexOf('<!doctype') > -1) ? true : false;
-
-          if (!incdoc) {
+          if (incdoc) {
+            newDoc = (incdoc.toLowerCase().indexOf('<!doctype') > -1) ? true : false;
+          }
+          else {
             if (teddy.params.verbosity) {
               console.warn('<include> element found which references a nonexistent template ("' + src + '"). Ignoring element.');
             }
@@ -912,7 +972,7 @@
         // escape html entities
         if (varname.slice(-2) !== '|s' && varname.slice(-3) !== '|s`') {
           if (!escapeOverride) {
-            varval = varval.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&#34;').replace(/'/g, '&#39;');
+            varval = teddy.escapeHtmlEntities(varval);
           }
         }
 
@@ -1186,6 +1246,10 @@
         }
         return false;
       }
+    },
+    
+    escapeHtmlEntities: function(v) {
+      return v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&#34;').replace(/'/g, '&#39;');
     },
 
     temporarilyRenameProblemElements: function(docString) {
