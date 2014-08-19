@@ -4,7 +4,7 @@ Teddy templating engine
 
 Teddy is the most readable and easy to learn templating language there is!
 
-It's an easy-to-read, HTML-based, mostly logic-less DOM templating engine with support for both server-side and client-side templating.
+Or put a more technical way, Teddy is an easy to read, HTML-inspired, mostly logic-less DOM templating engine with support for both server-side and client-side templating.
 
 It uses HTML-like `<tags>` for rudimentary templating logic and Teddy Roosevelt's facial hair for `{variables}`.
 
