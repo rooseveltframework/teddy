@@ -400,7 +400,7 @@ API documentation
   - `teddy.compiledTemplates`: Object indexed by template file path and file name.
   - `teddy.packagedTemplates`: Same as compiledTemplates, except it stores packaged templates instead of compiled templates. Packaged templates are templates compiled on the server and sent to the client as raw JS statements that can be simply eval'd client-side rather than compiled client-side.
 - `teddy.compile(templateString, templateName)`: Compile a template directly by passing a string rather than a file name. Give the template a name using the second argument. This method returns a compiled template. It also populates the two objects mentioned above, but instead indexes them by your chosen templateName, as path is not relevant.
-- `teddy.render(templateNameOrPath, dataModel)`: Render a template. This method will compile the template if it has not already been compiled.
+- `teddy.render(templateNameOrPath, dataModel)`: Render a template by referencing the template's name or file path. If the template was already compiled, it can be rendered by referencing its name. If you're using teddy server-side and the template has never been compiled before, `teddy.render` will perform the compile step first.
 - `teddy.setTemplateRoot(path)`: Set the location of your templates directory. The default is the current directory.
 - `teddy.setVerbosity(n)`: Sets the level of verbosity in Teddy's console logs. Call `teddy.setVerbosity(n)` where `n` equals one of the below values to change the default:
   - `0`: No logging.
