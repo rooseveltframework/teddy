@@ -368,6 +368,8 @@ For a complete sample implementation, see the sample app here: [sampleApps/nodeH
 
 Or if you're looking for a more fully-featured web framework to build web apps with using Teddy templates, then try out Teddy's companion, [Roosevelt](https://github.com/kethinov/roosevelt).
 
+If you're interested in using Teddy with the [gulp.js](http://gulp.js.com) build system for Node apps, check out the [gulp-teddy](https://github.com/Csombek/gulp-teddy) project.
+
 
 Using Teddy with client-side JS
 ===
