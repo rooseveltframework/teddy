@@ -21,7 +21,6 @@
     ".gitignore",
     ".npmignore",
     "assets",
-    "bower.json",
     "package.json",
     "playground.html",
     "README.md",
