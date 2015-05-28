@@ -559,29 +559,10 @@
 
     // retrieve local model from cache and apply it to full model for parsing
     applyLocalModel: function(el, model) {
-      var nextParent = el.parentNode,
-          noneAbove = true,
-          attr,
-          modelNumber,
-          localModel,
+      var attr = el.getAttribute('data-local-model'),
+          modelNumber = ('' + attr).length ? parseInt(attr) : -1,
+          localModel = teddy._contextModels[modelNumber - 1],
           i;
-
-      // look for one further up
-      while (nextParent) {
-        if (nextParent.nodeName.toLowerCase() === 'teddy-local-model') {
-          modelNumber = parseInt(nextParent.getAttribute('cid'));
-          localModel = teddy._contextModels[modelNumber - 1];
-          noneAbove = false;
-          break;
-        }
-        nextParent = nextParent.parentNode;
-      }
-      
-      if (noneAbove) {
-        attr = el.getAttribute('data-local-model');
-        modelNumber = ('' + attr).length ? parseInt(attr) : -1;
-        localModel = teddy._contextModels[modelNumber - 1];
-      }
 
       if (localModel) {
         for (i in localModel) {
@@ -655,8 +636,7 @@
                 localModel[val] = item;
 
                 // parse variables now, but store localModel for later use when parsing nested conditionals and includes
-                modelNumber = teddy._contextModels.push(localModel);
-                parsedLoop += '<teddy-local-model cid="' + modelNumber + '">' + teddy.parseVars(loopContent, model) + '</teddy-local-model>';
+                parsedLoop += serializer.serializeToString(teddy.tagLocalModels(parser.parseFromString(teddy.parseVars(loopContent, model), 'text/html'), localModel));
               }
             }
 
@@ -673,8 +653,6 @@
                 // find includes within the loop and process them
                 newEl = teddy.parseIncludes(newEl, model);
               }
-
-              newEl = teddy.removeLocalModelElements(newEl);
             }
 
             // restore original model
@@ -1280,27 +1258,6 @@
       return docString;
     },
     
-    removeLocalModelElements: function(doc) {
-      var el = doc.getElementsByTagName('teddy-local-model')[0],
-          childString,
-          children;
-
-      while (el) {
-        // get children
-        childString = teddy.stringifyElementChildren(el);
-        
-        // make dom node from just the children
-        children = parser.parseFromString(childString, 'text/html');
-        
-        // replace temp element with the children
-        teddy.replaceProcessedElement(el, children);
-        
-        el = doc.getElementsByTagName('teddy-local-model')[0];
-      }
-      
-      return doc;
-    },
-
     // hack to work around Opera and MSIE bug in which DOMParser's parseFromString method incorrectly parses empty UnknownElements. Since <include> tags can sometimes not have children, this hack is necessary for Opera and IE compatibility.
     runUnknownElementParentSiblingHack: function(doc) {
       if (!isNode) {
