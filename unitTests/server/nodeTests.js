@@ -7,6 +7,32 @@ model = {
   names: {jack: 'guy', jill: 'girl', hill: 'landscape'},
   objects: [{a:1, b:2, c:3}, {a:4, b:5, c:6}, {a:7, b:8, c:9}],
   objectOfObjects: {one: {a:1, b:2, c:3}, two:{a:4, b:5, c:6}, three:{a:7, b:8, c:9}},
+  nestedObjects: [
+    {
+      num: 1,
+      children: [
+        'one',
+        'two',
+        'three'
+      ]
+    },
+    {
+      num: 2,
+      children: [
+        'four',
+        'five',
+        'six'
+      ]
+    },
+    {
+      num: 3,
+      children: [
+        'seven',
+        'eight',
+        'nine'
+      ]
+    },
+  ],
   something: 'Some content',
   somethingElse: true,
   variableName: 'Hello world!',
@@ -97,7 +123,11 @@ unitTest('one line if test', function() {
 });
 
 unitTest('loops overall test', function() {
-  return renderedTemplate.indexOf("<section class=\"looping\"> <h1>Looping</h1> <dl> <dt>JS model:</dt> <dd>letters = ['a', 'b', 'c'];</dd> <dt>HTML template:</dt> <dd> <p>a</p><p>b</p><p>c</p> </dd> </dl> <dl> <dt>JS model:</dt> <dd>names = {jack: 'guy', jill: 'girl', hill: 'landscape'};</dd> <dt>HTML template:</dt> <dd> <p>jack</p> <p>guy</p><p>jill</p> <p>girl</p><p>hill</p> <p>landscape</p> </dd> </dl> <dl> <dt>JS model:</dt> <dd>objects = [{a:1, b:2, c:3}, {a:4, b:5, c:6}, {a:7, b:8, c:9}];</dd> <dt>HTML template:</dt> <dd> <p>0</p> <p>1</p> <p>2</p> <p>3</p><p>1</p> <p>4</p> <p>5</p> <p>6</p><p>2</p> <p>7</p> <p>8</p> <p>9</p> </dd> </dl> <dl> <dt>JS model:</dt> <dd>objects = [{a:1, b:2, c:3}, {a:4, b:5, c:6}, {a:7, b:8, c:9}];</dd> <dt>HTML template:</dt> <dd> <p hidden=\"\">item.b is 5</p> <section class=\"sampleIncludeWithArguments\"> <p>This is a sample included template with arguments.</p> <dl> <dt>firstArgument:</dt> <dd>2</dd> <dt>secondArgument:</dt> <dd> <span>3</span> </dd> <dt>thirdArgument: </dt> <dd>not present</dd> </dl></section><p>item.a is 4</p> <p class=\"item-b-is-five\">item.b is 5</p> <section class=\"sampleIncludeWithArguments\"> <p>This is a sample included template with arguments.</p> <dl> <dt>firstArgument:</dt> <dd>5</dd> <dt>secondArgument:</dt> <dd> <span>6</span> </dd> <dt>thirdArgument: </dt> <dd>not present</dd> </dl></section><p hidden=\"\">item.b is 5</p> <section class=\"sampleIncludeWithArguments\"> <p>This is a sample included template with arguments.</p> <dl> <dt>firstArgument:</dt> <dd>8</dd> <dt>secondArgument:</dt> <dd> <span>9</span> </dd> <dt>thirdArgument: </dt> <dd>not present</dd> </dl></section> </dd> </dl> </section>") > -1 ? true : false;
+  return renderedTemplate.indexOf("<section class=\"looping\"> <h1>Looping</h1> <dl> <dt>JS model:</dt> <dd>letters = ['a', 'b', 'c'];</dd> <dt>HTML template:</dt> <dd> <p>a</p><p>b</p><p>c</p> </dd> </dl> <dl> <dt>JS model:</dt> <dd>names = {jack: 'guy', jill: 'girl', hill: 'landscape'};</dd> <dt>HTML template:</dt> <dd> <p>jack</p> <p>guy</p><p>jill</p> <p>girl</p><p>hill</p> <p>landscape</p> </dd> </dl> <dl> <dt>JS model:</dt> <dd>objects = [{a:1, b:2, c:3}, {a:4, b:5, c:6}, {a:7, b:8, c:9}];</dd> <dt>HTML template:</dt> <dd> <p>0</p> <p>1</p> <p>2</p> <p>3</p><p>1</p> <p>4</p> <p>5</p> <p>6</p><p>2</p> <p>7</p> <p>8</p> <p>9</p> </dd> </dl> <dl> <dt>JS model:</dt> <dd>objects = [{a:1, b:2, c:3}, {a:4, b:5, c:6}, {a:7, b:8, c:9}];</dd> <dt>HTML template:</dt> <dd> <p hidden=\"\">item.b is 5</p> <section class=\"sampleIncludeWithArguments\"> <p>This is a sample included template with arguments.</p> <dl> <dt>firstArgument:</dt> <dd>2</dd> <dt>secondArgument:</dt> <dd> <span>3</span> </dd> <dt>thirdArgument: </dt> <dd>not present</dd> </dl></section><p>item.a is 4</p> <p class=\"item-b-is-five\">item.b is 5</p> <section class=\"sampleIncludeWithArguments\"> <p>This is a sample included template with arguments.</p> <dl> <dt>firstArgument:</dt> <dd>5</dd> <dt>secondArgument:</dt> <dd> <span>6</span> </dd> <dt>thirdArgument: </dt> <dd>not present</dd> </dl></section> <p hidden=\"\">item.b is 5</p> <section class=\"sampleIncludeWithArguments\"> <p>This is a sample included template with arguments.</p> <dl> <dt>firstArgument:</dt> <dd>8</dd> <dt>secondArgument:</dt> <dd> <span>9</span> </dd> <dt>thirdArgument: </dt> <dd>not present</dd> </dl></section> </dd> </dl> </section>") > -1 ? true : false;
+});
+
+unitTest('nested loops test', function() {
+  return renderedTemplate.indexOf("<section class=\"nestedLoops\"> <p>1</p> <ul> <li>0: one</li><li>1: two</li><li>2: three</li> </ul><p>2</p> <ul> <li>0: four</li><li>1: five</li><li>2: six</li> </ul><p>3</p> <ul> <li>0: seven</li><li>1: eight</li><li>2: nine</li> </ul> </section>") > -1 ? true : false;
 });
 
 unitTest('looping through nested object test', function() {
