@@ -273,5 +273,17 @@
         <p>{i}: {val}</p>
       </loop>
     </section>
+
+    {! this test ensures issue #38 remains closed !}
+    <section class='nestedLoops'>
+      <loop through='nestedObjects' val='firstlevel'>
+        <p>{firstlevel.num}</p>
+        <ul>
+          <loop through='firstlevel.children' key='index' val='value'>
+            <li>{index}: {value}</li>
+          </loop>
+        </ul>
+      </loop>
+    </section>
   </arg>
 </include>
