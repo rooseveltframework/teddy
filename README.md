@@ -8,7 +8,7 @@ Or put a more technical way, Teddy is an easy to read, HTML-inspired, mostly log
 
 It uses HTML-like `<tags>` for rudimentary templating logic and Teddy Roosevelt's facial hair for `{variables}`.
 
-![Teddy Roosevelt's facial hair is a curly brace.](https://raw.github.com/kethinov/teddy/master/assets/teddy.jpg "Teddy Roosevelt's facial hair is a curly brace.")
+![Teddy Roosevelt's facial hair is a curly brace.](https://raw.github.com/kethinov/mkroosevelt/master/sampleApp/statics/images/teddy.jpg "Teddy Roosevelt's facial hair is a curly brace.")
 
 Table of contents
 ===
