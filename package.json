@@ -2,7 +2,7 @@
   "name": "teddy",
   "description": "Teddy Templating Engine",
   "author": "Eric Newport <kethinov@gmail.com>",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "homepage": "https://github.com/kethinov/teddy",
   "license": "Creative Commons Attribution 4.0 International License",
   "main": "teddy.js",
