@@ -107,7 +107,7 @@
       // needed for express.js support
       if (model.settings) {
         if (model.settings.views) {
-          teddy.params.templateRoot = path.normalize(model.settings.views);
+          teddy.params.templateRoot = path.resolve(model.settings.views);
         }
       }
 
