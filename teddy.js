@@ -802,6 +802,7 @@
           i,
           condition,
           conditionVal,
+          hasNotOperator,
           modelVal,
           curVar,
           dots,
@@ -817,6 +818,14 @@
 
             if (condition === 'or' || condition === 'and' || condition === 'xor') {
               return condition; // this is a logical operator, not a condition to evaluate
+            }
+            
+            if (condition.substr(0, 4) === 'not:') {
+              hasNotOperator = true;
+              condition = condition.substring(4);
+            }
+            else {
+              hasNotOperator = false;
             }
 
             if (conditionVal === undefined) {
@@ -838,40 +847,44 @@
               return false;
             }
             modelVal = curVar;
+            
+            if (hasNotOperator) {
+              conditionVal = conditionVal.substring(4);
+            }
 
             if (conditionType === 'if' || conditionType === 'onelineif' || conditionType === 'elseif') {
               if (condition === conditionVal.toLowerCase() || conditionVal === '' || (conditionType === 'onelineif' && 'if-' + condition === conditionVal.toLowerCase())) {
                 if (modelVal) {
-                  return condition.substr(0, 3) === 'not:' ? false : true;
+                  return hasNotOperator ? false : true;
                 }
                 else {
-                  return condition.substr(0, 3) === 'not:' ? true : false;
+                  return hasNotOperator ? true : false;
                 }
               }
               else if (modelVal == conditionVal) {
-                return condition.substr(0, 3) === 'not:' ? false : true;
+                return hasNotOperator ? false : true;
               }
               else {
-                return condition.substr(0, 3) === 'not:' ? true : false;
+                return hasNotOperator ? true : false;
               }
             }
             else {
               if (condition === conditionVal.toLowerCase() || conditionVal === '') {
                 if (modelVal) {
-                  return condition.substr(0, 3) === 'not:' ? true : false;
+                  return hasNotOperator ? true : false;
                 }
                 else {
-                  return condition.substr(0, 3) === 'not:' ? false : true;
+                  return hasNotOperator ? false : true;
                 }
               }
               else if (modelVal != conditionVal) {
-                return condition.substr(0, 3) === 'not:' ? false : true;
+                return hasNotOperator ? false : true;
               }
               else {
-                return condition.substr(0, 3) === 'not:' ? true : false;
+                return hasNotOperator ? true : false;
               }
             }
-          };
+          }
 
       if (conditionType === 'else') {
         return true;
