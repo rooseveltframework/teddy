@@ -1,0 +1,11 @@
+{!
+  should evaluate <if something xor somethingElse> as false
+!}
+
+    {! true !}    {! true !}
+<if something xor somethingElse>
+  <p>should not render</p>
+</if>
+<else>
+  <p>xor: false</p>
+</else>

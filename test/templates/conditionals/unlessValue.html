@@ -1,0 +1,9 @@
+{!
+  should evaluate <unless something='Some content'> as false and trigger <else> condition
+!}
+<unless something='Some content'>
+  <p>The variable 'something' is not set to 'Some content'</p>
+</unless>
+<else>
+  <p>The variable 'something' is set to 'Some content'</p>
+</else>

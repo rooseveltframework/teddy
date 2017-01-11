@@ -1,25 +1,180 @@
+/*
+ * 0.4.0 WIP
+ *
+ * things left unfinished marked with "TODO:" throughout codebase
+ */
+
 (function(global) {
-  'use strict';
+  var teddy, // @namespace
 
-  // @namespace
-  var teddy = {
+      // private utility vars
+      consoleWarnings,          // used to overload console.warn for the server-side error gui
+      consoleErrors,            // used to overload console.error for the server-side error gui
+      fs,                       // server-side filesystem module
+      path,                     // server-side utility for manipulating  file paths
+      contextModels = [],       // stores local models for later consumption by template logic tags
+      baseModel = {},           // stores original model temporarily
+      oldIE,                    // binary for whether or not the execution environment is old IE
+      matchRecursive;           // see below
 
+
+  /* matchRecursive
+   * accepts a string to search and a format (start and end tokens separated by "...").
+   * returns an array of matches, allowing nested instances of format.
+   *
+   * examples:
+   *   matchRecursive("test",          "(...)")   -> []
+   *   matchRecursive("(t(e)s)()t",    "(...)")   -> ["t(e)s", ""]
+   *   matchRecursive("t<e>>st",       "<...>")   -> ["e"]
+   *   matchRecursive("t<<e>st",       "<...>")   -> ["e"]
+   *   matchRecursive("t<<e>>st",      "<...>")   -> ["<e>"]
+   *   matchRecursive("<|t<e<|s|>t|>", "<|...|>") -> ["t<e<|s|>t"]
+   *
+   * (c) 2007 Steven Levithan <stevenlevithan.com>
+   * MIT License
+   */
+  matchRecursive = (function() {
+    var formatParts = /^([\S\s]+?)\.\.\.([\S\s]+)/,
+        metaChar = /[-[\]{}()*+?.\\^$|,]/g;
+
+    function escape (str) {
+      return str.replace(metaChar, '\\$&');
+    }
+
+    function validateParts(p) {
+      if (!p) {
+        throw new Error('Format must include start and end tokens separated by \'...\'');
+      }
+
+      if (p[1] === p[2]) {
+        throw new Error('Start and end format tokens cannot be identical');
+      }
+    }
+
+    return function(str, format) {
+      var p = formatParts.exec(format),
+          opener,
+          closer,
+          iterator,
+          results = [],
+          openTokens,
+          matchStartIndex,
+          match;
+
+      validateParts(p);
+      opener = p[1];
+      closer = p[2];
+      // use an optimized regex when opener and closer are one character each
+      iterator = new RegExp(format.length === 5 ? '['+escape(opener+closer)+']' : escape(opener)+'|'+escape(closer), 'g');
+
+      do {
+        openTokens = 0;
+        while (match = iterator.exec(str)) {
+          if (match[0] === opener) {
+            if (!openTokens) {
+              matchStartIndex = iterator.lastIndex;
+            }
+            openTokens++;
+          }
+          else if (openTokens) {
+            openTokens--;
+            if (!openTokens) {
+              results.push(str.slice(matchStartIndex, match.index));
+            }
+          }
+        }
+      }
+      while (openTokens && (iterator.lastIndex = matchStartIndex));
+
+      return results;
+    };
+  })();
+
+
+  teddy = {
 
     /**
-     * Teddy core methods
+     * public member vars
+     */
+
+    // default values for parameters sent to teddy
+    params: {
+      verbosity: 1,
+      templateRoot: './',
+      compileAtEveryRender: false,
+      minify: false
+    },
+
+    // compiled templates are stored as object collections, e.g. { "myTemplate.html": "<p>some markup</p>"}
+    compiledTemplates: {},
+
+    /**
+     * mutator methods for public member vars
+     */
+
+    // mutator method to set verbosity param. takes human-readable string argument and converts it to an integer for more efficient checks against the setting
+    setVerbosity: function(v) {
+      switch (v) {
+        case 'none':
+        case 0:
+          v = 0;
+          break;
+        case 'verbose':
+        case 2:
+          v = 2;
+          break;
+        case 'DEBUG':
+        case 3:
+          v = 3;
+          break;
+        default: // concise
+          v = 1;
+      }
+      teddy.params.verbosity = v;
+    },
+
+    // mutator method to set template root param; must be a string
+    setTemplateRoot: function(v) {
+      teddy.params.templateRoot = String(v);
+    },
+
+    // turn on or off the setting to compile templates at every render
+    compileAtEveryRender: function(v) {
+      teddy.params.compileAtEveryRender = Boolean(v);
+    },
+
+    // turn on or off the setting to minify templates using teddy's internal minifier
+    enableMinify: function(v) {
+      teddy.params.minify = Boolean(v);
+    },
+
+    // teddy's internal console logging system
+    console: {
+      warn: function(value) {
+        console.warn(value);
+        consoleWarnings += '<li>' + escapeHtmlEntities(value) + '</li>';
+      },
+      error: function(value) {
+        console.error(value);
+        consoleErrors += '<li>' + escapeHtmlEntities(value) + '</li>';
+      }
+    },
+
+    /**
+     * public methods
      */
 
     // compiles a template (removes {! comments !} and unnecessary whitespace)
     compile: function(template, name) {
-      var fname = '';
+      var fname = '', oldTemplate, comments, l, i;
 
       // remove templateRoot from template name if necessary
       if (!name) {
         name = template.replace(teddy.params.templateRoot, '');
       }
 
-      // convert filepath into a template string if we're in node
-      if (isNode) {
+      // convert filepath into a template string if we're server-side
+      if (fs) {
         try {
           if (fs.existsSync(template)) {
             fname = template;
@@ -35,17 +190,19 @@
           template = fs.readFileSync(fname, 'utf8');
         }
         catch (e) {
-          if (teddy.params.verbosity) {
-            console.error('teddy.compile threw an exception while attempting to compile a template: ' + e);
+          if (e.code !== 'ENOENT') {
+            if (teddy.params.verbosity) {
+              teddy.console.error('teddy.compile threw an exception while attempting to compile a template: ' + e);
+            }
+            return false;
           }
-          return false;
         }
       }
 
-      // it's assumed that the argument is already a template string if we're not in node
-      else if ((typeof template).toLowerCase() !== 'string') {
+      // it's assumed that the argument is already a template string if we're not server-side
+      else if (typeof template !== 'string') {
         if (teddy.params.verbosity > 1) {
-          console.warn('teddy.compile attempted to compile a template which is not a string.');
+          teddy.console.warn('teddy.compile attempted to compile a template which is not a string.');
         }
         return false;
       }
@@ -55,67 +212,54 @@
         name += '.html';
       }
 
-      // remove {! comments !} and unnecessary whitespace
-      teddy.compiledTemplates[name] = template
-        .replace(/[\f\n\r\t\v]*/g, '')
-        .replace(/{!(.*?)!}/g, '')
-        .replace(/\s{2,}/g, ' ');
+      // remove {! comments !} and (optionally) unnecessary whitespace
+      do {
+        oldTemplate = template;
 
-      // write eval'able js ready to send over to the client
-      teddy.packagedTemplates[name] = 'teddy.compiledTemplates[\''+name+'\']=\''+teddy.compiledTemplates[name].replace(/'/g, '\\\'')+'\';';
+        if (teddy.params.minify) {
+          template = template
+            .replace(/[\f\n\r\t\v]*/g, '')
+            .replace(/\s{2,}/g, ' ');
+        }
+
+        comments = matchRecursive(template, '{!...!}');
+        l = comments.length;
+
+        for (i = 0; i < l; i++) {
+          template = template.replace('{!' + comments[i] + '!}', '');
+        }
+      }
+      while (oldTemplate !== template);
+
+      teddy.compiledTemplates[name] = template;
     },
 
     // parses a template
     render: function(template, model, callback) {
 
       // overload conosle logs
-      console.oldLog = console.log;
-      console.oldWarn = console.warn;
-      console.oldError = console.error;
-      teddy._consoleLogs = '';
-      teddy._consoleWarnings = '';
-      teddy._consoleErrors = '';
-      console.log = function(value) {
-        console.oldLog(value);
-        teddy._consoleLogs += '<li>' + teddy.escapeHtmlEntities(value) + '</li>';
-      };
-      console.warn = function(value) {
-        console.oldWarn(value);
-        teddy._consoleWarnings += '<li>' + teddy.escapeHtmlEntities(value) + '</li>';
-      };
-      console.error = function(value) {
-        console.oldError(value);
-        teddy._consoleErrors += '<li>' + teddy.escapeHtmlEntities(value) + '</li>';
-      };
+      consoleWarnings = '';
+      consoleErrors = '';
 
       // needed because sigh
+      // TODO: check if this is still necessary
       if (oldIE) {
-        console.error('Teddy does not support client-side templating on IE9 or below.');
-        
-        // reset console
-        console.log = console.oldLog;
-        console.warn = console.oldWarn;
-        console.error = console.oldError;
+        teddy.console.error('Teddy does not support client-side templating on IE9 or below.');
         return false;
       }
 
       // handle bad or unsupplied model
-      if (!model || (typeof model).toLowerCase() !== 'object') {
+      if (!model || typeof model !== 'object') {
         model = {};
       }
 
-      // needed for express.js support
-      if (model.settings) {
-        if (model.settings.views) {
-          teddy.params.templateRoot = path.normalize(model.settings.views);
-        }
+      // express.js support
+      if (model.settings && model.settings.views) {
+        teddy.params.templateRoot = path.resolve(model.settings.views);
       }
 
-      // flatten model to produce case-insensitivity (needed because HTML is case-insensitive)
-      model = teddy.flattenModel(model);
-
       // store original copy of model so it can be reset after being temporarily modified
-      teddy._baseModel = JSON.parse(JSON.stringify(model));
+      baseModel = model; // parse/stringify copy appears unnecessary
 
       // remove templateRoot from template name if necessary
       template = template.replace(teddy.params.templateRoot, '');
@@ -131,89 +275,96 @@
       }
 
       // declare vars
-      var compiledTemplate = teddy.compiledTemplates[template],
-          errors, renderedTemplate;
+      var renderedTemplate = teddy.compiledTemplates[template],
+          diff,
+          outerLoops,
+          outerLoopsCount,
+          loops = [],
+          loopCount,
+          i,
+          errors;
 
-      // create dom object out of template string
-      if (compiledTemplate) {
-
-        // some elements have special rules and must be normalized first by temporarily converting them into unknown elements
-        compiledTemplate = teddy.temporarilyRenameProblemElements(compiledTemplate);
-
-        renderedTemplate = parser.parseFromString(compiledTemplate, 'text/html');
-      }
-      else {
+      if (!renderedTemplate) {
         if (teddy.params.verbosity) {
-          console.warn('teddy.render attempted to render a template which doesn\'t exist: ' + template);
+          teddy.console.warn('teddy.render attempted to render a template which doesn\'t exist: ' + template);
         }
-
-        // reset console
-        console.log = console.oldLog;
-        console.warn = console.oldWarn;
-        console.error = console.oldError;
         return false;
       }
 
-      // this hack is necessary for IE and Opera compatibility
-      renderedTemplate = teddy.runUnknownElementParentSiblingHack(renderedTemplate);
+      function parseNonLoopedElements() {
+        function replaceLoops(match) {
+          loops.push(match);
+          return '{' + loops.length + '_loop}';
+        }
 
-      // since includes can introduce new conditionals, we loop until they're all dealt with
-      while (teddy.findNonLoopedConditionals(renderedTemplate)[0] || teddy.findNonLoopedOneLineConditionals(renderedTemplate)[0] || teddy.findNonLoopedInclude(renderedTemplate)[0]) {
+        do {
+          diff = renderedTemplate;
 
-        // parse non-looped conditionals
-        renderedTemplate = teddy.parseConditionals(renderedTemplate, model);
+          // find loops and remove them for now
+          outerLoops = matchRecursive(renderedTemplate, '<loop...<\/loop>');
+          outerLoopsCount = outerLoops.length;
+          for (i = 0; i < outerLoopsCount; i++) {
+            renderedTemplate = renderedTemplate.replace('<loop' + outerLoops[i] + '<\/loop>', replaceLoops);
+          }
 
-        // parse non-looped includes
-        renderedTemplate = teddy.parseIncludes(renderedTemplate, model);
+          // parse non-looped conditionals
+          renderedTemplate = parseConditionals(renderedTemplate, model);
+
+          // parse non-looped includes
+          renderedTemplate = parseIncludes(renderedTemplate, model);
+        }
+        while (diff !== renderedTemplate); // do another pass if this introduced new code to parse
       }
 
-      // parse loops and any conditionals or includes within
-      renderedTemplate = teddy.parseLoops(renderedTemplate, model);
+      do {
+        do {
+          parseNonLoopedElements();
 
-      // cleans up any remaining unnecessary <elseif>, <elseunless>, or <else> tags
-      renderedTemplate = teddy.removeDanglingConditionals(renderedTemplate);
+          // parse removed loops
+          loopCount = loops.length;
+          for (i = 0; i < loopCount; i++) {
+            if (loops[i]) {
+              renderedTemplate = renderedTemplate.replace('{' + (i + 1) + '_loop}', renderLoop(loops[i], model));
+              loops[i] = null; // this prevents renderLoop from attempting to render it again
+            }
+          }
+        }
+        while (diff !== renderedTemplate); // do another pass if this introduced new code to parse
 
-      // processes all remaining {vars}
-      renderedTemplate = teddy.parseVars(renderedTemplate, model); // last one converts it to a string
+        // clean up any remaining unnecessary <elseif>, <elseunless>, or <else> tags
+        renderedTemplate = renderedTemplate.replace(/(?:<elseif[\S\s]*?<\/elseif>|<elseunless[\S\s]*?<\/elseunless>|<else[\S\s]*?<\/else>)/g, '');
 
-      // remove any unnecessary whitespace generated by <include>s (probably caused by a bug in xmldom)
-      renderedTemplate = renderedTemplate.replace(/\s{2,}/g, ' ');
-
-      // rename any elements we temporarily renamed back to their original names
-      renderedTemplate = teddy.restoreProblemElements(renderedTemplate);
+        // processes all remaining {vars}
+        renderedTemplate = parseVars(renderedTemplate, model);
+      }
+      while (diff !== renderedTemplate); // do another pass if this introduced new code to parse
 
       // clean up temp vars
-      teddy._contextModels = [];
-      teddy._baseModel = {};
-      
+      contextModels = [];
+      baseModel = {};
+
       // if we have no template and we have errors, render an error page
-      if (!renderedTemplate && (teddy._consoleErrors || teddy._consoleWarnings)) {
-        renderedTemplate = "<!DOCTYPE html><html lang='en'><head><meta charset='utf-8'><meta http-equiv='Content-Type' content='text/html; charset=utf-8'><title>Parse error</title></head><body>";
-        renderedTemplate += '<h2>Teddy template parse errors:</h2>';
-        if (teddy._consoleErrors) {
+      if (!renderedTemplate && (consoleErrors || consoleWarnings)) {
+        renderedTemplate = '<!DOCTYPE html><html lang=\'en\'><head><meta charset=\'utf-8\'><title>Could not parse template</title></head><body><h1>Could not parse template</h1>';
+        if (consoleErrors) {
+          renderedTemplate += '<p>The following errors occurred while parsing the template:</p>';
           renderedTemplate += '<ul>';
-          renderedTemplate += teddy._consoleErrors;
+          renderedTemplate += consoleErrors;
           renderedTemplate += '</ul>';
         }
-        renderedTemplate += '<h2>Teddy template parse warnings:</h2>';
-        if (teddy._consoleWarnings) {
+        if (consoleWarnings) {
+          renderedTemplate += '<p>The following warnings occurred while parsing the template:</p>';
           renderedTemplate += '<ul>';
-          renderedTemplate += teddy._consoleWarnings;
+          renderedTemplate += consoleWarnings;
           renderedTemplate += '</ul>';
         }
         renderedTemplate += '</body></html>';
-        teddy._consoleLogs = '';
-        teddy._consoleWarnings = '';
-        teddy._consoleErrors = '';
+        consoleWarnings = '';
+        consoleErrors = '';
       }
 
-      // reset console
-      console.log = console.oldLog;
-      console.warn = console.oldWarn;
-      console.error = console.oldError;
-
       // execute callback if present, otherwise simply return the rendered template string
-      if ((typeof callback).toLowerCase() === 'function') {
+      if (typeof callback === 'function') {
         if (!errors) {
           callback(null, renderedTemplate);
         }
@@ -224,1215 +375,815 @@
       else {
         return renderedTemplate;
       }
-    },
+    }
+  };
 
+  /**
+   * private methods
+   */
 
-    /**
-     * Teddy group parsing methods
-     */
+  // finds all <include> tags and renders them
+  function parseIncludes(renderedTemplate, model) {
+    var els = matchRecursive(renderedTemplate, '<include...<\/include>'),
+        el,
+        l = els ? els.length : 0,
+        result,
+        i;
 
-    // finds all <include> tags and renders them
-    parseIncludes: function(doc, model) {
-      var el,
-          notDone = true,
-          result;
+    for (i = 0; i < l; i++) {
+      el = '<include' + els[i] + '</include>';
+      model = applyLocalModel(el, model);
+      result = renderInclude(el, model);
+      renderedTemplate = renderedTemplate.replace(el, result);
+      model = baseModel; // restore original model
+    }
 
-      while (notDone) {
-        el = teddy.findNonLoopedInclude(doc)[0];
-        if (el) {
-          notDone = true;
-          model = teddy.applyLocalModel(el, model);
-          result = teddy.renderInclude(el, model);
-          model = teddy._baseModel; // restore original model
-          if (result.newDoc) {
-            doc = result;
-          }
-          else {
-            teddy.replaceProcessedElement(el, result);
-          }
-        }
-        else {
-          notDone = false;
-        }
-      }
+    return renderedTemplate;
+  }
 
-      return doc;
-    },
+  // finds all <if> and <unless> tags and renders them along with any related <elseif>, <elseunless>, and <else> tags
+  function parseConditionals(renderedTemplate, model) {
+    var conds,
+        loopTypesLeft = true,
+        findElses = true,
+        condString,
+        sibling,
+        ifsDone = false,
+        parts,
+        elseCond,
+        result,
+        onelines,
+        el,
+        l,
+        result,
+        i;
 
-    // finds all <if> and <unless> tags and renders them along with any related <elseif>, <elseunless>, and <else> tags
-    parseConditionals: function(doc, model) {
-      var el,
-          result,
-          conditionals = teddy.findNonLoopedConditionals(doc),      // skips conditionals within loop tags
-          oneliners = teddy.findNonLoopedOneLineConditionals(doc),  // ditto
-          length,
-          i;
-
-      // process whitelisted conditionals
-      length = conditionals.length;
-      for (i = 0; i < length; i++) {
-        el = conditionals[i];
-        result = teddy.renderConditional(el, model);
-        model = teddy._baseModel; // restore original model
-        teddy.replaceProcessedElement(el, result);
-      }
-
-      // process whitelisted one-line conditionals
-      length = oneliners.length;
-      for (i = 0; i < length; i++) {
-        el = oneliners[i];
-        result = teddy.renderOneLineConditional(el, model);
-        model = teddy._baseModel; // restore original model
-        if (isNode) {
-          teddy.replaceProcessedElement(el, result);
-        }
-      }
-
-      return doc;
-    },
-
-    // finds all loop tags and renders them
-    parseLoops: function(doc, model) {
-      var el,
-          notDone = true,
-          result,
-          nextEl;
-
-      if (teddy.params.enableForeachTag) {
-        nextEl = function() {
-          return doc.getElementsByTagName('foreach')[0];
-        };
+    do {
+      if (ifsDone) {
+        conds = matchRecursive(renderedTemplate, '<unless ...<\/unless>');
+        loopTypesLeft = false;
       }
       else {
-        nextEl = function() {
-          return doc.getElementsByTagName('loop')[0];
-        };
+        conds = matchRecursive(renderedTemplate, '<if ...<\/if>');
       }
-      
-      while (notDone) {
-        el = nextEl();
-        if (el) {
-          notDone = true;
-          result = teddy.renderLoop(el, model);
-          model = teddy._baseModel; // restore original model
-          teddy.replaceProcessedElement(el, result);
+      l = conds.length;
+
+      for (i = 0; i < l; i++) {
+        condString = conds[i];
+        if (ifsDone) {
+          condString = '<unless ' + condString + '<\/unless>';
         }
         else {
-          notDone = false;
+          condString = '<if ' + condString + '<\/if>';
         }
+        parts = [condString];
+        findElses = true;
+        do {
+          sibling = renderedTemplate.match(new RegExp(condString + '[\\s]*[\\S\\s]{12}'));
+          if (sibling) {
+            sibling = sibling[0];
+            sibling = sibling.replace(condString, '');
+
+            if (sibling.replace(/^\s+/, '').substring(0, 8) === '<elseif ') {
+              elseCond = matchRecursive(renderedTemplate, condString + sibling + '...<\/elseif>');
+              elseCond = elseCond ? sibling + elseCond[0].replace(condString, '') + '</elseif>' : null;
+            }
+            else if (sibling.replace(/^\s+/, '').substring(0, 12) === '<elseunless ') {
+              elseCond = matchRecursive(renderedTemplate, condString + sibling + '...<\/elseunless>');
+              elseCond = elseCond ? sibling + elseCond[0].replace(condString, '') + '</elseunless>' : null;
+            }
+            else if (sibling.replace(/^\s+/, '').substring(0, 6) === '<else>') {
+              elseCond = matchRecursive(renderedTemplate, condString + sibling + '...<\/else>');
+              elseCond = elseCond ? sibling + elseCond[0].replace(condString, '') + '</else>' : null;
+            }
+            else {
+              findElses = false;
+              elseCond = false;
+            }
+
+            if (elseCond) {
+              parts.push(elseCond);
+              condString += elseCond;
+            }
+            else {
+              findElses = false;
+            }
+          }
+          else {
+            findElses = false;
+          }
+        }
+        while (findElses);
+
+        result = renderConditional(condString, parts, model);
+        renderedTemplate = renderedTemplate.replace(condString, result);
       }
+      ifsDone = true;
+    }
+    while (loopTypesLeft);
 
-      return doc;
-    },
+    // do one line ifs now...
+    onelines = renderedTemplate.match(/[^<]*?if-[^>]+/g);
+    l = onelines ? onelines.length : 0;
 
-    // removes dangling <elseif>, <elseunless>, and <else> tags as they are no longer needed
-    removeDanglingConditionals: function(doc) {
-      var notDone = true, el;
+    for (i = 0; i < l; i++) {
+      el = '<' + onelines[i] + '>';
+      model = applyLocalModel(el, model);
+      result = renderOneLineConditional(el, model);
+      renderedTemplate = renderedTemplate.replace(el, result);
+      model = baseModel; // restore original model
+    }
 
-      while (notDone) {
-        el = doc.getElementsByTagName('elseif')[0] || doc.getElementsByTagName('elseunless')[0] || doc.getElementsByTagName('else')[0];
+    return renderedTemplate;
+  }
 
-        if (el) {
-          notDone = true;
-          el.parentNode.removeChild(el);
-        }
-        else {
-          notDone = false;
-        }
-      }
+  // finds alls {vars} in a given document and replaces them with values from the model
+  function parseVars(docstring, model) {
+    docstring = docstring.replace(/{[\S\s]*?}/g, replaceVar);
 
-      return doc;
-    },
-
-    // finds alls {vars} in a given document and replaces them with values from the model
-    parseVars: function(doc, model) {
-      var docstring = (typeof doc).toLowerCase() === 'string' ? doc : serializer.serializeToString(doc), // not using serializer.serializeToString because this method can be called on a fully formed document and we don't want to exclude the root elements
-          curls,
-          numCurls,
-          curl,
+    function replaceVar(match) {
+      var localModel,
           varname,
           ovarname,
-          i,
-          varList,
-          lastVarList,
-          iterations = 0,
-          curVar,
           dots,
           numDots,
-          d,
-          doRender;
+          curVar,
+          doRender = false,
+          d;
 
-      docstring = docstring.replace(/%7B/g, '{').replace(/%7D/g, '}'); // hack for gecko
-
-      do {
-        lastVarList = varList;
-        varList = [];
-        curls = docstring ? docstring.split('{') : false;
-        numCurls = curls.length;
-
-        if (curls) {
-          for (i = 0; i < numCurls; i++) {
-            curl = curls[(i + 1)];
-            if (curl) {
-              varname = curl.split('}')[0].toLowerCase();
-              ovarname = varname;
-              varname = varname.replace(new RegExp('`', 'g'), '').replace(new RegExp('\\|s', 'g'), '');
-              if (varname) {
-                varList.push(varname);
-                dots = varname.split('.');
-                numDots = dots.length;
-                curVar = model;
-                if (curVar) {
-                  doRender = true;
-                  for (d = 0; d < numDots; d++) {
-                    curVar = curVar[dots[d]];
-                    if ((typeof curVar).toLowerCase() === 'undefined') {
-                      if (teddy.params.verbosity > 1) {
-                        console.warn('a {variable} was found with an invalid syntax: {' + varname + '}');
-                      }
-                      doRender = false;
-                      break;
-                    }
-                  }
-                }
-                else {
-                  if (teddy.params.verbosity > 1) {
-                    console.warn('a {variable} was found with an invalid syntax do to undefined model: {' + varname + '}');
-                  }
-                  doRender = false;
-                  break;
-                }
-                if (doRender) {
-                  docstring = teddy.renderVar(docstring, ovarname, curVar);
-                }
-              }
-            }
-          }
-        }
-        else {
-          if (teddy.params.verbosity > 1 && (typeof doc).toLowerCase() !== 'object') {
-            console.warn('teddy.parseVars called with invalid doc specified. Ignoring call.');
-            return false;
-          }
-          else {
-            return docstring;
-          }
-        }
-
-        iterations++;
-        if (iterations > 999) {
-          console.warn('teddy.parseVars gave up after parsing variables over 999 layers deep. You may have a recursive variable loop.');
-          return docstring;
-        }
-      }
-      while (JSON.stringify(varList) !== JSON.stringify(lastVarList));
-      return docstring;
-    },
-
-
-    /**
-     * Teddy render methods
-     */
-
-    // parses a single <include> tag
-    renderInclude: function(el, model) {
-      var src, incdoc, args, argl, arg, argname, argval, i, newDoc, localModel = {};
-
-      if (el) {
-        src = el.getAttribute('src');
-
-        if (!src) {
-          if (teddy.params.verbosity) {
-            console.warn('<include> element found with no src attribute. Ignoring element.');
-          }
-          return false;
-        }
-        else {
-
-          // parse variables which may be included in src attribute
-          src = teddy.parseVars(src, model);
-
-          // append extension if not present
-          if (src.slice(-5) !== '.html') {
-            src += '.html';
-          }
-
-          // compile included template if necessary
-          if (!teddy.compiledTemplates[src] || teddy.params.compileAtEveryRender) {
-            teddy.compile(src);
-          }
-
-          // get the template as a string
-          incdoc = teddy.compiledTemplates[src];
-
-          // determine if it's a new document
-          if (incdoc) {
-            newDoc = (incdoc.toLowerCase().indexOf('<!doctype') > -1) ? true : false;
-          }
-          else {
-            if (teddy.params.verbosity) {
-              console.warn('<include> element found which references a nonexistent template ("' + src + '"). Ignoring element.');
-            }
-            return false;
-          }
-
-          // process arguments
-          args = el.childNodes;
-          argl = args.length;
-          for (i = 0; i < argl; i++) {
-            arg = args[i];
-            if (arg.getAttribute) {
-              if (arg.nodeName.toLowerCase() !== 'arg' && !arg.getAttribute('data-unknownelementhack')) {
-                if (teddy.params.verbosity) {
-                  console.warn('child element found within a <include src="'+src+'"> that wasn\'t an <arg> element.');
-                }
-              }
-              else {
-                argname = arg.attributes[0];
-                argval = '';
-
-                if (argname) {
-                  argname = argname.nodeName.toLowerCase(); // forces case insensitivity
-                }
-                else {
-                  if (teddy.params.verbosity) {
-                    console.warn('<arg> element found with no attribute. Ignoring parent <include> element. (<include src="'+src+'">)');
-                  }
-                  return false;
-                }
-
-                // convert arg's children into a string
-                argval = teddy.stringifyElementChildren(arg);
-
-                // replace template string argument {var} with argument value
-                incdoc = teddy.renderVar(incdoc, argname, argval, true);
-
-                // add arg to local model
-                localModel[argname] = argval;
-              }
-            }
-          }
-
-          // create a dom object out of parsed template string
-          incdoc = parser.parseFromString(incdoc, 'text/html');
-
-          if (argl) {
-            // apply local model to child conditionals and loops
-            incdoc = teddy.tagLocalModels(incdoc, localModel);
-          }
-
-          // marks whether or not the included document is a new document or a partial
-          incdoc.newDoc = newDoc;
-
-          return incdoc;
-        }
-      }
-      else {
-        if (teddy.params.verbosity > 1) {
-          console.warn('teddy.renderInclude() called for an <include> element that does not exist.');
-        }
-        return false;
-      }
-    },
-
-    // finds all <if>, <elseif>, <unless>, <elseunless>, one line ifs, and loop tags and applies their local models
-    tagLocalModels: function(doc, extraModel) {
-      var el,
-          els = doc.getElementsByTagName('*'),
-          length = els.length,
-          i,
-          modelNumber,
-          nodeName;
-
-      modelNumber = teddy._contextModels.push(extraModel);
-
-      for (i = 0; i < length; i++) {
-        el = els[i];
-        nodeName = el.nodeName.toLowerCase();
-        if (el.getAttribute('true') || el.getAttribute('false') || nodeName === 'if' || nodeName === 'elseif' || nodeName === 'unless' || nodeName === 'elseunless' || nodeName === 'loop' || nodeName === 'foreach') {
-          el.setAttribute('data-local-model', modelNumber);
-        }
+      if (!isNaN(match.charAt(1))) {
+        return match; // don't parse variables that represent nested loops
       }
 
-      return doc;
-    },
-
-    // retrieve local model from cache and apply it to full model for parsing
-    applyLocalModel: function(el, model) {
-      var attr = el.getAttribute('data-local-model'),
-          modelNumber = ('' + attr).length ? parseInt(attr) : -1,
-          localModel = teddy._contextModels[modelNumber - 1],
-          i;
-
+      match = match.substring(0, match.length - 1).substring(1); // remove first and last chars
+      match = match.split(' ');
+      localModel = match[1]; // the variable's local model (if any)
+      varname = match[0]; // the variable's name (plus any flags)
+      ovarname = varname;
+      varname = varname.split('|s')[0]; // remove escape flag if present
       if (localModel) {
-        for (i in localModel) {
-          model[i] = localModel[i];
-        }
+        model = applyLocalModel('{'+varname+' ' + localModel + '}', model);
       }
-
-      return model;
-    },
-
-    // parses a single loop tag
-    renderLoop: function(el, model) {
-      if (el) {
-        var key = el.getAttribute('key'),
-            val = el.getAttribute('val'),
-            collection = (('' + el.getAttribute('through')) || ('' + el.getAttribute('in'))).toLowerCase(),
-            collectionString = collection,
-            localModel,
-            i,
-            loopContent = '',
-            parsedLoop = '',
-            item,
-            newEl,
-            modelNumber;
-
-        if (!val) {
-          if (teddy.params.verbosity) {
-            console.warn('loop element found with no "val" attribute. Ignoring element.');
-          }
-          return false;
-        }
-        else if (!collection) {
-          if (teddy.params.verbosity) {
-            console.warn('loop element found with no "through" or "in" attribute. Ignoring element.');
-          }
-          return false;
-        }
-        else {
-          model = teddy.applyLocalModel(el, model);
-          collection = teddy.getNestedObjectByString(model, collection);
-          if (!collection) {
-            if (teddy.params.verbosity) {
-              console.warn('loop element found with undefined value "' + collectionString + '" specified for "through" or "in" attribute. Ignoring element.');
+      dots = varname.split('.');
+      numDots = dots.length;
+      curVar = model;
+      if (curVar) {
+        doRender = true;
+        for (d = 0; d < numDots; d++) {
+          curVar = curVar[dots[d]];
+          if (typeof curVar === 'undefined') {
+            if (teddy.params.verbosity > 1) {
+              teddy.console.warn('a {variable} was found with an invalid syntax: {' + varname + '}');
             }
-
-            // restore original model
-            model = teddy._baseModel;
-
-            return false;
-          }
-          else {
-
-            // tells parseConditionals that this loop is safe to process conditionals in
-            el.setAttribute('looped', 'true');
-
-            loopContent = teddy.stringifyElementChildren(el);
-
-            // process loop
-            for (i in collection) {
-              if (collection.hasOwnProperty(i)) {
-                item = collection[i];
-                localModel = {};
-
-                // define local model for the iteration
-                // if model[val] or model[key] preexist, they will be overwritten by the locally supplied variables
-                if (key) {
-                  model[key] = i;
-                  localModel[key] = i;
-                }
-                model[val] = item;
-                localModel[val] = item;
-
-                // parse variables now, but store localModel for later use when parsing nested conditionals and includes
-                parsedLoop += serializer.serializeToString(teddy.tagLocalModels(parser.parseFromString(teddy.parseVars(loopContent, model), 'text/html'), localModel));
-              }
-            }
-
-            if (parsedLoop) {
-              // create a dom object out of parsed template string
-              newEl = parser.parseFromString(parsedLoop, 'text/html');
-
-              // since includes can introduce new conditionals, we loop until they're all dealt with
-              while (teddy.findNonLoopedConditionals(newEl)[0] || teddy.findNonLoopedOneLineConditionals(newEl)[0] || teddy.findNonLoopedInclude(newEl)[0]) {
-
-                // find conditionals within the loop and process them
-                newEl = teddy.parseConditionals(newEl, model);
-
-                // find includes within the loop and process them
-                newEl = teddy.parseIncludes(newEl, model);
-              }
-            }
-
-            // restore original model
-            model = teddy._baseModel;
-
-            return newEl || false;
-          }
-        }
-      }
-      else {
-        if (teddy.params.verbosity > 1) {
-          console.warn('teddy.renderLoop() called for a loop element that does not exist.');
-        }
-        return false;
-      }
-    },
-
-    // parses a single <if> or <unless> tag and any related <elseif>, <elseunless>, and <else> tags
-    renderConditional: function(el, model) {
-      if (el) {
-        var satisfiedCondition = false,
-            nextSibling = el,
-            nextSiblingName = nextSibling.nodeName.toLowerCase(),
-            conditionContent;
-
-        // add local vars to model
-        model = teddy.applyLocalModel(el, model);
-
-        while (!satisfiedCondition) {
-
-          // satisfied condition
-          if (teddy.evalCondition(el, model)) {
-            satisfiedCondition = true;
-
-            // get condition's children and stringify them
-            conditionContent = teddy.stringifyElementChildren(el);
-
-            // create a dom object out of that string
-            el = parser.parseFromString(conditionContent, 'text/html');
-
-            return el;
-          }
-
-          // failed condition, try the next one
-          else if (nextSibling) {
-
-            // get next elseif, elseunless, or else statement and evaluate it
-
-            do {
-              nextSibling = nextSibling.nextSibling;
-              nextSiblingName = nextSibling ? nextSibling.nodeName.toLowerCase() : false;
-              if (nextSiblingName === 'if' || nextSiblingName === 'unless') {
-                satisfiedCondition = true; // none of the conditions were true
-                break;
-              }
-              else if (nextSiblingName === 'elseif' || nextSiblingName === 'elseunless' || nextSiblingName === 'else') {
-                el = nextSibling; // advance parent loop
-                break;
-              }
-            }
-            while(nextSibling);
-          }
-
-          // no further siblings; no further conditions to test
-          else {
-
-            // restore original model
-            model = teddy._baseModel;
-
-            return false;
-          }
-        }
-
-        // restore original model
-        model = teddy._baseModel;
-      }
-      else {
-        if (teddy.params.verbosity > 1) {
-          console.warn('teddy.renderConditional() called for a <if> or <unless> element with no condition supplied.');
-        }
-        return false;
-      }
-    },
-
-    // parses a single one line conditional
-    renderOneLineConditional: function(el, model) {
-      if (el) {
-        var conditionContent,
-            newAttr,
-            attrVal;
-
-        // add local vars to model
-        model = teddy.applyLocalModel(el, model);
-        el.removeAttribute('data-local-model');
-
-        if (teddy.evalCondition(el, model)) {
-          conditionContent = el.getAttribute('true');
-        }
-        else {
-          conditionContent = el.getAttribute('false');
-        }
-
-        el.removeAttribute('true');
-        el.removeAttribute('false');
-
-        newAttr = conditionContent.split('=');
-        attrVal = newAttr[1];
-        newAttr = newAttr[0];
-
-        if (newAttr) {
-          if (attrVal) {
-            attrVal = attrVal.replace(/"/g, '').replace(/'/g, '');
-            el.setAttribute(newAttr, attrVal);
-          }
-          else {
-            el.setAttribute(newAttr, '');
-          }
-        }
-
-        // restore original model
-        model = teddy._baseModel;
-
-        return el;
-      }
-      else {
-        if (teddy.params.verbosity > 1) {
-          console.warn('teddy.renderOneLineConditional() called for an if attribtue with no condition supplied.');
-        }
-        return false;
-      }
-    },
-
-    // determines if a condition is true for <if>, <unless>, <elseif>, and <elseunless>, and one-liners
-    evalCondition: function(el, model) {
-
-      // some browsers annoyingly add an xmlns attribtue to pretty much everything when parsing HTML through DOMParser's parseFromString method. since xmlns attributes mess up the syntax for Teddy conditionals, we have to remove any xmlns attributes present before evaluating the condtional
-      el.removeAttribute('xmlns');
-
-      // also have to remove data-local-model due to a Firefox bug
-      el.removeAttribute('data-local-model');
-
-      var conditionType = el.nodeName.toLowerCase(),
-          attrCount = 0,
-          conditionAttr,
-          attributes = el.attributes,
-          length = attributes.length,
-          i,
-          condition,
-          conditionVal,
-          modelVal,
-          curVar,
-          dots,
-          numDots,
-          d,
-          notDone = true,
-          condResult,
-          truthStack = [],
-          evalStatement = function() {
-            if (!condition) {
-              condition = conditionAttr.nodeName.toLowerCase();
-            }
-
-            if (condition === 'or' || condition === 'and' || condition === 'xor') {
-              return condition; // this is a logical operator, not a condition to evaluate
-            }
-
-            if (conditionVal === undefined) {
-              conditionVal = teddy.parseVars(conditionAttr.value.trim(), model);
-            }
-
-            dots = condition.split('.');
-            numDots = dots.length;
-            curVar = model;
-            if (curVar) {
-              for (d = 0; d < numDots; d++) {
-                curVar = curVar[dots[d]];
-              }
-            }
-            else {
-              if (teddy.params.verbosity > 1) {
-                console.warn('teddy.evalCondition() supplied an empty model');
-              }
-              return false;
-            }
-            modelVal = curVar;
-
-            if (conditionType === 'if' || conditionType === 'onelineif' || conditionType === 'elseif') {
-              if (condition === conditionVal.toLowerCase() || conditionVal === '' || (conditionType === 'onelineif' && 'if-' + condition === conditionVal.toLowerCase())) {
-                if (modelVal) {
-                  return condition.substr(0, 3) === 'not:' ? false : true;
-                }
-                else {
-                  return condition.substr(0, 3) === 'not:' ? true : false;
-                }
-              }
-              else if (modelVal == conditionVal) {
-                return condition.substr(0, 3) === 'not:' ? false : true;
-              }
-              else {
-                return condition.substr(0, 3) === 'not:' ? true : false;
-              }
-            }
-            else {
-              if (condition === conditionVal.toLowerCase() || conditionVal === '') {
-                if (modelVal) {
-                  return condition.substr(0, 3) === 'not:' ? true : false;
-                }
-                else {
-                  return condition.substr(0, 3) === 'not:' ? false : true;
-                }
-              }
-              else if (modelVal != conditionVal) {
-                return condition.substr(0, 3) === 'not:' ? false : true;
-              }
-              else {
-                return condition.substr(0, 3) === 'not:' ? true : false;
-              }
-            }
-          };
-
-      if (conditionType === 'else') {
-        return true;
-      }
-      else if (conditionType !== 'if' && conditionType !== 'unless' && conditionType !== 'elseif' && conditionType !== 'elseunless') {
-        // it's a one-liner
-        conditionType = 'onelineif';
-        for (i = 0; i < length; i++) {
-          conditionAttr = attributes[i];
-          condition = conditionAttr.nodeName;
-          if (condition.substr(0, 3) === 'if-') {
-            conditionVal = teddy.parseVars(conditionAttr.value, model);
-            el.removeAttribute(condition); // so there's no attempt to parse it later
-            condition = condition.split('if-')[1].toLowerCase();
+            doRender = false;
             break;
           }
         }
-        conditionAttr = el.attributes[attrCount];
-        return evalStatement();
-      }
-
-      // regular conditional, could be multipart
-      do {
-
-        // examine each of the condition attributes
-        conditionAttr = el.attributes[attrCount];
-        if (conditionAttr) {
-          condition = undefined;
-          conditionVal = undefined;
-          truthStack.push(evalStatement());
-          attrCount++;
-          if (reordersAttributes) {
-            console.warn('teddy.evalCondition() does not support boolean logic in this browser. See https://github.com/kethinov/teddy/issues/23');
-            notDone = false;
-          }
-        }
-        else {
-          notDone = false;
-          length = truthStack.length;
-        }
-      }
-      while (notDone);
-
-      // loop through the results
-      for (i = 0; i < length; i++) {
-        condition = truthStack[i];
-        condResult = condResult !== undefined ? condResult : truthStack[i - 1];
-        if (condition === 'and') {
-          condResult = Boolean(condResult && truthStack[i + 1]);
-        }
-        else if (condition === 'or') {
-          condResult = Boolean(condResult || truthStack[i + 1]);
-        }
-        else if (condition === 'xor') {
-          condResult = Boolean((condResult && !truthStack[i + 1]) || (!condResult && truthStack[i + 1]));
-        }
-      }
-
-      return condResult !== undefined ? condResult : condition;
-    },
-
-    // replaces a single {var} with its value from a given model
-    renderVar: function(str, varname, varval, escapeOverride) {
-      if (str) {
-        // hack to typecast to string
-        varname = '' + varname;
-        varval = '' + varval;
-        
-        // todo: deal with whitespace, see issue #28 and see compile and render methods
-        /*
-        if (varname.charAt(0) !== '`' || varname.charAt(varname.length - 1) !== '`') {
-          
-        }
-        */
-        
-        // escape html entities
-        if (varname.slice(-2) !== '|s' && varname.slice(-3) !== '|s`') {
-          if (!escapeOverride) {
-            varval = teddy.escapeHtmlEntities(varval);
-          }
-        }
-
-        return str.replace(new RegExp('{' + varname.replace(/\|/g, '\\|') + '}', 'gi'), varval);
       }
       else {
         if (teddy.params.verbosity > 1) {
-          console.warn('an empty string was passed to teddy.renderVar.');
+          teddy.console.warn('a {variable} was found with an invalid syntax do to undefined model: {' + varname + '}');
         }
+        doRender = false;
       }
-    },
-
-    // finds an <include> tag that is not within any loop tag
-    findNonLoopedInclude: function(doc) {
-      var el,
-          parent,
-          includes = [],
-          tags = doc.getElementsByTagName('include'),
-          length = tags.length,
-          skip = false,
-          i;
-
-      for (i = 0; i < length; i++) {
-        el = tags[i];
-        parent = el ? el.parentNode : false;
-        while (parent && !skip) {
-          if (parent.nodeName) {
-            if (parent.nodeName.toLowerCase() === 'loop' || parent.nodeName.toLowerCase() === 'foreach') {
-              if (!parent.getAttribute('looped')) {
-                skip = true;
-              }
-            }
-          }
-          parent = parent.parentNode;
-        }
-        if (el && !skip) {
-          includes.push(el);
-          return includes;
-        }
-        else {
-          skip = false;
-        }
+      if (localModel) {
+        model = baseModel;
       }
 
-      return includes;
-    },
-
-    // finds all <if> and <unless> tags that are not within any loop tags
-    findNonLoopedConditionals: function(doc) {
-      var el,
-          parent,
-          notDone = true,
-          conditionals = [],
-          ifs = doc.getElementsByTagName('if'),
-          length = ifs.length,
-          unlesses = false,
-          skip = false,
-          i;
-
-      while (notDone) {
-        for (i = 0; i < length; i++) {
-          el = ifs[i];
-          parent = el ? el.parentNode : false;
-          while (parent && !skip) {
-            if (parent.nodeName) {
-              if (parent.nodeName.toLowerCase() === 'loop' || parent.nodeName.toLowerCase() === 'foreach') {
-                if (!parent.getAttribute('looped')) { // exemption check
-                  skip = true;
-                }
-              }
-            }
-            parent = parent.parentNode;
-          }
-          if (el && !skip) {
-            conditionals.push(el);
-          }
-          else {
-            skip = false;
-          }
-        }
-
-        // we're done with <if>s, so do <unless>es if necessary
-        if (!unlesses) {
-          // set it to unlesses for one more pass
-          ifs = doc.getElementsByTagName('unless');
-          length = ifs.length;
-          unlesses = true;
-        }
-        else {
-          notDone = false; // we're done, break loop
-        }
-      }
-
-      return conditionals;
-    },
-
-    // finds all one line conditionals that are not within any loop tags
-    findNonLoopedOneLineConditionals: function(doc) {
-      var el,
-          parent,
-          conditionals = [],
-          ifs = doc.getElementsByTagName('*'),
-          length = ifs.length,
-          skip = false,
-          i;
-
-      for (i = 0; i < length; i++) {
-        el = ifs[i];
-        parent = el ? el.parentNode : false;
-        if (!el.getAttribute('true') && !el.getAttribute('false')) {
-          skip = true;
-        }
-        while (parent && !skip) {
-          if (parent.nodeName) {
-            if (parent.nodeName.toLowerCase() === 'loop' || parent.nodeName.toLowerCase() === 'foreach') {
-              if (!parent.getAttribute('looped')) { // exemption check
-                skip = true;
-              }
-            }
-          }
-          parent = parent.parentNode;
-        }
-        if (el && !skip) {
-          conditionals.push(el);
-        }
-        else {
-          skip = false;
-        }
-      }
-
-      return conditionals;
-    },
-
-
-    /**
-     * Utility methods
-     */
-
-    // normalizes XMLSerializer's serializeToString method (fixes some browser compatibility issues)
-    stringifyElement: function(el) {
-      var innerHTML = false, body = el.body;
-
-      // try innerHTML
-      if (body) {
-        innerHTML = body.innerHTML;
-        if (innerHTML) {
-          return innerHTML;
-        }
-      }
-
-      // innerHTML failed, so just return the standard serializer
-      return serializer.serializeToString(el);
-    },
-
-    // converts all of a DOM node's children into a single string
-    stringifyElementChildren: function(el) {
-      if (el) {
-        var childNodes = el.childNodes, i, child, childString = '';
-
-        for (i in childNodes) {
-          child = childNodes[i];
-          if ((typeof child).toLowerCase() === 'object') {
-            childString += teddy.stringifyElement(child);
-          }
-        }
-
-        return childString;
+      if (doRender) {
+        return renderVar('{' + ovarname + '}', ovarname, curVar);
       }
       else {
-        if (teddy.params.verbosity > 1) {
-          console.warn('teddy.stringifyElementChildren called on a non-DOM object');
-        }
-        return false;
+        return match;
       }
-    },
-
-    // makes a JSON structure's keys all lower case (all variables in Teddy templates are case-insensitive because HTML is case-insensitive)
-    flattenModel: function(model) {
-      var newModel = {}, i, item;
-
-      // sanity check for circular data
-      try {
-        JSON.stringify(model);
-      }
-      catch (e) {
-        if (e === 'TypeError: Converting circular structure to JSON') {
-          console.error(e);
-          console.error('do not pass data models to Teddy that have a circular structure.');
-        }
-        return newModel;
-      }
-
-      for (i in model) {
-        item = model[i];
-        if ((typeof item).toLowerCase() === 'object') {
-          item = teddy.flattenModel(item);
-        }
-        newModel[i.toLowerCase()] = item;
-      }
-      return newModel;
-    },
-    
-    // gets nested object by string
-    getNestedObjectByString: function(o, s) {
-      s = s.replace(/\[(\w+)\]/g, '.$1');  // convert indexes to properties
-      s = s.replace(/^\./, ''); // strip leading dot
-      var a = s.split('.'), n;
-      while (a.length) {
-        n = a.shift();
-        if (n in o) {
-          o = o[n];
-        }
-        else {
-          return;
-        }
-      }
-      return o;
-    },
-
-    // replaces 'el' with 'result'
-    replaceProcessedElement: function(el, result) {
-      if (!el) {
-        if (teddy.params.verbosity > 1) {
-          console.warn('teddy.replaceProcessedElement called without being supplied a valid element to replace');
-        }
-        return false;
-      }
-
-      var parent = el.parentNode, sibling = el.nextSibling, i, children, length, child, clone;
-
-      if (parent) {
-        parent.removeChild(el);
-      }
-      else {
-        if (teddy.params.verbosity > 1) {
-          console.warn('teddy.replaceProcessedElement called on an object without a parentNode');
-        }
-        return false;
-      }
-
-      if (result) {
-        if (isNode) {
-          if (sibling) {
-            parent.insertBefore(result, sibling);
-          }
-          else {
-            parent.appendChild(result);
-          }
-        }
-        else {
-          result = result.body;
-          children = result.childNodes;
-          length = children.length;
-          for (i = 0; i < length; i++) {
-            child = children[i];
-            if ((typeof child).toLowerCase() === 'object') {
-              clone = child.cloneNode(true);
-              if (sibling) {
-                parent.insertBefore(clone, sibling);
-              }
-              else {
-                parent.appendChild(clone);
-              }
-            }
-          }
-        }
-      }
-      else {
-        if (teddy.params.verbosity > 1) {
-          console.warn('teddy.replaceProcessedElement called without being supplied a result');
-        }
-        return false;
-      }
-    },
-    
-    escapeHtmlEntities: function(v) {
-      return v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&#34;').replace(/'/g, '&#39;');
-    },
-
-    temporarilyRenameProblemElements: function(docString) {
-      var problemElements = teddy._problemElements, i, l = problemElements.length, el;
-
-      for (i = 0; i < l; i++) {
-        el = problemElements[i];
-        docString = docString
-        .replace(new RegExp('<' + el + ' ', 'gi'), '<teddy-' + el + ' ')
-        .replace(new RegExp('<' + el + '>', 'gi'), '<teddy-' + el + '>')
-        .replace(new RegExp('</' + el + '>', 'gi'), '</teddy-' + el + '>');
-      }
-
-      return docString;
-    },
-
-    restoreProblemElements: function(docString) {
-      var problemElements = teddy._problemElements, i, l = problemElements.length, el;
-
-      for (i = 0; i < l; i++) {
-        el = problemElements[i];
-        docString = docString
-        .replace(new RegExp('<teddy-' + el + ' ', 'gi'), '<' + el + ' ')
-        .replace(new RegExp('<teddy-' + el + '>', 'gi'), '<' + el + '>')
-        .replace(new RegExp('</teddy-' + el + '>', 'gi'), '</' + el + '>');
-      }
-
-      return docString;
-    },
-    
-    // hack to work around Opera and MSIE bug in which DOMParser's parseFromString method incorrectly parses empty UnknownElements. Since <include> tags can sometimes not have children, this hack is necessary for Opera and IE compatibility.
-    runUnknownElementParentSiblingHack: function(doc) {
-      if (!isNode) {
-        var includes, inlength, i, el, hack, hasBug = parser.parseFromString(serializer.serializeToString(parser.parseFromString('<z></z><p></p>', 'text/html')), 'text/html').getElementsByTagName('z')[0].firstChild;
-
-        if (hasBug) {
-          includes = doc.body.getElementsByTagName('include');
-          inlength = includes.length;
-          for (i = 0; i < inlength; i++) {
-            el = includes[i];
-            if (!el.firstChild) {
-              hack = document.createElement('p');
-              hack.setAttribute('data-unknownelementhack', 'true');
-              hack.setAttribute('hidden', 'hidden');
-              hack.setAttribute('style', 'display:none');
-              hack.innerHTML = 'h';
-              el.appendChild(hack);
-            }
-          }
-        }
-      }
-      return doc;
-    },
-
-
-    /**
-     * Error handler methods
-     */
-
-    // suppresses xml warnings (because Teddy is a made-up HTML syntax)
-    DOMParserWarningHandler: function(e) {
-      if (teddy.params.verbosity > 2) {
-        console.warn('Teddy\'s DOMParser issued the following warning:');
-        console.warn(e);
-      }
-    },
-
-    // logs xml errors
-    DOMParserErrorHandler: function(e) {
-      if (teddy.params.verbosity) {
-        console.warn('Teddy\'s DOMParser issued the following warning:');
-        console.warn(e);
-      }
-    },
-
-    // fatal errors
-    DOMParserFatalErrorHandler: function(e) {
-      if (teddy.params.strictParser) {
-        console.error('Teddy\'s DOMParser experienced a fatal error:');
-        throw e;
-      }
-      else {
-        console.error('Teddy\'s DOMParser experienced a fatal error:');
-        console.error(e);
-      }
-    },
-
-    // logs file I/O errors in node.js
-    readFileError: function(e) {
-      if (teddy.params.verbosity) {
-        console.warn('teddy.compile attempting to compile a template which doesn\'t exist: ' + e);
-      }
-    },
-
-
-    /**
-     * Teddy object public member vars
-     */
-
-    // compiled templates are stored as object collections, e.g. { "myTemplate.html": "<p>some markup</p>"}
-    compiledTemplates: {},
-
-    // packaged templates are stored as raw JS statements that can be sent to the client and eval'd, e.g. "teddy.compiledTemplates['myTemplate.html']='<p>some markup</p>';"
-    packagedTemplates: {},
-
-    // default values for parameters sent to teddy
-    params: {
-      verbosity: 1,
-      templateRoot: './',
-      strictParser: false,
-      enableForeachTag: false,
-      compileAtEveryRender: false
-    },
-
-    // stores local models for later consumption by template logic tags
-    _contextModels: [],
-
-    // list of elements to temporarily rename during parsing
-    _problemElements: [
-      // table elements are problematic because they whitelist allowable child elements
-      'table', 'caption', 'colgroup', 'col', 'thead', 'tfoot', 'tbody', 'tr', 'th', 'td',
-
-      // text node-only elements are problematic because they don't permit child elements
-      'script', 'textarea', 'title',
-
-      // <option> is a text node-only element and <select> / <datalist> only permits certain child elements
-      'select', 'datalist', 'option', 'optgroup'
-    ],
-
-    /**
-     * Mutator methods for Teddy object public member vars
-     */
-
-    // mutator method to set verbosity param. takes human-readable string argument and converts it to an integer for more efficient checks against the setting
-    setVerbosity: function(v) {
-      switch (v) {
-        case 'none':
-          v = 0;
-          break;
-        case 'verbose':
-          v = 2;
-          break;
-        case 'DEBUG':
-          v = 3;
-          break;
-        default: // case 'concise':
-          v = 1;
-      }
-      teddy.params.verbosity = v;
-    },
-
-    // mutator method to set template root param; must be a string
-    setTemplateRoot: function(v) {
-      teddy.params.templateRoot = String(v);
-    },
-
-    // turn on or off the setting to throw an exception if the template is not well formed
-    strictParser: function(v) {
-      teddy.params.strictParser = Boolean(v);
-    },
-
-    // turn on or off support for the <foreach> tag
-    enableForeachTag: function(v) {
-      teddy.params.enableForeachTag = Boolean(v);
-    },
-
-    // turn on or off the setting to compile templates at every render
-    compileAtEveryRender: function(v) {
-      teddy.params.compileAtEveryRender = Boolean(v);
     }
-  },
 
-  // private utility vars
-  isNode = ((typeof module).toLowerCase() !== 'undefined' && module.exports) ? true : false,
-  fs,
-  path,
-  xmldom,
-  parser,
-  serializer,
-  oldIE,
-  reordersAttributes;
+    return docstring;
+  }
 
-  // set env specific vars for node.js
-  if (isNode) {
-    module.exports = teddy; // makes teddy requirable in node.js
+  /**
+   * Teddy render methods
+   */
+
+  // parses a single <include> tag
+  function renderInclude(el, model) {
+    var src, incdoc, args, argl, argname, argval, i, localModel;
+
+    if (el) {
+      src = getAttribute(el, 'src');
+      if (!src) {
+        if (teddy.params.verbosity) {
+          teddy.console.warn('<include> element found with no src attribute. Ignoring element.');
+        }
+        return false;
+      }
+      else {
+
+        // parse variables which may be included in src attribute
+        src = parseVars(src, model);
+
+        // append extension if not present
+        if (src.slice(-5) !== '.html') {
+          src += '.html';
+        }
+
+        // compile included template if necessary
+        if (!teddy.compiledTemplates[src] || teddy.params.compileAtEveryRender) {
+          teddy.compile(src);
+        }
+
+        // get the template as a string
+        incdoc = teddy.compiledTemplates[src];
+        if (!incdoc) {
+          if (teddy.params.verbosity) {
+            teddy.console.warn('<include> element found which references a nonexistent template ("' + src + '"). Ignoring element.');
+          }
+          return false;
+        }
+        localModel = getAttribute(el, 'data-local-model');
+
+        // extend from the include's own local model
+        if (localModel) {
+          localModel = contextModels[parseInt(localModel)];
+        }
+        else {
+          localModel = {};
+        }
+
+        args = el.match(/<arg[\S\s]*?<\/arg>/g);
+        argl = args ? args.length : 0;
+        for (i = 0; i < argl; i++) {
+          argname = args[i].split('<arg ');
+          argname = argname[1];
+          argname = argname.split('>');
+          argname = argname[0];
+
+          if (!argname) {
+            if (teddy.params.verbosity) {
+              teddy.console.warn('<arg> element found with no attribute. Ignoring parent <include> element. (<include src="'+src+'">)');
+            }
+            return false;
+          }
+
+          argval = getInnerHTML(args[i]);
+
+          // replace template string argument {var} with argument value
+          incdoc = renderVar(incdoc, argname, argval, true);
+
+          // add arg to local model
+          localModel[argname] = argval;
+        }
+
+        if (argl) {
+          // apply local model to child conditionals and loops
+          incdoc = tagLocalModels(incdoc, localModel);
+        }
+        return incdoc;
+      }
+    }
+    else {
+      if (teddy.params.verbosity > 1) {
+        teddy.console.warn('teddy.renderInclude() called for an <include> element that does not exist.');
+      }
+      return false;
+    }
+  }
+
+  // finds all <include>, <if>, <elseif>, <unless>, <elseunless>, one line ifs, and <loop> tags and applies their local models
+  function tagLocalModels(doc, extraModel) {
+    doc = doc.replace(/(?:{[\S\s]*?}|<include[\S\s]*?>|<if[\S\s]*?>|<elseif[\S\s]*?>|<unless[\S\s]*?>|<elseunless[\S\s]*?>|<loop[\S\s]*?>|<[\S\s]if-[\S\s](?:="[\S\s]"|='[\S\s]')[\S\s](?:true=|false=)(?:="[\S\s]"|='[\S\s]')*?>)/g, addTag);
+
+    function addTag(match) {
+      var modelNumber = -1,
+          localModel = getAttribute(match, 'data-local-model'),
+          lastChar = match.charAt(match.length - 1);
+
+      // get existing derivative
+      if (localModel) {
+        localModel = contextModels[parseInt(localModel)];
+      }
+
+      // possibly new derivative
+      else {
+        localModel = extraModel;
+      }
+      // check for duplicates
+      modelNumber = contextModels.indexOf(localModel);
+
+      // if no duplicates
+      if (modelNumber < 0) {
+        localModel = Object.assign(localModel, extraModel);
+        modelNumber = contextModels.push(localModel);
+        modelNumber--;
+        return match.replace(lastChar, ' data-local-model=\'' + modelNumber + '\'' + lastChar);
+      }
+      else if (match.indexOf('data-local-model') === -1) {
+        return match.replace(lastChar, ' data-local-model=\'' + modelNumber + '\'' + lastChar);
+      }
+      else {
+        return match;
+      }
+    }
+
+    return doc;
+  }
+
+  // retrieve local model from cache and apply it to full model for parsing
+  function applyLocalModel(el, model) {
+    var localModel = el.match(/data-local-model=\'[\S\s]*?\'/),
+        i;
+
+    if (localModel) {
+      localModel = localModel[0];
+      localModel = localModel.replace('data-local-model=\'', '');
+      localModel = localModel.substring(0, localModel.length);
+      localModel = contextModels[parseInt(localModel)];
+      for (i in localModel) {
+        model[i] = localModel[i];
+      }
+    }
+    return model;
+  }
+
+  // parses a single loop tag
+  function renderLoop(el, model) {
+    if (el) {
+      var key = getAttribute(el, 'key'),
+          val = getAttribute(el, 'val'),
+          collection = getAttribute(el, 'through'),
+          collectionString = collection,
+          loopContent,
+          localModel,
+          item,
+          i,
+          key,
+          parsedLoop = '',
+          nestedLoops = [],
+          nestedLoopsCount;
+
+      if (!val) {
+        if (teddy.params.verbosity) {
+          teddy.console.warn('loop element found with no "val" attribute. Ignoring element.');
+        }
+        return false;
+      }
+      if (!collection) {
+        if (teddy.params.verbosity) {
+          teddy.console.warn('loop element found with no "through" attribute. Ignoring element.');
+        }
+        return false;
+      }
+
+      model = applyLocalModel(el, model);
+      collection = getNestedObjectByString(model, collection);
+
+      if (!collection) {
+        if (teddy.params.verbosity) {
+          teddy.console.warn('loop element found with undefined value "' + collectionString + '" specified for "through" or "in" attribute. Ignoring element.');
+        }
+
+        // restore original model
+        model = baseModel;
+
+        return false;
+      }
+      else {
+        loopContent = getInnerHTML(el);
+
+        // process loop
+        for (i in collection) {
+          if (collection.hasOwnProperty(i)) {
+            item = collection[i];
+            localModel = {};
+
+            // define local model for the iteration
+            // if model[val] or model[key] preexist, they will be overwritten by the locally supplied variables
+            if (key) {
+              model[key] = i;
+              localModel[key] = i;
+            }
+            model[val] = item;
+            localModel[val] = item;
+            parsedLoop += teddy.render(loopContent, model);
+          }
+        }
+
+        // restore original model
+        model = baseModel;
+
+        nestedLoopsCount = nestedLoops.length;
+        for (i = 0; i < nestedLoopsCount; i++) {
+          parsedLoop = parsedLoop.replace(new RegExp('{' + (i + 1) + '_nestedLoop.*?}', 'g'), function(match) {
+            var localModel = getAttribute(match, 'data-local-model'),
+                nestedLoop = nestedLoops[i];
+//console.log(nestedLoop);
+            if (nestedLoop.indexOf(' data-local-model') === -1) {
+              nestedLoop = nestedLoop.replace('>', ' data-local-model=\''+ localModel +'\'>');
+            }
+            return nestedLoop;
+          });
+        }
+
+        return parsedLoop;
+      }
+    }
+    else {
+      if (teddy.params.verbosity > 1) {
+        teddy.console.warn('teddy.renderLoop() called for a loop element that does not exist.');
+      }
+      return false;
+    }
+  }
+
+  // parses a single <if> or <unless> tag and any related <elseif>, <elseunless>, and <else> tags
+  function renderConditional(condString, parts, model) {
+    var el = parts[0],
+        satisfiedCondition = false,
+        nextSibling = el;
+
+    // add local vars to model
+    model = applyLocalModel(el, model);
+
+    while (!satisfiedCondition) {
+
+      if (evalCondition(el, model)) {
+        satisfiedCondition = true;
+        return getInnerHTML(el);
+      }
+      else {
+        do {
+          nextSibling = parts[parts.indexOf(nextSibling) + 1];
+          if (nextSibling && evalCondition(nextSibling, model)) {
+            satisfiedCondition = true;
+            return getInnerHTML(nextSibling);
+          }
+        }
+        while (nextSibling);
+
+        // restore original model
+        model = baseModel;
+        return false;
+      }
+    }
+  }
+
+  // parses a single one line conditional
+  function renderOneLineConditional(el, model) {
+    var conditionContent,
+        parts = el.split(' if-'),
+        part,
+        l = parts.length,
+        i,
+        el = parts[0],
+        flip = false,
+        extraString = '';
+
+    for (i = 1; i < l; i++) {
+      part = parts[i];
+      if (flip) {
+        extraString += ' if-' + part;
+      }
+      else {
+        el += ' if-' + part;
+        flip = true;
+      }
+    }
+
+    if (evalCondition(el, model)) {
+      conditionContent = getAttribute(el, 'true');
+    }
+    else {
+      conditionContent = getAttribute(el, 'false');
+    }
+
+    // remove conditionals from element
+    el = removeAttribute(el, 'true');
+    el = removeAttribute(el, 'false');
+
+    // remove if-conditions at end of element
+    el = el.replace(/(?: if-[\S]*?=(?:"[\S\s]*?"|'[\S\s]*?')>| if-[\S]*?>)/, '');
+    if (el.charAt(el.length - 1) !== '>') {
+      el += '>';
+    }
+
+    // remove if-conditions in middle of element
+    el = el.replace(/(?: if-[\S]*?=(?:"[\S\s]*?"|'[\S\s]*?') | if-[\S]*? )/, ' ');
+
+    // append condition content to element
+    el = el.slice(0, -1) + ' ' + conditionContent;
+
+    // append additional one line content if any
+    el += extraString;
+
+    if (el.charAt(el.length - 1) !== '>') {
+      el += '>';
+    }
+
+    // restore original model
+    model = baseModel;
+
+    return el;
+  }
+
+  // determines if a condition is true for <if>, <unless>, <elseif>, and <elseunless>, and one-liners
+  function evalCondition(el, model) {
+    el = el.trim();
+
+    var conditionType,
+        attrCount = 0,
+        conditionAttr,
+        attributes,
+        length,
+        i,
+        condition,
+        conditionVal,
+        modelVal,
+        curVar,
+        dots,
+        numDots,
+        d,
+        notDone = true,
+        condResult,
+        truthStack = [];
+
+    conditionType = getNodeName(el);
+    attributes = getAttributes(el);
+    length = attributes.length;
+
+    if (conditionType === 'else') {
+      return true;
+    }
+    else if (conditionType !== 'if' && conditionType !== 'unless' && conditionType !== 'elseif' && conditionType !== 'elseunless') {
+
+      // it's a one-liner
+      conditionType = 'onelineif';
+      for (i = 0; i < length; i++) {
+        conditionAttr = attributes[i].split('=');
+        if (conditionAttr[0].substr(0, 3) === 'if-') {
+          conditionVal = conditionAttr[1];
+          if (conditionVal) {
+            conditionVal = conditionVal.substring(1, conditionVal.length - 1);
+            conditionVal = parseVars(conditionVal, model);
+          }
+          conditionAttr = attributes[i].replace('if-', '');
+          break;
+        }
+      }
+      return evalStatement();
+    }
+
+    // regular conditional, could be multipart
+    do {
+
+      // examine each of the condition attributes
+      conditionAttr = attributes[attrCount];
+      if (conditionAttr) {
+        condition = undefined;
+        conditionVal = undefined;
+        truthStack.push(evalStatement());
+        attrCount++;
+      }
+      else {
+        notDone = false;
+        length = truthStack.length;
+      }
+    }
+    while (notDone);
+
+    function evalStatement() {
+      conditionAttr = conditionAttr.split('=');
+      condition = conditionAttr[0];
+
+      var hasNotOperator;
+      if (condition.substr(0, 4) === 'not:') {
+        hasNotOperator = true;
+        condition = condition.substring(4);
+      }
+      else {
+        hasNotOperator = false;
+      }
+
+      if (condition === 'or' || condition === 'and' || condition === 'xor') {
+        return condition; // this is a logical operator, not a condition to evaluate
+      }
+
+      if (conditionVal === undefined) {
+        conditionVal = conditionAttr[1];
+        if (conditionVal) {
+          conditionVal = conditionVal.substring(1, conditionVal.length - 1);
+          conditionVal = parseVars(conditionVal, model);
+        }
+        else {
+          conditionVal = condition;
+        }
+      }
+
+      dots = condition.split('.');
+      numDots = dots.length;
+      curVar = model;
+      if (curVar) {
+        for (d = 0; d < numDots; d++) {
+          curVar = curVar[dots[d]];
+        }
+      }
+      else {
+        if (teddy.params.verbosity > 1) {
+          teddy.console.warn('teddy.evalCondition() supplied an empty model');
+        }
+        return false;
+      }
+      modelVal = curVar;
+
+      // force empty arrays and empty objects to be falsey (#44)
+      if (modelVal && ((Array.isArray(modelVal) && modelVal.length === 0) || (typeof modelVal === 'object' && Object.keys(modelVal).length === 0 && modelVal.constructor === Object))) {
+        modelVal = false;
+      }
+
+      if (conditionType === 'if' || conditionType === 'onelineif' || conditionType === 'elseif') {
+        if (condition === conditionVal || (conditionType === 'onelineif' && 'if-' + condition === conditionVal)) {
+          if (modelVal) {
+            return hasNotOperator ? false : true;
+          }
+          else {
+            return hasNotOperator ? true : false;
+          }
+        }
+        else if (modelVal == conditionVal) {
+          return hasNotOperator ? false : true;
+        }
+        else {
+          return hasNotOperator ? true : false;
+        }
+      }
+      else {
+        if (condition === conditionVal) {
+          if (modelVal) {
+            return hasNotOperator ? true : false;
+          }
+          else {
+            return hasNotOperator ? false : true;
+          }
+        }
+        else if (modelVal != conditionVal) {
+          return hasNotOperator ? false : true;
+        }
+        else {
+          return hasNotOperator ? true : false;
+        }
+      }
+    }
+
+    // loop through the results
+    for (i = 0; i < length; i++) {
+      condition = truthStack[i];
+      condResult = condResult !== undefined ? condResult : truthStack[i - 1];
+      if (condition === 'and') {
+        condResult = Boolean(condResult && truthStack[i + 1]);
+      }
+      else if (condition === 'or') {
+        condResult = Boolean(condResult || truthStack[i + 1]);
+      }
+      else if (condition === 'xor') {
+        condResult = Boolean((condResult && !truthStack[i + 1]) || (!condResult && truthStack[i + 1]));
+      }
+    }
+
+    return condResult !== undefined ? condResult : condition;
+  }
+
+  // replaces a single {var} with its value from a given model
+  function renderVar(str, varname, varval, escapeOverride) {
+    if (str) {
+
+      // escape html entities
+      if (varname.slice(-2) !== '|s' && varname.slice(-3) !== '|s`') {
+        if (!escapeOverride) {
+          varval = escapeHtmlEntities(varval);
+        }
+      }
+
+      return str.replace(new RegExp('{' + varname.replace(/\|/g, '\\|') + '}', 'g'), varval);
+    }
+    else {
+      if (teddy.params.verbosity > 1) {
+        teddy.console.warn('an empty string was passed to teddy.renderVar.');
+      }
+    }
+  }
+
+
+  /**
+   * private utility methods
+   */
+
+  // gets nested object by string
+  function getNestedObjectByString(o, s) {
+    s = s.replace(/\[(\w+)\]/g, '.$1');  // convert indexes to properties
+    s = s.replace(/^\./, ''); // strip leading dot
+    var a = s.split('.'), n;
+    while (a.length) {
+      n = a.shift();
+      if (n in o) {
+        o = o[n];
+      }
+      else {
+        return;
+      }
+    }
+    return o;
+  }
+
+  // get all attributes of an element
+  function getAttributes(el) {
+    var attributes = el.split('>');
+    attributes = attributes[0];
+    attributes = attributes.substring(attributes.indexOf(' '));
+    attributes = attributes.match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g);
+    return attributes;
+  }
+
+  // get a specific attribute from a given element
+  function getAttribute(el, attr) {
+    var i, l, a, match;
+    match = el.match(new RegExp(attr + '=(\\\'.*?\\\'|\\".*?\\")'));
+
+    if (!match) {
+      return false;
+    }
+
+    l = match.length;
+    for (i = 0; i < l; i++) {
+      a = match[i];
+      if (a && typeof a === 'string') {
+        a = a.trim();
+        if (a.substring(0, attr.length) === attr) {
+          // got a match
+          break;
+        }
+      }
+    }
+    if (!a) {
+      return false;
+    }
+    else {
+      a = a.substring(attr.length + 2).slice(0, -1);
+      return a;
+    }
+  }
+
+  // get a specific attribute from a given element
+  function removeAttribute(el, attr) {
+    var newEl = el.replace(new RegExp('(?: (?:' + attr + '(?: |>))| (?:' + attr + '=)(?:\\"([\\S\\s]*?)\\"|\\\'([\\S\\s]*?)\\\')(?: |>))'), ' ');
+    if (newEl.charAt(newEl.length - 1) !== '>') {
+      newEl = newEl.trim();
+      newEl += '>';
+    }
+    return newEl;
+  }
+
+  // gets children of a given element
+  function getInnerHTML(el) {
+    el = el.trim();
+
+    var nodeName = getNodeName(el);
+    el = el.replace(new RegExp('<' + nodeName + '(?:>| [\\S\\s]*?>)'), '');
+    el = el.substring(0, el.lastIndexOf('</' + nodeName + '>'));
+    return el.trim();
+  }
+
+  // get an element's node name
+  function getNodeName(el) {
+    var nodeName = el.split(' ');
+    nodeName = nodeName[0];
+    nodeName = nodeName.split('>');
+    nodeName = nodeName[0];
+    nodeName = nodeName.substring(1, nodeName.length);
+    return nodeName;
+  }
+
+  function escapeHtmlEntities(v) {
+    if (v && typeof v === 'string') {
+      return v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&#34;').replace(/'/g, '&#39;');
+    }
+    else {
+      return v;
+    }
+  }
+
+  // expose as a CommonJS module
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = teddy; // makes teddy requirable in server-side JS
     module.exports.__express = teddy.render; // express.js support
 
-    // node module dependencies
-    fs = require('fs');
-    path = require('path');
-    xmldom = require('xmldom');
-
-    // define parser and serializer from xmldom
-    parser = new xmldom.DOMParser({
-      errorHandler: {
-        warning: teddy.DOMParserWarningHandler,
-        error: teddy.DOMParserErrorHandler,
-        fatalError: teddy.DOMParserFatalErrorHandler
-      }
-    });
-    serializer = new xmldom.XMLSerializer();
+    if (require) {
+      // server-side module dependencies
+      fs = require('fs');
+      path = require('path');
+    }
   }
 
   // set env specific vars for client-side
-  else {
+  if (typeof document !== 'undefined' && typeof window !== 'undefined') {
     global.teddy = teddy;
 
     // test for old IE
@@ -1446,55 +1197,6 @@
         window.console = {};
         console.log = console.warn = console.error = function() {};
       }
-
-      parser = new DOMParser();
-      serializer = new XMLSerializer();
-
-      /*
-       * DOMParser HTML extension
-       * 2012-09-04
-       *
-       * By Eli Grey, http://eligrey.com
-       * Modified for use in Teddy by Eric Newport (kethinov)
-       * Public domain.
-       * NO WARRANTY EXPRESSED OR IMPLIED. USE AT YOUR OWN RISK.
-       *
-       * @source https://gist.github.com/kethinov/4760460
-       */
-
-      (function(DOMParser) {
-        var DOMParserProto = DOMParser.prototype,
-            realParseFromString = DOMParserProto.parseFromString;
-
-        // Firefox/Opera/IE throw errors on unsupported types
-        try {
-          // WebKit returns null on unsupported types
-          if ((new DOMParser()).parseFromString("", "text/html")) {
-            // text/html parsing is natively supported
-            return;
-          }
-        }
-        catch (ex) {}
-
-        DOMParserProto.parseFromString = function(markup, type) {
-          if (/^\s*text\/html\s*(?:;|$)/i.test(type)) {
-            var doc = document.implementation.createHTMLDocument('');
-            if (markup.toLowerCase().indexOf('<!doctype') > -1) {
-              doc.documentElement.innerHTML = markup;
-            }
-            else {
-              doc.body.innerHTML = markup;
-            }
-            return doc;
-          }
-          else {
-            return realParseFromString.apply(this, arguments);
-          }
-        };
-      }(DOMParser));
-
-      // test to see if the browser reorders attributes (e.g. IE)
-      reordersAttributes = parser.parseFromString(serializer.serializeToString(parser.parseFromString('<if o t>', 'text/html')), 'text/html').getElementsByTagName('if')[0].attributes[0].nodeName === 't';
     }
   }
 })(this);
