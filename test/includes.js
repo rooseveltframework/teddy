@@ -3,6 +3,8 @@ var chai = require('chai'),
     model = require('./models/model')(),
     teddy = require('../teddy');
 
+chai.use(require('chai-string'));
+
 describe('Includes', function() {
   it('should <include> a template (includes/include.html)', function(done) {
     assert.equalIgnoreSpaces(teddy.render('includes/include.html', model), '<p>Some content</p>');

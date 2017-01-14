@@ -3,7 +3,10 @@ var chai = require('chai'),
     model = require('./models/model')(),
     teddy = require('../teddy');
 
-require('./includes');
+chai.use(require('chai-string'));
+
+console.log('Model used:');
+console.log(model);
 
 describe('Conditionals', function() {
   it('should evaluate <if something> as true (conditionals/if.html)', function(done) {

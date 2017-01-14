@@ -3,7 +3,7 @@ var chai = require('chai'),
     model = require('./models/model')(),
     teddy = require('../teddy');
 
-require('./conditionals');
+chai.use(require('chai-string'));
 
 describe('Looping', function() {
   it('should loop through {letters} correctly (looping/loopVal.html)', function(done) {
