@@ -26,4 +26,9 @@ describe('Includes', function() {
     model.escapeTest = '<span>raw html</span>'; // undo changes to global model that this test makes before calling done
     done();
   });
+
+  it('should <include> a template with loop arguments (includes/nestedLoop.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('includes/nestedLoop.html', model), '<p><p>a</p><p>b</p><p>c</p></p>');
+    done();
+  });
 });
