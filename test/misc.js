@@ -36,4 +36,9 @@ describe('Misc', function() {
     assert.equalIgnoreSpaces(teddy.render('misc/serverSideCommentsNested.html', model), '<p>Any comments? </p>');
     done();
   });
+
+  it('should ignore and skip rendering orphaned argument (misc/orphanedArgument.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('misc/orphanedArgument.html', model), '');
+    done();
+  });
 });
