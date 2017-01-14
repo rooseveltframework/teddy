@@ -28,7 +28,12 @@ describe('Includes', function() {
   });
 
   it('should <include> a template with loop arguments (includes/nestedLoop.html)', function(done) {
-    assert.equalIgnoreSpaces(teddy.render('includes/nestedLoop.html', model), '<p><p>a</p><p>b</p><p>c</p></p>');
+    assert.equalIgnoreSpaces(teddy.render('includes/nestedLoop.html', model), '<p>a</p><p>b</p><p>c</p>');
+    done();
+  });
+
+  it('should ignore and skip rendering orphaned argument (includes/orphanedArgument.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('includes/orphanedArgument.html', model), '<div></div>');
     done();
   });
 });
