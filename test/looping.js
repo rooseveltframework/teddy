@@ -49,4 +49,9 @@ describe('Looping', function() {
     assert.isAtMost(time, 1000);
     done();
   });
+
+  it('should ignore loop with invalid through attribute (looping/undefinedObjectLoop.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('looping/undefinedObjectLoop.html', model), '');
+    done();
+  });
 });
