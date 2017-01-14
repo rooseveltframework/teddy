@@ -51,7 +51,7 @@ describe('Looping', function() {
   });
 
   it('should ignore loop with invalid through attribute (looping/undefinedObjectLoop.html)', function(done) {
-    assert.equalIgnoreSpaces(teddy.render('looping/undefinedObjectLoop.html', model), '');
+    assert.equalIgnoreSpaces(teddy.render('looping/undefinedObjectLoop.html', model), '<div></div>');
     done();
   });
 });
