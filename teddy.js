@@ -351,7 +351,7 @@
         }
         while (diff !== renderedTemplate); // do another pass if this introduced new code to parse
 
-        // clean up any remaining unnecessary <elseif>, <elseunless>, or <else> tags
+        // clean up any remaining unnecessary <elseif>, <elseunless>, <else>, and orphaned <arg> tags
         renderedTemplate = renderedTemplate.replace(/(?:<elseif[\S\s]*?<\/elseif>|<elseunless[\S\s]*?<\/elseunless>|<else[\S\s]*?<\/else>|<arg[\S\s]*?<\/arg>)/g, '');
 
         // processes all remaining {vars}
