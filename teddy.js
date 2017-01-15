@@ -277,12 +277,13 @@
       // declare vars
       var renderedTemplate = teddy.compiledTemplates[template],
           diff,
-          outerLoops,
-          outerLoopsCount,
           loops = [],
           loopCount,
+          loop,
           i,
-          errors;
+          el,
+          localModel,
+          errors; // TODO: do something useful with this
 
       if (!renderedTemplate) {
         if (teddy.params.verbosity) {
@@ -292,6 +293,9 @@
       }
 
       function parseNonLoopedElements() {
+        var outerLoops,
+            outerLoopsCount;
+
         function replaceLoops(match) {
           loops.push(match);
           return '{' + loops.length + '_loop}';
@@ -323,8 +327,24 @@
           // parse removed loops
           loopCount = loops.length;
           for (i = 0; i < loopCount; i++) {
-            if (loops[i]) {
-              renderedTemplate = renderedTemplate.replace('{' + (i + 1) + '_loop}', renderLoop(loops[i], model));
+            loop = loops[i];
+            if (loop) {
+
+              // try for a version of this loop that might have a data model attached to it now
+              el = renderedTemplate.match(new RegExp('(?:{' + ( i + 1 ) + '_loop data-local-model=\\\'[\\S\\s]*?\\\'})'));
+
+              if (el && el[0]) {
+                el = el[0];
+                localModel = el.split(' ');
+                localModel = localModel[1].slice(0, -1);
+                loop = loop.replace('>', ' ' + localModel + '>');
+                renderedTemplate = renderedTemplate.replace(el, renderLoop(loop, model));
+              }
+
+              // no data model on it, render it vanilla
+              else {
+                renderedTemplate = renderedTemplate.replace('{' + (i + 1) + '_loop}', renderLoop(loop, model));
+              }
               loops[i] = null; // this prevents renderLoop from attempting to render it again
             }
           }
@@ -332,7 +352,7 @@
         while (diff !== renderedTemplate); // do another pass if this introduced new code to parse
 
         // clean up any remaining unnecessary <elseif>, <elseunless>, or <else> tags
-        renderedTemplate = renderedTemplate.replace(/(?:<elseif[\S\s]*?<\/elseif>|<elseunless[\S\s]*?<\/elseunless>|<else[\S\s]*?<\/else>)/g, '');
+        renderedTemplate = renderedTemplate.replace(/(?:<elseif[\S\s]*?<\/elseif>|<elseunless[\S\s]*?<\/elseunless>|<else[\S\s]*?<\/else>|<arg[\S\s]*?<\/arg>)/g, '');
 
         // processes all remaining {vars}
         renderedTemplate = parseVars(renderedTemplate, model);
@@ -725,13 +745,13 @@
         if (teddy.params.verbosity) {
           teddy.console.warn('loop element found with no "val" attribute. Ignoring element.');
         }
-        return false;
+        return '';
       }
       if (!collection) {
         if (teddy.params.verbosity) {
           teddy.console.warn('loop element found with no "through" attribute. Ignoring element.');
         }
-        return false;
+        return '';
       }
 
       model = applyLocalModel(el, model);
@@ -745,7 +765,7 @@
         // restore original model
         model = baseModel;
 
-        return false;
+        return '';
       }
       else {
         loopContent = getInnerHTML(el);

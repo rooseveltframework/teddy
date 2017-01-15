@@ -3,6 +3,8 @@ var chai = require('chai'),
     model = require('./models/model')(),
     teddy = require('../teddy');
 
+teddy.setVerbosity(0);
+
 chai.use(require('chai-string'));
 
 describe('Looping', function() {
