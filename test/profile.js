@@ -1,12 +1,10 @@
-var chai = require('chai'),
-    assert = chai.assert,
-    model = require('./models/model')(),
-    teddy = require('../teddy'),
-    start, end, time;
+// uncomment the below for manual profiling
 
-start = new Date().getTime();
-//debugger;
-    console.log(teddy.render('test/templates/looping/largeDataSet.html', model));
+/*
 
-    end = new Date().getTime();
-    time = end - start;
+var model = require('./models/model')(),
+    teddy = require('../teddy');
+
+// debugger;
+console.log(teddy.render('test/templates/looping/largeDataSet.html', model));
+*/
