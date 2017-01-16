@@ -165,51 +165,38 @@
      */
 
     // compiles a template (removes {! comments !} and unnecessary whitespace)
-    compile: function(template, name) {
-      var fname = '', oldTemplate, comments, l, i;
-
-      // remove templateRoot from template name if necessary
-      if (!name) {
-        name = template.replace(teddy.params.templateRoot, '');
-      }
-
-      // convert filepath into a template string if we're server-side
-      if (fs) {
-        try {
-          if (fs.existsSync(template)) {
-            fname = template;
-          }
-          else if (fs.existsSync(teddy.params.templateRoot + template)) {
-            fname = teddy.params.templateRoot + template;
-          }
-          else {
-            fname = teddy.params.templateRoot + '/' + template;
-          }
-
-          // attempt readFile
-          template = fs.readFileSync(fname, 'utf8');
-        }
-        catch (e) {
-          if (e.code !== 'ENOENT') {
-            if (teddy.params.verbosity) {
-              teddy.console.error('teddy.compile threw an exception while attempting to compile a template: ' + e);
-            }
-            return false;
-          }
-        }
-      }
+    compile: function(template) {
+      var name = template, oldTemplate, comments, l, i;
 
       // it's assumed that the argument is already a template string if we're not server-side
-      else if (typeof template !== 'string') {
+      if (typeof template !== 'string') {
         if (teddy.params.verbosity > 1) {
           teddy.console.warn('teddy.compile attempted to compile a template which is not a string.');
         }
         return false;
       }
 
-      // append extension if not present
-      if (name.slice(-5) !== '.html') {
-        name += '.html';
+      // get contents of file if template is a file
+      if (template.indexOf('<') === -1 && fs) {
+        try {
+          template = fs.readFileSync(template, 'utf8');
+        }
+        catch (e) {
+          try {
+            template = fs.readFileSync(teddy.params.templateRoot + template, 'utf8');
+          }
+          catch (e) {
+            try {
+              template = fs.readFileSync(teddy.params.templateRoot + '/' + template, 'utf8');
+            }
+            catch (e) {
+              if (teddy.params.verbosity) {
+                teddy.console.error('teddy.compile threw an exception while attempting to compile a template: ' + e);
+              }
+              return false;
+            }
+          }
+        }
       }
 
       // remove {! comments !} and (optionally) unnecessary whitespace
@@ -230,6 +217,11 @@
         }
       }
       while (oldTemplate !== template);
+
+      // append extension if not present
+      if (name.slice(-5) !== '.html') {
+        name += '.html';
+      }
 
       teddy.compiledTemplates[name] = template;
     },
@@ -503,15 +495,17 @@
     while (loopTypesLeft);
 
     // do one line ifs now...
-    onelines = renderedTemplate.match(/[^<]*?if-[^>]+/g);
-    l = onelines ? onelines.length : 0;
+    if (renderedTemplate.indexOf('if-') > -1) {
+      onelines = renderedTemplate.match(/[^<]*?if-[^>]+/g);
+      l = onelines ? onelines.length : 0;
 
-    for (i = 0; i < l; i++) {
-      el = '<' + onelines[i] + '>';
-      model = applyLocalModel(el, model);
-      result = renderOneLineConditional(el, model);
-      renderedTemplate = renderedTemplate.replace(el, result);
-      model = baseModel; // restore original model
+      for (i = 0; i < l; i++) {
+        el = '<' + onelines[i] + '>';
+        model = applyLocalModel(el, model);
+        result = renderOneLineConditional(el, model);
+        renderedTemplate = renderedTemplate.replace(el, result);
+        model = baseModel; // restore original model
+      }
     }
 
     return renderedTemplate;
@@ -796,7 +790,7 @@
           parsedLoop = parsedLoop.replace(new RegExp('{' + (i + 1) + '_nestedLoop.*?}', 'g'), function(match) {
             var localModel = getAttribute(match, 'data-local-model'),
                 nestedLoop = nestedLoops[i];
-//console.log(nestedLoop);
+
             if (nestedLoop.indexOf(' data-local-model') === -1) {
               nestedLoop = nestedLoop.replace('>', ' data-local-model=\''+ localModel +'\'>');
             }

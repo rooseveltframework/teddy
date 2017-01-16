@@ -51,6 +51,7 @@
   },
   "scripts": {
     "test": "./node_modules/.bin/mocha --recursive test",
+    "test-debug": "node debug --inspect ./node_modules/.bin/mocha --recursive test",
     "eslint": "./node_modules/.bin/eslint ."
   },
   "pre-commit": [
