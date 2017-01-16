@@ -36,4 +36,9 @@ describe('Includes', function() {
     assert.equalIgnoreSpaces(teddy.render('includes/orphanedArgument.html', model), '<div></div>');
     done();
   });
+
+  it('should print {variable} of included argument (infinite loop bug) (includes/argVariableWithinArg.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('includes/argVariableWithinArg.html', model), '<p>Some content</p>');
+    done();
+  });
 });
