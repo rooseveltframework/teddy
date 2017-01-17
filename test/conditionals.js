@@ -134,4 +134,9 @@ describe('Conditionals', function() {
     assert.equalIgnoreSpaces(teddy.render('conditionals/nestedConditional.html', model), '<p>The variable \'something\' and \'somethingElse\' are both present</p>');
     done();
   });
+
+  it('should render nothing if condition isn\'t met (conditionals/ifNotPresent.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/ifNotPresent.html', model), '<div></div>');
+    done();
+  });
 });
