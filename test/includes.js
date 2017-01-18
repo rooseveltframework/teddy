@@ -37,7 +37,12 @@ describe('Includes', function() {
     done();
   });
 
-  it('should print {variable} of included argument (infinite loop bug) (includes/argVariableWithinArg.html)', function(done) {
+  it('should <include> a template that contains loops and variables with an argument (includes/includeLoopsAndVars.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('includes/includeLoopsAndVars.html', model), '<p>a</p><p>b</p><p>c</p><p>world</p><p>guy</p>');
+    done();
+  });
+
+  it('should prevent recursion abuse (includes/argVariableWithinArg.html)', function(done) {
     assert.equalIgnoreSpaces(teddy.render('includes/argVariableWithinArg.html', model), '<p>Some content</p>');
     done();
   });
