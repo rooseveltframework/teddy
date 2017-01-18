@@ -56,4 +56,9 @@ describe('Looping', function() {
     assert.equalIgnoreSpaces(teddy.render('looping/undefinedObjectLoop.html', model), '<div></div>');
     done();
   });
+
+  it('should ignore loop with no contents (looping/emptyMarkupLoop.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('looping/emptyMarkupLoop.html', model), '<div></div>');
+    done();
+  });
 });
