@@ -173,7 +173,7 @@
         if (teddy.params.verbosity > 1) {
           teddy.console.warn('teddy.compile attempted to compile a template which is not a string.');
         }
-        return false;
+        return '';
       }
 
       // get contents of file if template is a file
@@ -193,7 +193,7 @@
               if (teddy.params.verbosity) {
                 teddy.console.error('teddy.compile threw an exception while attempting to compile a template: ' + e);
               }
-              return false;
+              return '';
             }
           }
         }
@@ -237,7 +237,7 @@
       // TODO: check if this is still necessary
       if (oldIE) {
         teddy.console.error('Teddy does not support client-side templating on IE9 or below.');
-        return false;
+        return '';
       }
 
       // handle bad or unsupplied model
@@ -281,7 +281,7 @@
         if (teddy.params.verbosity) {
           teddy.console.warn('teddy.render attempted to render a template which doesn\'t exist: ' + template);
         }
-        return false;
+        return '';
       }
 
       function parseNonLoopedElements() {
@@ -589,7 +589,7 @@
         if (teddy.params.verbosity) {
           teddy.console.warn('<include> element found with no src attribute. Ignoring element.');
         }
-        return false;
+        return '';
       }
       else {
 
@@ -612,7 +612,7 @@
           if (teddy.params.verbosity) {
             teddy.console.warn('<include> element found which references a nonexistent template ("' + src + '"). Ignoring element.');
           }
-          return false;
+          return '';
         }
         localModel = getAttribute(el, 'data-local-model');
 
@@ -636,7 +636,7 @@
             if (teddy.params.verbosity) {
               teddy.console.warn('<arg> element found with no attribute. Ignoring parent <include> element. (<include src="'+src+'">)');
             }
-            return false;
+            return '';
           }
 
           argval = getInnerHTML(args[i]);
@@ -659,7 +659,7 @@
       if (teddy.params.verbosity > 1) {
         teddy.console.warn('teddy.renderInclude() called for an <include> element that does not exist.');
       }
-      return false;
+      return '';
     }
   }
 
@@ -805,7 +805,7 @@
       if (teddy.params.verbosity > 1) {
         teddy.console.warn('teddy.renderLoop() called for a loop element that does not exist.');
       }
-      return false;
+      return '';
     }
   }
 
@@ -836,7 +836,7 @@
 
         // restore original model
         model = baseModel;
-        return false;
+        return '';
       }
     }
   }
