@@ -31,6 +31,7 @@ module.exports = function() {
         },
       ],
       something: 'Some content',
+      somethingMore: 'More content',
       somethingElse: true,
       varWithVarInside: 'Variable with a variable inside: {subVar}',
       subVar: 'And another: {something}',

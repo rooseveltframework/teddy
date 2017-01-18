@@ -11,6 +11,11 @@ describe('Misc', function() {
     done();
   });
 
+  it('should render multiple {variables} (misc/multipleVariables.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('misc/multipleVariables.html', model), '<p>Some content</p> <h5>More content</h5>');
+    done();
+  });
+
   it('should render nested {variables} (misc/nestedVars.html)', function(done) {
     assert.equalIgnoreSpaces(teddy.render('misc/nestedVars.html', model), '<p>Variable with a variable inside: And another: Some content</p>');
     done();
