@@ -251,7 +251,7 @@
       }
 
       // store original copy of model so it can be reset after being temporarily modified
-      baseModel = model; // parse/stringify copy appears unnecessary
+      baseModel = model;
 
       // remove templateRoot from template name if necessary
       template = template.replace(teddy.params.templateRoot, '');
@@ -353,7 +353,6 @@
 
       // clean up temp vars
       contextModels = [];
-      baseModel = {};
 
       // if we have no template and we have errors, render an error page
       if (!renderedTemplate && (consoleErrors || consoleWarnings)) {
@@ -560,15 +559,13 @@
         }
         doRender = false;
       }
-      if (localModel) {
-        model = baseModel;
-      }
+      model = baseModel;
 
       if (doRender) {
         return renderVar('{' + ovarname + '}', ovarname, curVar);
       }
       else {
-        return match;
+        return '{' + match[0] + '}';
       }
     }
 
