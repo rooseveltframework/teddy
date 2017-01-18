@@ -165,51 +165,38 @@
      */
 
     // compiles a template (removes {! comments !} and unnecessary whitespace)
-    compile: function(template, name) {
-      var fname = '', oldTemplate, comments, l, i;
-
-      // remove templateRoot from template name if necessary
-      if (!name) {
-        name = template.replace(teddy.params.templateRoot, '');
-      }
-
-      // convert filepath into a template string if we're server-side
-      if (fs) {
-        try {
-          if (fs.existsSync(template)) {
-            fname = template;
-          }
-          else if (fs.existsSync(teddy.params.templateRoot + template)) {
-            fname = teddy.params.templateRoot + template;
-          }
-          else {
-            fname = teddy.params.templateRoot + '/' + template;
-          }
-
-          // attempt readFile
-          template = fs.readFileSync(fname, 'utf8');
-        }
-        catch (e) {
-          if (e.code !== 'ENOENT') {
-            if (teddy.params.verbosity) {
-              teddy.console.error('teddy.compile threw an exception while attempting to compile a template: ' + e);
-            }
-            return false;
-          }
-        }
-      }
+    compile: function(template) {
+      var name = template, oldTemplate, comments, l, i;
 
       // it's assumed that the argument is already a template string if we're not server-side
-      else if (typeof template !== 'string') {
+      if (typeof template !== 'string') {
         if (teddy.params.verbosity > 1) {
           teddy.console.warn('teddy.compile attempted to compile a template which is not a string.');
         }
-        return false;
+        return '';
       }
 
-      // append extension if not present
-      if (name.slice(-5) !== '.html') {
-        name += '.html';
+      // get contents of file if template is a file
+      if (template.indexOf('<') === -1 && fs) {
+        try {
+          template = fs.readFileSync(template, 'utf8');
+        }
+        catch (e) {
+          try {
+            template = fs.readFileSync(teddy.params.templateRoot + template, 'utf8');
+          }
+          catch (e) {
+            try {
+              template = fs.readFileSync(teddy.params.templateRoot + '/' + template, 'utf8');
+            }
+            catch (e) {
+              if (teddy.params.verbosity) {
+                teddy.console.error('teddy.compile threw an exception while attempting to compile a template: ' + e);
+              }
+              return '';
+            }
+          }
+        }
       }
 
       // remove {! comments !} and (optionally) unnecessary whitespace
@@ -231,6 +218,11 @@
       }
       while (oldTemplate !== template);
 
+      // append extension if not present
+      if (name.slice(-5) !== '.html') {
+        name += '.html';
+      }
+
       teddy.compiledTemplates[name] = template;
     },
 
@@ -245,7 +237,7 @@
       // TODO: check if this is still necessary
       if (oldIE) {
         teddy.console.error('Teddy does not support client-side templating on IE9 or below.');
-        return false;
+        return '';
       }
 
       // handle bad or unsupplied model
@@ -259,7 +251,7 @@
       }
 
       // store original copy of model so it can be reset after being temporarily modified
-      baseModel = model; // parse/stringify copy appears unnecessary
+      baseModel = model;
 
       // remove templateRoot from template name if necessary
       template = template.replace(teddy.params.templateRoot, '');
@@ -289,7 +281,7 @@
         if (teddy.params.verbosity) {
           teddy.console.warn('teddy.render attempted to render a template which doesn\'t exist: ' + template);
         }
-        return false;
+        return '';
       }
 
       function parseNonLoopedElements() {
@@ -361,7 +353,6 @@
 
       // clean up temp vars
       contextModels = [];
-      baseModel = {};
 
       // if we have no template and we have errors, render an error page
       if (!renderedTemplate && (consoleErrors || consoleWarnings)) {
@@ -503,15 +494,17 @@
     while (loopTypesLeft);
 
     // do one line ifs now...
-    onelines = renderedTemplate.match(/[^<]*?if-[^>]+/g);
-    l = onelines ? onelines.length : 0;
+    if (renderedTemplate.indexOf('if-') > -1) {
+      onelines = renderedTemplate.match(/[^<]*?if-[^>]+/g);
+      l = onelines ? onelines.length : 0;
 
-    for (i = 0; i < l; i++) {
-      el = '<' + onelines[i] + '>';
-      model = applyLocalModel(el, model);
-      result = renderOneLineConditional(el, model);
-      renderedTemplate = renderedTemplate.replace(el, result);
-      model = baseModel; // restore original model
+      for (i = 0; i < l; i++) {
+        el = '<' + onelines[i] + '>';
+        model = applyLocalModel(el, model);
+        result = renderOneLineConditional(el, model);
+        renderedTemplate = renderedTemplate.replace(el, result);
+        model = baseModel; // restore original model
+      }
     }
 
     return renderedTemplate;
@@ -566,15 +559,13 @@
         }
         doRender = false;
       }
-      if (localModel) {
-        model = baseModel;
-      }
+      model = baseModel;
 
       if (doRender) {
         return renderVar('{' + ovarname + '}', ovarname, curVar);
       }
       else {
-        return match;
+        return '{' + match[0] + '}';
       }
     }
 
@@ -595,7 +586,7 @@
         if (teddy.params.verbosity) {
           teddy.console.warn('<include> element found with no src attribute. Ignoring element.');
         }
-        return false;
+        return '';
       }
       else {
 
@@ -618,7 +609,7 @@
           if (teddy.params.verbosity) {
             teddy.console.warn('<include> element found which references a nonexistent template ("' + src + '"). Ignoring element.');
           }
-          return false;
+          return '';
         }
         localModel = getAttribute(el, 'data-local-model');
 
@@ -642,7 +633,7 @@
             if (teddy.params.verbosity) {
               teddy.console.warn('<arg> element found with no attribute. Ignoring parent <include> element. (<include src="'+src+'">)');
             }
-            return false;
+            return '';
           }
 
           argval = getInnerHTML(args[i]);
@@ -665,7 +656,7 @@
       if (teddy.params.verbosity > 1) {
         teddy.console.warn('teddy.renderInclude() called for an <include> element that does not exist.');
       }
-      return false;
+      return '';
     }
   }
 
@@ -796,7 +787,7 @@
           parsedLoop = parsedLoop.replace(new RegExp('{' + (i + 1) + '_nestedLoop.*?}', 'g'), function(match) {
             var localModel = getAttribute(match, 'data-local-model'),
                 nestedLoop = nestedLoops[i];
-//console.log(nestedLoop);
+
             if (nestedLoop.indexOf(' data-local-model') === -1) {
               nestedLoop = nestedLoop.replace('>', ' data-local-model=\''+ localModel +'\'>');
             }
@@ -811,7 +802,7 @@
       if (teddy.params.verbosity > 1) {
         teddy.console.warn('teddy.renderLoop() called for a loop element that does not exist.');
       }
-      return false;
+      return '';
     }
   }
 
@@ -842,7 +833,7 @@
 
         // restore original model
         model = baseModel;
-        return false;
+        return '';
       }
     }
   }
