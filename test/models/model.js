@@ -38,6 +38,7 @@ module.exports = function() {
       escapeTest: '<span>raw html</span>',
       nullVar: null,
       emptyArray: [],
+      hello: 'world',
       largeDataSet: []
     },
     i,

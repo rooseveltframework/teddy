@@ -36,4 +36,9 @@ describe('Includes', function() {
     assert.equalIgnoreSpaces(teddy.render('includes/orphanedArgument.html', model), '<div></div>');
     done();
   });
+
+  it('should <include> a template that contains loops and variables with an argument (includes/includeLoopsAndVars.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('includes/includeLoopsAndVars.html', model), '<p>a</p><p>b</p><p>c</p><p>world</p><p>guy</p>');
+    done();
+  });
 });
