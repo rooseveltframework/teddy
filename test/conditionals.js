@@ -77,7 +77,7 @@ describe('Conditionals', function() {
   });
 
   it('should evaluate `and` truth table as <p>and: true</p> (conditionals/andTruthTable.html)', function(done) {
-    assert.equalIgnoreSpaces(teddy.render('conditionals/andTruthTable.html', model), ' <p>and: true</p>');
+    assert.equalIgnoreSpaces(teddy.render('conditionals/andTruthTable.html', model), ' <p>and: true true</p>');
     done();
   });
 
