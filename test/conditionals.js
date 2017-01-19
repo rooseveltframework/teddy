@@ -76,6 +76,26 @@ describe('Conditionals', function() {
     done();
   });
 
+  it('should evaluate <if something=\'Nope\' and somethingMore=\'Nope\'> (False and False) as false (conditionals/andDifferentVarFalseFalse.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/andDifferentVarFalseFalse.html', model), ' ');
+    done();
+  });
+
+  it('should evaluate <if something=\'Nope\' and somethingMore=\'More Content\'> (False and True) as false (conditionals/andDifferentVarFalseTrue.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/andDifferentVarFalseTrue.html', model), ' ');
+    done();
+  });
+
+  it('should evaluate <if something=\'Some content\' and somethingMore=\'Nope\'> (True and False) as false where the left side is false and the right side is true (conditionals/andDifferentVarTrueFalse.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/andDifferentVarTrueFalse.html', model), ' ');
+    done();
+  });
+
+  it('should evaluate <if something=\'Some content\' and somethingMore=\'More content\'> (True and True) as true (conditionals/andDifferentVarTrueTrue.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/andDifferentVarTrueTrue.html', model), ' <p>and: true</p>');
+    done();
+  });
+
   it('should evaluate <if something or notDefined> as true (conditionals/or.html)', function(done) {
     assert.equalIgnoreSpaces(teddy.render('conditionals/or.html', model), ' <p>or: true</p>');
     done();
