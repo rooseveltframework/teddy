@@ -81,6 +81,11 @@ describe('Conditionals', function() {
     done();
   });
 
+  it('should evaluate `or` truth table as <p>or: true true</p> <p>or: true false</p> <p>or: false true</p> <p>or: fasle false</p> (conditionals/orTruthTable.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/orTruthTable.html', model), ' <p>or: true true</p> <p>or: true false</p> <p>or: false true</p> <p>or: fasle false</p>');
+    done();
+  });
+
   it('should evaluate <if something or notDefined> as true where the left side is false and the right side is true (conditionals/or.html)', function(done) {
     assert.equalIgnoreSpaces(teddy.render('conditionals/orRightSide.html', model), ' <p>or: true</p>');
     done();
