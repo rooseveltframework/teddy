@@ -1,0 +1,23 @@
+{!
+  should evaluate the truth table of the `and` conditional as <p>and: true</p>
+!}
+
+    {! true !}                  {! true !}
+<if something='Some content' and somethingMore='More content'>
+  <p>and: true</p>
+</if>
+
+    {! true !}                  {! false !}
+<if something='Some content' and somethingMore='Nope'>
+  <p>and: true</p>
+</if>
+
+    {! false !}                  {! true !}
+<if something='Nope' and somethingMore='More Content'>
+  <p>and: true</p>
+</if>
+
+    {! false !}                  {! false !}
+<if something='Nope' and somethingMore='Nope'>
+  <p>and: true</p>
+</if>
