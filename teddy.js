@@ -102,7 +102,8 @@
       verbosity: 1,
       templateRoot: './',
       compileAtEveryRender: false,
-      minify: false
+      minify: false,
+      maxPasses: 25000
     },
 
     // compiled templates are stored as object collections, e.g. { "myTemplate.html": "<p>some markup</p>"}
@@ -148,14 +149,23 @@
       teddy.params.minify = Boolean(v);
     },
 
+    // mutator method to set max passes param: the number of times the parser can iterate over the template
+    setMaxPasses: function(v) {
+      teddy.params.maxPasses = Number(v);
+    },
+
     // teddy's internal console logging system
+    warnings: [],
+    errors: [],
     console: {
       warn: function(value) {
         console.warn(value);
+        teddy.warnings.push(value);
         consoleWarnings += '<li>' + escapeHtmlEntities(value) + '</li>';
       },
       error: function(value) {
         console.error(value);
+        teddy.errors.push(value);
         consoleErrors += '<li>' + escapeHtmlEntities(value) + '</li>';
       }
     },
@@ -275,7 +285,10 @@
           i,
           el,
           localModel,
-          errors; // TODO: do something useful with this
+          errors,
+          passes = 0,
+          maxPasses = teddy.params.maxPasses,
+          maxPassesError = 'Render aborted due to max number of passes (' + maxPasses + ') exceeded; there is a possible infinite loop in your template logic.';
 
       if (!renderedTemplate) {
         if (teddy.params.verbosity) {
@@ -308,37 +321,57 @@
 
           // parse non-looped includes
           renderedTemplate = parseIncludes(renderedTemplate, model);
+
+          passes++;
+          if (passes >= maxPasses) {
+            return false;
+          }
         }
         while (diff !== renderedTemplate); // do another pass if this introduced new code to parse
+        return true;
       }
 
       do {
         do {
-          parseNonLoopedElements();
+          if (parseNonLoopedElements()) {
 
-          // parse removed loops
-          loopCount = loops.length;
-          for (i = 0; i < loopCount; i++) {
-            loop = loops[i];
-            if (loop) {
+            // parse removed loops
+            loopCount = loops.length;
+            for (i = 0; i < loopCount; i++) {
+              loop = loops[i];
+              if (loop) {
 
-              // try for a version of this loop that might have a data model attached to it now
-              el = renderedTemplate.match(new RegExp('(?:{' + ( i + 1 ) + '_loop data-local-model=\\\'[\\S\\s]*?\\\'})'));
+                // try for a version of this loop that might have a data model attached to it now
+                el = renderedTemplate.match(new RegExp('(?:{' + ( i + 1 ) + '_loop data-local-model=\\\'[\\S\\s]*?\\\'})'));
 
-              if (el && el[0]) {
-                el = el[0];
-                localModel = el.split(' ');
-                localModel = localModel[1].slice(0, -1);
-                loop = loop.replace('>', ' ' + localModel + '>');
-                renderedTemplate = renderedTemplate.replace(el, renderLoop(loop, model));
+                if (el && el[0]) {
+                  el = el[0];
+                  localModel = el.split(' ');
+                  localModel = localModel[1].slice(0, -1);
+                  loop = loop.replace('>', ' ' + localModel + '>');
+                  renderedTemplate = renderedTemplate.replace(el, renderLoop(loop, model));
+                }
+
+                // no data model on it, render it vanilla
+                else {
+                  renderedTemplate = renderedTemplate.replace('{' + (i + 1) + '_loop}', renderLoop(loop, model));
+                }
+                loops[i] = null; // this prevents renderLoop from attempting to render it again
               }
-
-              // no data model on it, render it vanilla
-              else {
-                renderedTemplate = renderedTemplate.replace('{' + (i + 1) + '_loop}', renderLoop(loop, model));
-              }
-              loops[i] = null; // this prevents renderLoop from attempting to render it again
             }
+          }
+          else {
+            if (teddy.params.verbosity) {
+              teddy.console.error(maxPassesError);
+            }
+            return maxPassesError;
+          }
+          passes++;
+          if (passes >= maxPasses) {
+            if (teddy.params.verbosity) {
+              teddy.console.error(maxPassesError);
+            }
+            return maxPassesError;
           }
         }
         while (diff !== renderedTemplate); // do another pass if this introduced new code to parse
@@ -348,11 +381,20 @@
 
         // processes all remaining {vars}
         renderedTemplate = parseVars(renderedTemplate, model);
+
+        passes++;
+        if (passes >= maxPasses) {
+          if (teddy.params.verbosity) {
+            teddy.console.error(maxPassesError);
+          }
+          return maxPassesError;
+        }
       }
       while (diff !== renderedTemplate); // do another pass if this introduced new code to parse
 
       // clean up temp vars
       contextModels = [];
+      passes = 0;
 
       // if we have no template and we have errors, render an error page
       if (!renderedTemplate && (consoleErrors || consoleWarnings)) {
@@ -380,7 +422,7 @@
           callback(null, renderedTemplate);
         }
         else {
-          callback(errors, renderedTemplate);
+          callback(consoleErrors, renderedTemplate);
         }
       }
       else {

@@ -1,0 +1,23 @@
+{!
+  should evaluate the truth table of the `or` conditional as <p>or: true true</p> <p>or: true false</p> <p>or: false true</p> <p>or: false false</p>
+!}
+
+    {! true !}                  {! true !}
+<if something='Some content' or somethingMore='More content'>
+  <p>or: true true</p>
+</if>
+
+    {! true !}                  {! false !}
+<if something='Some content' or somethingMore='Nope'>
+  <p>or: true false</p>
+</if>
+
+    {! false !}                  {! true !}
+<if something='Nope' or somethingMore='More content'>
+  <p>or: false true</p>
+</if>
+
+    {! false !}                  {! false !}
+<unless something='Nope' or somethingMore='Nope'>
+  <p>or: false false</p>
+</unless>

@@ -41,4 +41,9 @@ describe('Includes', function() {
     assert.equalIgnoreSpaces(teddy.render('includes/includeLoopsAndVars.html', model), '<p>a</p><p>b</p><p>c</p><p>world</p><p>guy</p>');
     done();
   });
+
+  it('should prevent recursion abuse (includes/argVariableWithinArg.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('includes/argVariableWithinArg.html', model), 'Render aborted due to max number of passes (' + teddy.params.maxPasses + ') exceeded; there is a possible infinite loop in your template logic.');
+    done();
+  });
 });
