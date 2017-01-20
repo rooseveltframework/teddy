@@ -41,4 +41,9 @@ describe('Misc', function() {
     assert.equalIgnoreSpaces(teddy.render('misc/serverSideCommentsNested.html', model), '<p>Any comments? </p>');
     done();
   });
+
+  it.only('should not break when referencing objects that don\'t exist (misc/objectDoesNotExist.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('misc/objectDoesNotExist.html', model), '');
+    done();
+  });
 });
