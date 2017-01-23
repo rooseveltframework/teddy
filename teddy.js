@@ -587,9 +587,6 @@
         for (d = 0; d < numDots; d++) {
           curVar = curVar[dots[d]];
           if (typeof curVar === 'undefined') {
-            if (teddy.params.verbosity > 1) {
-              teddy.console.warn('a {variable} was found with an invalid syntax: {' + varname + '}');
-            }
             doRender = false;
             break;
           }
@@ -923,7 +920,7 @@
     el = el.replace(/(?: if-[\S]*?=(?:"[\S\s]*?"|'[\S\s]*?') | if-[\S]*? )/, ' ');
 
     // append condition content to element
-    el = el.slice(0, -1) + ' ' + conditionContent;
+    el = el.slice(0, -1) + ' ' + (conditionContent ? conditionContent : '');
 
     // append additional one line content if any
     el += extraString;
@@ -1036,7 +1033,9 @@
       curVar = model;
       if (curVar) {
         for (d = 0; d < numDots; d++) {
-          curVar = curVar[dots[d]];
+          if (typeof curVar !== 'undefined') {
+            curVar = curVar[dots[d]];
+          }
         }
       }
       else {
