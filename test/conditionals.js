@@ -144,4 +144,9 @@ describe('Conditionals', function() {
     assert.equalIgnoreSpaces(teddy.render('conditionals/ifNotPresent.html', model), '<div></div>');
     done();
   });
+
+  it('should evaluate one line if as false and apply no class (conditionals/oneLineFalse.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineFalse.html', model), '<p></p>');
+    done();
+  });
 });
