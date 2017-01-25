@@ -61,4 +61,9 @@ describe('Misc', function() {
     assert.equalIgnoreSpaces(teddy.render('misc/variableObjectProperty.html', model), '<p>guy</p>');
     done();
   });
+
+  it('should escape curly braces from regex pattern (misc/regexEscaping.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('misc/regexEscaping.html', model), '<input type=\'text\' name=\'date\' placeholder=\'DD/MM/YYYY\' id=\'date\' pattern=\'^(3[0-1]|[1-2]\\d|[1-9]|0\\d)\\/(1[0-2]|[1-9]|0\\d)\\/[1-2]\\d{3}$\'>');
+    done();
+  });
 });
