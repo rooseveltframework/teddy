@@ -40,6 +40,7 @@ module.exports = function() {
       nullVar: null,
       emptyArray: [],
       hello: 'world',
+      number: 10,
       largeDataSet: []
     },
     i,
