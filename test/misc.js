@@ -53,7 +53,12 @@ describe('Misc', function() {
   });
 
   it('should render {variables} within style element (misc/styleVariables.html)', function(done) {
-    assert.equalIgnoreSpaces(teddy.render('misc/styleVariables.html', model), ' <style>p{height:10px;}</style>');
+    assert.equalIgnoreSpaces(teddy.render('misc/styleVariables.html', model), '<style>p{height:10px;}</style>');
+    done();
+  });
+
+  it('should access property of {variable} object with {variable} (misc/variableObjectProperty.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('misc/variableObjectProperty.html', model), '<p>guy</p>');
     done();
   });
 });
