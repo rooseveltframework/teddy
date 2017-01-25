@@ -41,6 +41,7 @@ module.exports = function() {
       emptyArray: [],
       hello: 'world',
       number: 10,
+      nameReference: 'jack',
       largeDataSet: []
     },
     i,
