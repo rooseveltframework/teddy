@@ -42,6 +42,7 @@ module.exports = function() {
       hello: 'world',
       number: 10,
       nameReference: 'jack',
+      3: 'Unexpected String',
       largeDataSet: []
     },
     i,
