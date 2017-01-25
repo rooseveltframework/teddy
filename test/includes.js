@@ -46,4 +46,9 @@ describe('Includes', function() {
     assert.equalIgnoreSpaces(teddy.render('includes/argVariableWithinArg.html', model), 'Render aborted due to max number of passes (' + teddy.params.maxPasses + ') exceeded; there is a possible infinite loop in your template logic.');
     done();
   });
+
+  it('should <include> a template that contains numerical {variables} (includes/numericVarInArg.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('includes/numericVarInArg.html', model), '<p>STRING!</p>');
+    done();
+  });
 });
