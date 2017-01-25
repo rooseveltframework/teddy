@@ -51,4 +51,9 @@ describe('Misc', function() {
     assert.equalIgnoreSpaces(teddy.render('misc/plainHTML.html', model), '<!DOCTYPE html><html lang=\'en\'><head><meta charset=\'utf-8\'><meta name=\'viewport\' content=\'width=device-width,initial-scale=1\'><meta name=\'format-detection\' content=\'telephone=no\'><title>Plain HTML</title><link rel=\'stylesheet\' href=\'/css/styles.css\'></head><body><main><p>This template contains no teddy tags. Just HTML.</p></main><script type=\'text/javascript\' src=\'/js/main.js\'></script></body></html>');
     done();
   });
+
+  it('should render {variables} within style element (misc/styleVariables.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('misc/styleVariables.html', model), ' <style>p{height:10px;}</style>');
+    done();
+  });
 });
