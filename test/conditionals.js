@@ -149,4 +149,9 @@ describe('Conditionals', function() {
     assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineFalse.html', model), '<p></p>');
     done();
   });
+
+  it('should evaluate if statement that contains an element with a regex pattern (conditionals/ifEscapeRegex.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/ifEscapeRegex.html', model), '<input type=\'text\' name=\'date\' placeholder=\'DD/MM/YYYY\' id=\'date\' pattern=\'^(3[0-1]|[1-2]\\d|[1-9]|0\\d)\\/(1[0-2]|[1-9]|0\\d)\\/[1-2]\\d{3}$\'>');
+    done();
+  });
 });
