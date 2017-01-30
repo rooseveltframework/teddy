@@ -51,4 +51,9 @@ describe('Includes', function() {
     assert.equalIgnoreSpaces(teddy.render('includes/numericVarInArg.html', model), '<p>STRING!</p>');
     done();
   });
+
+  it('should evaluate if statement within style element as an argument (includes/conditionArgInStyle.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('includes/conditionArgInStyle.html', model), '<style>#p { height: 20px; }</style>');
+    done();
+  });
 });
