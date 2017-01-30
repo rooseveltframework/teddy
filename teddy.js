@@ -563,10 +563,6 @@
           doRender = false,
           d;
 
-      if (!isNaN(match.charAt(1))) {
-        return match; // don't parse variables that represent nested loops
-      }
-
       match = match.substring(0, match.length - 1).substring(1); // remove first and last chars
       match = match.split(' ');
       localModel = match[1]; // the variable's local model (if any)
