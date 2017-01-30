@@ -42,7 +42,7 @@ module.exports = function() {
       hello: 'world',
       number: 10,
       nameReference: 'jack',
-      3: 'STRING!',
+      4: 'STRING!',
       largeDataSet: []
     },
     i,
