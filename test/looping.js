@@ -66,4 +66,9 @@ describe('Looping', function() {
     assert.equalIgnoreSpaces(teddy.render('looping/noMarkupLoop.html', model), '<div>abc</div>');
     done();
   });
+
+  it('should loop through {letters} correctly with numeric val (looping/numericalVal.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('looping/numericalVal.html', model), '<p>a</p><p>b</p><p>c</p>');
+    done();
+  });
 });
