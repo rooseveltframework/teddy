@@ -551,26 +551,36 @@
 
   // finds alls {vars} in a given document and replaces them with values from the model
   function parseVars(docstring, model) {
-    docstring = docstring.replace(/{[\S\s]*?}/g, replaceVar);
+    var vars = matchRecursive(docstring, '{...}'),
+        l = vars.length,
+        i;
 
-    function replaceVar(match) {
+    for (i = 0; i < l; i++) {
+      docstring = replaceVar(docstring, vars[i]);
+    }
+
+    function replaceVar(docstring, match) {
       var localModel,
           varname,
           ovarname,
+          omatch = match,
+          nmatch = match,
           dots,
           numDots,
           curVar,
           doRender = false,
           d;
 
-      match = match.substring(0, match.length - 1).substring(1); // remove first and last chars
-      match = match.split(' ');
+      match = parseVars(match, model);
+      nmatch = match;
+
+      match = match.split('data-local-model=\'');
       localModel = match[1]; // the variable's local model (if any)
-      varname = match[0]; // the variable's name (plus any flags)
+      varname = match[0].trim(); // the variable's name (plus any flags)
       ovarname = varname;
       varname = varname.split('|s')[0]; // remove escape flag if present
       if (localModel) {
-        model = applyLocalModel('{'+varname+' ' + localModel + '}', model);
+        model = applyLocalModel('{'+varname+' ' + 'data-local-model=\'' + localModel + '}', model);
       }
       dots = varname.split('.');
       numDots = dots.length;
@@ -594,10 +604,10 @@
       model = baseModel;
 
       if (doRender) {
-        return renderVar('{' + ovarname + '}', ovarname, curVar);
+        return docstring.replace('{' + omatch + '}', renderVar('{' + ovarname + '}', ovarname, curVar), 'g');
       }
       else {
-        return '{' + match[0] + '}';
+        return docstring.replace('{' + omatch + '}', ('{' + nmatch + '}').replace(/data-local-model=\'[\S\s]*?\'/, ''));
       }
     }
 

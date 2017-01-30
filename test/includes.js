@@ -53,7 +53,7 @@ describe('Includes', function() {
   });
 
   it('should evaluate if statement within style element as an argument (includes/conditionArgInStyle.html)', function(done) {
-    assert.equalIgnoreSpaces(teddy.render('includes/conditionArgInStyle.html', model), '<style>#p { height: 20px; }</style>');
+    assert.equalIgnoreSpaces(teddy.render('includes/conditionArgInStyle.html', model), '<style>p { height: 20px; }</style>');
     done();
   });
 
