@@ -1105,6 +1105,9 @@
 
   // replaces a single {var} with its value from a given model
   function renderVar(str, varname, varval, escapeOverride) {
+    if (!isNaN(parseInt(varname))) {
+      varname = '[' + varname + ']';
+    }
     if (str) {
 
       // escape html entities
