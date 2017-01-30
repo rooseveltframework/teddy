@@ -200,10 +200,7 @@
               template = fs.readFileSync(teddy.params.templateRoot + '/' + template, 'utf8');
             }
             catch (e) {
-              if (teddy.params.verbosity) {
-                teddy.console.error('teddy.compile threw an exception while attempting to compile a template: ' + e);
-              }
-              return '';
+              // do nothing, attempt to render it as code
             }
           }
         }
