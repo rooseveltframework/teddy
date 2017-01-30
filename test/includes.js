@@ -56,4 +56,9 @@ describe('Includes', function() {
     assert.equalIgnoreSpaces(teddy.render('includes/conditionArgInStyle.html', model), '<style>#p { height: 20px; }</style>');
     done();
   });
+
+  it('should <include> a template with numeric arguments (includes/numericArgument.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('includes/numericArgument.html', model), '<p>Hello!</p>');
+    done();
+  });
 });
