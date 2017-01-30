@@ -90,7 +90,6 @@
     };
   })();
 
-
   teddy = {
 
     /**
@@ -220,7 +219,7 @@
         l = comments.length;
 
         for (i = 0; i < l; i++) {
-          template = template.replace('{!' + comments[i] + '!}', '');
+          template = replaceNonRegex(template, '{!' + comments[i] + '!}', '');
         }
       }
       while (oldTemplate !== template);
@@ -261,7 +260,7 @@
       baseModel = model;
 
       // remove templateRoot from template name if necessary
-      template = template.replace(teddy.params.templateRoot, '');
+      template = replaceNonRegex(template, teddy.params.templateRoot, '');
 
       // compile template if necessary
       if (!teddy.compiledTemplates[template] || teddy.params.compileAtEveryRender) {
@@ -346,12 +345,12 @@
                   localModel = el.split(' ');
                   localModel = localModel[1].slice(0, -1);
                   loop = loop.replace('>', ' ' + localModel + '>');
-                  renderedTemplate = renderedTemplate.replace(el, renderLoop(loop, model));
+                  renderedTemplate = replaceNonRegex(renderedTemplate, el, renderLoop(loop, model));
                 }
 
                 // no data model on it, render it vanilla
                 else {
-                  renderedTemplate = renderedTemplate.replace('{' + (i + 1) + '_loop}', renderLoop(loop, model));
+                  renderedTemplate = replaceNonRegex(renderedTemplate, '{' + (i + 1) + '_loop}', renderLoop(loop, model));
                 }
                 loops[i] = null; // this prevents renderLoop from attempting to render it again
               }
@@ -444,7 +443,7 @@
       el = '<include' + els[i] + '</include>';
       model = applyLocalModel(el, model);
       result = renderInclude(el, model);
-      renderedTemplate = renderedTemplate.replace(el, result);
+      renderedTemplate = replaceNonRegex(renderedTemplate, el, result);
       model = baseModel; // restore original model
     }
 
@@ -492,19 +491,19 @@
           sibling = renderedTemplate.match(new RegExp(condString + '[\\s]*[\\S\\s]{12}'));
           if (sibling) {
             sibling = sibling[0];
-            sibling = sibling.replace(condString, '');
+            sibling = replaceNonRegex(sibling, condString, '');
 
             if (sibling.replace(/^\s+/, '').substring(0, 8) === '<elseif ') {
               elseCond = matchRecursive(renderedTemplate, condString + sibling + '...<\/elseif>');
-              elseCond = elseCond ? sibling + elseCond[0].replace(condString, '') + '</elseif>' : null;
+              elseCond = elseCond ? sibling + replaceNonRegex(elseCond[0], condString, '') + '</elseif>' : null;
             }
             else if (sibling.replace(/^\s+/, '').substring(0, 12) === '<elseunless ') {
               elseCond = matchRecursive(renderedTemplate, condString + sibling + '...<\/elseunless>');
-              elseCond = elseCond ? sibling + elseCond[0].replace(condString, '') + '</elseunless>' : null;
+              elseCond = elseCond ? sibling + replaceNonRegex(elseCond[0], condString, '') + '</elseunless>' : null;
             }
             else if (sibling.replace(/^\s+/, '').substring(0, 6) === '<else>') {
               elseCond = matchRecursive(renderedTemplate, condString + sibling + '...<\/else>');
-              elseCond = elseCond ? sibling + elseCond[0].replace(condString, '') + '</else>' : null;
+              elseCond = elseCond ? sibling + replaceNonRegex(elseCond[0], condString, '') + '</else>' : null;
             }
             else {
               findElses = false;
@@ -526,7 +525,7 @@
         while (findElses);
 
         result = renderConditional(condString, parts, model);
-        renderedTemplate = renderedTemplate.replace(condString, result);
+        renderedTemplate = replaceNonRegex(renderedTemplate, condString, result);
       }
       ifsDone = true;
     }
@@ -541,7 +540,7 @@
         el = '<' + onelines[i] + '>';
         model = applyLocalModel(el, model);
         result = renderOneLineConditional(el, model);
-        renderedTemplate = renderedTemplate.replace(el, result);
+        renderedTemplate = replaceNonRegex(renderedTemplate, el, result);
         model = baseModel; // restore original model
       }
     }
@@ -604,10 +603,10 @@
       model = baseModel;
 
       if (doRender) {
-        return docstring.replace('{' + omatch + '}', renderVar('{' + ovarname + '}', ovarname, curVar), 'g');
+        return replaceNonRegex(docstring, '{' + omatch + '}', renderVar('{' + ovarname + '}', ovarname, curVar));
       }
       else {
-        return docstring.replace('{' + omatch + '}', ('{' + nmatch + '}').replace(/data-local-model=\'[\S\s]*?\'/, ''));
+        return replaceNonRegex(docstring, '{' + omatch + '}', ('{' + nmatch + '}').replace(/data-local-model=\'[\S\s]*?\'/, ''));
       }
     }
 
@@ -978,7 +977,7 @@
             conditionVal = conditionVal.substring(1, conditionVal.length - 1);
             conditionVal = parseVars(conditionVal, model);
           }
-          conditionAttr = attributes[i].replace('if-', '');
+          conditionAttr = replaceNonRegex(attributes[i], 'if-', '');
           break;
         }
       }
@@ -1226,6 +1225,10 @@
     else {
       return v;
     }
+  }
+
+  function replaceNonRegex(str, find, replace) {
+    return str.split(find).join(replace);
   }
 
   // expose as a CommonJS module
