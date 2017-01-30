@@ -61,4 +61,9 @@ describe('Looping', function() {
     assert.equalIgnoreSpaces(teddy.render('looping/emptyMarkupLoop.html', model), '<div></div>');
     done();
   });
+
+  it('should loop without nested markup (looping/noMarkupLoop.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('looping/noMarkupLoop.html', model), '<div>abc</div>');
+    done();
+  });
 });
