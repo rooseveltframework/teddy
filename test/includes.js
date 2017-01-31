@@ -1,9 +1,11 @@
-var chai = require('chai'),
-    assert = chai.assert,
-    model = require('./models/model')(),
-    teddy = require('../teddy');
-
-chai.use(require('chai-string'));
+if (typeof module !== 'undefined') {
+  var chai = require('chai'),
+      chaiString = require('chai-string'),
+      assert = chai.assert,
+      model = require('./models/model')(),
+      teddy = require('../teddy');
+  chai.use(chaiString);
+}
 
 describe('Includes', function() {
   it('should <include> a template (includes/include.html)', function(done) {

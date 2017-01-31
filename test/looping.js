@@ -1,11 +1,13 @@
-var chai = require('chai'),
-    assert = chai.assert,
-    model = require('./models/model')(),
-    teddy = require('../teddy');
+if (typeof module !== 'undefined') {
+  var chai = require('chai'),
+      chaiString = require('chai-string'),
+      assert = chai.assert,
+      model = require('./models/model')(),
+      teddy = require('../teddy');
+  chai.use(chaiString);
+}
 
 teddy.setVerbosity(0);
-
-chai.use(require('chai-string'));
 
 describe('Looping', function() {
   it('should loop through {letters} correctly (looping/loopVal.html)', function(done) {

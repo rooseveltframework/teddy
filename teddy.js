@@ -230,6 +230,7 @@
       }
 
       teddy.compiledTemplates[name] = template;
+      return template;
     },
 
     // parses a template

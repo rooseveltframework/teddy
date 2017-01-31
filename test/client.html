@@ -13,20 +13,121 @@
       <!--[if lte IE 9]>
         <h2>Warning: IE9 and below are not supported in Teddy client-side templating.</h2>
       <![endif]-->
-      
+
       <output id='mocha'></output>
     </main>
 
     <!-- include teddy library -->
     <script src='../teddy.js'></script>
+    <script src='models/model.js'></script>
 
     <!-- include unit testing libraries -->
     <script src='../node_modules/mocha/mocha.js'></script>
-    <script src='../node_modules/expect/umd/expect.js'></script>
-    
+    <script src='../node_modules/chai/chai.js'></script>
+    <script src='../node_modules/chai-string/chai-string.js'></script>
+    <script>
+      var assert = chai.assert,
+          oldIE,
+          templateList,
+          request,
+          i;
+
+      // test for old IE
+      oldIE = document.createElement('p');
+      oldIE.innerHTML = '<!--[if lte IE 9]><i></i><![endif]-->';
+      oldIE = oldIE.getElementsByTagName('i').length === 1 ? true : false;
+
+      templateList = [
+        'conditionals/and.html',
+        'conditionals/andOr.html',
+        'conditionals/andTruthTable.html',
+        'conditionals/if.html',
+        'conditionals/ifElse.html',
+        'conditionals/ifElseIf.html',
+        'conditionals/ifElseValue.html',
+        'conditionals/ifEmptyArray.html',
+        'conditionals/ifEscapeRegex.html',
+        'conditionals/ifNotPresent.html',
+        'conditionals/ifValue.html',
+        'conditionals/nestedConditional.html',
+        'conditionals/not.html',
+        'conditionals/oneLine.html',
+        'conditionals/oneLineEmpty.html',
+        'conditionals/oneLineFalse.html',
+        'conditionals/oneLineMulti.html',
+        'conditionals/oneLineTrueOnly.html',
+        'conditionals/oneLineValue.html',
+        'conditionals/orSameVar.html',
+        'conditionals/orTruthTable.html',
+        'conditionals/unless.html',
+        'conditionals/unlessElse.html',
+        'conditionals/unlessElseUnless.html',
+        'conditionals/unlessElseValue.html',
+        'conditionals/unlessNull.html',
+        'conditionals/unlessValue.html',
+        'conditionals/xor.html',
+        'includes/argVariableWithinArg.html',
+        'includes/conditionArgInStyle.html',
+        'includes/dynamicInclude.html',
+        'includes/include.html',
+        'includes/includeLoopsAndVars.html',
+        'includes/includeWithArguments.html',
+        'includes/nestedInclude.html',
+        'includes/nestedLoop.html',
+        'includes/numericArgument.html',
+        'includes/numericVarInArg.html',
+        'includes/orphanedArgument.html',
+        'looping/emptyMarkupLoop.html',
+        'looping/largeDataSet.html',
+        'looping/loopArrayOfObjects.html',
+        'looping/loopKeyVal.html',
+        'looping/loopVal.html',
+        'looping/nestedArrays.html',
+        'looping/nestedLoops.html',
+        'looping/nestedObjectLoop.html',
+        'looping/noMarkupLoop.html',
+        'looping/numericalVal.html',
+        'looping/undefinedObjectLoop.html',
+        'misc/markupArgument.html',
+        'misc/multipleVariables.html',
+        'misc/nestedVars.html',
+        'misc/numericMarkupArgument.html',
+        'misc/objectDoesNotExist.html',
+        'misc/plainHTML.html',
+        'misc/regexEscaping.html',
+        'misc/serverSideComments.html',
+        'misc/serverSideCommentsNested.html',
+        'misc/styleVariables.html',
+        'misc/templateWithLoop.html',
+        'misc/varEscaping.html',
+        'misc/varNoEscaping.html',
+        'misc/variable.html',
+        'misc/variableObjectProperty.html'
+      ];
+      request = new XMLHttpRequest();
+
+      // fetch and compile the templates
+      for (i in templateList) {
+        template = templateList[i];
+        try {
+          request.open('GET', 'templates/' + template, false);
+          request.send(); // because of 'false' above, the send method will block until the request is finished
+          teddy.compiledTemplates[template] = teddy.compile(request.response);
+        }
+        catch (e) {
+          document.getElementsByTagName('h1')[0].insertAdjacentHTML('afterend', '<h2>Warning: these tests can only be run from a web server.</h2><p>Due to the <a href=\'http://en.wikipedia.org/wiki/Same_origin_policy\'>same origin policy</a> applying to files loaded directly from the local filesystem, these unit tests can only be executed from a real HTTP server.</p><p>To start a simple web server to run these tests with, open your terminal and run this command from the \"teddy\" directory:</p><pre>python -m SimpleHTTPServer</pre><p>Then simply visit <a href=\'http://localhost:8000/test/client.html\'>http://localhost:8000/test/client.html</a></p><p>If you can\'t run the command, then you\'ll need to <a href=\'http://www.python.org/\'>install Python</a> or use some other web server.</p>');
+          throw new Error('Same origin policy error.');
+          break;
+        }
+      }
+    </script>
+
     <!-- run tests -->
     <script>mocha.setup('bdd');</script>
-    <script src='tests.js'></script>
+    <script src='conditionals.js'></script>
+    <script src='includes.js'></script>
+    <script src='looping.js'></script>
+    <script src='misc.js'></script>
     <script>mocha.run();</script>
   </body>
 </html>

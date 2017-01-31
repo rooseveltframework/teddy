@@ -1,10 +1,13 @@
-var chai = require('chai'),
-    assert = chai.assert,
-    model = require('./models/model')(),
-    teddy = require('../teddy');
+if (typeof module !== 'undefined') {
+  var chai = require('chai'),
+      chaiString = require('chai-string'),
+      assert = chai.assert,
+      model = require('./models/model')(),
+      teddy = require('../teddy');
+  chai.use(chaiString);
+}
 
-chai.use(require('chai-string'));
-
+teddy.setTemplateRoot('test/templates');
 console.log('Model used:');
 console.log(model);
 
