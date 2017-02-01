@@ -63,4 +63,9 @@ describe('Includes', function() {
     assert.equalIgnoreSpaces(teddy.render('includes/numericArgument.html', model), '<p>Hello!</p>');
     done();
   });
+
+  it('should escape the contents of a script when included in a template (includes/inlineScriptTag.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('includes/inlineScriptTag.html', model), '<p>Hello!</p><script>console.log(\'Hello world\'); for (var i = 0; i < 2; i++) { console.log(\'Test\') } </script>');
+    done();
+  });
 });
