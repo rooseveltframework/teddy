@@ -1,6 +1,7 @@
 function makeModel() {
   var model = {
         letters: ['a', 'b', 'c'],
+        camelLetters: ['a', 'b', 'c'],
         names: {jack: 'guy', jill: 'girl', hill: 'landscape'},
         objects: [{a:1, b:2, c:3}, {a:4, b:5, c:6}, {a:7, b:8, c:9}],
         objectOfObjects: {one: {a:1, b:2, c:3}, two:{a:4, b:5, c:6}, three:{a:7, b:8, c:9}},

@@ -73,4 +73,9 @@ describe('Looping', function() {
     assert.equalIgnoreSpaces(teddy.render('looping/numericalVal.html', model), '<p>a</p><p>b</p><p>c</p>');
     done();
   });
+
+  it('should loop through {letters} correctly with camelCase val (looping/camelCaseLoopVal.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('looping/camelCaseLoopVal.html', model), '<p>a</p><p>b</p><p>c</p>');
+    done();
+  });
 });
