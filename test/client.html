@@ -5,6 +5,23 @@
     <meta name='viewport' content='width=device-width,initial-scale=1'/>
     <meta name='format-detection' content='telephone=no'/>
     <title>Teddy Templating Engine unit tests</title>
+    <style>
+      #crossOriginError {
+        animation: 1s fadeIn;
+        animation-fill-mode: forwards;
+        animation-delay: 1s;
+        visibility: hidden;
+      }
+      @keyframes fadeIn {
+        0% {
+          opacity: 0;
+        }
+        100% {
+          visibility: visible;
+          opacity: 1;
+        }
+      }
+    </style>
   </head>
   <body>
     <main>
