@@ -75,4 +75,9 @@ describe('Includes', function() {
     assert.equalIgnoreSpaces(teddy.render('includes/inlineScriptTag.html', model), '<p>Hello!</p><script>console.log(\'Hello world\'); for (var i = 0; i < 2; i++) { console.log(\'Test\') } </script>');
     done();
   });
+
+  it('should evaluate {variable} outside of include as original model value (includes/argRedefineModelVar.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('includes/argRedefineModelVar.html', model), '<style>p { height: 10px }</style> <p>Some content</p>');
+    done();
+  });
 });
