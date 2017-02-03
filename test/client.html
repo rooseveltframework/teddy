@@ -110,42 +110,39 @@
       ];
       templateLength = templateList.length;
 
-      function runTests() {
-
-      };
-
       // fetch and compile the templates
-      for (i in templateList) {
+      for (i = 0; i < templateLength; i++) {
         (function() {
-          req = new XMLHttpRequest();
-
           template = templateList[i];
+          var req = new XMLHttpRequest();
 
-          req.onreadystatechange = function() {
-            return function() {
-              if (req.status == 200) {
-                teddy.compiledTemplates[template] = teddy.compile(req.response);
-                counter++;
-                if (counter === templateLength) {
-                  console.log('should only happen once');
-                }
-              }
-              else {
-                document.getElementsByTagName('h1')[0].insertAdjacentHTML('afterend', '<h2>Warning: these tests can only be run from a web server.</h2><p>Due to the <a href=\'http://en.wikipedia.org/wiki/Same_origin_policy\'>same origin policy</a> applying to files loaded directly from the local filesystem, these unit tests can only be executed from a real HTTP server.</p><p>To start a simple web server to run these tests with, open your terminal and run this command from the \"teddy\" directory:</p><pre>python -m SimpleHTTPServer</pre><p><em>(For python 2.x.)</em></p><p>If that command doesn\'t work, try the python 3.x version instead:</p><pre> python -m http.server</pre><p><em>(For python 3.x.)</em></p><p>Then simply visit <a href=\'http://localhost:8000/test/client.html\'>http://localhost:8000/test/client.html</a></p><p>If you can\'t run the command, then you\'ll need to <a href=\'http://www.python.org/\'>install Python</a> or use some other web server.</p>');
-                throw new Error('Same origin policy error.');
-              }
-            }
-          };
           req.open('GET', 'templates/' + template);
           req.send();
+
+          req.onreadystatechange = function() {
+            if (req.readyState === XMLHttpRequest.DONE && req.status === 200) {
+              teddy.compiledTemplates[template] = teddy.compile(req.response);
+              console.log(teddy.compile(req.response));
+              counter++;
+              if (counter === templateLength) {
+                console.log('should only happen once');
+                mocha.run();
+              }
+            }
+            else {
+              document.getElementsByTagName('h1')[0].insertAdjacentHTML('afterend', '<h2>Warning: these tests can only be run from a web server.</h2><p>Due to the <a href=\'http://en.wikipedia.org/wiki/Same_origin_policy\'>same origin policy</a> applying to files loaded directly from the local filesystem, these unit tests can only be executed from a real HTTP server.</p><p>To start a simple web server to run these tests with, open your terminal and run this command from the \"teddy\" directory:</p><pre>python -m SimpleHTTPServer</pre><p><em>(For python 2.x.)</em></p><p>If that command doesn\'t work, try the python 3.x version instead:</p><pre> python -m http.server</pre><p><em>(For python 3.x.)</em></p><p>Then simply visit <a href=\'http://localhost:8000/test/client.html\'>http://localhost:8000/test/client.html</a></p><p>If you can\'t run the command, then you\'ll need to <a href=\'http://www.python.org/\'>install Python</a> or use some other web server.</p>');
+              throw new Error('Same origin policy error.');
+            }
+          };
         })(i);
       }
     </script>
+
+    <!-- run tests -->
     <script>mocha.setup('bdd');</script>
     <script src='conditionals.js'></script>
     <script src='includes.js'></script>
     <script src='looping.js'></script>
     <script src='misc.js'></script>
-    <script>mocha.run();</script>
   </body>
 </html>
