@@ -2,7 +2,8 @@ if (typeof module !== 'undefined') {
   var chai = require('chai'),
       chaiString = require('chai-string'),
       assert = chai.assert,
-      model = require('./models/model')(),
+      model,
+      makeModel = require('./models/model'),
       teddy = require('../teddy');
   chai.use(chaiString);
 }
@@ -12,6 +13,10 @@ console.log('Model used:');
 console.log(model);
 
 describe('Conditionals', function() {
+  beforeEach(function() {
+    model = makeModel();
+  });
+
   it('should evaluate <if something> as true (conditionals/if.html)', function(done) {
     assert.equalIgnoreSpaces(teddy.render('conditionals/if.html', model), '<p>The variable \'something\' is present</p>');
     done();

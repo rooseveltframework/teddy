@@ -2,7 +2,8 @@ if (typeof module !== 'undefined') {
   var chai = require('chai'),
       chaiString = require('chai-string'),
       assert = chai.assert,
-      model = require('./models/model')(),
+      model,
+      makeModel = require('./models/model'),
       teddy = require('../teddy');
   chai.use(chaiString);
 }
@@ -10,6 +11,10 @@ if (typeof module !== 'undefined') {
 teddy.setVerbosity(0);
 
 describe('Looping', function() {
+  beforeEach(function() {
+    model = makeModel();
+  });
+
   it('should loop through {letters} correctly (looping/loopVal.html)', function(done) {
     assert.equalIgnoreSpaces(teddy.render('looping/loopVal.html', model), '<p>a</p><p>b</p><p>c</p>');
     done();

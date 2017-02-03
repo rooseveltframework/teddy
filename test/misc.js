@@ -2,12 +2,17 @@ if (typeof module !== 'undefined') {
   var chai = require('chai'),
       chaiString = require('chai-string'),
       assert = chai.assert,
-      model = require('./models/model')(),
+      model,
+      makeModel = require('./models/model'),
       teddy = require('../teddy');
   chai.use(chaiString);
 }
 
 describe('Misc', function() {
+  beforeEach(function() {
+    model = makeModel();
+  });
+
   it('should render {variables} (misc/variable.html)', function(done) {
     assert.equalIgnoreSpaces(teddy.render('misc/variable.html', model), '<p>Some content</p>');
     done();
