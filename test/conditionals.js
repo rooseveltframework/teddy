@@ -157,4 +157,14 @@ describe('Conditionals', function() {
     assert.equalIgnoreSpaces(teddy.render('conditionals/ifEscapeRegex.html', model), '<input type=\'text\' name=\'date\' placeholder=\'DD/MM/YYYY\' id=\'date\' pattern=\'^(3[0-1]|[1-2]\\d|[1-9]|0\\d)\\/(1[0-2]|[1-9]|0\\d)\\/[1-2]\\d{3}$\'>');
     done();
   });
+
+  it('should evaluate if statement that queries the same variable more than once (conditionals/duplicateVarInline.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/duplicateVarInline.html', model), '<p>True</p>');
+    done();
+  });
+
+  it('should evaluate if statement with multiple instances of the same operators inline (conditionals/duplicateOperatorInline.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/duplicateOperatorInline.html', model), '<p>True</p>');
+    done();
+  });
 });
