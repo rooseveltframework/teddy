@@ -21,6 +21,271 @@
           opacity: 1;
         }
       }
+
+      /*
+       * mocha-css by Eduardo San Martin Morote (posva) https://github.com/posva/mocha-css
+       */
+      body {
+        margin: 0;
+      }
+      #mocha {
+        font: 20px/1.5 "Helvetica Neue", Helvetica, Arial, sans-serif;
+        margin: 60px 50px;
+      }
+      #mocha .hidden {
+        display: none;
+      }
+      #mocha #stats {
+        position: absolute;
+      }
+      @media screen and (max-device-width: 480px) {
+        #mocha {
+          margin: 60px 0;
+        }
+      }
+      #mocha > ul,
+      #mocha .suite > ul,
+      #mocha .suite {
+        margin: 0;
+        padding: 0;
+      }
+      #mocha > ul,
+      #mocha .suite > ul {
+        list-style: none;
+      }
+      #mocha .suite > h1,
+      #mocha li.test > h2 {
+        margin: 0;
+      }
+      #mocha .suite {
+        margin-left: 15px;
+      }
+      #mocha .suite > h1 {
+        font-size: 1em;
+        font-weight: 200;
+        margin-top: 15px;
+      }
+      #mocha .suite > h1 a {
+        color: inherit;
+        text-decoration: none;
+      }
+      #mocha .suite > h1 a:hover {
+        text-decoration: underline;
+      }
+      #mocha .suite .suite > h1 {
+        font-size: 0.8em;
+        margin-top: 0;
+      }
+      #mocha li.test {
+        margin-left: 15px;
+        overflow: hidden;
+      /**
+          * (1): approximate for browsers not supporting calc
+          * (2): 42 = 2*15 + 2*10 + 2*1 (padding + margin + border)
+          *      ^^ seriously
+          */
+      }
+      #mocha li.test > pre {
+        border: 1px solid #eee;
+        border-bottom-color: #ddd;
+        border-radius: 3px;
+        box-shadow: 0 1px 3px #eee;
+        clear: left;
+        display: block;
+        float: left;
+        font: 12px/1.5 monaco, monospace;
+        margin: 5px;
+        max-width: calc(100% - 42px); /*(2)*/
+        padding: 15px;
+        word-wrap: break-word;
+      }
+      #mocha li.test > pre code .comment {
+        color: #ddd;
+      }
+      #mocha li.test > pre code .init {
+        color: #2f6fad;
+      }
+      #mocha li.test > pre code .string {
+        color: #5890ad;
+      }
+      #mocha li.test > pre code .keyword {
+        color: #8a6343;
+      }
+      #mocha li.test > pre code .number {
+        color: #2f6fad;
+      }
+      #mocha li.test:hover > h2 a.replay {
+        opacity: 1;
+      }
+      #mocha li.test.pass.medium > h2 > .duration {
+        background: #c09853;
+      }
+      #mocha li.test.pass.slow > h2 > .duration {
+        background: #b94a48;
+      }
+      #mocha li.test.pass::before {
+        color: #00d6b2;
+        content: '\2713';
+        display: block;
+        float: left;
+        font-size: 12px;
+        margin-right: 5px;
+      }
+      #mocha li.test.pass > h2 > .duration {
+        border-radius: 5px;
+        box-shadow: inset 0 1px 1px rgba(0,0,0,0.2);
+        color: #fff;
+        font-size: 9px;
+        margin-left: 5px;
+        padding: 2px 5px;
+      }
+      #mocha li.test.pass.fast > h2 > .duration {
+        display: none;
+      }
+      #mocha li.test.pending > pre,
+      #mocha li.test.pending > h2 {
+        color: #0b97c4;
+      }
+      #mocha li.test.pending::before {
+        color: #0b97c4;
+        content: '\25E6';
+      }
+      #mocha li.test.pending:hover > h2::after {
+        content: '(pending)';
+        font-family: arial, sans-serif;
+      }
+      #mocha li.test.fail > pre,
+      #mocha li.test.fail > h2 {
+        color: #c00;
+      }
+      #mocha li.test.fail > pre {
+        color: #000;
+      }
+      #mocha li.test.fail > pre.error {
+        color: #c00;
+        max-height: 300px;
+        overflow: auto;
+      }
+      #mocha li.test.fail::before {
+        color: #c00;
+        content: '\2716';
+        display: block;
+        float: left;
+        font-size: 12px;
+        margin-right: 5px;
+      }
+      #mocha li.test > html-error {
+        border: 1px solid #eee;
+        border-bottom-color: #ddd;
+        border-radius: 3px;
+        box-shadow: 0 1px 3px #eee;
+        clear: left;
+        color: #000;
+        display: block;
+        float: left;
+        font: 12px/1.5 monaco, monospace;
+        line-height: 1.5;
+        margin: 5px;
+        max-height: 300px;
+        max-width: calc(100% - 42px); /*(2)*/
+        overflow: auto;
+        padding: 15px;
+        word-wrap: break-word;
+      }
+      #mocha li.test > html-error pre.error {
+        border: none;
+        border-radius: 0;
+        box-shadow: 0;
+        margin: 0;
+        margin-top: 18px;
+        max-height: none;
+        padding: 0;
+      }
+      #mocha li.test > h2 {
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: normal;
+        position: relative;
+      }
+      #mocha li.test > h2 > a.replay {
+        background: #eee;
+        border-radius: 15px;
+        color: #888;
+        display: block;
+        font-size: 15px;
+        height: 15px;
+        line-height: 15px;
+        opacity: 0.3;
+        position: absolute;
+        right: 0;
+        text-align: center;
+        text-decoration: none;
+        top: 3px;
+        transition: opacity 200ms;
+        vertical-align: middle;
+        width: 15px;
+      }
+      #mocha-report.pass .test.fail {
+        display: none;
+      }
+      #mocha-report.fail .test.pass {
+        display: none;
+      }
+      #mocha-report.pending .test.pass,
+      #mocha-report.pending .test.fail {
+        display: none;
+      }
+      #mocha-report.pending .test.pass.pending {
+        display: block;
+      }
+      #mocha-error {
+        color: #c00;
+        font-size: 1.5em;
+        font-weight: 100;
+        letter-spacing: 1px;
+      }
+      #mocha-stats {
+        color: #888;
+        font-size: 12px;
+        margin: 0;
+        position: fixed;
+        right: 10px;
+        top: 15px;
+        z-index: 1;
+      }
+      #mocha-stats .progress {
+        background-color: initial;
+        box-shadow: none;
+        float: right;
+        height: auto;
+        padding-top: 0;
+      /**
+          * Set safe initial values, so mochas .progress does not inherit these
+          * properties from Bootstrap .progress (which causes .progress height to
+          * equal line height set in Bootstrap).
+          */
+      }
+      #mocha-stats em {
+        color: #000;
+      }
+      #mocha-stats a {
+        color: inherit;
+        text-decoration: none;
+      }
+      #mocha-stats a:hover {
+        border-bottom: 1px solid #eee;
+      }
+      #mocha-stats > li {
+        display: inline-block;
+        list-style: none;
+        margin: 0 5px;
+        padding-top: 11px;
+      }
+      #mocha-stats canvas {
+        height: 40px;
+        width: 40px;
+      }
+
     </style>
   </head>
   <body>

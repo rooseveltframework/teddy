@@ -46,7 +46,7 @@ describe('Looping', function() {
     done();
   });
 
-  it('should loop through an array of 1000 elements in < 1000ms (looping/largeDataSet.html)', function(done) {
+  it('should loop through an array of 5000 elements in < 5000ms (looping/largeDataSet.html)', function(done) {
     var start, end, time;
     start = new Date().getTime();
 
@@ -55,7 +55,7 @@ describe('Looping', function() {
     end = new Date().getTime();
     time = end - start;
 
-    assert.isAtMost(time, 1000);
+    assert.isAtMost(time, 5000);
     done();
   });
 
