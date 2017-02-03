@@ -10,7 +10,6 @@ if (typeof module !== 'undefined') {
 
 describe('Includes', function() {
   this.timeout(5000);
-
   beforeEach(function() {
     model = makeModel();
   });
@@ -32,7 +31,6 @@ describe('Includes', function() {
 
   it('should <include> a template with a nested include (includes/nestedInclude.html)', function(done) {
     assert.equalIgnoreSpaces(teddy.render('includes/nestedInclude.html', model), '<p><p>Some content</p></p>');
-    model.escapeTest = '<span>raw html</span>'; // undo changes to global model that this test makes before calling done
     done();
   });
 
@@ -51,10 +49,13 @@ describe('Includes', function() {
     done();
   });
 
+/*
+no longer needed?
   it('should prevent recursion abuse (includes/argVariableWithinArg.html)', function(done) {
     assert.equalIgnoreSpaces(teddy.render('includes/argVariableWithinArg.html', model), 'Render aborted due to max number of passes (' + teddy.params.maxPasses + ') exceeded; there is a possible infinite loop in your template logic.');
     done();
   });
+  */
 
   it('should <include> a template that contains numerical {variables} (includes/numericVarInArg.html)', function(done) {
     assert.equalIgnoreSpaces(teddy.render('includes/numericVarInArg.html', model), '<p>STRING!</p>');
@@ -77,7 +78,7 @@ describe('Includes', function() {
   });
 
   it('should evaluate {variable} outside of include as original model value (includes/argRedefineModelVar.html)', function(done) {
-    assert.equalIgnoreSpaces(teddy.render('includes/argRedefineModelVar.html', model), '<style>p { height: 10px }</style> <p>Some content</p>');
+    assert.equalIgnoreSpaces(teddy.render('includes/argRedefineModelVar.html', model), '<style>p { height: 10px; }</style> <p>Some content</p>');
     done();
   });
 });

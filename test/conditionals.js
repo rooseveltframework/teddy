@@ -8,12 +8,9 @@ if (typeof module !== 'undefined') {
   chai.use(chaiString);
 }
 
-teddy.setTemplateRoot('test/templates');
-console.log('Model used:');
-console.log(model);
-
 describe('Conditionals', function() {
-  beforeEach(function() {
+  before(function() {
+    teddy.setTemplateRoot('test/templates');
     model = makeModel();
   });
 

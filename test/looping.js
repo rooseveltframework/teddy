@@ -8,10 +8,9 @@ if (typeof module !== 'undefined') {
   chai.use(chaiString);
 }
 
-teddy.setVerbosity(0);
-
 describe('Looping', function() {
-  beforeEach(function() {
+  before(function() {
+    teddy.setVerbosity(0);
     model = makeModel();
   });
 

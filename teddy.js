@@ -271,10 +271,7 @@
       }
 
       // declare vars
-      var
-          // store original copy of model so it can be reset after being temporarily modified
-          baseModel = model,
-          renderedTemplate = teddy.compiledTemplates[template],
+      var renderedTemplate = teddy.compiledTemplates[template],
           diff,
           loops = [],
           loopCount,
@@ -445,7 +442,6 @@
           model = applyLocalModel(el, model);
           result = renderInclude(el, model);
           renderedTemplate = replaceNonRegex(renderedTemplate, el, result);
-          model = baseModel; // restore original model
         }
 
         return renderedTemplate;
@@ -542,7 +538,6 @@
             model = applyLocalModel(el, model);
             result = renderOneLineConditional(el, model);
             renderedTemplate = replaceNonRegex(renderedTemplate, el, result);
-            model = baseModel; // restore original model
           }
         }
 
@@ -560,7 +555,8 @@
         }
 
         function replaceVar(docstring, match) {
-          var localModel,
+          var localModelString,
+              localModel,
               varname,
               ovarname,
               omatch = match,
@@ -575,16 +571,16 @@
           nmatch = match;
 
           match = match.split('data-local-model=\'');
-          localModel = match[1]; // the variable's local model (if any)
+          localModelString = match[1]; // the variable's local model (if any)
           varname = match[0].trim(); // the variable's name (plus any flags)
           ovarname = varname;
           varname = varname.split('|s')[0]; // remove escape flag if present
-          if (localModel) {
-            model = applyLocalModel('{'+varname+' ' + 'data-local-model=\'' + localModel + '}', model);
+          if (localModelString) {
+            localModel = applyLocalModel('{'+varname+' ' + 'data-local-model=\'' + localModelString + '}', Object.assign({}, model));
           }
           dots = varname.split('.');
           numDots = dots.length;
-          curVar = model;
+          curVar = localModel || model;
           if (curVar) {
             doRender = true;
             for (d = 0; d < numDots; d++) {
@@ -601,7 +597,6 @@
             }
             doRender = false;
           }
-          model = baseModel;
 
           if (doRender) {
             return replaceNonRegex(docstring, '{' + omatch + '}', renderVar('{' + ovarname + '}', ovarname, curVar));
@@ -691,6 +686,7 @@
               // apply local model to child conditionals and loops
               incdoc = tagLocalModels(incdoc, localModel);
             }
+
             return incdoc;
           }
         }
@@ -795,9 +791,6 @@
               teddy.console.warn('loop element found with undefined value "' + collectionString + '" specified for "through" or "in" attribute. Ignoring element.');
             }
 
-            // restore original model
-            model = baseModel;
-
             return '';
           }
           else {
@@ -820,9 +813,6 @@
                 parsedLoop += teddy.render(loopContent, model);
               }
             }
-
-            // restore original model
-            model = baseModel;
 
             nestedLoopsCount = nestedLoops.length;
             for (i = 0; i < nestedLoopsCount; i++) {
@@ -873,8 +863,6 @@
             }
             while (nextSibling);
 
-            // restore original model
-            model = baseModel;
             return '';
           }
         }
@@ -931,9 +919,6 @@
         if (el.charAt(el.length - 1) !== '>') {
           el += '>';
         }
-
-        // restore original model
-        model = baseModel;
 
         return el;
       }

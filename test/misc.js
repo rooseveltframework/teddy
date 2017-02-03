@@ -9,7 +9,7 @@ if (typeof module !== 'undefined') {
 }
 
 describe('Misc', function() {
-  beforeEach(function() {
+  before(function() {
     model = makeModel();
   });
 
