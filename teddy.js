@@ -234,6 +234,7 @@
 
     // parses a template
     render: function(template, model, callback) {
+      model = Object.assign({}, model); // make a copy of the model
 
       // overload conosle logs
       consoleWarnings = '';

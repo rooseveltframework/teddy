@@ -10,7 +10,7 @@ if (typeof module !== 'undefined') {
 
 describe('Includes', function() {
   this.timeout(5000);
-  beforeEach(function() {
+  before(function() {
     model = makeModel();
   });
 
