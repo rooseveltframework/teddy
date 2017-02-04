@@ -1204,17 +1204,17 @@
         nodeName = nodeName.substring(1, nodeName.length);
         return nodeName;
       }
-
-      function escapeHtmlEntities(v) {
-        if (v && typeof v === 'string') {
-          return v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&#34;').replace(/'/g, '&#39;');
-        }
-        else {
-          return v;
-        }
-      }
     }
   };
+
+  function escapeHtmlEntities(v) {
+    if (v && typeof v === 'string') {
+      return v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&#34;').replace(/'/g, '&#39;');
+    }
+    else {
+      return v;
+    }
+  }
 
   function replaceNonRegex(str, find, replace) {
     return str.split(find).join(replace);
