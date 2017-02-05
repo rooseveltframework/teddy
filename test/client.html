@@ -425,7 +425,7 @@
             if (req.readyState === XMLHttpRequest.DONE) {
               if (req.status === 200) {
                 if (crossOriginError) {
-                  crossOriginError.remove();
+                  crossOriginError.parentNode.removeChild(crossOriginError);
                 }
                 teddy.templates[template] = teddy.compile(req.response);
                 counter++;
