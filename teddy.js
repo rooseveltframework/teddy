@@ -311,10 +311,10 @@
 
       // needed because sigh
       // TODO: check if this is still necessary
-      if (oldIE) {
-        teddy.console.error('Teddy does not support client-side templating on IE9 or below.');
-        return '';
-      }
+      //if (oldIE) {
+      //  teddy.console.error('Teddy does not support client-side templating on IE9 or below.');
+      //  return '';
+      //}
 
       // handle bad or unsupplied model
       if (!model || typeof model !== 'object') {
@@ -1308,13 +1308,13 @@
     oldIE.innerHTML = '<!--[if lte IE 9]><i></i><![endif]-->';
     oldIE = oldIE.getElementsByTagName('i').length === 1 ? true : false;
 
-    if (!oldIE) {
+    //if (!oldIE) {
       // IE does not populate console unless the developer tools are opened
       if (typeof console === 'undefined') {
         window.console = {};
         console.log = console.warn = console.error = function() {};
       }
-    }
+    //}
 
     // Object.assign polyfill
     if (typeof Object.assign != 'function') {
