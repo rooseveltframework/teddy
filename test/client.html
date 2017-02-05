@@ -295,10 +295,6 @@
     <main>
       <h1>Teddy Templating Engine unit tests</h1>
 
-      <!--[if lte IE 9]>
-        <h2>Warning: IE9 and below are not supported in Teddy client-side templating.</h2>
-      <![endif]-->
-
       <article id='crossOriginError'>
         <h2>Warning: these tests can only be run from a web server.</h2>
         <p>Due to the <a href='http://en.wikipedia.org/wiki/Same_origin_policy'>same origin policy</a> applying to files loaded directly from the local filesystem, these unit tests can only be executed from a real HTTP server.</p>
@@ -316,7 +312,7 @@
 
     <script>
       // test for old IE
-      oldIE = document.createElement('p');
+      var oldIE = document.createElement('p');
       oldIE.innerHTML = '<!--[if lte IE 9]><i></i><![endif]-->';
       oldIE = oldIE.getElementsByTagName('i').length === 1 ? true : false;
       if (oldIE) {
@@ -432,7 +428,7 @@
                 if (crossOriginError) {
                   crossOriginError.parentNode.removeChild(crossOriginError);
                 }
-                teddy.templates[template] = teddy.compile(req.response);
+                teddy.templates[template] = teddy.compile(req.response || req.responseText);
                 counter++;
                 if (counter === templateLength) {
                   mocha.run();

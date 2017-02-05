@@ -309,13 +309,6 @@
       consoleWarnings = '';
       consoleErrors = '';
 
-      // needed because sigh
-      // TODO: check if this is still necessary
-      //if (oldIE) {
-      //  teddy.console.error('Teddy does not support client-side templating on IE9 or below.');
-      //  return '';
-      //}
-
       // handle bad or unsupplied model
       if (!model || typeof model !== 'object') {
         model = {};
@@ -1303,35 +1296,34 @@
   if (typeof document !== 'undefined' && typeof window !== 'undefined') {
     global.teddy = teddy;
 
-    // test for old IE
-    oldIE = document.createElement('p');
-    oldIE.innerHTML = '<!--[if lte IE 9]><i></i><![endif]-->';
-    oldIE = oldIE.getElementsByTagName('i').length === 1 ? true : false;
-
-    //if (!oldIE) {
-      // IE does not populate console unless the developer tools are opened
-      if (typeof console === 'undefined') {
-        window.console = {};
-        console.log = console.warn = console.error = function() {};
-      }
-    //}
+    // IE does not populate console unless the developer tools are opened
+    if (typeof console === 'undefined') {
+      window.console = {};
+      console.log = console.warn = console.error = function() {};
+    }
 
     // Object.assign polyfill
-    if (typeof Object.assign != 'function') {
+    if (typeof Object.assign !== 'function') {
       Object.assign = function(target, varArgs) { // .length of function is 2
-        'use strict';
-        if (target == null) { // TypeError if undefined or null
+        var i,
+            l,
+            to,
+            nextSource,
+            nextKey;
+
+        if (target === null) { // TypeError if undefined or null
           throw new TypeError('Cannot convert undefined or null to object');
         }
 
-        var to = Object(target);
+        to = Object(target);
 
-        for (var index = 1; index < arguments.length; index++) {
-          var nextSource = arguments[index];
+        l = arguments.length;
+        for (i = 1; i < l; i++) {
+          nextSource = arguments[i];
 
-          if (nextSource != null) { // Skip over if undefined or null
-            for (var nextKey in nextSource) {
-              // Avoid bugs when hasOwnProperty is shadowed
+          if (nextSource !== null) { // skip over if undefined or null
+            for (nextKey in nextSource) {
+              // avoid bugs when hasOwnProperty is shadowed
               if (Object.prototype.hasOwnProperty.call(nextSource, nextKey)) {
                 to[nextKey] = nextSource[nextKey];
               }
