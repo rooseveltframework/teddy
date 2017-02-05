@@ -314,6 +314,16 @@
       <output id='mocha'></output>
     </main>
 
+    <script>
+      // test for old IE
+      oldIE = document.createElement('p');
+      oldIE.innerHTML = '<!--[if lte IE 9]><i></i><![endif]-->';
+      oldIE = oldIE.getElementsByTagName('i').length === 1 ? true : false;
+      if (oldIE) {
+        document.getElementById('crossOriginError').style.visibility = 'visible';
+      }
+    </script>
+
     <!-- include teddy library -->
     <script src='../teddy.js'></script>
     <script src='models/model.js'></script>
@@ -323,23 +333,13 @@
     <script src='../node_modules/chai/chai.js'></script>
     <script src='../node_modules/chai-string/chai-string.js'></script>
     <script>
-      var assert = chai.assert,
-          oldIE,
+      var assert = chai.assert
           templateList,
           templateLength,
           counter = 0,
           crossOriginError,
           request,
           i;
-
-      // test for old IE
-      oldIE = document.createElement('p');
-      oldIE.innerHTML = '<!--[if lte IE 9]><i></i><![endif]-->';
-      oldIE = oldIE.getElementsByTagName('i').length === 1 ? true : false;
-
-      if (oldIE) {
-        document.getElementById('crossOriginError').style.visibility = 'visible';
-      }
 
       templateList = [
         'conditionals/and.html',
