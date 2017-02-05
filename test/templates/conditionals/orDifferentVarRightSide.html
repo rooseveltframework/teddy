@@ -1,0 +1,7 @@
+{!
+  should evaluate <if something='Some content' or something='Nope'> as true
+!}
+    {! false !}                  {! true !}
+<if somethingMore='Nope' or something='Some content' >
+  <p>or: true</p>
+</if>
