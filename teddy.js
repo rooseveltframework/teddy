@@ -1028,6 +1028,22 @@
               break;
             }
           }
+
+      if (conditionType === 'else') {
+        return true;
+      }
+      else if (conditionType !== 'if' && conditionType !== 'unless' && conditionType !== 'elseif' && conditionType !== 'elseunless') {
+        // it's a one-liner
+        conditionType = 'onelineif';
+        for (i = 0; i < length; i++) {
+          conditionAttr = attributes[i];
+          condition = conditionAttr.nodeName;
+          if (condition.substr(0, 3) === 'if-') {
+            conditionVal = teddy.parseVars(conditionAttr.value, model);
+            el.removeAttribute(condition); // so there's no attempt to parse it later
+            condition = condition.split('if-')[1].toLowerCase();
+            break;
+          }
           return evalStatement();
         }
 
