@@ -328,7 +328,7 @@
           templateList,
           templateLength,
           counter = 0,
-          crossOriginError = document.getElementById('crossOriginError'),
+          crossOriginError,
           request,
           i;
 
@@ -424,6 +424,7 @@
             template = templateList[i];
             if (req.readyState === XMLHttpRequest.DONE) {
               if (req.status === 200) {
+                crossOriginError = document.getElementById('crossOriginError');
                 if (crossOriginError) {
                   crossOriginError.parentNode.removeChild(crossOriginError);
                 }
