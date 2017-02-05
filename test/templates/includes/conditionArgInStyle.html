@@ -1,0 +1,14 @@
+{!
+  should evaluate if statement within style element as an argument
+!}
+<include src='misc/markupArgument'>
+  <arg something>
+    <style>
+      p {
+        <if hello>
+          height: 20px;
+        </if>
+      }
+    </style>
+  </arg>
+</include>

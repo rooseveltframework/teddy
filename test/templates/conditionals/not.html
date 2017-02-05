@@ -1,0 +1,11 @@
+{!
+  should evaluate <if not:something> as false
+!}
+
+    {! false !}
+<if not:something>
+  <p>should not render</p>
+</if>
+<else>
+  <p>not: false</p>
+</else>

@@ -2,7 +2,6 @@
 <html lang='en'>
   <head>
     <meta charset='utf-8'>
-    <meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
     <meta name='viewport' content='width=device-width,initial-scale=1'>
     <meta name='format-detection' content='telephone=no'>
     <title>Teddy Templating Engine playground</title>
@@ -52,21 +51,21 @@
         var json, rendered, idoc;
 
         try {
-          teddy.compile(document.getElementById('src').value, 'playground');
-        }
-        catch (e) {
-          console.log(e);
-          alert('Teddy could not compile the template! Check console log for the error.');
-        }
-
-        try {
           json = JSON.parse(document.getElementById('json').value);
         }
         catch (e) {
           console.log(e);
           alert('Teddy could not parse your JSON! Check console log for the error.');
         }
-        rendered = teddy.render('playground', json);
+
+        try {
+          //teddy.compile(document.getElementById('src').value, 'playground');
+          rendered = teddy.render(document.getElementById('src').value, json);
+        }
+        catch (e) {
+          console.log(e);
+          alert('Teddy could not compile the template! Check console log for the error.');
+        }
 
         idoc = document.getElementById('renderedframe').contentWindow.document;
         idoc.open();

@@ -1,0 +1,12 @@
+{!
+  should evaluate <if something='no'> as false and <elseif somethingElse> as true
+!}
+<if something='no'>
+  <p>The variable 'something' is set to 'no'</p>
+</if>
+<elseif somethingElse>
+  <p>The variable 'somethingElse' is present</p>
+</elseif>
+<else>
+  <p>The variable 'something' is not set to 'no' and the variable 'somethingElse' is not present</p>
+</else>

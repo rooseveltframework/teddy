@@ -1,0 +1,6 @@
+{!
+  should <include> a template with a nested include
+!}
+<include src='misc/varNoEscaping'>
+  <arg escapeTest><include src='misc/variable'></include></arg>
+</include>

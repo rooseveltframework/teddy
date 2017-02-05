@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang='en'>
+  <head>
+    <meta charset='utf-8'>
+    <meta name='viewport' content='width=device-width,initial-scale=1'>
+    <meta name='format-detection' content='telephone=no'>
+    <title>Teddy Templating Engine unit tests</title>
+    <style>
+      #crossOriginError {
+        animation: 1s fadeIn;
+        animation-fill-mode: forwards;
+        animation-delay: 1s;
+        visibility: hidden;
+      }
+      @keyframes fadeIn {
+        0% {
+          opacity: 0;
+        }
+        100% {
+          visibility: visible;
+          opacity: 1;
+        }
+      }
+      body {
+        margin: 10px !important;
+        font: 20px/1.5 "Helvetica Neue", Helvetica, Arial, sans-serif;
+      }
+
+      /*
+       * mocha-css by Eduardo San Martin Morote (posva) https://github.com/posva/mocha-css
+       */
+      body {
+        margin: 0;
+      }
+      #mocha {
+        font: 20px/1.5 "Helvetica Neue", Helvetica, Arial, sans-serif;
+        margin: 60px 50px;
+      }
+      #mocha .hidden {
+        display: none;
+      }
+      #mocha #stats {
+        position: absolute;
+      }
+      @media screen and (max-device-width: 480px) {
+        #mocha {
+          margin: 60px 0;
+        }
+      }
+      #mocha > ul,
+      #mocha .suite > ul,
+      #mocha .suite {
+        margin: 0;
+        padding: 0;
+      }
+      #mocha > ul,
+      #mocha .suite > ul {
+        list-style: none;
+      }
+      #mocha .suite > h1,
+      #mocha li.test > h2 {
+        margin: 0;
+      }
+      #mocha .suite {
+        margin-left: 15px;
+      }
+      #mocha .suite > h1 {
+        font-size: 1em;
+        font-weight: 200;
+        margin-top: 15px;
+      }
+      #mocha .suite > h1 a {
+        color: inherit;
+        text-decoration: none;
+      }
+      #mocha .suite > h1 a:hover {
+        text-decoration: underline;
+      }
+      #mocha .suite .suite > h1 {
+        font-size: 0.8em;
+        margin-top: 0;
+      }
+      #mocha li.test {
+        margin-left: 15px;
+        overflow: hidden;
+      /**
+          * (1): approximate for browsers not supporting calc
+          * (2): 42 = 2*15 + 2*10 + 2*1 (padding + margin + border)
+          *      ^^ seriously
+          */
+      }
+      #mocha li.test > pre {
+        border: 1px solid #eee;
+        border-bottom-color: #ddd;
+        border-radius: 3px;
+        box-shadow: 0 1px 3px #eee;
+        clear: left;
+        display: block;
+        float: left;
+        font: 12px/1.5 monaco, monospace;
+        margin: 5px;
+        max-width: calc(100% - 42px); /*(2)*/
+        padding: 15px;
+        word-wrap: break-word;
+      }
+      #mocha li.test > pre code .comment {
+        color: #ddd;
+      }
+      #mocha li.test > pre code .init {
+        color: #2f6fad;
+      }
+      #mocha li.test > pre code .string {
+        color: #5890ad;
+      }
+      #mocha li.test > pre code .keyword {
+        color: #8a6343;
+      }
+      #mocha li.test > pre code .number {
+        color: #2f6fad;
+      }
+      #mocha li.test:hover > h2 a.replay {
+        opacity: 1;
+      }
+      #mocha li.test.pass.medium > h2 > .duration {
+        background: #c09853;
+      }
+      #mocha li.test.pass.slow > h2 > .duration {
+        background: #b94a48;
+      }
+      #mocha li.test.pass::before {
+        color: #00d6b2;
+        content: '\2713';
+        display: block;
+        float: left;
+        font-size: 12px;
+        margin-right: 5px;
+      }
+      #mocha li.test.pass > h2 > .duration {
+        border-radius: 5px;
+        box-shadow: inset 0 1px 1px rgba(0,0,0,0.2);
+        color: #fff;
+        font-size: 9px;
+        margin-left: 5px;
+        padding: 2px 5px;
+      }
+      #mocha li.test.pass.fast > h2 > .duration {
+        display: none;
+      }
+      #mocha li.test.pending > pre,
+      #mocha li.test.pending > h2 {
+        color: #0b97c4;
+      }
+      #mocha li.test.pending::before {
+        color: #0b97c4;
+        content: '\25E6';
+      }
+      #mocha li.test.pending:hover > h2::after {
+        content: '(pending)';
+        font-family: arial, sans-serif;
+      }
+      #mocha li.test.fail > pre,
+      #mocha li.test.fail > h2 {
+        color: #c00;
+      }
+      #mocha li.test.fail > pre {
+        color: #000;
+      }
+      #mocha li.test.fail > pre.error {
+        color: #c00;
+        max-height: 300px;
+        overflow: auto;
+      }
+      #mocha li.test.fail::before {
+        color: #c00;
+        content: '\2716';
+        display: block;
+        float: left;
+        font-size: 12px;
+        margin-right: 5px;
+      }
+      #mocha li.test > html-error {
+        border: 1px solid #eee;
+        border-bottom-color: #ddd;
+        border-radius: 3px;
+        box-shadow: 0 1px 3px #eee;
+        clear: left;
+        color: #000;
+        display: block;
+        float: left;
+        font: 12px/1.5 monaco, monospace;
+        line-height: 1.5;
+        margin: 5px;
+        max-height: 300px;
+        max-width: calc(100% - 42px); /*(2)*/
+        overflow: auto;
+        padding: 15px;
+        word-wrap: break-word;
+      }
+      #mocha li.test > html-error pre.error {
+        border: none;
+        border-radius: 0;
+        box-shadow: 0;
+        margin: 0;
+        margin-top: 18px;
+        max-height: none;
+        padding: 0;
+      }
+      #mocha li.test > h2 {
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: normal;
+        position: relative;
+      }
+      #mocha li.test > h2 > a.replay {
+        background: #eee;
+        border-radius: 15px;
+        color: #888;
+        display: block;
+        font-size: 15px;
+        height: 15px;
+        line-height: 15px;
+        opacity: 0.3;
+        position: absolute;
+        right: 0;
+        text-align: center;
+        text-decoration: none;
+        top: 3px;
+        transition: opacity 200ms;
+        vertical-align: middle;
+        width: 15px;
+      }
+      #mocha-report.pass .test.fail {
+        display: none;
+      }
+      #mocha-report.fail .test.pass {
+        display: none;
+      }
+      #mocha-report.pending .test.pass,
+      #mocha-report.pending .test.fail {
+        display: none;
+      }
+      #mocha-report.pending .test.pass.pending {
+        display: block;
+      }
+      #mocha-error {
+        color: #c00;
+        font-size: 1.5em;
+        font-weight: 100;
+        letter-spacing: 1px;
+      }
+      #mocha-stats {
+        color: #888;
+        font-size: 12px;
+        margin: 0;
+        position: fixed;
+        right: 10px;
+        top: 15px;
+        z-index: 1;
+      }
+      #mocha-stats .progress {
+        background-color: initial;
+        box-shadow: none;
+        float: right;
+        height: auto;
+        padding-top: 0;
+      /**
+          * Set safe initial values, so mochas .progress does not inherit these
+          * properties from Bootstrap .progress (which causes .progress height to
+          * equal line height set in Bootstrap).
+          */
+      }
+      #mocha-stats em {
+        color: #000;
+      }
+      #mocha-stats a {
+        color: inherit;
+        text-decoration: none;
+      }
+      #mocha-stats a:hover {
+        border-bottom: 1px solid #eee;
+      }
+      #mocha-stats > li {
+        display: inline-block;
+        list-style: none;
+        margin: 0 5px;
+        padding-top: 11px;
+      }
+      #mocha-stats canvas {
+        height: 40px;
+        width: 40px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Teddy Templating Engine unit tests</h1>
+
+      <article id='crossOriginError'>
+        <h2>Warning: these tests can only be run from a web server.</h2>
+        <p>Due to the <a href='http://en.wikipedia.org/wiki/Same_origin_policy'>same origin policy</a> applying to files loaded directly from the local filesystem, these unit tests can only be executed from a real HTTP server.</p>
+        <p>To start a simple web server to run these tests with, open your terminal and run this command from the "teddy" directory:</p>
+        <pre>python -m SimpleHTTPServer</pre>
+        <p><em>(For python 2.x.)</em></p>
+        <p>If that command doesn't work, try the python 3.x version instead:</p>
+        <pre>python -m http.server</pre><p><em>(For python 3.x.)</em></p>
+        <p>Then simply visit <a href='http://localhost:8000/test/client.html'>http://localhost:8000/test/client.html</a></p>
+        <p>If you can't run the command, then you'll need to <a href='http://www.python.org/'>install Python</a> or use some other web server.</p>
+      </article>
+
+      <output id='mocha'></output>
+    </main>
+
+    <script>
+      // test for old IE
+      var oldIE = document.createElement('p');
+      oldIE.innerHTML = '<!--[if lte IE 9]><i></i><![endif]-->';
+      oldIE = oldIE.getElementsByTagName('i').length === 1 ? true : false;
+      if (oldIE) {
+        document.getElementById('crossOriginError').style.visibility = 'visible';
+      }
+    </script>
+
+    <!-- include teddy library -->
+    <script src='../teddy.js'></script>
+    <script src='models/model.js'></script>
+
+    <!-- include unit testing libraries -->
+    <script src='../node_modules/mocha/mocha.js'></script>
+    <script src='../node_modules/chai/chai.js'></script>
+    <script src='../node_modules/chai-string/chai-string.js'></script>
+    <script>
+      var assert = chai.assert,
+          templateList,
+          templateLength,
+          counter = 0,
+          crossOriginError,
+          request,
+          i;
+
+      templateList = [
+        'conditionals/and.html',
+        'conditionals/andOr.html',
+        'conditionals/andTruthTable.html',
+        'conditionals/if.html',
+        'conditionals/ifElse.html',
+        'conditionals/ifElseIf.html',
+        'conditionals/ifElseValue.html',
+        'conditionals/ifEmptyArray.html',
+        'conditionals/ifEscapeRegex.html',
+        'conditionals/ifNotPresent.html',
+        'conditionals/ifValue.html',
+        'conditionals/nestedConditional.html',
+        'conditionals/not.html',
+        'conditionals/oneLine.html',
+        'conditionals/oneLineEmpty.html',
+        'conditionals/oneLineFalse.html',
+        'conditionals/oneLineMulti.html',
+        'conditionals/oneLineTrueOnly.html',
+        'conditionals/oneLineValue.html',
+        'conditionals/orSameVar.html',
+        'conditionals/orTruthTable.html',
+        'conditionals/unless.html',
+        'conditionals/unlessElse.html',
+        'conditionals/unlessElseUnless.html',
+        'conditionals/unlessElseValue.html',
+        'conditionals/unlessNull.html',
+        'conditionals/unlessValue.html',
+        'conditionals/xor.html',
+        'conditionals/duplicateVarInline.html',
+        'conditionals/duplicateOperatorInline.html',
+        'includes/argVariableWithinArg.html',
+        'includes/conditionArgInStyle.html',
+        'includes/dynamicInclude.html',
+        'includes/include.html',
+        'includes/includeLoopsAndVars.html',
+        'includes/includeWithArguments.html',
+        'includes/nestedInclude.html',
+        'includes/nestedLoop.html',
+        'includes/numericArgument.html',
+        'includes/numericVarInArg.html',
+        'includes/orphanedArgument.html',
+        'includes/inlineScriptTag.html',
+        'includes/argRedefineModelVar.html',
+        'looping/emptyMarkupLoop.html',
+        'looping/largeDataSet.html',
+        'looping/loopArrayOfObjects.html',
+        'looping/loopKeyVal.html',
+        'looping/loopVal.html',
+        'looping/nestedArrays.html',
+        'looping/nestedLoops.html',
+        'looping/nestedObjectLoop.html',
+        'looping/noMarkupLoop.html',
+        'looping/numericalVal.html',
+        'looping/undefinedObjectLoop.html',
+        'looping/camelCaseLoopVal.html',
+        'misc/markupArgument.html',
+        'misc/multipleVariables.html',
+        'misc/nestedVars.html',
+        'misc/numericMarkupArgument.html',
+        'misc/objectDoesNotExist.html',
+        'misc/plainHTML.html',
+        'misc/regexEscaping.html',
+        'misc/serverSideComments.html',
+        'misc/serverSideCommentsNested.html',
+        'misc/styleVariables.html',
+        'misc/templateWithLoop.html',
+        'misc/varEscaping.html',
+        'misc/varNoEscaping.html',
+        'misc/variable.html',
+        'misc/variableObjectProperty.html'
+      ];
+      templateLength = templateList.length;
+
+      // fetch and compile the templates
+      for (i = 0; i < templateLength; i++) {
+        (function(i) {
+          template = templateList[i];
+
+          var req = new XMLHttpRequest();
+          req.open('GET', 'templates/' + template);
+          req.send();
+
+          req.onreadystatechange = function() {
+            template = templateList[i];
+            if (req.readyState === XMLHttpRequest.DONE) {
+              if (req.status === 200) {
+                crossOriginError = document.getElementById('crossOriginError');
+                if (crossOriginError) {
+                  crossOriginError.parentNode.removeChild(crossOriginError);
+                }
+                teddy.templates[template] = teddy.compile(req.response || req.responseText);
+                counter++;
+                if (counter === templateLength) {
+                  mocha.run();
+                }
+              }
+            }
+          };
+        })(i);
+      }
+    </script>
+
+    <!-- run tests -->
+    <script>mocha.setup('bdd');</script>
+    <script src='conditionals.js'></script>
+    <script src='includes.js'></script>
+    <script src='looping.js'></script>
+    <script src='misc.js'></script>
+  </body>
+</html>

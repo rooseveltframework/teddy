@@ -1,3 +1,4 @@
+
 Teddy templating engine
 ===
 [![NPM version](https://badge.fury.io/js/teddy.png)](http://badge.fury.io/js/teddy) [![Dependency Status](https://gemnasium.com/kethinov/teddy.png)](https://gemnasium.com/kethinov/teddy) [![Gittip](http://img.shields.io/gittip/kethinov.png)](https://www.gittip.com/kethinov/)
@@ -9,6 +10,7 @@ Or put a more technical way, Teddy is an easy to read, HTML-inspired, mostly log
 It uses HTML-like `<tags>` for rudimentary templating logic and Teddy Roosevelt's facial hair for `{variables}`.
 
 ![Teddy Roosevelt's facial hair is a curly brace.](https://raw.github.com/kethinov/mkroosevelt/master/sampleApp/statics/images/teddy.jpg "Teddy Roosevelt's facial hair is a curly brace.")
+
 
 Table of contents
 ===
@@ -27,11 +29,10 @@ Table of contents
 - [Using Teddy in Node.js](https://github.com/kethinov/teddy#using-teddy-in-nodejs)
 - [Using Teddy with client-side JS](https://github.com/kethinov/teddy#using-teddy-with-client-side-js)
 - [API documentation](https://github.com/kethinov/teddy#api-documentation)
-- [Notable intentional design choices and limitations](https://github.com/kethinov/teddy#notable-intentional-design-choices-and-limitations)
 - [Client-side browser support](https://github.com/kethinov/teddy#client-side-browser-support)
 - [How to run the unit tests](https://github.com/kethinov/teddy#how-to-run-the-unit-tests)
-- [Dependencies](https://github.com/kethinov/teddy#dependencies)
-- [License](https://github.com/kethinov/teddy#license)
+
+
 
 Why yet another templating engine?
 ===
@@ -39,6 +40,7 @@ Why yet another templating engine?
 Good question.
 
 Here's why:
+
 
 Other popular templating engines are too cryptic
 ---
@@ -83,6 +85,7 @@ Want something simpler and more readable so you can stop wasting time memorizing
 
 Well you're not the only one.
 
+
 Teddy, symbol-buster extraordinaire
 ===
 
@@ -99,10 +102,13 @@ Here's how:
 - Server-side `{!comments!}` delimited by exclamation points in a fashion similar to `<!-- HTML comments -->`. Server-side comments are stripped out at the template compilation stage.
 - No funky symbols to memorize. Just `{variables}` for data and new HTML-like `<tags>` for rudimentary logic.
 
+
+
 How to write Teddy templates
 ===
 
 Here's some examples of how to write Teddy templates:
+
 
 Variables
 ---
@@ -112,6 +118,7 @@ Display a variable by simply writing `{varName}` anywhere in the template.
 HTML entities such as `<`, `>`, `&`, `'`, and `"` will be escaped by default as a safeguard against [cross-site scripting](https://en.wikipedia.org/wiki/Cross-site_scripting).
 
 If you need to suppress this escaping in certain scenarios, write your variable like this: `{varName|s}`.
+
 
 Includes
 ---
@@ -140,6 +147,7 @@ Pass arguments to the template:
 ```
 
 The arguments you've defined will be accessible as `{firstArgument}` and `{secondArgument}` in the child template `partial.html`.
+
 
 Conditionals
 ---
@@ -205,6 +213,7 @@ An `<unless>` statement structure with an `<elseunless>` tag which is evaluated 
 </else>
 ```
 
+
 Boolean logic
 ---
 
@@ -245,6 +254,7 @@ Boolean logic operators are evaluated left to right.
 </if>
 ```
 
+
 One line ifs
 ---
 
@@ -273,6 +283,7 @@ Like the `<if>` tag you can check for both the presence of a variable as well as
 ```
 
 It's important to note that whichever type of quotes you use on the outside of your `true` or `false` attributes must be reversed on the inside. So if you use single quotes on the outside, then you must use double quotes on the inside.
+
 
 Loops
 ---
@@ -329,6 +340,7 @@ For the above array of objects, we can combine the techniques illustrated above 
 
 *Note: you can also use `in` in place of `through` if you like a more concise syntax.*
 
+
 A complex example combining all tag types
 ---
 
@@ -355,6 +367,7 @@ We could perform many complex operations simultaneously. For instance, we could 
 </loop>
 ```
 
+
 Using Teddy in Node.js
 ===
 
@@ -364,9 +377,7 @@ Teddy is designed for use with [Express](http://expressjs.com) in [Node.js](http
 - Then initialize express and configure it to your liking
 - In your express config, make sure to include this line: `app.engine('html', teddy.__express)`
 
-For a complete sample implementation, see the sample app here: [sampleApps/nodeHelloWorld](https://github.com/kethinov/teddy/tree/master/sampleApps/nodeHelloWorld).
-
-Or if you're looking for a more fully-featured web framework to build web apps with using Teddy templates, then try out Teddy's companion, [Roosevelt](https://github.com/kethinov/roosevelt).
+If you're looking for a more fully-featured web framework to build web apps with using Teddy templates, then try out Teddy's companion, [Roosevelt](https://github.com/kethinov/roosevelt).
 
 If you're interested in using Teddy with the [gulp.js](http://gulpjs.com) build system for Node apps, check out the [gulp-teddy](https://github.com/Csombek/gulp-teddy) project.
 
@@ -374,64 +385,44 @@ If you're interested in using Teddy with the [gulp.js](http://gulpjs.com) build 
 Using Teddy with client-side JS
 ===
 
-Server-side app:
+On the client-side, pass source code to Teddy's render method, like so:  `teddy.render(sourceCode, yourModel)`. The render method will return a fully rendered template.
 
-- Setup a Node.js app using the instructions above
-- Precompile templates somewhere in your app using the `teddy.compile('templateName.html')` method
-- Create a route that serves one or more precompiled templates as `text/javascript`
-- Optionally write the precompiled templates somewhere to disk and serve them as statics instead to optimize for performance
-
-Client-side HTML:
-
-- Include teddy.js: `<script src='teddy.js'></script>`
-- Include precompiled templates: `<script src='path/to/precompiled/templates'></script>`
-- Include your client.js: `<script src='client.js'></script>`
-
-Writing your client.js:
-
-- Define a model: `var model = {some: 'data'}` or optionally pull the JSON from the server, localStorage, or wherever
-- Render a template client-side: `var rendered = teddy.render(teddy.compiledTemplates['template.html'], model)`
-- Render the template into the document somewhere, for instance: `document.body.insertAdjacentHTML('beforeend', rendered);`
-
-For a complete sample implementation, see the sample app here: [sampleApps/client-server](https://github.com/kethinov/teddy/tree/master/sampleApps/client-server).
 
 API documentation
 ===
 
-- `teddy.compile(path)`: Compile a template server-side by referencing a file name. This method returns a compiled template. It also populates these two objects:
-  - `teddy.compiledTemplates`: Object indexed by template file path and file name.
-  - `teddy.packagedTemplates`: Same as compiledTemplates, except it stores packaged templates instead of compiled templates. Packaged templates are templates compiled on the server and sent to the client as raw JS statements that can be simply eval'd client-side rather than compiled client-side.
-- `teddy.compile(templateString, templateName)`: Compile a template directly by passing a string rather than a file name. Give the template a name using the second argument. This method returns a compiled template. It also populates the two objects mentioned above, but instead indexes them by your chosen templateName, as path is not relevant.
-- `teddy.render(templateNameOrPath, dataModel)`: Render a template by referencing the template's name or file path. If the template was already compiled, it can be rendered by referencing its name. If you're using teddy server-side and the template has never been compiled before, `teddy.render` will perform the compile step first.
-- `teddy.setTemplateRoot(path)`: Set the location of your templates directory. The default is the current directory.
+- `teddy.compile(template)`: Compile a template by supplying either source code or a file name (in Node.js).
+  - Returns template source code with `{! teddy comments !}` removed. 
+  - Populates `teddy.templates` with the new template in the format of `teddy.templates[path]: compiledSource`. 
+- `teddy.render(template, model)`: Render a template by supplying either source code or a file name (in Node.js).
+  - Returns fully rendered HTML.
+- `teddy.setTemplateRoot(path)`: Set the location of your templates directory. 
+  - Default is the current directory.
 - `teddy.setVerbosity(n)`: Sets the level of verbosity in Teddy's console logs. Call `teddy.setVerbosity(n)` where `n` equals one of the below values to change the default:
   - `0`: No logging.
   - `1`: The default. Concise logging. Usually just logs serious errors.
   - `2`: Verbose logging. Logs even minor errors.
   - `3`: Debug mode. Very verbose.
-- `teddy.strictParser(true)`: When this setting is enabled, Teddy will throw an exception if the template is not well formed. Default is false. *(Not recommended to enable in production as throwing exceptions could cause downtime.)*
-- `teddy.enableForeachTag(true)`: When this setting is enabled, Teddy will allow the old `<foreach>` tag syntax. Default is false. *(Not recommended to enable as the `foreach` tag will likely be deprecated in the future.)*
-- `teddy.compileAtEveryRender(true)`: When this setting is enabled, Teddy will compile the template at each render rather than caching previous compiles. Default is false. *(Not recommended to enable in production for performance reasons.)*
+- `teddy.maxPasses(n)`: Sets the maximum number of passes the parser can execute over your template. If this maximum is exceeded, Teddy will stop attempting to render the template. The limit exists to prevent the possibility of teddy producing infinite loops due to improperly coded templates.  
+  - Default: 25000.
+- `teddy.cacheRenders(true/false)`: When this setting is enabled, Teddy will cache all unique combinations of templates and models. Any time a template has been rendered before with the given model, the cached template will be returned instead, improving performance.
+  - Default is false. *(Feature is currently experimental.)*
+- `teddy.flushCache(template)`: Delete all the caches of a given template by supplying either its source code or a file name (in Node.js).
+- `teddy.flushCache(template, model)`: Delete the cache of a specific template and model combination by supplying the template's source code or file name (in Node.js) along with the desired model to match.
+- `teddy.compileAtEveryRender(true/false)`: When this setting is enabled, Teddy will compile the template at each render rather than caching previous compiles.
+  - Default is false. *(Not recommended to enable in production for performance reasons.)*
+- `teddy.minify(true/false)`: When this setting is enabled, Teddy will minify templates using its own internal minifier during the compile step.
+  - Default is false. *(Not recommended. Usually best to use a third party tool like [html-minifier](https://www.npmjs.com/package/html-minifier) instead.)*
 
-Notable intentional design choices and limitations
-===
 
-- All variables in Teddy templates are case-insensitive because HTML is case-insensitive.
-- Teddy adheres to a mostly logic-less templates philosophy. Teddy is of the opinion that complex logic beyond what Teddy tags are capable of generally doesn't belong in templates. Evaluate such logic at the code level and pass the results to the templates through the model as readable variables.
-- Teddy's client-side performance and browser support is largely tied to how well [DOMParser](https://developer.mozilla.org/en-US/docs/Web/API/DOMParser) and [XMLSerializer](https://developer.mozilla.org/en-US/docs/XMLSerializer) are implemented (if at all) in the target browser.
-- Teddy is beta software! Not many apps have been written using Teddy yet, so it's entirely possible that there will be some significant bugs.
 
 Client-side browser support
 ===
 
-Teddy is supported on:
+Teddy is supported on all modern browsers.
 
-- Recent versions of Chrome
-- Recent versions of Firefox
-- Recent versions of Opera
-- Recent versions of Safari
-- Android browser 4.x+
-- Internet Explorer 10+
+Teddy is also supported in Internet Explorer 9+. Teddy may work in earlier versions of IE too but that isn't easy to test because the mocha/chai unit tests do not work in IE8 and below.
+
 
 How to run the unit tests
 ===
@@ -448,7 +439,7 @@ cd teddy
 Install dependencies for the server test:
 
 ```
-npm install
+npm i
 ```
 
 Run server test:
@@ -457,29 +448,4 @@ Run server test:
 npm test
 ```
 
-To run the client tests, open `unitTests/client/clientTests.html` and follow its instructions.
-
-Dependencies
-===
-
-Node.js dependencies:
-
-- [xmldom](https://github.com/jindw/xmldom) - W3C Standard based (XML DOM Level 2 Core) DOMParser and XMLSerializer for Node.js
-
-Client-side dependencies:
-
-- [DOMParser HTML extension](https://gist.github.com/eligrey/1129031)</a> (bundled) - polyfill for DOMParser parseFromString for certain browsers
-
-Node.js unit test dependencies:
-
-- None
-
-Client-side unit test dependencies:
-
-- [prettify.js](https://code.google.com/p/google-code-prettify)</a> (bundled) - used to syntax highlight rendered template in unitTests/client/clientTests.html
-- [vkBeautify](http://www.eslinstructor.net/vkbeautify) (bundled) - used to indent rendered template in unitTests/client/clientTests.html
-
-License
-===
-
-All original code in Teddy is licensed under the [Creative Commons Attribution 4.0 International License](http://creativecommons.org/licenses/by/4.0)</a>. Commercial and noncommercial use is permitted with attribution.
+To run the client tests, open `test/client.html` and follow its instructions.
