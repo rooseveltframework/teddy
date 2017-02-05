@@ -419,15 +419,9 @@ API documentation
 Client-side browser support
 ===
 
-Teddy is supported on:
+Teddy is supported on all modern browsers.
 
-- Recent versions of Chrome
-- Recent versions of Firefox
-- Recent versions of Opera
-- Recent versions of Safari
-- Android browser 4.x+
-- Internet Explorer 10+
-
+Teddy is also supported in Internet Explorer 9+. Teddy may work in earlier versions of IE too but that isn't easy to test because the mocha/chai unit tests do not work in IE8 and below.
 
 
 How to run the unit tests
