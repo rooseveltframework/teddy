@@ -337,6 +337,10 @@
       oldIE.innerHTML = '<!--[if lte IE 9]><i></i><![endif]-->';
       oldIE = oldIE.getElementsByTagName('i').length === 1 ? true : false;
 
+      if (oldIE) {
+        document.getElementById('crossOriginError').style.visibility = 'visible';
+      }
+
       templateList = [
         'conditionals/and.html',
         'conditionals/andOr.html',
