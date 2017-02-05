@@ -99,13 +99,17 @@
     params: {
       verbosity: 1,
       templateRoot: './',
+      cacheRenders: false,
       compileAtEveryRender: false,
       minify: false,
       maxPasses: 25000
     },
 
     // compiled templates are stored as object collections, e.g. { "myTemplate.html": "<p>some markup</p>"}
-    compiledTemplates: {},
+    templates: {},
+
+    // cache of fully rendered temmplates, e.g. { "myTemplate.html": "<p>some markup</p>"}
+    renderedTemplates: {},
 
     /**
      * mutator methods for public member vars
@@ -137,13 +141,18 @@
       teddy.params.templateRoot = String(v);
     },
 
+    // turn on or off the setting to cache template renders
+    cacheRenders: function(v) {
+      teddy.params.cacheRenders = Boolean(v);
+    },
+
     // turn on or off the setting to compile templates at every render
     compileAtEveryRender: function(v) {
       teddy.params.compileAtEveryRender = Boolean(v);
     },
 
     // turn on or off the setting to minify templates using teddy's internal minifier
-    enableMinify: function(v) {
+    minify: function(v) {
       teddy.params.minify = Boolean(v);
     },
 
@@ -228,13 +237,73 @@
         name += '.html';
       }
 
-      teddy.compiledTemplates[name] = template;
+      teddy.templates[name] = template;
       return template;
+    },
+
+    // invalidates cache of a given template and model combination
+    // if no model is supplied, deletes all caches of the given template
+    flushCache: function(template, model) {
+      // append extension if not present
+      if (template.slice(-5) !== '.html') {
+        template += '.html';
+      }
+
+      if (model) {
+        var renders = teddy.renderedTemplates[template],
+            i,
+            l,
+            render;
+        if (renders) {
+          l = renders.length;
+        }
+        else {
+          return;
+        }
+        for (i = 0; i < l; i++) {
+          render = renders[i];
+          if (JSON.stringify(render.model) === JSON.stringify(model)) {
+            teddy.renderedTemplates[template].splice(i, 1);
+          }
+        }
+      }
+      else {
+        delete teddy.renderedTemplates[template];
+      }
     },
 
     // parses a template
     render: function(template, model, callback) {
       model = Object.assign({}, model); // make a copy of the model
+
+      // declare vars
+      var renderedTemplate,
+          diff,
+          loops = [],
+          loopCount,
+          loop,
+          i,
+          l,
+          el,
+          localModel,
+          errors,
+          passes = 0,
+          renders,
+          render,
+          maxPasses = teddy.params.maxPasses,
+          maxPassesError = 'Render aborted due to max number of passes (' + maxPasses + ') exceeded; there is a possible infinite loop in your template logic.';
+
+      if (teddy.params.cacheRenders) {
+        teddy.renderedTemplates[template] = teddy.renderedTemplates[template] || [];
+        renders = teddy.renderedTemplates[template];
+        l = renders.length;
+        for (i = 0; i < l; i++) {
+          render = renders[i];
+          if (JSON.stringify(render.model) === JSON.stringify(model)) {
+            return render.renderedTemplate;
+          }
+        }
+      }
 
       // overload conosle logs
       consoleWarnings = '';
@@ -257,12 +326,11 @@
         teddy.params.templateRoot = path.resolve(model.settings.views);
       }
 
-
       // remove templateRoot from template name if necessary
       template = replaceNonRegex(template, teddy.params.templateRoot, '');
 
       // compile template if necessary
-      if (!teddy.compiledTemplates[template] || teddy.params.compileAtEveryRender) {
+      if (!teddy.templates[template] || teddy.params.compileAtEveryRender) {
         teddy.compile(template);
       }
 
@@ -271,19 +339,15 @@
         template += '.html';
       }
 
-      // declare vars
-      var renderedTemplate = teddy.compiledTemplates[template],
-          diff,
-          loops = [],
-          loopCount,
-          loop,
-          i,
-          el,
-          localModel,
-          errors,
-          passes = 0,
-          maxPasses = teddy.params.maxPasses,
-          maxPassesError = 'Render aborted due to max number of passes (' + maxPasses + ') exceeded; there is a possible infinite loop in your template logic.';
+      if (teddy.params.cacheRenders) {
+        teddy.renderedTemplates[template] = teddy.renderedTemplates[template] || [];
+        l = teddy.renderedTemplates[template].push({
+          renderedTemplate: '',
+          model: Object.assign({}, model)
+        });
+      }
+
+      renderedTemplate = teddy.templates[template];
 
       if (!renderedTemplate) {
         if (teddy.params.verbosity) {
@@ -411,6 +475,10 @@
         consoleErrors = '';
       }
 
+      if (teddy.params.cacheRenders) {
+        teddy.renderedTemplates[template][l - 1].renderedTemplate = renderedTemplate;
+      }
+
       // execute callback if present, otherwise simply return the rendered template string
       if (typeof callback === 'function') {
         if (!errors) {
@@ -423,7 +491,6 @@
       else {
         return renderedTemplate;
       }
-
 
 
       /**
@@ -637,12 +704,12 @@
             }
 
             // compile included template if necessary
-            if (!teddy.compiledTemplates[src] || teddy.params.compileAtEveryRender) {
+            if (!teddy.templates[src] || teddy.params.compileAtEveryRender) {
               teddy.compile(src);
             }
 
             // get the template as a string
-            incdoc = teddy.compiledTemplates[src];
+            incdoc = teddy.templates[src];
             if (!incdoc) {
               if (teddy.params.verbosity) {
                 teddy.console.warn('<include> element found which references a nonexistent template ("' + src + '"). Ignoring element.');
@@ -1114,98 +1181,98 @@
           }
         }
       }
-
-
-      /**
-       * private utility methods
-       */
-
-      // gets nested object by string
-      function getNestedObjectByString(o, s) {
-        s = s.replace(/\[(\w+)\]/g, '.$1');  // convert indexes to properties
-        s = s.replace(/^\./, ''); // strip leading dot
-        var a = s.split('.'), n;
-        while (a.length) {
-          n = a.shift();
-          if (n in o) {
-            o = o[n];
-          }
-          else {
-            return;
-          }
-        }
-        return o;
-      }
-
-      // get all attributes of an element
-      function getAttributes(el) {
-        var attributes = el.split('>');
-        attributes = attributes[0];
-        attributes = attributes.substring(attributes.indexOf(' '));
-        attributes = attributes.match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g);
-        return attributes;
-      }
-
-      // get a specific attribute from a given element
-      function getAttribute(el, attr) {
-        var i, l, a, match;
-        match = el.match(new RegExp(attr + '=(\\\'.*?\\\'|\\".*?\\")'));
-
-        if (!match) {
-          return false;
-        }
-
-        l = match.length;
-        for (i = 0; i < l; i++) {
-          a = match[i];
-          if (a && typeof a === 'string') {
-            a = a.trim();
-            if (a.substring(0, attr.length) === attr) {
-              // got a match
-              break;
-            }
-          }
-        }
-        if (!a) {
-          return false;
-        }
-        else {
-          a = a.substring(attr.length + 2).slice(0, -1);
-          return a;
-        }
-      }
-
-      // get a specific attribute from a given element
-      function removeAttribute(el, attr) {
-        var newEl = el.replace(new RegExp('(?: (?:' + attr + '(?: |>))| (?:' + attr + '=)(?:\\"([\\S\\s]*?)\\"|\\\'([\\S\\s]*?)\\\')(?: |>))'), ' ');
-        if (newEl.charAt(newEl.length - 1) !== '>') {
-          newEl = newEl.trim();
-          newEl += '>';
-        }
-        return newEl;
-      }
-
-      // gets children of a given element
-      function getInnerHTML(el) {
-        el = el.trim();
-
-        var nodeName = getNodeName(el);
-        el = el.replace(new RegExp('<' + nodeName + '(?:>| [\\S\\s]*?>)'), '');
-        el = el.substring(0, el.lastIndexOf('</' + nodeName + '>'));
-        return el.trim();
-      }
-
-      // get an element's node name
-      function getNodeName(el) {
-        var nodeName = el.split(' ');
-        nodeName = nodeName[0];
-        nodeName = nodeName.split('>');
-        nodeName = nodeName[0];
-        nodeName = nodeName.substring(1, nodeName.length);
-        return nodeName;
-      }
     }
   };
+
+
+  /**
+   * private utility methods
+   */
+
+  // gets nested object by string
+  function getNestedObjectByString(o, s) {
+    s = s.replace(/\[(\w+)\]/g, '.$1');  // convert indexes to properties
+    s = s.replace(/^\./, ''); // strip leading dot
+    var a = s.split('.'), n;
+    while (a.length) {
+      n = a.shift();
+      if (n in o) {
+        o = o[n];
+      }
+      else {
+        return;
+      }
+    }
+    return o;
+  }
+
+  // get all attributes of an element
+  function getAttributes(el) {
+    var attributes = el.split('>');
+    attributes = attributes[0];
+    attributes = attributes.substring(attributes.indexOf(' '));
+    attributes = attributes.match(/(?:[^\s"']+|"[^"]*"|'[^']*')+/g);
+    return attributes;
+  }
+
+  // get a specific attribute from a given element
+  function getAttribute(el, attr) {
+    var i, l, a, match;
+    match = el.match(new RegExp(attr + '=(\\\'.*?\\\'|\\".*?\\")'));
+
+    if (!match) {
+      return false;
+    }
+
+    l = match.length;
+    for (i = 0; i < l; i++) {
+      a = match[i];
+      if (a && typeof a === 'string') {
+        a = a.trim();
+        if (a.substring(0, attr.length) === attr) {
+          // got a match
+          break;
+        }
+      }
+    }
+    if (!a) {
+      return false;
+    }
+    else {
+      a = a.substring(attr.length + 2).slice(0, -1);
+      return a;
+    }
+  }
+
+  // get a specific attribute from a given element
+  function removeAttribute(el, attr) {
+    var newEl = el.replace(new RegExp('(?: (?:' + attr + '(?: |>))| (?:' + attr + '=)(?:\\"([\\S\\s]*?)\\"|\\\'([\\S\\s]*?)\\\')(?: |>))'), ' ');
+    if (newEl.charAt(newEl.length - 1) !== '>') {
+      newEl = newEl.trim();
+      newEl += '>';
+    }
+    return newEl;
+  }
+
+  // gets children of a given element
+  function getInnerHTML(el) {
+    el = el.trim();
+
+    var nodeName = getNodeName(el);
+    el = el.replace(new RegExp('<' + nodeName + '(?:>| [\\S\\s]*?>)'), '');
+    el = el.substring(0, el.lastIndexOf('</' + nodeName + '>'));
+    return el.trim();
+  }
+
+  // get an element's node name
+  function getNodeName(el) {
+    var nodeName = el.split(' ');
+    nodeName = nodeName[0];
+    nodeName = nodeName.split('>');
+    nodeName = nodeName[0];
+    nodeName = nodeName.substring(1, nodeName.length);
+    return nodeName;
+  }
 
   function escapeHtmlEntities(v) {
     if (v && typeof v === 'string') {

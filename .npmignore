@@ -1,6 +1,4 @@
-assets
-bower.json
 playground.html
+LICENSE.md
 README.md
-sampleApps
-unitTests
+test

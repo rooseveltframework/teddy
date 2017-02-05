@@ -377,9 +377,7 @@ Teddy is designed for use with [Express](http://expressjs.com) in [Node.js](http
 - Then initialize express and configure it to your liking
 - In your express config, make sure to include this line: `app.engine('html', teddy.__express)`
 
-For a complete sample implementation, see the sample app here: [sampleApps/nodeHelloWorld](https://github.com/kethinov/teddy/tree/master/sampleApps/nodeHelloWorld).
-
-Or if you're looking for a more fully-featured web framework to build web apps with using Teddy templates, then try out Teddy's companion, [Roosevelt](https://github.com/kethinov/roosevelt).
+If you're looking for a more fully-featured web framework to build web apps with using Teddy templates, then try out Teddy's companion, [Roosevelt](https://github.com/kethinov/roosevelt).
 
 If you're interested in using Teddy with the [gulp.js](http://gulpjs.com) build system for Node apps, check out the [gulp-teddy](https://github.com/Csombek/gulp-teddy) project.
 
@@ -387,45 +385,34 @@ If you're interested in using Teddy with the [gulp.js](http://gulpjs.com) build 
 Using Teddy with client-side JS
 ===
 
-Server-side app:
-
-- **TODO: rewrite this...**
-- Setup a Node.js app using the instructions above
-- Precompile templates somewhere in your app using the `teddy.compile('templateName.html')` method
-- Create a route that serves one or more precompiled templates as `text/javascript`
-- Optionally write the precompiled templates somewhere to disk and serve them as statics instead to optimize for performance
-
-Client-side HTML:
-
-- Include teddy.js: `<script src='teddy.js'></script>`
-- Include precompiled templates: `<script src='path/to/precompiled/templates'></script>`
-- Include your client.js: `<script src='client.js'></script>`
-
-Writing your client.js:
-
-- Define a model: `var model = {some: 'data'}` or optionally pull the JSON from the server, localStorage, or wherever
-- Render a template client-side: `var rendered = teddy.render(teddy.compiledTemplates['template.html'], model)`
-- Render the template into the document somewhere, for instance: `document.body.insertAdjacentHTML('beforeend', rendered);`
-
-For a complete sample implementation, see the sample app here: [sampleApps/client-server](https://github.com/kethinov/teddy/tree/master/sampleApps/client-server).
+On the client-side, pass source code to Teddy's render method, like so:  `teddy.render(sourceCode, yourModel)`. The render method will return a fully rendered template.
 
 
 API documentation
 ===
 
-- `teddy.compile(path)`: Compile a template server-side by referencing a file name. This method returns a compiled template. It also populates these two objects:
-  - `teddy.compiledTemplates`: Object indexed by template file path and file name.
-- `teddy.compile(templateString, templateName)`: Compile a template directly by passing a string rather than a file name. Give the template a name using the second argument. This method returns a compiled template. It also populates the two objects mentioned above, but instead indexes them by your chosen templateName, as path is not relevant.
-- `teddy.render(templateNameOrPath, dataModel)`: Render a template by referencing the template's name or file path. If the template was already compiled, it can be rendered by referencing its name. If you're using teddy server-side and the template has never been compiled before, `teddy.render` will perform the compile step first.
-- `teddy.render(code, dataModel)`: Render a template by supplying source code.
-- `teddy.setTemplateRoot(path)`: Set the location of your templates directory. The default is the current directory.
+- `teddy.compile(template)`: Compile a template by supplying either source code or a file name (in Node.js).
+  - Returns template source code with `{! teddy comments !}` removed. 
+  - Populates `teddy.templates` with the new template in the format of `teddy.templates[path]: compiledSource`. 
+- `teddy.render(template, model)`: Render a template by supplying either source code or a file name (in Node.js).
+  - Returns fully rendered HTML.
+- `teddy.setTemplateRoot(path)`: Set the location of your templates directory. 
+  - Default is the current directory.
 - `teddy.setVerbosity(n)`: Sets the level of verbosity in Teddy's console logs. Call `teddy.setVerbosity(n)` where `n` equals one of the below values to change the default:
   - `0`: No logging.
   - `1`: The default. Concise logging. Usually just logs serious errors.
   - `2`: Verbose logging. Logs even minor errors.
   - `3`: Debug mode. Very verbose.
-- `teddy.compileAtEveryRender(true)`: When this setting is enabled, Teddy will compile the template at each render rather than caching previous compiles. Default is false. *(Not recommended to enable in production for performance reasons.)*
-- `teddy.enableMinify(true)`: When this setting is enabled, Teddy will minify templates using its own internal minifier. Default is false. *(Not recommended. Usually best to use a third party tool like [html-minifier](https://www.npmjs.com/package/html-minifier) instead.)*
+- `teddy.maxPasses(n)`: Sets the maximum number of passes the parser can execute over your template. If this maximum is exceeded, Teddy will stop attempting to render the template. The limit exists to prevent the possibility of teddy producing infinite loops due to improperly coded templates.  
+  - Default: 25000.
+- `teddy.cacheRenders(true/false)`: When this setting is enabled, Teddy will cache all unique combinations of templates and models. Any time a template has been rendered before with the given model, the cached template will be returned instead, improving performance.
+  - Default is false. *(Feature is currently experimental.)*
+- `teddy.flushCache(template)`: Delete all the caches of a given template by supplying either its source code or a file name (in Node.js).
+- `teddy.flushCache(template, model)`: Delete the cache of a specific template and model combination by supplying the template's source code or file name (in Node.js) along with the desired model to match.
+- `teddy.compileAtEveryRender(true/false)`: When this setting is enabled, Teddy will compile the template at each render rather than caching previous compiles.
+  - Default is false. *(Not recommended to enable in production for performance reasons.)*
+- `teddy.minify(true/false)`: When this setting is enabled, Teddy will minify templates using its own internal minifier during the compile step.
+  - Default is false. *(Not recommended. Usually best to use a third party tool like [html-minifier](https://www.npmjs.com/package/html-minifier) instead.)*
 
 
 
@@ -458,7 +445,7 @@ cd teddy
 Install dependencies for the server test:
 
 ```
-npm install
+npm i
 ```
 
 Run server test:
@@ -467,4 +454,4 @@ Run server test:
 npm test
 ```
 
-To run the client tests, open `unitTests/client/clientTests.html` and follow its instructions.
+To run the client tests, open `test/client.html` and follow its instructions.

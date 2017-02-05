@@ -11,6 +11,7 @@ if (typeof module !== 'undefined') {
 describe('Looping', function() {
   before(function() {
     teddy.setVerbosity(0);
+    teddy.cacheRenders(true);
     model = makeModel();
   });
 
@@ -55,6 +56,73 @@ describe('Looping', function() {
     time = end - start;
 
     assert.isAtMost(time, 5000);
+    done();
+  });
+
+  it('should loop through same array of 5000 elements in < 50ms during second attempt due to caching (looping/largeDataSet.html)', function(done) {
+    var start, end, time;
+    start = new Date().getTime();
+
+    teddy.render('looping/largeDataSet.html', model);
+
+    end = new Date().getTime();
+    time = end - start;
+
+    assert.isAtMost(time, 50);
+    done();
+  });
+
+  it('should loop through an array of 5000 elements in < 5000ms doing a fresh render via partial cache invalidation (looping/largeDataSet.html)', function(done) {
+    var start, end, time;
+    start = new Date().getTime();
+
+    teddy.flushCache('looping/largeDataSet.html', model);
+    teddy.render('looping/largeDataSet.html', model);
+
+    end = new Date().getTime();
+    time = end - start;
+
+    assert.isAtMost(time, 5000);
+    done();
+  });
+
+  it('should loop through same array of 5000 elements in < 50ms during second attempt due to caching (looping/largeDataSet.html)', function(done) {
+    var start, end, time;
+    start = new Date().getTime();
+
+    teddy.render('looping/largeDataSet.html', model);
+
+    end = new Date().getTime();
+    time = end - start;
+
+    assert.isAtMost(time, 50);
+    done();
+  });
+
+  it('should loop through an array of 5000 elements in < 5000ms doing a fresh render via full cache invalidation (looping/largeDataSet.html)', function(done) {
+    var start, end, time;
+    start = new Date().getTime();
+
+    teddy.flushCache('looping/largeDataSet.html');
+    teddy.render('looping/largeDataSet.html', model);
+
+    end = new Date().getTime();
+    time = end - start;
+
+    assert.isAtMost(time, 5000);
+    done();
+  });
+
+  it('should loop through same array of 5000 elements in < 50ms during second attempt due to caching (looping/largeDataSet.html)', function(done) {
+    var start, end, time;
+    start = new Date().getTime();
+
+    teddy.render('looping/largeDataSet.html', model);
+
+    end = new Date().getTime();
+    time = end - start;
+
+    assert.isAtMost(time, 50);
     done();
   });
 

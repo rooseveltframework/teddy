@@ -9,8 +9,8 @@ if (typeof module !== 'undefined') {
 }
 
 describe('Includes', function() {
-  this.timeout(5000);
   before(function() {
+    this.timeout(5000);
     model = makeModel();
   });
 
@@ -48,14 +48,6 @@ describe('Includes', function() {
     assert.equalIgnoreSpaces(teddy.render('includes/includeLoopsAndVars.html', model), '<p>a</p><p>b</p><p>c</p><p>world</p><p>guy</p>');
     done();
   });
-
-/*
-no longer needed?
-  it('should prevent recursion abuse (includes/argVariableWithinArg.html)', function(done) {
-    assert.equalIgnoreSpaces(teddy.render('includes/argVariableWithinArg.html', model), 'Render aborted due to max number of passes (' + teddy.params.maxPasses + ') exceeded; there is a possible infinite loop in your template logic.');
-    done();
-  });
-  */
 
   it('should <include> a template that contains numerical {variables} (includes/numericVarInArg.html)', function(done) {
     assert.equalIgnoreSpaces(teddy.render('includes/numericVarInArg.html', model), '<p>STRING!</p>');
