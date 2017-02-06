@@ -713,7 +713,7 @@
             return replaceNonRegex(docstring, '{' + omatch + '}', renderVar('{' + ovarname + '}', ovarname, curVar));
           }
           else {
-            return replaceNonRegex(docstring, '{' + omatch + '}', ('{' + nmatch + '}').replace(/data-local-model=\'[\S\s]*?\'/, ''));
+            return replaceNonRegex(docstring, '{' + omatch + '}', ('{' + nmatch + '}').replace(/ data-local-model=\'[\S\s]*?\'/, ''));
           }
         }
 
