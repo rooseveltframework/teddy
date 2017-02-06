@@ -94,6 +94,10 @@
       verbosity: 1,
       templateRoot: './',
       cacheRenders: false,
+      defaultCaches: 1,
+      templateMaxCaches: {},
+      cacheWhitelist: false,
+      cacheBlacklist: [],
       compileAtEveryRender: false,
       minify: false,
       maxPasses: 25000
@@ -140,6 +144,30 @@
       teddy.params.cacheRenders = Boolean(v);
     },
 
+    // mutator method to set default caches param: the number of cached versions of each templates to store by default if cacheRenders is enabled
+    setDefaultCaches: function(v) {
+      teddy.params.defaultCaches = parseInt(v);
+    },
+
+    // mutator method to set max caches for a given registered template
+    setMaxCaches: function(template, v) {
+      teddy.params.templateMaxCaches[String(template)] = parseInt(v);
+    },
+
+    // mutator method to set a whitelist of templates to cache, e.g. { "myTemplate.html": maxCaches} where maxCaches is an integer
+    setCacheWhitelist: function(o) {
+      var i;
+      teddy.params.cacheWhitelist = o;
+      for (i in o) {
+        teddy.setMaxCaches(i, o[i]);
+      }
+    },
+
+    // mutator method to set a blacklist of templates not to cache as an array
+    setCacheBlacklist: function(a) {
+      teddy.params.cacheBlacklist = a;
+    },
+
     // turn on or off the setting to compile templates at every render
     compileAtEveryRender: function(v) {
       teddy.params.compileAtEveryRender = Boolean(v);
@@ -177,7 +205,7 @@
 
     // compiles a template (removes {! comments !} and unnecessary whitespace)
     compile: function(template) {
-      var name = template, oldTemplate, comments, l, i;
+      var name = template, oldTemplate, comments, l, i, register = false;
 
       // it's assumed that the argument is already a template string if we're not server-side
       if (typeof template !== 'string') {
@@ -189,6 +217,7 @@
 
       // get contents of file if template is a file
       if (template.indexOf('<') === -1 && fs) {
+        register = true;
         try {
           template = fs.readFileSync(template, 'utf8');
         }
@@ -202,6 +231,7 @@
             }
             catch (e) {
               // do nothing, attempt to render it as code
+              register = false;
             }
           }
         }
@@ -226,13 +256,13 @@
       }
       while (oldTemplate !== template);
 
-      // append extension if not present
-      if (name.slice(-5) !== '.html') {
-        name += '.html';
+      if (register) {
+        teddy.templates[name] = template;
+        return template;
       }
-
-      teddy.templates[name] = template;
-      return template;
+      else {
+        return template.slice(-5) === '.html' ? template.substring(0, template.length - 5) : template;
+      }
     },
 
     // invalidates cache of a given template and model combination
@@ -284,20 +314,9 @@
           passes = 0,
           renders,
           render,
+          stringyModel,
           maxPasses = teddy.params.maxPasses,
           maxPassesError = 'Render aborted due to max number of passes (' + maxPasses + ') exceeded; there is a possible infinite loop in your template logic.';
-
-      if (teddy.params.cacheRenders) {
-        teddy.renderedTemplates[template] = teddy.renderedTemplates[template] || [];
-        renders = teddy.renderedTemplates[template];
-        l = renders.length;
-        for (i = 0; i < l; i++) {
-          render = renders[i];
-          if (JSON.stringify(render.model) === JSON.stringify(model)) {
-            return render.renderedTemplate;
-          }
-        }
-      }
 
       // overload conosle logs
       consoleWarnings = '';
@@ -314,11 +333,8 @@
       }
 
       // remove templateRoot from template name if necessary
-      template = replaceNonRegex(template, teddy.params.templateRoot, '');
-
-      // compile template if necessary
-      if (!teddy.templates[template] || teddy.params.compileAtEveryRender) {
-        teddy.compile(template);
+      if (template.slice(teddy.params.templateRoot.length) === teddy.params.templateRoot) {
+        template = template.replace(teddy.params.templateRoot, '');
       }
 
       // append extension if not present
@@ -326,15 +342,44 @@
         template += '.html';
       }
 
-      if (teddy.params.cacheRenders) {
+      // return cached template if one exists
+      if (teddy.params.cacheRenders && teddy.templates[template] && (!teddy.params.cacheWhitelist || teddy.params.cacheWhitelist[template]) && teddy.params.cacheBlacklist.indexOf(template) < 0) {
+        stringyModel = JSON.stringify(model);
         teddy.renderedTemplates[template] = teddy.renderedTemplates[template] || [];
+        renders = teddy.renderedTemplates[template];
+        l = renders.length;
+        for (i = 0; i < l; i++) {
+          render = renders[i];
+          if (JSON.stringify(render.model) === stringyModel) {
+
+            // move to last position in the array to mark it as most recently accessed
+            teddy.renderedTemplates[template].push(teddy.renderedTemplates[template].splice(i, 1)[0]);
+            return render.renderedTemplate;
+          }
+        }
+      }
+
+      // compile template if necessary
+      if (!teddy.templates[template] || teddy.params.compileAtEveryRender) {
+        renderedTemplate = teddy.compile(template);
+      }
+
+      renderedTemplate = teddy.templates[template] || renderedTemplate;
+
+      // prepare to cache the template if caching is enabled and this template is eligible
+      if (teddy.params.cacheRenders && teddy.templates[template] && (!teddy.params.cacheWhitelist || teddy.params.cacheWhitelist[template]) && teddy.params.cacheBlacklist.indexOf(template) < 0) {
+        teddy.renderedTemplates[template] = teddy.renderedTemplates[template] || [];
+        l = teddy.renderedTemplates[template].length;
+
+        // remove first (oldest) item from the array if cache limit is reached
+        if ((teddy.params.templateMaxCaches[template] && l >= teddy.params.templateMaxCaches[template]) || (!teddy.params.templateMaxCaches[template] && l >= teddy.params.defaultCaches)) {
+          teddy.renderedTemplates[template].shift();
+        }
         l = teddy.renderedTemplates[template].push({
           renderedTemplate: '',
           model: Object.assign({}, model)
         });
       }
-
-      renderedTemplate = teddy.templates[template];
 
       if (!renderedTemplate) {
         if (teddy.params.verbosity) {
@@ -462,7 +507,8 @@
         consoleErrors = '';
       }
 
-      if (teddy.params.cacheRenders) {
+      // cache the template if caching is enabled and this template is eligible
+      if (teddy.params.cacheRenders && teddy.templates[template] && (!teddy.params.cacheWhitelist || teddy.params.cacheWhitelist[template]) && teddy.params.cacheBlacklist.indexOf(template) < 0) {
         teddy.renderedTemplates[template][l - 1].renderedTemplate = renderedTemplate;
       }
 
@@ -692,11 +738,11 @@
 
             // compile included template if necessary
             if (!teddy.templates[src] || teddy.params.compileAtEveryRender) {
-              teddy.compile(src);
+              incdoc = teddy.compile(src);
             }
 
             // get the template as a string
-            incdoc = teddy.templates[src];
+            incdoc = teddy.templates[src] || incdoc;
             if (!incdoc) {
               if (teddy.params.verbosity) {
                 teddy.console.warn('<include> element found which references a nonexistent template ("' + src + '"). Ignoring element.');
@@ -1271,7 +1317,12 @@
   }
 
   function replaceNonRegex(str, find, replace) {
-    return str.split(find).join(replace);
+    if (typeof str === 'string') {
+      return str.split(find).join(replace);
+    }
+    else {
+      teddy.console.error('teddy: replaceNonRegex passed invalid arguments.');
+    }
   }
 
   // expose as a CommonJS module

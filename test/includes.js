@@ -10,7 +10,7 @@ if (typeof module !== 'undefined') {
 
 describe('Includes', function() {
   before(function() {
-    this.timeout(5000);
+    teddy.setTemplateRoot('test/templates');
     model = makeModel();
   });
 

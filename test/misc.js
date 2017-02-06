@@ -10,6 +10,7 @@ if (typeof module !== 'undefined') {
 
 describe('Misc', function() {
   before(function() {
+    teddy.setTemplateRoot('test/templates');
     model = makeModel();
   });
 
@@ -71,6 +72,60 @@ describe('Misc', function() {
 
   it('should escape curly braces from regex pattern (misc/regexEscaping.html)', function(done) {
     assert.equalIgnoreSpaces(teddy.render('misc/regexEscaping.html', model), '<input type=\'text\' name=\'date\' placeholder=\'DD/MM/YYYY\' id=\'date\' pattern=\'^(3[0-1]|[1-2]\\d|[1-9]|0\\d)\\/(1[0-2]|[1-9]|0\\d)\\/[1-2]\\d{3}$\'>');
+    done();
+  });
+
+  it('should trigger caching rollover given one template with 100 unique models (misc/variable.html)', function(done) {
+    var i;
+    teddy.cacheRenders(true);
+    teddy.setDefaultCaches(10);
+    for (i = 0; i < 100; i++) {
+      teddy.render('misc/variable.html', {something: i});
+    }
+    assert.equalIgnoreSpaces(teddy.renderedTemplates['misc/variable.html'][0].renderedTemplate, '<p>90</p>');
+    teddy.setDefaultCaches(1);
+    teddy.cacheRenders(false);
+    done();
+  });
+
+  it('should not cache a blacklisted template (misc/variable.html)', function(done) {
+    teddy.cacheRenders(true);
+    teddy.renderedTemplates = {};
+    teddy.setCacheBlacklist(['misc/variable.html']);
+    teddy.render('misc/variable.html', {something: 1});
+    assert.equal(teddy.renderedTemplates['misc/variable.html'], undefined);
+    teddy.setCacheBlacklist([]);
+    teddy.cacheRenders(false);
+    done();
+  });
+
+  it('should only cache whitelisted templates (misc/variable.html)', function(done) {
+    teddy.cacheRenders(true);
+    teddy.renderedTemplates = {};
+    teddy.setCacheWhitelist({'misc/variable.html': 1});
+    teddy.render('misc/plainHTML.html', {something: 1});
+    teddy.render('misc/variable.html', {something: 1});
+    assert.equal(teddy.renderedTemplates['misc/plainHTML.html'], undefined);
+    assert.equalIgnoreSpaces(teddy.renderedTemplates['misc/variable.html'][0].renderedTemplate, '<p>1</p>');
+    teddy.setCacheWhitelist({});
+    teddy.cacheRenders(false);
+    done();
+  });
+
+  it('should only cache the whitelisted template the specified number of times (misc/variable.html)', function(done) {
+    var i;
+    teddy.cacheRenders(true);
+    teddy.renderedTemplates = {};
+    teddy.setDefaultCaches(10);
+    teddy.setCacheWhitelist({'misc/variable.html': 10});
+    teddy.render('misc/plainHTML.html', {something: 1});
+    for (i = 0; i < 100; i++) {
+      teddy.render('misc/variable.html', {something: i});
+    }
+    assert.equal(teddy.renderedTemplates['misc/plainHTML.html'], undefined);
+    assert.equalIgnoreSpaces(teddy.renderedTemplates['misc/variable.html'][0].renderedTemplate, '<p>90</p>');
+    teddy.setCacheWhitelist({});
+    teddy.cacheRenders(false);
     done();
   });
 });

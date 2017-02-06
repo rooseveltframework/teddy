@@ -10,8 +10,7 @@ if (typeof module !== 'undefined') {
 
 describe('Looping', function() {
   before(function() {
-    teddy.setVerbosity(0);
-    teddy.cacheRenders(true);
+    teddy.setTemplateRoot('test/templates');
     model = makeModel();
   });
 
@@ -47,6 +46,7 @@ describe('Looping', function() {
   });
 
   it('should loop through an array of 5000 elements in < 5000ms (looping/largeDataSet.html)', function(done) {
+    teddy.cacheRenders(true);
     var start, end, time;
     start = new Date().getTime();
 
@@ -122,17 +122,22 @@ describe('Looping', function() {
     end = new Date().getTime();
     time = end - start;
 
+    teddy.cacheRenders(false);
     assert.isAtMost(time, 50);
     done();
   });
 
   it('should ignore loop with invalid through attribute (looping/undefinedObjectLoop.html)', function(done) {
+    teddy.setVerbosity(0);
     assert.equalIgnoreSpaces(teddy.render('looping/undefinedObjectLoop.html', model), '<div></div>');
+    teddy.setVerbosity(1);
     done();
   });
 
   it('should ignore loop with no contents (looping/emptyMarkupLoop.html)', function(done) {
+    teddy.setVerbosity(0);
     assert.equalIgnoreSpaces(teddy.render('looping/emptyMarkupLoop.html', model), '<div></div>');
+    teddy.setVerbosity(1);
     done();
   });
 
