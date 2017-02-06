@@ -373,9 +373,9 @@ Using Teddy in Node.js
 
 Teddy is designed for use with [Express](http://expressjs.com) in [Node.js](http://nodejs.org).
 
-- First require the node modules `express`, and `teddy`
-- Then initialize express and configure it to your liking
-- In your express config, make sure to include this line: `app.engine('html', teddy.__express)`
+- First require the node modules `express`, and `teddy`.
+- Then initialize express and configure it to your liking.
+- In your express config, make sure to include this line: `app.engine('html', teddy.__express)`.
 
 If you're looking for a more fully-featured web framework to build web apps with using Teddy templates, then try out Teddy's companion, [Roosevelt](https://github.com/kethinov/roosevelt).
 
@@ -403,12 +403,23 @@ API documentation
   - `1`: The default. Concise logging. Usually just logs serious errors.
   - `2`: Verbose logging. Logs even minor errors.
   - `3`: Debug mode. Very verbose.
-- `teddy.maxPasses(n)`: Sets the maximum number of passes the parser can execute over your template. If this maximum is exceeded, Teddy will stop attempting to render the template. The limit exists to prevent the possibility of teddy producing infinite loops due to improperly coded templates.  
-  - Default: 25000.
 - `teddy.cacheRenders(true/false)`: When this setting is enabled, Teddy will cache all unique combinations of templates and models. Any time a template has been rendered before with the given model, the cached template will be returned instead, improving performance.
   - Default is false. *(Feature is currently experimental.)*
+- `teddy.setDefaultCaches(n)`: Set the default number of unique caches to store per template when template caching is enabled.
+  - Default: 1.
+- `teddy.setMaxCaches(template, n)`: Set the maximum number of unique caches to store for a given template when template caching is enabled.
+- `teddy.setCacheWhitelist({'templateNameOrPath': maxCaches})`: Establish a whitelist of templates to cache and set their maxCache value.
+  - Example: `{'one.html': 1, 'two.html': 50, 'three.html': 250}`.
+  - The above example will only allow caching on one.html, two.html. and three.html. No other template renders will be cached.
+  - Also one.html will have a maximum unique cache count of 1, two.html's maximum will be 50, and three.html's maximum will be 250.
+  - Note: mutually exclusive with `teddy.setCacheBlacklist`
+- `teddy.setCacheBlacklist(templateArray)`: Establish a blacklist of templates to never cache.
+  - Example: `['one.html', 'two.html', 'three.html']`.
+  - Note: mutually exclusive with `teddy.setCacheWhitelist`.
 - `teddy.flushCache(template)`: Delete all the caches of a given template by supplying either its source code or a file name (in Node.js).
 - `teddy.flushCache(template, model)`: Delete the cache of a specific template and model combination by supplying the template's source code or file name (in Node.js) along with the desired model to match.
+- `teddy.maxPasses(n)`: Sets the maximum number of passes the parser can execute over your template. If this maximum is exceeded, Teddy will stop attempting to render the template. The limit exists to prevent the possibility of teddy producing infinite loops due to improperly coded templates.  
+  - Default: 25000.
 - `teddy.compileAtEveryRender(true/false)`: When this setting is enabled, Teddy will compile the template at each render rather than caching previous compiles.
   - Default is false. *(Not recommended to enable in production for performance reasons.)*
 - `teddy.minify(true/false)`: When this setting is enabled, Teddy will minify templates using its own internal minifier during the compile step.
