@@ -1,6 +1,7 @@
 function makeModel() {
   var model = {
         letters: ['a', 'b', 'c'],
+        circular: {},
         camelLetters: ['a', 'b', 'c'],
         names: {jack: 'guy', jill: 'girl', hill: 'landscape'},
         objects: [{a:1, b:2, c:3}, {a:4, b:5, c:6}, {a:7, b:8, c:9}],
@@ -49,6 +50,8 @@ function makeModel() {
       i,
       charList = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789',
       cl = charList.length;
+
+  model.circular.circular = model.circular;
 
   function randChars(n) {
     var i, s = '';

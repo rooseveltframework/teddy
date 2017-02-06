@@ -277,16 +277,22 @@
         var renders = teddy.renderedTemplates[template],
             i,
             l,
-            render;
+            render,
+            stringyModel,
+            renderStringyModel;
         if (renders) {
           l = renders.length;
         }
         else {
           return;
         }
+        jsonStringifyCache = [];
+        stringyModel = JSON.stringify(model, jsonStringifyRemoveCircularReferences)
         for (i = 0; i < l; i++) {
           render = renders[i];
-          if (JSON.stringify(render.model) === JSON.stringify(model)) {
+          jsonStringifyCache = [];
+          renderStringyModel = JSON.stringify(render.model, jsonStringifyRemoveCircularReferences);
+          if (renderStringyModel === stringyModel) {
             teddy.renderedTemplates[template].splice(i, 1);
           }
         }
@@ -315,6 +321,7 @@
           renders,
           render,
           stringyModel,
+          renderStringyModel,
           maxPasses = teddy.params.maxPasses,
           maxPassesError = 'Render aborted due to max number of passes (' + maxPasses + ') exceeded; there is a possible infinite loop in your template logic.';
 
@@ -344,13 +351,16 @@
 
       // return cached template if one exists
       if (teddy.params.cacheRenders && teddy.templates[template] && (!teddy.params.cacheWhitelist || teddy.params.cacheWhitelist[template]) && teddy.params.cacheBlacklist.indexOf(template) < 0) {
-        stringyModel = JSON.stringify(model);
+        jsonStringifyCache = [];
+        stringyModel = JSON.stringify(model, jsonStringifyRemoveCircularReferences);
         teddy.renderedTemplates[template] = teddy.renderedTemplates[template] || [];
         renders = teddy.renderedTemplates[template];
         l = renders.length;
         for (i = 0; i < l; i++) {
           render = renders[i];
-          if (JSON.stringify(render.model) === stringyModel) {
+          jsonStringifyCache = [];
+          renderStringyModel = JSON.stringify(render.model, jsonStringifyRemoveCircularReferences)
+          if (renderStringyModel === stringyModel) {
 
             // move to last position in the array to mark it as most recently accessed
             teddy.renderedTemplates[template].push(teddy.renderedTemplates[template].splice(i, 1)[0]);
@@ -1323,6 +1333,17 @@
     else {
       teddy.console.error('teddy: replaceNonRegex passed invalid arguments.');
     }
+  }
+
+  function jsonStringifyRemoveCircularReferences(key, value) {
+    if (typeof value === 'object' && value !== null) {
+      if (jsonStringifyCache.indexOf(value) !== -1) {
+        // circular reference found, discard key
+        return;
+      }
+      jsonStringifyCache.push(value);
+    }
+    return value;
   }
 
   // expose as a CommonJS module
