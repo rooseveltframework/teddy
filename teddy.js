@@ -596,7 +596,7 @@
             parts = [condString];
             findElses = true;
             do {
-              sibling = renderedTemplate.match(new RegExp(condString + '[\\s]*[\\S\\s]{12}'));
+              sibling = renderedTemplate.match(new RegExp(condString.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&') + '[\\s]*[\\S\\s]{12}'));
               if (sibling) {
                 sibling = sibling[0];
                 sibling = replaceNonRegex(sibling, condString, '');
@@ -1261,7 +1261,7 @@
   // get a specific attribute from a given element
   function getAttribute(el, attr) {
     var i, l, a, match;
-    match = el.match(new RegExp(attr + '=(\\\'.*?\\\'|\\".*?\\")'));
+    match = el.match(new RegExp(attr.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&') + '=(\\\'.*?\\\'|\\".*?\\")'));
 
     if (!match) {
       return false;
@@ -1289,6 +1289,7 @@
 
   // get a specific attribute from a given element
   function removeAttribute(el, attr) {
+    attr = attr.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
     var newEl = el.replace(new RegExp('(?: (?:' + attr + '(?: |>))| (?:' + attr + '=)(?:\\"([\\S\\s]*?)\\"|\\\'([\\S\\s]*?)\\\')(?: |>))'), ' ');
     if (newEl.charAt(newEl.length - 1) !== '>') {
       newEl = newEl.trim();
@@ -1302,7 +1303,7 @@
     el = el.trim();
 
     var nodeName = getNodeName(el);
-    el = el.replace(new RegExp('<' + nodeName + '(?:>| [\\S\\s]*?>)'), '');
+    el = el.replace(new RegExp('<' + nodeName.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&') + '(?:>| [\\S\\s]*?>)'), '');
     el = el.substring(0, el.lastIndexOf('</' + nodeName + '>'));
     return el.trim();
   }
