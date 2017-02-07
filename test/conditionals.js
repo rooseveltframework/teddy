@@ -169,4 +169,9 @@ describe('Conditionals', function() {
     assert.equalIgnoreSpaces(teddy.render('conditionals/duplicateOperatorInline.html', model), '<p>True</p>');
     done();
   });
+
+  it('should evaluate <if noExist> containing regex pattern as false and trigger <else> condition (conditionals/ifElseRegex.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/ifElseRegex.html', model), '<p>False</p>');
+    done();
+  });
 });
