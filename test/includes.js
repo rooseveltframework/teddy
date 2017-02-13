@@ -34,6 +34,11 @@ describe('Includes', function() {
     done();
   });
 
+  it('should <include> a template with a nested include passing a text argument (includes/nestedIncludeWithArg.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('includes/nestedIncludeWithArg.html', model), '<p><p>nested</p></p>');
+    done();
+  });
+
   it('should <include> a template with loop arguments (includes/nestedLoop.html)', function(done) {
     assert.equalIgnoreSpaces(teddy.render('includes/nestedLoop.html', model), '<p>a</p><p>b</p><p>c</p>');
     done();
