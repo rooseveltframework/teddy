@@ -7,7 +7,6 @@
       fs,                       // server-side filesystem module
       path,                     // server-side utility for manipulating  file paths
       contextModels = [],       // stores local models for later consumption by template logic tags
-      oldIE,                    // binary for whether or not the execution environment is old IE
       matchRecursive;           // see below
 
 
@@ -287,7 +286,7 @@
           return;
         }
         jsonStringifyCache = [];
-        stringyModel = JSON.stringify(model, jsonStringifyRemoveCircularReferences)
+        stringyModel = JSON.stringify(model, jsonStringifyRemoveCircularReferences);
         for (i = 0; i < l; i++) {
           render = renders[i];
           jsonStringifyCache = [];
@@ -359,7 +358,7 @@
         for (i = 0; i < l; i++) {
           render = renders[i];
           jsonStringifyCache = [];
-          renderStringyModel = JSON.stringify(render.model, jsonStringifyRemoveCircularReferences)
+          renderStringyModel = JSON.stringify(render.model, jsonStringifyRemoveCircularReferences);
           if (renderStringyModel === stringyModel) {
 
             // move to last position in the array to mark it as most recently accessed
@@ -769,9 +768,10 @@
               localModel = {};
             }
 
-            args = el.match(/<arg[\S\s]*?<\/arg>/g);
+            args = matchRecursive(el, '<arg...<\/arg>');
             argl = args ? args.length : 0;
             for (i = 0; i < argl; i++) {
+              args[i] = '<arg' + args[i] + '</arg>';
               argname = args[i].split('<arg ');
               argname = argname[1];
               argname = argname.split('>');
