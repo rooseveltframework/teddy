@@ -83,4 +83,9 @@ describe('Includes', function() {
     assert.equalIgnoreSpaces(teddy.render('includes/includeEscapeRegex.html', model), '<input type=\'text\' name=\'date\' placeholder=\'DD/MM/YYYY\' id=\'date\' pattern=\'^(3[0-1]|[1-2]\\d|[1-9]|0\\d)\\/(1[0-2]|[1-9]|0\\d)\\/[1-2]\\d{3}$\'>');
     done();
   });
+
+  it('should skip rendering <include> that references a nonexistent template (includes/includeInvalidTemplate.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('includes/includeInvalidTemplate.html', model), '<div></div>');
+    done();
+  });
 });
