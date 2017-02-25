@@ -85,7 +85,9 @@ describe('Includes', function() {
   });
 
   it('should skip rendering <include> that references a nonexistent template (includes/includeInvalidTemplate.html)', function(done) {
+    teddy.setVerbosity(0);
     assert.equalIgnoreSpaces(teddy.render('includes/includeInvalidTemplate.html', model), '<div></div>');
+    teddy.setVerbosity(1);
     done();
   });
 });
