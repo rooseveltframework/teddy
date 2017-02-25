@@ -752,6 +752,12 @@
 
             // get the template as a string
             incdoc = teddy.templates[src] || incdoc;
+
+            // if source is the same as the file name, we consider it a template that doesn't exist
+            if (incdoc === src || incdoc + '.html' === src) {
+              incdoc = null;
+            }
+
             if (!incdoc) {
               if (teddy.params.verbosity) {
                 teddy.console.warn('<include> element found which references a nonexistent template ("' + src + '"). Ignoring element.');
