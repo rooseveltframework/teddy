@@ -877,7 +877,6 @@
           var key = getAttribute(el, 'key'),
               val = getAttribute(el, 'val'),
               collection = getAttribute(el, 'through'),
-              collectionString = collection,
               loopContent,
               localModel,
               item,
