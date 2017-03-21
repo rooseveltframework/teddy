@@ -904,10 +904,6 @@
           collection = getNestedObjectByString(model, collection);
 
           if (!collection) {
-            if (teddy.params.verbosity) {
-              teddy.console.warn('loop element found with undefined value "' + collectionString + '" specified for "through" or "in" attribute. Ignoring element.');
-            }
-
             return '';
           }
           else {
