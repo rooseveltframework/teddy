@@ -128,9 +128,7 @@ describe('Looping', function() {
   });
 
   it('should ignore loop with invalid through attribute (looping/undefinedObjectLoop.html)', function(done) {
-    teddy.setVerbosity(0);
     assert.equalIgnoreSpaces(teddy.render('looping/undefinedObjectLoop.html', model), '<div></div>');
-    teddy.setVerbosity(1);
     done();
   });
 

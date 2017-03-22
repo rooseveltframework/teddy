@@ -877,7 +877,6 @@
           var key = getAttribute(el, 'key'),
               val = getAttribute(el, 'val'),
               collection = getAttribute(el, 'through'),
-              collectionString = collection,
               loopContent,
               localModel,
               item,
@@ -904,10 +903,6 @@
           collection = getNestedObjectByString(model, collection);
 
           if (!collection) {
-            if (teddy.params.verbosity) {
-              teddy.console.warn('loop element found with undefined value "' + collectionString + '" specified for "through" or "in" attribute. Ignoring element.');
-            }
-
             return '';
           }
           else {
