@@ -153,4 +153,14 @@ describe('Looping', function() {
     assert.equalIgnoreSpaces(teddy.render('looping/camelCaseLoopVal.html', model), '<p>a</p><p>b</p><p>c</p>');
     done();
   });
+
+  it('should loop through {letters} correctly with camelCase val (looping/camelCaseLoopVal.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('looping/camelCaseLoopVal.html', model), '<p>a</p><p>b</p><p>c</p>');
+    done();
+  });
+
+  it('should ignore loops with missing attribites and print warnings in the console (looping/loopInvalidAttributes.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('looping/loopInvalidAttributes.html', model), '<div></div>');
+    done();
+  });
 });
