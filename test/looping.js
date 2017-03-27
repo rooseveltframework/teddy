@@ -128,14 +128,14 @@ describe('Looping', function() {
   });
 
   it('should ignore loop with invalid through attribute (looping/undefinedObjectLoop.html)', function(done) {
+    teddy.setVerbosity(2);
     assert.equalIgnoreSpaces(teddy.render('looping/undefinedObjectLoop.html', model), '<div></div>');
+    teddy.setVerbosity(1);
     done();
   });
 
   it('should ignore loop with no contents (looping/emptyMarkupLoop.html)', function(done) {
-    teddy.setVerbosity(0);
     assert.equalIgnoreSpaces(teddy.render('looping/emptyMarkupLoop.html', model), '<div></div>');
-    teddy.setVerbosity(1);
     done();
   });
 
@@ -146,11 +146,6 @@ describe('Looping', function() {
 
   it('should loop through {letters} correctly with numeric val (looping/numericalVal.html)', function(done) {
     assert.equalIgnoreSpaces(teddy.render('looping/numericalVal.html', model), '<p>a</p><p>b</p><p>c</p>');
-    done();
-  });
-
-  it('should loop through {letters} correctly with camelCase val (looping/camelCaseLoopVal.html)', function(done) {
-    assert.equalIgnoreSpaces(teddy.render('looping/camelCaseLoopVal.html', model), '<p>a</p><p>b</p><p>c</p>');
     done();
   });
 
