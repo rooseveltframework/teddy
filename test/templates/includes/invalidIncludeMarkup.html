@@ -1,0 +1,16 @@
+{!
+  should ignore includes with invalid markup and print console warnings
+!}
+<div>
+  {! Missing src attribute !}
+  <include></include>
+
+  {! references nonexistent template !}
+  <include src='noExist.html'></include>
+
+  {! arg element with no attribute !}
+  <include src='misc/variable'>
+    <arg></arg>
+  </include>
+</div>
+

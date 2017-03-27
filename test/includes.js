@@ -84,10 +84,8 @@ describe('Includes', function() {
     done();
   });
 
-  it('should skip rendering <include> that references a nonexistent template (includes/includeInvalidTemplate.html)', function(done) {
-    teddy.setVerbosity(0);
-    assert.equalIgnoreSpaces(teddy.render('includes/includeInvalidTemplate.html', model), '<div></div>');
-    teddy.setVerbosity(1);
+  it('should ignore includes with invalid markup and print console warnings (includes/invalidIncludeMarkup.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('includes/invalidIncludeMarkup.html', model), '<div></div>');
     done();
   });
 });
