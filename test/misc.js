@@ -12,6 +12,12 @@ describe('Misc', function() {
   before(function() {
     teddy.setTemplateRoot('test/templates');
     model = makeModel();
+    if (process.env.NODE_ENV === 'test') {
+      teddy.setVerbosity(0);
+    }
+    else if (process.env.NODE_ENV === 'cover') {
+      teddy.setVerbosity(3);
+    }
   });
 
   it('should render {variables} (misc/variable.html)', function(done) {

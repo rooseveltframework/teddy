@@ -12,6 +12,12 @@ describe('Includes', function() {
   before(function() {
     teddy.setTemplateRoot('test/templates');
     model = makeModel();
+    if (process.env.NODE_ENV === 'test') {
+      teddy.setVerbosity(0);
+    }
+    else if (process.env.NODE_ENV === 'cover') {
+      teddy.setVerbosity(3);
+    }
   });
 
   it('should <include> a template (includes/include.html)', function(done) {
@@ -85,9 +91,7 @@ describe('Includes', function() {
   });
 
   it('should skip rendering <include> that references a nonexistent template (includes/includeInvalidTemplate.html)', function(done) {
-    teddy.setVerbosity(0);
     assert.equalIgnoreSpaces(teddy.render('includes/includeInvalidTemplate.html', model), '<div></div>');
-    teddy.setVerbosity(1);
     done();
   });
 });

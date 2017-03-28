@@ -53,9 +53,9 @@
     }
   },
   "scripts": {
-    "test": "./node_modules/.bin/mocha --recursive test",
+    "test": "NODE_ENV=test ./node_modules/.bin/mocha --recursive test",
     "eslint": "./node_modules/.bin/eslint .",
-    "cover": "istanbul cover ./node_modules/.bin/_mocha --recursive test"
+    "cover": "NODE_ENV=cover istanbul cover ./node_modules/.bin/_mocha --recursive test"
   },
   "pre-commit": [
     "test",

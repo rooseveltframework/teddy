@@ -12,6 +12,12 @@ describe('Looping', function() {
   before(function() {
     teddy.setTemplateRoot('test/templates');
     model = makeModel();
+    if (process.env.NODE_ENV === 'test') {
+      teddy.setVerbosity(0);
+    }
+    else if (process.env.NODE_ENV === 'cover') {
+      teddy.setVerbosity(3);
+    }
   });
 
   it('should loop through {letters} correctly (looping/loopVal.html)', function(done) {
@@ -128,9 +134,7 @@ describe('Looping', function() {
   });
 
   it('should ignore loop with invalid through attribute (looping/undefinedObjectLoop.html)', function(done) {
-    teddy.setVerbosity(2);
     assert.equalIgnoreSpaces(teddy.render('looping/undefinedObjectLoop.html', model), '<div></div>');
-    teddy.setVerbosity(1);
     done();
   });
 
