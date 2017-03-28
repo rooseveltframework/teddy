@@ -780,8 +780,6 @@
               args[i] = '<arg' + args[i] + '</arg>';
               argname = args[i].split('<arg ');
               argname = argname[1];
-              argname = argname.split('>');
-              argname = argname[0];
 
               if (!argname) {
                 if (teddy.params.verbosity) {
@@ -790,6 +788,8 @@
                 return '';
               }
 
+              argname = argname.split('>');
+              argname = argname[0];
               argval = getInnerHTML(args[i]);
 
               // replace template string argument {var} with argument value
