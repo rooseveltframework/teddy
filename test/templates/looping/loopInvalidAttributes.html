@@ -1,0 +1,11 @@
+{!
+  should ignore loops with missing attribites and print warnings in the console
+!}
+<div>
+  <loop through='letters'>
+    <p>{letter}</p>
+  </loop>
+  <loop val='letter'>
+    <p>{letter}</p>
+  </loop>
+</div>
