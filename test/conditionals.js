@@ -12,6 +12,12 @@ describe('Conditionals', function() {
   before(function() {
     teddy.setTemplateRoot('test/templates');
     model = makeModel();
+    if (process.env.NODE_ENV === 'test') {
+      teddy.setVerbosity(0);
+    }
+    else if (process.env.NODE_ENV === 'cover') {
+      teddy.setVerbosity(3);
+    }
   });
 
   it('should evaluate <if something> as true (conditionals/if.html)', function(done) {

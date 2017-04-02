@@ -12,6 +12,12 @@ describe('Includes', function() {
   before(function() {
     teddy.setTemplateRoot('test/templates');
     model = makeModel();
+    if (process.env.NODE_ENV === 'test') {
+      teddy.setVerbosity(0);
+    }
+    else if (process.env.NODE_ENV === 'cover') {
+      teddy.setVerbosity(3);
+    }
   });
 
   it('should <include> a template (includes/include.html)', function(done) {
@@ -84,7 +90,7 @@ describe('Includes', function() {
     done();
   });
 
-  it('should ignore includes with invalid markup and print console warnings (includes/invalidIncludeMarkup.html)', function(done) {
+  it('should ignore includes with invalid markup (includes/invalidIncludeMarkup.html)', function(done) {
     assert.equalIgnoreSpaces(teddy.render('includes/invalidIncludeMarkup.html', model), '<div></div>');
     done();
   });

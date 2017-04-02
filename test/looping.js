@@ -12,6 +12,12 @@ describe('Looping', function() {
   before(function() {
     teddy.setTemplateRoot('test/templates');
     model = makeModel();
+    if (process.env.NODE_ENV === 'test') {
+      teddy.setVerbosity(0);
+    }
+    else if (process.env.NODE_ENV === 'cover') {
+      teddy.setVerbosity(3);
+    }
   });
 
   it('should loop through {letters} correctly (looping/loopVal.html)', function(done) {
@@ -133,9 +139,7 @@ describe('Looping', function() {
   });
 
   it('should ignore loop with no contents (looping/emptyMarkupLoop.html)', function(done) {
-    teddy.setVerbosity(0);
     assert.equalIgnoreSpaces(teddy.render('looping/emptyMarkupLoop.html', model), '<div></div>');
-    teddy.setVerbosity(1);
     done();
   });
 
@@ -151,6 +155,11 @@ describe('Looping', function() {
 
   it('should loop through {letters} correctly with camelCase val (looping/camelCaseLoopVal.html)', function(done) {
     assert.equalIgnoreSpaces(teddy.render('looping/camelCaseLoopVal.html', model), '<p>a</p><p>b</p><p>c</p>');
+    done();
+  });
+
+  it('should ignore loops with missing attributes (looping/loopInvalidAttributes.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('looping/loopInvalidAttributes.html', model), '<div></div>');
     done();
   });
 });

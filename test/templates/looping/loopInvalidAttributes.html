@@ -1,0 +1,11 @@
+{!
+  should ignore loops with missing attributes
+!}
+<div>
+  <loop through='letters'>
+    <p>{letter}</p>
+  </loop>
+  <loop val='letter'>
+    <p>{letter}</p>
+  </loop>
+</div>
