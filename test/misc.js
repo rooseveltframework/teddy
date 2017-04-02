@@ -134,4 +134,9 @@ describe('Misc', function() {
     teddy.cacheRenders(false);
     done();
   });
+
+  it('should render {variables} that start with numbers (misc/varStartsWithNumber.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('misc/varStartsWithNumber.html', model), '<p>hello</p>');
+    done();
+  });
 });

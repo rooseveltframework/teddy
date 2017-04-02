@@ -52,6 +52,7 @@ function makeModel() {
       cl = charList.length;
 
   model.circular.circular = model.circular;
+  model['0Var'] = 'hello';
 
   function randChars(n) {
     var i, s = '';
