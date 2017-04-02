@@ -1,11 +1,19 @@
 {!
-  should ignore loops with missing attribites and print warnings in the console
+  should ignore loops with missing attributes
 !}
 <div>
+  {! missing val attribute !}
   <loop through='letters'>
     <p>{letter}</p>
   </loop>
+
+  {! missing through attribute !}
   <loop val='letter'>
+    <p>{letter}</p>
+  </loop>
+
+  {! no attributes !}
+  <loop>
     <p>{letter}</p>
   </loop>
 </div>

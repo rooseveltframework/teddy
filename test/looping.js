@@ -158,7 +158,7 @@ describe('Looping', function() {
     done();
   });
 
-  it('should ignore loops with missing attribites and print warnings in the console (looping/loopInvalidAttributes.html)', function(done) {
+  it('should ignore loops with missing attributes (looping/loopInvalidAttributes.html)', function(done) {
     assert.equalIgnoreSpaces(teddy.render('looping/loopInvalidAttributes.html', model), '<div></div>');
     done();
   });
