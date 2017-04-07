@@ -94,4 +94,10 @@ describe('Includes', function() {
     assert.equalIgnoreSpaces(teddy.render('includes/invalidIncludeMarkup.html', model), '<div></div>');
     done();
   });
+
+  it('should escape from infinite loop of includes via setMaxPasses (includes/includeInfiniteLoop.html)', function(done) {
+    teddy.setMaxPasses(100);
+    assert.equal(teddy.render('includes/includeInfiniteLoop.html', model), 'Render aborted due to max number of passes (100) exceeded; there is a possible infinite loop in your template logic.');
+    done();
+  });
 });

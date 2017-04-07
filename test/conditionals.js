@@ -113,8 +113,8 @@ describe('Conditionals', function() {
     done();
   });
 
-  it('should evaluate <if not:something> as false (conditionals/not.html)', function(done) {
-    assert.equalIgnoreSpaces(teddy.render('conditionals/not.html', model), ' <p>not: false</p>');
+  it('should evaluate <if not:something> as false and <if not:noExist> as true (conditionals/not.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/not.html', model), ' <p>not: false</p><p>not: true</p>');
     done();
   });
 

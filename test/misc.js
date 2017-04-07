@@ -4,6 +4,7 @@ if (typeof module !== 'undefined') {
       assert = chai.assert,
       model,
       makeModel = require('./models/model'),
+      verbosity = '',
       teddy = require('../teddy');
   chai.use(chaiString);
 }
@@ -132,6 +133,59 @@ describe('Misc', function() {
     assert.equalIgnoreSpaces(teddy.renderedTemplates['misc/variable.html'][0].renderedTemplate, '<p>90</p>');
     teddy.setCacheWhitelist({});
     teddy.cacheRenders(false);
+    done();
+  });
+
+  it('should avoid rendering templates that are not strings', function(done) {
+    assert.equalIgnoreSpaces(teddy.render(5, model), '');
+    done();
+  });
+
+  it('should avoid compiling templates that are not strings', function(done) {
+    assert.equalIgnoreSpaces(teddy.compile(5, model), '');
+    done();
+  });
+
+  it('should render a template with missing or invalid model (misc/emptyModelMarkup.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('misc/emptyModelMarkup.html', 1), '<div><p>Hello</p></div>');
+    done();
+  });
+
+  it('should not render {variables} that don\'t exist in the model (misc/varNotInModel.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('misc/varNotInModel.html', model), '{noExist}');
+    done();
+  });
+
+  it('should set each verbosity level', function(done) {
+    teddy.setVerbosity();
+    verbosity += teddy.params.verbosity + ', ';
+    teddy.setVerbosity('none');
+    verbosity += teddy.params.verbosity + ', ';
+    teddy.setVerbosity(0);
+    verbosity += teddy.params.verbosity + ', ';
+    teddy.setVerbosity('verbose');
+    verbosity += teddy.params.verbosity + ', ';
+    teddy.setVerbosity(2);
+    verbosity += teddy.params.verbosity + ', ';
+    teddy.setVerbosity('DEBUG');
+    verbosity += teddy.params.verbosity + ', ';
+    teddy.setVerbosity(3);
+    verbosity += teddy.params.verbosity;
+
+    assert.equal(verbosity, '1, 0, 0, 2, 2, 3, 3');
+    if (process.env.NODE_ENV === 'test') {
+      teddy.setVerbosity(0);
+    }
+    else if (process.env.NODE_ENV === 'cover') {
+      teddy.setVerbosity(3);
+    }
+    done();
+  });
+
+  it('should minify template with internal minifier (misc/plainHTML.html)', function(done) {
+    teddy.minify(true);
+    assert.equal(teddy.compile('misc/plainHTML.html', model), '<!DOCTYPE html><html lang=\'en\'> <head> <meta charset=\'utf-8\'> <meta name=\'viewport\' content=\'width=device-width,initial-scale=1\'> <meta name=\'format-detection\' content=\'telephone=no\'> <title>Plain HTML</title> <link rel=\'stylesheet\' href=\'/css/styles.css\'> </head> <body> <main> <p>This template contains no teddy tags. Just HTML.</p> </main> <script type=\'text/javascript\' src=\'/js/main.js\'></script> </body></html>');
+    teddy.minify(false);
     done();
   });
 });
