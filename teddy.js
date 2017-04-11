@@ -587,7 +587,7 @@
             parts = [condString];
             findElses = true;
             do {
-              sibling = renderedTemplate.match(new RegExp(condString.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&') + '[\\s]*[\\S\\s]{12}'));
+              sibling = renderedTemplate.match(new RegExp(condString.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&') + '[\\s]*[^.]{12}'));
               if (sibling) {
                 sibling = sibling[0];
                 sibling = replaceNonRegex(sibling, condString, '');
