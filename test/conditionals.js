@@ -113,8 +113,8 @@ describe('Conditionals', function() {
     done();
   });
 
-  it('should evaluate <if not:something> as false (conditionals/not.html)', function(done) {
-    assert.equalIgnoreSpaces(teddy.render('conditionals/not.html', model), ' <p>not: false</p>');
+  it('should evaluate <if not:something> as false and <if not:noExist> as true (conditionals/not.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/not.html', model), ' <p>not: false</p><p>not: true</p>');
     done();
   });
 
@@ -178,6 +178,11 @@ describe('Conditionals', function() {
 
   it('should evaluate <if noExist> containing regex pattern as false and trigger <else> condition (conditionals/ifElseRegex.html)', function(done) {
     assert.equalIgnoreSpaces(teddy.render('conditionals/ifElseRegex.html', model), '<p>False</p>');
+    done();
+  });
+
+  it('should evaluate if statement where elseif condition is a three character named object (conditionals/ifNestedProperties.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/ifNestedProperties.html', model), '<p>Should render</p>');
     done();
   });
 });

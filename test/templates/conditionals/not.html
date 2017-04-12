@@ -1,5 +1,5 @@
 {!
-  should evaluate <if not:something> as false
+  should evaluate <if not:something> as false and <if not:noExist> as true
 !}
 
     {! false !}
@@ -8,4 +8,12 @@
 </if>
 <else>
   <p>not: false</p>
+</else>
+
+    {! true !}
+<if not:noExist>
+  <p>not: true</p>
+</if>
+<else>
+  <p>should not render</p>
 </else>

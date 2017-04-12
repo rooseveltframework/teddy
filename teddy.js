@@ -5,10 +5,9 @@
       consoleWarnings,          // used to overload console.warn for the server-side error gui
       consoleErrors,            // used to overload console.error for the server-side error gui
       fs,                       // server-side filesystem module
-      path,                     // server-side utility for manipulating  file paths
+      path,                     // server-side utility for manipulating file paths
       contextModels = [],       // stores local models for later consumption by template logic tags
       matchRecursive;           // see below
-
 
   /* matchRecursive
    * accepts a string to search and a format (start and end tokens separated by "...").
@@ -24,6 +23,8 @@
    *
    * (c) 2007 Steven Levithan <stevenlevithan.com>
    * MIT License
+   *
+   * altered for use within teddy
    */
   matchRecursive = (function() {
     var formatParts = /^([\S\s]+?)\.\.\.([\S\s]+)/,
@@ -31,16 +32,6 @@
 
     function escape (str) {
       return str.replace(metaChar, '\\$&');
-    }
-
-    function validateParts(p) {
-      if (!p) {
-        throw new Error('Format must include start and end tokens separated by \'...\'');
-      }
-
-      if (p[1] === p[2]) {
-        throw new Error('Start and end format tokens cannot be identical');
-      }
     }
 
     return function(str, format) {
@@ -53,7 +44,6 @@
           matchStartIndex,
           match;
 
-      validateParts(p);
       opener = p[1];
       closer = p[2];
       // use an optimized regex when opener and closer are one character each
@@ -305,6 +295,14 @@
     render: function(template, model, callback) {
       model = Object.assign({}, model); // make a copy of the model
 
+      // ensure template is a string
+      if (typeof template !== 'string') {
+        if (teddy.params.verbosity > 1) {
+          teddy.console.warn('teddy.render attempted to render a template which is not a string.');
+        }
+        return '';
+      }
+
       // declare vars
       var renderedTemplate,
           diff,
@@ -324,14 +322,9 @@
           maxPasses = teddy.params.maxPasses,
           maxPassesError = 'Render aborted due to max number of passes (' + maxPasses + ') exceeded; there is a possible infinite loop in your template logic.';
 
-      // overload conosle logs
+      // overload console logs
       consoleWarnings = '';
       consoleErrors = '';
-
-      // handle bad or unsupplied model
-      if (!model || typeof model !== 'object') {
-        model = {};
-      }
 
       // express.js support
       if (model.settings && model.settings.views) {
@@ -534,7 +527,6 @@
         return renderedTemplate;
       }
 
-
       /**
        * private methods
        */
@@ -595,7 +587,7 @@
             parts = [condString];
             findElses = true;
             do {
-              sibling = renderedTemplate.match(new RegExp(condString.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&') + '[\\s]*[\\S\\s]{12}'));
+              sibling = renderedTemplate.match(new RegExp(condString.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&') + '[\\s]*[^.]{12}'));
               if (sibling) {
                 sibling = sibling[0];
                 sibling = replaceNonRegex(sibling, condString, '');
@@ -674,7 +666,7 @@
               dots,
               numDots,
               curVar,
-              doRender = false,
+              doRender = true,
               d;
 
           match = parseVars(match, model);
@@ -691,21 +683,13 @@
           dots = varname.split('.');
           numDots = dots.length;
           curVar = localModel || model;
-          if (curVar) {
-            doRender = true;
-            for (d = 0; d < numDots; d++) {
-              curVar = curVar[dots[d]];
-              if (typeof curVar === 'undefined') {
-                doRender = false;
-                break;
-              }
+
+          for (d = 0; d < numDots; d++) {
+            curVar = curVar[dots[d]];
+            if (typeof curVar === 'undefined') {
+              doRender = false;
+              break;
             }
-          }
-          else {
-            if (teddy.params.verbosity > 1) {
-              teddy.console.warn('a {variable} was found with an invalid syntax do to undefined model: {' + varname + '}');
-            }
-            doRender = false;
           }
 
           if (doRender) {
@@ -727,91 +711,83 @@
       function renderInclude(el, model) {
         var src, incdoc, args, argl, argname, argval, i, localModel;
 
-        if (el) {
-          src = getAttribute(el, 'src');
-          if (!src) {
+        src = getAttribute(el, 'src');
+        if (!src) {
+          if (teddy.params.verbosity) {
+            teddy.console.warn('<include> element found with no src attribute. Ignoring element.');
+          }
+          return '';
+        }
+        else {
+
+          // parse variables which may be included in src attribute
+          src = parseVars(src, model);
+
+          // append extension if not present
+          if (src.slice(-5) !== '.html') {
+            src += '.html';
+          }
+
+          // compile included template if necessary
+          if (!teddy.templates[src] || teddy.params.compileAtEveryRender) {
+            incdoc = teddy.compile(src);
+          }
+
+          // get the template as a string
+          incdoc = teddy.templates[src] || incdoc;
+
+          // if source is the same as the file name, we consider it a template that doesn't exist
+          if (incdoc === src || incdoc + '.html' === src) {
+            incdoc = null;
+          }
+
+          if (!incdoc) {
             if (teddy.params.verbosity) {
-              teddy.console.warn('<include> element found with no src attribute. Ignoring element.');
+              teddy.console.warn('<include> element found which references a nonexistent template ("' + src + '"). Ignoring element.');
             }
             return '';
           }
+          localModel = getAttribute(el, 'data-local-model');
+
+          // extend from the include's own local model
+          if (localModel) {
+            localModel = contextModels[parseInt(localModel)];
+          }
           else {
+            localModel = {};
+          }
 
-            // parse variables which may be included in src attribute
-            src = parseVars(src, model);
+          args = matchRecursive(el, '<arg...<\/arg>');
+          argl = args ? args.length : 0;
+          for (i = 0; i < argl; i++) {
+            args[i] = '<arg' + args[i] + '</arg>';
+            argname = args[i].split('<arg ');
+            argname = argname[1];
 
-            // append extension if not present
-            if (src.slice(-5) !== '.html') {
-              src += '.html';
-            }
-
-            // compile included template if necessary
-            if (!teddy.templates[src] || teddy.params.compileAtEveryRender) {
-              incdoc = teddy.compile(src);
-            }
-
-            // get the template as a string
-            incdoc = teddy.templates[src] || incdoc;
-
-            // if source is the same as the file name, we consider it a template that doesn't exist
-            if (incdoc === src || incdoc + '.html' === src) {
-              incdoc = null;
-            }
-
-            if (!incdoc) {
+            if (!argname) {
               if (teddy.params.verbosity) {
-                teddy.console.warn('<include> element found which references a nonexistent template ("' + src + '"). Ignoring element.');
+                teddy.console.warn('<arg> element found with no attribute. Ignoring parent <include> element. (<include src="'+src+'">)');
               }
               return '';
             }
-            localModel = getAttribute(el, 'data-local-model');
 
-            // extend from the include's own local model
-            if (localModel) {
-              localModel = contextModels[parseInt(localModel)];
-            }
-            else {
-              localModel = {};
-            }
+            argname = argname.split('>');
+            argname = argname[0];
+            argval = getInnerHTML(args[i]);
 
-            args = matchRecursive(el, '<arg...<\/arg>');
-            argl = args ? args.length : 0;
-            for (i = 0; i < argl; i++) {
-              args[i] = '<arg' + args[i] + '</arg>';
-              argname = args[i].split('<arg ');
-              argname = argname[1];
+            // replace template string argument {var} with argument value
+            incdoc = renderVar(incdoc, argname, argval, true);
 
-              if (!argname) {
-                if (teddy.params.verbosity) {
-                  teddy.console.warn('<arg> element found with no attribute. Ignoring parent <include> element. (<include src="'+src+'">)');
-                }
-                return '';
-              }
-
-              argname = argname.split('>');
-              argname = argname[0];
-              argval = getInnerHTML(args[i]);
-
-              // replace template string argument {var} with argument value
-              incdoc = renderVar(incdoc, argname, argval, true);
-
-              // add arg to local model
-              localModel[argname] = argval;
-            }
-
-            if (argl) {
-              // apply local model to child conditionals and loops
-              incdoc = tagLocalModels(incdoc, localModel);
-            }
-
-            return incdoc;
+            // add arg to local model
+            localModel[argname] = argval;
           }
-        }
-        else {
-          if (teddy.params.verbosity > 1) {
-            teddy.console.warn('teddy.renderInclude() called for an <include> element that does not exist.');
+
+          if (argl) {
+            // apply local model to child conditionals and loops
+            incdoc = tagLocalModels(incdoc, localModel);
           }
-          return '';
+
+          return incdoc;
         }
       }
 
@@ -873,85 +849,62 @@
 
       // parses a single loop tag
       function renderLoop(el, model) {
-        if (el) {
-          var key = getAttribute(el, 'key'),
-              val = getAttribute(el, 'val'),
-              collection = getAttribute(el, 'through'),
-              collectionString = collection,
-              loopContent,
-              localModel,
-              item,
-              i,
-              key,
-              parsedLoop = '',
-              nestedLoops = [],
-              nestedLoopsCount;
+        var key = getAttribute(el, 'key'),
+            val = getAttribute(el, 'val'),
+            collection = getAttribute(el, 'through'),
+            collectionString = collection,
+            loopContent,
+            localModel,
+            item,
+            i,
+            key,
+            parsedLoop = '';
 
-          if (!val) {
-            if (teddy.params.verbosity) {
-              teddy.console.warn('loop element found with no "val" attribute. Ignoring element.');
-            }
-            return '';
-          }
-          if (!collection) {
-            if (teddy.params.verbosity) {
-              teddy.console.warn('loop element found with no "through" attribute. Ignoring element.');
-            }
-            return '';
-          }
-
-          model = applyLocalModel(el, model);
-          collection = getNestedObjectByString(model, collection);
-
-          if (!collection) {
-            if (teddy.params.verbosity > 1) {
-              teddy.console.warn('loop element found with undefined value "' + collectionString + '" specified for "through" or "in" attribute. Ignoring element.');
-            }
-
-            return '';
-          }
-          else {
-            loopContent = getInnerHTML(el);
-
-            // process loop
-            for (i in collection) {
-              if (collection.hasOwnProperty(i)) {
-                item = collection[i];
-                localModel = {};
-
-                // define local model for the iteration
-                // if model[val] or model[key] preexist, they will be overwritten by the locally supplied variables
-                if (key) {
-                  model[key] = i;
-                  localModel[key] = i;
-                }
-                model[val] = item;
-                localModel[val] = item;
-                parsedLoop += teddy.render(loopContent, model);
-              }
-            }
-
-            nestedLoopsCount = nestedLoops.length;
-            for (i = 0; i < nestedLoopsCount; i++) {
-              parsedLoop = parsedLoop.replace(new RegExp('{' + (i + 1) + '_nestedLoop.*?}', 'g'), function(match) {
-                var localModel = getAttribute(match, 'data-local-model'),
-                    nestedLoop = nestedLoops[i];
-
-                if (nestedLoop.indexOf(' data-local-model') === -1) {
-                  nestedLoop = nestedLoop.replace('>', ' data-local-model=\''+ localModel +'\'>');
-                }
-                return nestedLoop;
-              });
-            }
-
-            return parsedLoop;
-          }
-        }
-        else {
-          if (teddy.params.verbosity > 1) {
-            teddy.console.warn('teddy.renderLoop() called for a loop element that does not exist.');
+        if (!val) {
+          if (teddy.params.verbosity) {
+            teddy.console.warn('loop element found with no "val" attribute. Ignoring element.');
           }
           return '';
+        }
+        if (!collection) {
+          if (teddy.params.verbosity) {
+            teddy.console.warn('loop element found with no "through" attribute. Ignoring element.');
+          }
+          return '';
+        }
+
+        model = applyLocalModel(el, model);
+        collection = getNestedObjectByString(model, collection);
+
+        if (!collection) {
+          if (teddy.params.verbosity > 1) {
+            teddy.console.warn('loop element found with undefined value "' + collectionString + '" specified for "through" or "in" attribute. Ignoring element.');
+          }
+
+          return '';
+        }
+        else {
+          loopContent = getInnerHTML(el);
+
+          // process loop
+          for (i in collection) {
+            if (collection.hasOwnProperty(i)) {
+              item = collection[i];
+              localModel = {};
+
+              // define local model for the iteration
+              // if model[val] or model[key] preexist, they will be overwritten by the locally supplied variables
+              if (key) {
+                model[key] = i;
+                localModel[key] = i;
+              }
+              model[val] = item;
+              localModel[val] = item;
+              parsedLoop += teddy.render(loopContent, model);
+            }
+          }
+
+          return parsedLoop;
         }
       }
 
@@ -1136,19 +1089,13 @@
           dots = condition.split('.');
           numDots = dots.length;
           curVar = model;
-          if (curVar) {
-            for (d = 0; d < numDots; d++) {
-              if (typeof curVar !== 'undefined') {
-                curVar = curVar[dots[d]];
-              }
+
+          for (d = 0; d < numDots; d++) {
+            if (typeof curVar !== 'undefined') {
+              curVar = curVar[dots[d]];
             }
           }
-          else {
-            if (teddy.params.verbosity > 1) {
-              teddy.console.warn('teddy.evalCondition() supplied an empty model');
-            }
-            return false;
-          }
+
           modelVal = curVar;
 
           // force empty arrays and empty objects to be falsey (#44)
@@ -1213,26 +1160,18 @@
         if (!isNaN(parseInt(varname))) {
           varname = '[' + varname + ']';
         }
-        if (str) {
 
-          // escape html entities
-          if (varname.slice(-2) !== '|s' && varname.slice(-3) !== '|s`') {
-            if (!escapeOverride) {
-              varval = escapeHtmlEntities(varval);
-            }
-          }
-
-          return replaceNonRegex(str, new RegExp('{' + varname.replace(/\|/g, '\\|') + '}', 'g'), varval);
-        }
-        else {
-          if (teddy.params.verbosity > 1) {
-            teddy.console.warn('an empty string was passed to teddy.renderVar.');
+        // escape html entities
+        if (varname.slice(-2) !== '|s' && varname.slice(-3) !== '|s`') {
+          if (!escapeOverride) {
+            varval = escapeHtmlEntities(varval);
           }
         }
+
+        return replaceNonRegex(str, new RegExp('{' + varname.replace(/\|/g, '\\|') + '}', 'g'), varval);
       }
     }
   };
-
 
   /**
    * private utility methods
@@ -1284,13 +1223,8 @@
         }
       }
     }
-    if (!a) {
-      return false;
-    }
-    else {
-      a = a.substring(attr.length + 2).slice(0, -1);
-      return a;
-    }
+    a = a.substring(attr.length + 2).slice(0, -1);
+    return a;
   }
 
   // get a specific attribute from a given element
