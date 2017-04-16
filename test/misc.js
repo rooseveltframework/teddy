@@ -4,7 +4,7 @@ if (typeof module !== 'undefined') {
       assert = chai.assert,
       model,
       makeModel = require('./models/model'),
-      verbosity = '',
+      verbosity,
       teddy = require('../teddy');
   chai.use(chaiString);
 }
@@ -13,11 +13,13 @@ describe('Misc', function() {
   before(function() {
     teddy.setTemplateRoot('test/templates');
     model = makeModel();
-    if (process.env.NODE_ENV === 'test') {
-      teddy.setVerbosity(0);
-    }
-    else if (process.env.NODE_ENV === 'cover') {
-      teddy.setVerbosity(3);
+    if (typeof process === 'object') {
+      if (process.env.NODE_ENV === 'test') {
+        teddy.setVerbosity(0);
+      }
+      else if (process.env.NODE_ENV === 'cover') {
+        teddy.setVerbosity(3);
+      }
     }
   });
 
@@ -157,6 +159,7 @@ describe('Misc', function() {
   });
 
   it('should set each verbosity level', function(done) {
+    verbosity = '';
     teddy.setVerbosity();
     verbosity += teddy.params.verbosity + ', ';
     teddy.setVerbosity('none');
@@ -173,11 +176,14 @@ describe('Misc', function() {
     verbosity += teddy.params.verbosity;
 
     assert.equal(verbosity, '1, 0, 0, 2, 2, 3, 3');
-    if (process.env.NODE_ENV === 'test') {
-      teddy.setVerbosity(0);
-    }
-    else if (process.env.NODE_ENV === 'cover') {
-      teddy.setVerbosity(3);
+    verbosity = '';
+    if (typeof process === 'object') {
+      if (process.env.NODE_ENV === 'test') {
+        teddy.setVerbosity(0);
+      }
+      else if (process.env.NODE_ENV === 'cover') {
+        teddy.setVerbosity(3);
+      }
     }
     done();
   });
