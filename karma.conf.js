@@ -1,12 +1,11 @@
 // Karma configuration
 
 module.exports = function(config) {
-  config.set({
+  var configuration = {
     basePath: '',
     frameworks: ['mocha'],
     files: [
       'teddy.js',
-      'node_modules/mocha/mocha.js',
       'test/models/*.js',
       'node_modules/chai/chai.js',
       'node_modules/chai-string/chai-string.js',
@@ -34,6 +33,18 @@ module.exports = function(config) {
     autoWatch: false,
     singleRun: true,
     browsers: ['Chrome'],
+    customLaunchers: {
+      Chrome_travis_ci: {
+        base: 'Chrome',
+        flags: ['--no-sandbox']
+      }
+    },
     concurrency: 1
-  });
+  };
+
+  if (process.env.TRAVIS) {
+    configuration.browsers = ['Chrome_travis_ci'];
+  }
+
+  config.set(configuration);
 };

@@ -188,9 +188,10 @@ describe('Misc', function() {
     done();
   });
 
-  it('should minify template with internal minifier (misc/plainHTML.html)', function(done) {
+  it('should minify template with internal minifier (misc/templateToMinify.html)', function(done) {
     teddy.minify(true);
-    assert.equal(teddy.compile('misc/plainHTML.html', model), '<!DOCTYPE html><html lang=\'en\'> <head> <meta charset=\'utf-8\'> <meta name=\'viewport\' content=\'width=device-width,initial-scale=1\'> <meta name=\'format-detection\' content=\'telephone=no\'> <title>Plain HTML</title> <link rel=\'stylesheet\' href=\'/css/styles.css\'> </head> <body> <main> <p>This template contains no teddy tags. Just HTML.</p> </main> <script type=\'text/javascript\' src=\'/js/main.js\'></script> </body></html>');
+    teddy.flushCache('misc/templateToMinify.html');
+    assert.equal(teddy.render('misc/templateToMinify.html', model), '<!DOCTYPE html><html lang=\'en\'> <head> <meta charset=\'utf-8\'> <meta name=\'viewport\' content=\'width=device-width,initial-scale=1\'> <meta name=\'format-detection\' content=\'telephone=no\'> <title>Plain HTML</title> </head> <body> <main> <p>This template contains no teddy tags. Just HTML.</p> </main> </body></html>');
     teddy.minify(false);
     done();
   });

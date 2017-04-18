@@ -328,13 +328,21 @@
     <script src='../node_modules/mocha/mocha.js'></script>
     <script src='../node_modules/chai/chai.js'></script>
     <script src='../node_modules/chai-string/chai-string.js'></script>
+
+    <!-- include mocha tests -->
+    <script>mocha.setup('bdd');</script>
+    <script src='conditionals.js'></script>
+    <script src='includes.js'></script>
+    <script src='looping.js'></script>
+    <script src='misc.js'></script>
+
+    <!-- run tests -->
     <script>
       var assert = chai.assert,
           templateList,
           templateLength,
           counter = 0,
           crossOriginError,
-          request,
           i;
 
       templateList = [
@@ -417,7 +425,8 @@
         'misc/variableObjectProperty.html',
         'misc/emptyModelMarkup.html',
         'misc/infiniteIncludeTemplate.html',
-        'misc/varNotInModel.html'
+        'misc/varNotInModel.html',
+        'misc/templateToMinify.html'
       ];
       templateLength = templateList.length;
 
@@ -438,10 +447,13 @@
                 if (crossOriginError) {
                   crossOriginError.parentNode.removeChild(crossOriginError);
                 }
+                if (template === 'misc/templateToMinify.html') {
+                  teddy.minify(true);
+                }
                 teddy.templates[template] = teddy.compile(req.response || req.responseText);
-                counter++;
-                if (counter === templateLength) {
+                if (counter++ === templateLength - 1) {
                   mocha.run();
+                  console.log(teddy.templates);
                 }
               }
             }
@@ -449,12 +461,5 @@
         })(i);
       }
     </script>
-
-    <!-- run tests -->
-    <script>mocha.setup('bdd');</script>
-    <script src='conditionals.js'></script>
-    <script src='includes.js'></script>
-    <script src='looping.js'></script>
-    <script src='misc.js'></script>
   </body>
 </html>

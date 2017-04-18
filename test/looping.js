@@ -4,8 +4,12 @@ if (typeof module !== 'undefined') {
       assert = chai.assert,
       model,
       makeModel = require('./models/model'),
+      loopMs = 50,
       teddy = require('../teddy');
   chai.use(chaiString);
+}
+else {
+  var loopMs = 400;
 }
 
 describe('Looping', function() {
@@ -67,7 +71,7 @@ describe('Looping', function() {
     done();
   });
 
-  it('should loop through same array of 5000 elements in < 50ms during second attempt due to caching (looping/largeDataSet.html)', function(done) {
+  it('should loop through same array of 5000 elements in < ' + loopMs + 'ms during second attempt due to caching (looping/largeDataSet.html)', function(done) {
     var start, end, time;
     start = new Date().getTime();
 
@@ -76,7 +80,7 @@ describe('Looping', function() {
     end = new Date().getTime();
     time = end - start;
 
-    assert.isAtMost(time, 50);
+    assert.isAtMost(time, loopMs);
     done();
   });
 
@@ -94,7 +98,7 @@ describe('Looping', function() {
     done();
   });
 
-  it('should loop through same array of 5000 elements in < 50ms during second attempt due to caching (looping/largeDataSet.html)', function(done) {
+  it('should loop through same array of 5000 elements in < ' + loopMs + 'ms during second attempt due to caching (looping/largeDataSet.html)', function(done) {
     var start, end, time;
     start = new Date().getTime();
 
@@ -103,7 +107,7 @@ describe('Looping', function() {
     end = new Date().getTime();
     time = end - start;
 
-    assert.isAtMost(time, 50);
+    assert.isAtMost(time, loopMs);
     done();
   });
 
@@ -121,7 +125,7 @@ describe('Looping', function() {
     done();
   });
 
-  it('should loop through same array of 5000 elements in < 50ms during second attempt due to caching (looping/largeDataSet.html)', function(done) {
+  it('should loop through same array of 5000 elements in < ' + loopMs + 'ms during second attempt due to caching (looping/largeDataSet.html)', function(done) {
     var start, end, time;
     start = new Date().getTime();
 
@@ -131,7 +135,7 @@ describe('Looping', function() {
     time = end - start;
 
     teddy.cacheRenders(false);
-    assert.isAtMost(time, 50);
+    assert.isAtMost(time, loopMs);
     done();
   });
 
