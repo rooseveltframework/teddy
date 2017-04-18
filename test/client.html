@@ -453,7 +453,6 @@
                 teddy.templates[template] = teddy.compile(req.response || req.responseText);
                 if (counter++ === templateLength - 1) {
                   mocha.run();
-                  console.log(teddy.templates);
                 }
               }
             }
