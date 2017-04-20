@@ -22,6 +22,7 @@ describe('Looping', function() {
       }
       else if (process.env.NODE_ENV === 'cover') {
         teddy.setVerbosity(3);
+        loopMs = 400;
       }
     }
   });

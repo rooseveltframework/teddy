@@ -451,7 +451,9 @@
                   teddy.minify(true);
                 }
                 teddy.templates[template] = teddy.compile(req.response || req.responseText);
-                if (counter++ === templateLength - 1) {
+                counter++;
+
+                if (counter === templateLength) {
                   mocha.run();
                 }
               }
