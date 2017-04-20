@@ -306,8 +306,7 @@
         <p>Then simply visit <a href='http://localhost:8000/test/client.html'>http://localhost:8000/test/client.html</a></p>
         <p>If you can't run the command, then you'll need to <a href='http://www.python.org/'>install Python</a> or use some other web server.</p>
       </article>
-
-      <output id='mocha'></output>
+      <div id='mocha'></div>
     </main>
 
     <script>
@@ -450,8 +449,10 @@
                 if (template === 'misc/templateToMinify.html') {
                   teddy.minify(true);
                 }
-                teddy.templates[template] = teddy.compile(req.response || req.responseText);
-                if (counter++ === templateLength - 1) {
+                teddy.templates[template] = teddy.render(req.response || req.responseText);
+                counter++;
+
+                if (counter === templateLength) {
                   mocha.run();
                 }
               }

@@ -61,10 +61,12 @@
     }
   },
   "scripts": {
-    "test": "cross-env NODE_ENV=test mocha --recursive test",
+    "test": "cross-env NODE_ENV=test mocha --recursive test && karma start",
+    "test-server": "cross-env NODE_ENV=test mocha --recursive test",
+    "test-client": "karma start",
     "eslint": "eslint .",
     "cover": "cross-env NODE_ENV=cover istanbul cover _mocha --recursive test",
-    "karma": "karma start"
+    "coverage": "npm run cover"
   },
   "pre-commit": [
     "test",

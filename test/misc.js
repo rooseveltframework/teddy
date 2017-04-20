@@ -1,28 +1,4 @@
-if (typeof module !== 'undefined') {
-  var chai = require('chai'),
-      chaiString = require('chai-string'),
-      assert = chai.assert,
-      model,
-      makeModel = require('./models/model'),
-      verbosity,
-      teddy = require('../teddy');
-  chai.use(chaiString);
-}
-
 describe('Misc', function() {
-  before(function() {
-    teddy.setTemplateRoot('test/templates');
-    model = makeModel();
-    if (typeof process === 'object') {
-      if (process.env.NODE_ENV === 'test') {
-        teddy.setVerbosity(0);
-      }
-      else if (process.env.NODE_ENV === 'cover') {
-        teddy.setVerbosity(3);
-      }
-    }
-  });
-
   it('should render {variables} (misc/variable.html)', function(done) {
     assert.equalIgnoreSpaces(teddy.render('misc/variable.html', model), '<p>Some content</p>');
     done();

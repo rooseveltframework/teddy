@@ -1,31 +1,16 @@
-if (typeof module !== 'undefined') {
-  var chai = require('chai'),
-      chaiString = require('chai-string'),
-      assert = chai.assert,
-      model,
-      makeModel = require('./models/model'),
-      loopMs = 50,
-      teddy = require('../teddy');
-  chai.use(chaiString);
+var loopMs;
+
+if (typeof process === 'object') {
+  loopMs = 50;
+  if (process.env.NODE_ENV === 'cover') {
+    loopMs = 400;
+  }
 }
 else {
-  var loopMs = 400;
+  loopMs = 400;
 }
 
 describe('Looping', function() {
-  before(function() {
-    teddy.setTemplateRoot('test/templates');
-    model = makeModel();
-    if (typeof process === 'object') {
-      if (process.env.NODE_ENV === 'test') {
-        teddy.setVerbosity(0);
-      }
-      else if (process.env.NODE_ENV === 'cover') {
-        teddy.setVerbosity(3);
-      }
-    }
-  });
-
   it('should loop through {letters} correctly (looping/loopVal.html)', function(done) {
     assert.equalIgnoreSpaces(teddy.render('looping/loopVal.html', model), '<p>a</p><p>b</p><p>c</p>');
     done();
