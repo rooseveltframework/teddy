@@ -25,6 +25,9 @@ describe('Looping', function() {
         loopMs = 450;
       }
     }
+    else {
+      teddy.setVerbosity(0);
+    }
   });
 
   it('should loop through {letters} correctly (looping/loopVal.html)', function(done) {

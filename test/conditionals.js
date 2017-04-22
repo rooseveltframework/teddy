@@ -20,6 +20,9 @@ describe('Conditionals', function() {
         teddy.setVerbosity(3);
       }
     }
+    else {
+      teddy.setVerbosity(0);
+    }
   });
 
   it('should evaluate <if something> as true (conditionals/if.html)', function(done) {

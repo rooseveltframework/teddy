@@ -20,6 +20,9 @@ describe('Includes', function() {
         teddy.setVerbosity(3);
       }
     }
+    else {
+      teddy.setVerbosity(0);
+    }
   });
 
   it('should <include> a template (includes/include.html)', function(done) {

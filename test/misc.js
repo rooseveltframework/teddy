@@ -21,6 +21,9 @@ describe('Misc', function() {
         teddy.setVerbosity(3);
       }
     }
+    else {
+      teddy.setVerbosity(0);
+    }
   });
 
   it('should render {variables} (misc/variable.html)', function(done) {
