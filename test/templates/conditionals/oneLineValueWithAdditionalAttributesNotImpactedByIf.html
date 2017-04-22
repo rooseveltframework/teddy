@@ -1,0 +1,5 @@
+{!
+  should evaluate one line if "if-something='Some content'" as true and still add the id attribute regardless of the if statement outcome
+!}
+<p if-something='Some content' true="class='something-is-present'" id='someId'>One line if.</p>
+<p if-something='Some content1' true="class='something-is-present'" id='someId'>One line if.</p>
