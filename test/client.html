@@ -292,23 +292,21 @@
     </style>
   </head>
   <body>
-    <main>
-      <h1>Teddy Templating Engine unit tests</h1>
+    <h1>Teddy Templating Engine unit tests</h1>
 
-      <article id='crossOriginError'>
-        <h2>Warning: these tests can only be run from a web server.</h2>
-        <p>Due to the <a href='http://en.wikipedia.org/wiki/Same_origin_policy'>same origin policy</a> applying to files loaded directly from the local filesystem, these unit tests can only be executed from a real HTTP server.</p>
-        <p>To start a simple web server to run these tests with, open your terminal and run this command from the "teddy" directory:</p>
-        <pre>python -m SimpleHTTPServer</pre>
-        <p><em>(For python 2.x.)</em></p>
-        <p>If that command doesn't work, try the python 3.x version instead:</p>
-        <pre>python -m http.server</pre><p><em>(For python 3.x.)</em></p>
-        <p>Then simply visit <a href='http://localhost:8000/test/client.html'>http://localhost:8000/test/client.html</a></p>
-        <p>If you can't run the command, then you'll need to <a href='http://www.python.org/'>install Python</a> or use some other web server.</p>
-      </article>
+    <article id='crossOriginError'>
+      <h2>Warning: these tests can only be run from a web server.</h2>
+      <p>Due to the <a href='http://en.wikipedia.org/wiki/Same_origin_policy'>same origin policy</a> applying to files loaded directly from the local filesystem, these unit tests can only be executed from a real HTTP server.</p>
+      <p>To start a simple web server to run these tests with, open your terminal and run this command from the "teddy" directory:</p>
+      <pre>python -m SimpleHTTPServer</pre>
+      <p><em>(For python 2.x.)</em></p>
+      <p>If that command doesn't work, try the python 3.x version instead:</p>
+      <pre>python -m http.server</pre><p><em>(For python 3.x.)</em></p>
+      <p>Then simply visit <a href='http://localhost:8000/test/client.html'>http://localhost:8000/test/client.html</a></p>
+      <p>If you can't run the command, then you'll need to <a href='http://www.python.org/'>install Python</a> or use some other web server.</p>
+    </article>
 
-      <output id='mocha'></output>
-    </main>
+    <div id='mocha'></div>
 
     <script>
       // test for old IE
