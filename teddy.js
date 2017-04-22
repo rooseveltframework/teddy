@@ -947,7 +947,13 @@
             i,
             el = parts[0],
             flip = false,
-            extraString = '';
+            extraString = '',
+
+            // One line if statement regexp
+            midIfBinaryConditionalRegexp = /(?: if-[\S]*?=(?:"[\S\s]*?"|'[\S\s]*?') )/,
+            endIfBinaryConditionalRegexp = /(?: if-[\S]*?=(?:"[\S\s]*?"|'[\S\s]*?')>)/,
+            midIfUnaryConditionalRegexp  = /(?: if-[\S]*? )/,
+            endIfUnaryConditionalRegexp  = /(?: if-[\S]*?>)/;
 
         for (i = 1; i < l; i++) {
           part = parts[i];
@@ -971,17 +977,11 @@
         el = removeAttribute(el, 'true');
         el = removeAttribute(el, 'false');
 
-        // remove if-conditions at end of element
-        el = el.replace(/(?: if-[\S]*?=(?:"[\S\s]*?"|'[\S\s]*?')>| if-[\S]*?>)/, '');
-        if (el.charAt(el.length - 1) !== '>') {
-          el += '>';
-        }
-
-        // remove if-conditions in middle of element
-        el = el.replace(/(?: if-[\S]*?=(?:"[\S\s]*?"|'[\S\s]*?') | if-[\S]*? )/, ' ');
-
-        // append condition content to element
-        el = el.slice(0, -1) + ' ' + (conditionContent ? conditionContent : '');
+        // Remove all if-conditionals and append condition eval value
+        el = el.replace(midIfBinaryConditionalRegexp, conditionContent ? ' ' + conditionContent : '');
+        el = el.replace(endIfBinaryConditionalRegexp, conditionContent ? ' ' + conditionContent : '');
+        el = el.replace(midIfUnaryConditionalRegexp, conditionContent ? ' ' + conditionContent : '');
+        el = el.replace(endIfUnaryConditionalRegexp, conditionContent ? ' ' + conditionContent : '');
 
         // append additional one line content if any
         el += extraString;
