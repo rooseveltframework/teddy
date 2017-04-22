@@ -134,6 +134,11 @@ describe('Conditionals', function() {
     done();
   });
 
+  it('should evaluate one line if "if-something=\'Some content\'" as true and still add the id attribute regardless of the if statement outcome (conditionals/oneLineValueWithAdditionalAttributesNotImpactedByIf.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineValueWithAdditionalAttributesNotImpactedByIf.html', model), '<p class=\'something-is-present\' id=\'someId\'>One line if.</p> <p id=\'someId\'>One line if.</p>');
+    done();
+  });
+
   // #46
   it('should evaluate one line if "if-something=\'\'" as false (conditionals/oneLineEmpty.html)', function(done) {
     assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineEmpty.html', model), '<p class=\'something-is-not-empty\'>One line if.</p>');
