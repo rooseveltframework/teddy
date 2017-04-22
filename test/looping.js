@@ -9,7 +9,7 @@ if (typeof module !== 'undefined') {
   chai.use(chaiString);
 }
 else {
-  var loopMs = 400;
+  var loopMs = 450;
 }
 
 describe('Looping', function() {
@@ -22,7 +22,7 @@ describe('Looping', function() {
       }
       else if (process.env.NODE_ENV === 'cover') {
         teddy.setVerbosity(3);
-        loopMs = 400;
+        loopMs = 450;
       }
     }
   });
