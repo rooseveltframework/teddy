@@ -987,6 +987,7 @@
         el += extraString;
 
         if (el.charAt(el.length - 1) !== '>') {
+          el = el.trim();
           el += '>';
         }
 

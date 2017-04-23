@@ -12,11 +12,16 @@ describe('Conditionals', function() {
   before(function() {
     teddy.setTemplateRoot('test/templates');
     model = makeModel();
-    if (process.env.NODE_ENV === 'test') {
-      teddy.setVerbosity(0);
+    if (typeof process !== 'undefined') {
+      if (process.env.NODE_ENV === 'test') {
+        teddy.setVerbosity(0);
+      }
+      else if (process.env.NODE_ENV === 'cover') {
+        teddy.setVerbosity(3);
+      }
     }
-    else if (process.env.NODE_ENV === 'cover') {
-      teddy.setVerbosity(3);
+    else {
+      teddy.setVerbosity(0);
     }
   });
 
@@ -139,7 +144,7 @@ describe('Conditionals', function() {
     <p id=\'someId\'>One line if.</p> \
     <p disabled id=\'someId\'>One line if.</p> \
     <option selected value=\'3\'>One line if.</option> \
-    <option value=\'3\' selected >One line if.</option>');
+    <option value=\'3\' selected>One line if.</option>');
     done();
   });
 
