@@ -978,15 +978,16 @@
         el = removeAttribute(el, 'false');
 
         // Remove all if-conditionals and append condition eval value
-        el = el.replace(midIfBinaryConditionalRegexp, conditionContent ? ' ' + conditionContent : '');
-        el = el.replace(endIfBinaryConditionalRegexp, conditionContent ? ' ' + conditionContent : '');
-        el = el.replace(midIfUnaryConditionalRegexp, conditionContent ? ' ' + conditionContent : '');
-        el = el.replace(endIfUnaryConditionalRegexp, conditionContent ? ' ' + conditionContent : '');
+        el = el.replace(midIfBinaryConditionalRegexp, conditionContent ? ' ' + conditionContent + ' ' : ' ');
+        el = el.replace(endIfBinaryConditionalRegexp, conditionContent ? ' ' + conditionContent + ' ' : ' ');
+        el = el.replace(midIfUnaryConditionalRegexp, conditionContent ? ' ' + conditionContent + ' ' : ' ');
+        el = el.replace(endIfUnaryConditionalRegexp, conditionContent ? ' ' + conditionContent + ' ' : ' ');
 
         // append additional one line content if any
         el += extraString;
 
         if (el.charAt(el.length - 1) !== '>') {
+          el = el.trim();
           el += '>';
         }
 
