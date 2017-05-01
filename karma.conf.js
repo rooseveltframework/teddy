@@ -9,7 +9,7 @@ module.exports = function(config) {
       'test/models/*.js',
       'node_modules/chai/chai.js',
       'node_modules/chai-string/chai-string.js',
-      {pattern: 'test/templates/**/*', included: false},
+      'test/templates/**/*',
       'test/*.js',
       'test/client.html'
     ],
@@ -19,7 +19,11 @@ module.exports = function(config) {
       '/templates/': '/base/test/templates/',
     },
     preprocessors: {
-      'teddy.js': ['coverage']
+      'teddy.js': ['coverage'],
+      'test/templates/**/*': ['html2js']
+    },
+    html2JsPreprocessor: {
+      stripPrefix: 'test/templates/'
     },
     coverageReporter: {
       type: 'lcov',

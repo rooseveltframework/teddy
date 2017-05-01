@@ -28,7 +28,8 @@
     "karma-coverage": "1.1.1",
     "karma-chrome-launcher": "2.0.0",
     "karma-coverage-allsources": "0.0.4",
-    "lcov-result-merger": "^1.2.0"
+    "lcov-result-merger": "^1.2.0",
+    "karma-html2js-preprocessor": "1.1.0"
   },
   "eslintConfig": {
     "env": {

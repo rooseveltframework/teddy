@@ -1,20 +1,24 @@
-var assert;
-
 if (typeof process === 'object') {
   global.chai = require('chai');
   global.chaiString = require('chai-string');
   global.assert = chai.assert;
   global.makeModel = require('./models/model');
   global.teddy = require('../teddy');
-  global.model;
+  global.model = makeModel();
+  global.getTemplate = getTemplate;
 }
-else {
-  assert = chai.assert;
-}
+
+function getTemplate(template) {
+  if (typeof process === 'object') {
+    return template;
+  }
+  else {
+    return window.__html__[template];
+  }
+};
 
 before(function() {
   teddy.setTemplateRoot('test/templates');
-  console.warn(teddy.compile('misc/templateToMinify.html', model));
   model = makeModel();
   if (typeof process === 'object') {
     chai.use(chaiString);
