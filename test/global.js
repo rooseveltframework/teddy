@@ -25,4 +25,7 @@ before(function() {
       teddy.setVerbosity(3);
     }
   }
+  else {
+    teddy.setVerbosity(0);
+  }
 });

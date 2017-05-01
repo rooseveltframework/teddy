@@ -2,7 +2,7 @@
   "name": "teddy",
   "description": "Teddy Templating Engine",
   "author": "Eric Newport <kethinov@gmail.com>",
-  "version": "0.4.9",
+  "version": "0.4.11",
   "homepage": "https://github.com/kethinov/teddy",
   "license": "CC-BY-4.0",
   "main": "teddy.js",
@@ -61,7 +61,7 @@
     }
   },
   "scripts": {
-    "test": "cross-env NODE_ENV=test mocha --recursive test && karma start",
+    "test": "cross-env NODE_ENV=test npm run test-server && npm run test-client",
     "test-server": "cross-env NODE_ENV=test mocha --recursive test",
     "test-client": "karma start",
     "eslint": "eslint .",

@@ -28,6 +28,11 @@ module.exports = function(config) {
         return browser.toLowerCase().split(/[ /-]/)[0];
       }
     },
+    client: {
+      mocha: {
+        reporter: 'html'
+      }
+    },
     colors: true,
     logLevel: config.LOG_INFO,
     autoWatch: false,
