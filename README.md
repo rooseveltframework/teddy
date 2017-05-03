@@ -453,10 +453,8 @@ Install dependencies for the server test:
 npm i
 ```
 
-Run server test:
+Run tests:
 
 ```
 npm test
 ```
-
-To run the client tests, open `test/client.html` and follow its instructions.
