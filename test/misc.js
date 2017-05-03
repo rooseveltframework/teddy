@@ -161,6 +161,9 @@ describe('Misc', function() {
         teddy.setVerbosity(3);
       }
     }
+    else {
+      teddy.setVerbosity(0);
+    }
     done();
   });
 
@@ -170,6 +173,11 @@ describe('Misc', function() {
     assert.equal(teddy.render('misc/templateToMinify.html', model), '<!DOCTYPE html><html lang=\'en\'> <head> <meta charset=\'utf-8\'> <meta name=\'viewport\' content=\'width=device-width,initial-scale=1\'> <meta name=\'format-detection\' content=\'telephone=no\'> <title>Plain HTML</title> </head> <body> <main> <p>This template contains no teddy tags. Just HTML.</p> </main> </body></html>');
     teddy.minify(false);
     teddy.compileAtEveryRender(false);
+    done();
+  });
+
+  it('should avoid flushing cache of non strings', function(done) {
+    assert.equalIgnoreSpaces(teddy.flushCache(5), '');
     done();
   });
 });
