@@ -6,21 +6,6 @@
     <meta name='format-detection' content='telephone=no'>
     <title>Teddy Templating Engine unit tests</title>
     <style>
-      #crossOriginError {
-        animation: 1s fadeIn;
-        animation-fill-mode: forwards;
-        animation-delay: 1s;
-        visibility: hidden;
-      }
-      @keyframes fadeIn {
-        0% {
-          opacity: 0;
-        }
-        100% {
-          visibility: visible;
-          opacity: 1;
-        }
-      }
       body {
         margin: 10px !important;
         font: 20px/1.5 "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -297,29 +282,7 @@
   <body>
     <h1>Teddy Templating Engine unit tests</h1>
 
-    <article id='crossOriginError'>
-      <h2>Warning: these tests can only be run from a web server.</h2>
-      <p>Due to the <a href='http://en.wikipedia.org/wiki/Same_origin_policy'>same origin policy</a> applying to files loaded directly from the local filesystem, these unit tests can only be executed from a real HTTP server.</p>
-      <p>To start a simple web server to run these tests with, open your terminal and run this command from the "teddy" directory:</p>
-      <pre>python -m SimpleHTTPServer</pre>
-      <p><em>(For python 2.x.)</em></p>
-      <p>If that command doesn't work, try the python 3.x version instead:</p>
-      <pre>python -m http.server</pre><p><em>(For python 3.x.)</em></p>
-      <p>Then simply visit <a href='http://localhost:8000/test/client.html'>http://localhost:8000/test/client.html</a></p>
-      <p>If you can't run the command, then you'll need to <a href='http://www.python.org/'>install Python</a> or use some other web server.</p>
-    </article>
-
     <div id='mocha'></div>
-
-    <script>
-      // test for old IE
-      var oldIE = document.createElement('p');
-      oldIE.innerHTML = '<!--[if lte IE 9]><i></i><![endif]-->';
-      oldIE = oldIE.getElementsByTagName('i').length === 1 ? true : false;
-      if (oldIE) {
-        document.getElementById('crossOriginError').style.visibility = 'visible';
-      }
-    </script>
 
     <!-- include teddy library -->
     <script src='../teddy.js'></script>
@@ -330,18 +293,22 @@
     <script src='../node_modules/chai/chai.js'></script>
     <script src='../node_modules/chai-string/chai-string.js'></script>
 
-    <!-- include mocha tests -->
-    <script>mocha.setup('bdd');</script>
-    <script src='conditionals.js'></script>
-    <script src='includes.js'></script>
-    <script src='looping.js'></script>
-    <script src='misc.js'></script>
+    <!-- setup test suite -->
+    <script>
+      var assert = chai.assert,
+          templates = window.__html__,
+          i;
+
+      teddy.setVerbosity(0);
+
+      for (i in templates) {
+        teddy.templates[i] = teddy.compile(templates[i]);
+      }
+
+      mocha.setup('bdd');
+    </script>
 
     <!-- run tests -->
-    <script>
-      var assert = chai.assert;
-      teddy.setVerbosity(0);
-      mocha.run();
-    </script>
+    <script>mocha.run();</script>
   </body>
 </html>

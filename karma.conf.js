@@ -13,7 +13,7 @@ module.exports = function(config) {
       'test/*.js',
       'test/client.html'
     ],
-    reporters: ['progress', 'coverage'],
+    reporters: ['spec', 'coverage'],
     port: 8000,
     proxies: {
       '/templates/': '/base/test/templates/',
@@ -24,6 +24,14 @@ module.exports = function(config) {
     },
     html2JsPreprocessor: {
       stripPrefix: 'test/templates/'
+    },
+    specReporter: {
+      maxLogLines: 5,
+      suppressErrorSummary: false,
+      suppressFailed: false,
+      suppressPassed: false,
+      suppressSkipped: false,
+      showSpecTiming: true
     },
     coverageReporter: {
       type: 'lcov',
