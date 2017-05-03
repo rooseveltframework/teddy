@@ -79,18 +79,7 @@
      */
 
     // default values for parameters sent to teddy
-    params: {
-      verbosity: 1,
-      templateRoot: './',
-      cacheRenders: false,
-      defaultCaches: 1,
-      templateMaxCaches: {},
-      cacheWhitelist: false,
-      cacheBlacklist: [],
-      compileAtEveryRender: false,
-      minify: false,
-      maxPasses: 25000
-    },
+    params: {},
 
     // compiled templates are stored as object collections, e.g. { "myTemplate.html": "<p>some markup</p>"}
     templates: {},
@@ -1202,6 +1191,9 @@
       }
     }
   };
+
+  // set params to default values
+  teddy.setDefaultParams();
 
   /**
    * private utility methods
