@@ -416,6 +416,7 @@ API documentation
 - `teddy.setCacheBlacklist(templateArray)`: Establish a blacklist of templates to never cache.
   - Example: `['one.html', 'two.html', 'three.html']`.
   - Note: mutually exclusive with `teddy.setCacheWhitelist`.
+- `teddy.setDefaultParams()`: Reset all params to default.
 - `teddy.flushCache(template)`: Delete all the caches of a given template by supplying either its source code or a file name (in Node.js).
 - `teddy.flushCache(template, model)`: Delete the cache of a specific template and model combination by supplying the template's source code or file name (in Node.js) along with the desired model to match.
 - `teddy.maxPasses(n)`: Sets the maximum number of passes the parser can execute over your template. If this maximum is exceeded, Teddy will stop attempting to render the template. The limit exists to prevent the possibility of teddy producing infinite loops due to improperly coded templates.  
