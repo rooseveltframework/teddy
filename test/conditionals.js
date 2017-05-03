@@ -1,30 +1,4 @@
-if (typeof module !== 'undefined') {
-  var chai = require('chai'),
-      chaiString = require('chai-string'),
-      assert = chai.assert,
-      model,
-      makeModel = require('./models/model'),
-      teddy = require('../teddy');
-  chai.use(chaiString);
-}
-
 describe('Conditionals', function() {
-  before(function() {
-    teddy.setTemplateRoot('test/templates');
-    model = makeModel();
-    if (typeof process !== 'undefined') {
-      if (process.env.NODE_ENV === 'test') {
-        teddy.setVerbosity(0);
-      }
-      else if (process.env.NODE_ENV === 'cover') {
-        teddy.setVerbosity(3);
-      }
-    }
-    else {
-      teddy.setVerbosity(0);
-    }
-  });
-
   it('should evaluate <if something> as true (conditionals/if.html)', function(done) {
     assert.equalIgnoreSpaces(teddy.render('conditionals/if.html', model), '<p>The variable \'something\' is present</p>');
     done();

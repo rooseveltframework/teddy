@@ -6,24 +6,16 @@
     <meta name='format-detection' content='telephone=no'>
     <title>Teddy Templating Engine unit tests</title>
     <style>
-      #crossOriginError {
-        animation: 1s fadeIn;
-        animation-fill-mode: forwards;
-        animation-delay: 1s;
-        visibility: hidden;
-      }
-      @keyframes fadeIn {
-        0% {
-          opacity: 0;
-        }
-        100% {
-          visibility: visible;
-          opacity: 1;
-        }
-      }
       body {
         margin: 10px !important;
         font: 20px/1.5 "Helvetica Neue", Helvetica, Arial, sans-serif;
+      }
+
+      /*
+       * related issue: https://github.com/karma-runner/karma-mocha/issues/176
+       */
+      #mocha-error {
+        display: none;
       }
 
       /*
@@ -292,33 +284,9 @@
     </style>
   </head>
   <body>
-    <main>
-      <h1>Teddy Templating Engine unit tests</h1>
+    <h1>Teddy Templating Engine unit tests</h1>
 
-      <article id='crossOriginError'>
-        <h2>Warning: these tests can only be run from a web server.</h2>
-        <p>Due to the <a href='http://en.wikipedia.org/wiki/Same_origin_policy'>same origin policy</a> applying to files loaded directly from the local filesystem, these unit tests can only be executed from a real HTTP server.</p>
-        <p>To start a simple web server to run these tests with, open your terminal and run this command from the "teddy" directory:</p>
-        <pre>python -m SimpleHTTPServer</pre>
-        <p><em>(For python 2.x.)</em></p>
-        <p>If that command doesn't work, try the python 3.x version instead:</p>
-        <pre>python -m http.server</pre><p><em>(For python 3.x.)</em></p>
-        <p>Then simply visit <a href='http://localhost:8000/test/client.html'>http://localhost:8000/test/client.html</a></p>
-        <p>If you can't run the command, then you'll need to <a href='http://www.python.org/'>install Python</a> or use some other web server.</p>
-      </article>
-
-      <output id='mocha'></output>
-    </main>
-
-    <script>
-      // test for old IE
-      var oldIE = document.createElement('p');
-      oldIE.innerHTML = '<!--[if lte IE 9]><i></i><![endif]-->';
-      oldIE = oldIE.getElementsByTagName('i').length === 1 ? true : false;
-      if (oldIE) {
-        document.getElementById('crossOriginError').style.visibility = 'visible';
-      }
-    </script>
+    <div id='mocha'></div>
 
     <!-- include teddy library -->
     <script src='../teddy.js'></script>
@@ -328,134 +296,23 @@
     <script src='../node_modules/mocha/mocha.js'></script>
     <script src='../node_modules/chai/chai.js'></script>
     <script src='../node_modules/chai-string/chai-string.js'></script>
+
+    <!-- setup test suite -->
     <script>
       var assert = chai.assert,
-          templateList,
-          templateLength,
-          counter = 0,
-          crossOriginError,
-          request,
+          templates = window.__html__,
           i;
 
-      templateList = [
-        'conditionals/and.html',
-        'conditionals/andOr.html',
-        'conditionals/andTruthTable.html',
-        'conditionals/if.html',
-        'conditionals/ifElse.html',
-        'conditionals/ifElseIf.html',
-        'conditionals/ifElseValue.html',
-        'conditionals/ifEmptyArray.html',
-        'conditionals/ifEscapeRegex.html',
-        'conditionals/ifNotPresent.html',
-        'conditionals/ifValue.html',
-        'conditionals/nestedConditional.html',
-        'conditionals/not.html',
-        'conditionals/oneLine.html',
-        'conditionals/oneLineEmpty.html',
-        'conditionals/oneLineFalse.html',
-        'conditionals/oneLineMulti.html',
-        'conditionals/oneLineTrueOnly.html',
-        'conditionals/oneLineValue.html',
-        'conditionals/oneLineValueWithAdditionalAttributesNotImpactedByIf.html',
-        'conditionals/orSameVar.html',
-        'conditionals/orTruthTable.html',
-        'conditionals/unless.html',
-        'conditionals/unlessElse.html',
-        'conditionals/unlessElseUnless.html',
-        'conditionals/unlessElseValue.html',
-        'conditionals/unlessNull.html',
-        'conditionals/unlessValue.html',
-        'conditionals/xor.html',
-        'conditionals/duplicateVarInline.html',
-        'conditionals/duplicateOperatorInline.html',
-        'conditionals/ifElseRegex.html',
-        'conditionals/ifNestedProperties.html',
-        'includes/argVariableWithinArg.html',
-        'includes/conditionArgInStyle.html',
-        'includes/dynamicInclude.html',
-        'includes/include.html',
-        'includes/includeLoopsAndVars.html',
-        'includes/includeWithArguments.html',
-        'includes/nestedInclude.html',
-        'includes/nestedIncludeWithArg.html',
-        'includes/nestedLoop.html',
-        'includes/numericArgument.html',
-        'includes/numericVarInArg.html',
-        'includes/orphanedArgument.html',
-        'includes/inlineScriptTag.html',
-        'includes/argRedefineModelVar.html',
-        'includes/includeEscapeRegex.html',
-        'includes/invalidIncludeMarkup.html',
-        'includes/includeInfiniteLoop.html',
-        'looping/emptyMarkupLoop.html',
-        'looping/largeDataSet.html',
-        'looping/loopArrayOfObjects.html',
-        'looping/loopKeyVal.html',
-        'looping/loopVal.html',
-        'looping/nestedArrays.html',
-        'looping/nestedLoops.html',
-        'looping/nestedObjectLoop.html',
-        'looping/noMarkupLoop.html',
-        'looping/numericalVal.html',
-        'looping/undefinedObjectLoop.html',
-        'looping/camelCaseLoopVal.html',
-        'looping/loopInvalidAttributes.html',
-        'misc/markupArgument.html',
-        'misc/multipleVariables.html',
-        'misc/nestedVars.html',
-        'misc/numericMarkupArgument.html',
-        'misc/objectDoesNotExist.html',
-        'misc/plainHTML.html',
-        'misc/regexEscaping.html',
-        'misc/serverSideComments.html',
-        'misc/serverSideCommentsNested.html',
-        'misc/styleVariables.html',
-        'misc/templateWithLoop.html',
-        'misc/varEscaping.html',
-        'misc/varNoEscaping.html',
-        'misc/variable.html',
-        'misc/variableObjectProperty.html',
-        'misc/emptyModelMarkup.html',
-        'misc/infiniteIncludeTemplate.html',
-        'misc/varNotInModel.html'
-      ];
-      templateLength = templateList.length;
+      teddy.setVerbosity(0);
 
-      // fetch and compile the templates
-      for (i = 0; i < templateLength; i++) {
-        (function(i) {
-          template = templateList[i];
-
-          var req = new XMLHttpRequest();
-          req.open('GET', 'templates/' + template);
-          req.send();
-
-          req.onreadystatechange = function() {
-            template = templateList[i];
-            if (req.readyState === XMLHttpRequest.DONE) {
-              if (req.status === 200) {
-                crossOriginError = document.getElementById('crossOriginError');
-                if (crossOriginError) {
-                  crossOriginError.parentNode.removeChild(crossOriginError);
-                }
-                teddy.templates[template] = teddy.compile(req.response || req.responseText);
-                counter++;
-                if (counter === templateLength) {
-                  mocha.run();
-                }
-              }
-            }
-          };
-        })(i);
+      for (i in templates) {
+        teddy.templates[i] = teddy.compile(templates[i]);
       }
+
+      mocha.setup('bdd');
     </script>
 
     <!-- run tests -->
-    <script>mocha.setup('bdd');</script>
-    <script src='conditionals.js'></script>
-    <script src='includes.js'></script>
-    <script src='looping.js'></script>
-    <script src='misc.js'></script>
+    <script>mocha.run();</script>
   </body>
 </html>

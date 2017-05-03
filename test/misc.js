@@ -1,31 +1,4 @@
-if (typeof module !== 'undefined') {
-  var chai = require('chai'),
-      chaiString = require('chai-string'),
-      assert = chai.assert,
-      model,
-      makeModel = require('./models/model'),
-      verbosity = '',
-      teddy = require('../teddy');
-  chai.use(chaiString);
-}
-
 describe('Misc', function() {
-  before(function() {
-    teddy.setTemplateRoot('test/templates');
-    model = makeModel();
-    if (typeof process !== 'undefined') {
-      if (process.env.NODE_ENV === 'test') {
-        teddy.setVerbosity(0);
-      }
-      else if (process.env.NODE_ENV === 'cover') {
-        teddy.setVerbosity(3);
-      }
-    }
-    else {
-      teddy.setVerbosity(0);
-    }
-  });
-
   it('should render {variables} (misc/variable.html)', function(done) {
     assert.equalIgnoreSpaces(teddy.render('misc/variable.html', model), '<p>Some content</p>');
     done();
@@ -161,8 +134,8 @@ describe('Misc', function() {
     done();
   });
 
-  // broken client-side ಠ_ಠ @Autre31415
-  it.skip('should set each verbosity level', function(done) {
+  it('should set each verbosity level', function(done) {
+    verbosity = '';
     teddy.setVerbosity();
     verbosity += teddy.params.verbosity + ', ';
     teddy.setVerbosity('none');
@@ -179,20 +152,32 @@ describe('Misc', function() {
     verbosity += teddy.params.verbosity;
 
     assert.equal(verbosity, '1, 0, 0, 2, 2, 3, 3');
-    if (process.env.NODE_ENV === 'test') {
-      teddy.setVerbosity(0);
+    verbosity = '';
+    if (typeof process === 'object') {
+      if (process.env.NODE_ENV === 'test') {
+        teddy.setVerbosity(0);
+      }
+      else if (process.env.NODE_ENV === 'cover') {
+        teddy.setVerbosity(3);
+      }
     }
-    else if (process.env.NODE_ENV === 'cover') {
-      teddy.setVerbosity(3);
+    else {
+      teddy.setVerbosity(0);
     }
     done();
   });
 
-  // broken client-side ಠ_ಠ @Autre31415
-  it.skip('should minify template with internal minifier (misc/plainHTML.html)', function(done) {
+  it('should minify template with internal minifier (misc/templateToMinify.html)', function(done) {
+    teddy.compileAtEveryRender(true);
     teddy.minify(true);
-    assert.equal(teddy.compile('misc/plainHTML.html', model), '<!DOCTYPE html><html lang=\'en\'> <head> <meta charset=\'utf-8\'> <meta name=\'viewport\' content=\'width=device-width,initial-scale=1\'> <meta name=\'format-detection\' content=\'telephone=no\'> <title>Plain HTML</title> <link rel=\'stylesheet\' href=\'/css/styles.css\'> </head> <body> <main> <p>This template contains no teddy tags. Just HTML.</p> </main> <script type=\'text/javascript\' src=\'/js/main.js\'></script> </body></html>');
+    assert.equal(teddy.render('misc/templateToMinify.html', model), '<!DOCTYPE html><html lang=\'en\'> <head> <meta charset=\'utf-8\'> <meta name=\'viewport\' content=\'width=device-width,initial-scale=1\'> <meta name=\'format-detection\' content=\'telephone=no\'> <title>Plain HTML</title> </head> <body> <main> <p>This template contains no teddy tags. Just HTML.</p> </main> </body></html>');
     teddy.minify(false);
+    teddy.compileAtEveryRender(false);
+    done();
+  });
+
+  it('should avoid flushing cache of non strings', function(done) {
+    assert.equalIgnoreSpaces(teddy.flushCache(5), '');
     done();
   });
 });

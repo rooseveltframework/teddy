@@ -79,18 +79,7 @@
      */
 
     // default values for parameters sent to teddy
-    params: {
-      verbosity: 1,
-      templateRoot: './',
-      cacheRenders: false,
-      defaultCaches: 1,
-      templateMaxCaches: {},
-      cacheWhitelist: false,
-      cacheBlacklist: [],
-      compileAtEveryRender: false,
-      minify: false,
-      maxPasses: 25000
-    },
+    params: {},
 
     // compiled templates are stored as object collections, e.g. { "myTemplate.html": "<p>some markup</p>"}
     templates: {},
@@ -101,6 +90,20 @@
     /**
      * mutator methods for public member vars
      */
+
+    // sets all params to their default values
+    setDefaultParams: function() {
+      teddy.params.verbosity = 1;
+      teddy.params.templateRoot = './';
+      teddy.params.cacheRenders = false;
+      teddy.params.defaultCaches = 1;
+      teddy.params.templateMaxCaches = {};
+      teddy.params.cacheWhitelist = false;
+      teddy.params.cacheBlacklist = [];
+      teddy.params.compileAtEveryRender = false;
+      teddy.params.minify = false;
+      teddy.params.maxPasses = 25000;
+    },
 
     // mutator method to set verbosity param. takes human-readable string argument and converts it to an integer for more efficient checks against the setting
     setVerbosity: function(v) {
@@ -225,6 +228,12 @@
           }
         }
       }
+      else {
+        if (teddy.templates[template]) {
+          template = teddy.templates[template];
+          register = true;
+        }
+      }
 
       // remove {! comments !} and (optionally) unnecessary whitespace
       do {
@@ -257,6 +266,15 @@
     // invalidates cache of a given template and model combination
     // if no model is supplied, deletes all caches of the given template
     flushCache: function(template, model) {
+
+      // ensure template is a string
+      if (typeof template !== 'string') {
+        if (teddy.params.verbosity > 1) {
+          teddy.console.warn('teddy.flushCache attempted to invalidate cache of template that is not a string');
+        }
+        return '';
+      }
+
       // append extension if not present
       if (template.slice(-5) !== '.html') {
         template += '.html';
@@ -1173,6 +1191,9 @@
       }
     }
   };
+
+  // set params to default values
+  teddy.setDefaultParams();
 
   /**
    * private utility methods
