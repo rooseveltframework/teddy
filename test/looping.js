@@ -3,11 +3,11 @@ var loopMs;
 if (typeof process === 'object') {
   loopMs = 50;
   if (process.env.NODE_ENV === 'cover') {
-    loopMs = 500;
+    loopMs = 600;
   }
 }
 else {
-  loopMs = 500;
+  loopMs = 600;
 }
 
 describe('Looping', function() {
