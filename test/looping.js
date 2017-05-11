@@ -1,4 +1,6 @@
 describe('Looping', function() {
+  this.timeout(5000);
+
   it('should loop through {letters} correctly (looping/loopVal.html)', function(done) {
     assert.equalIgnoreSpaces(teddy.render('looping/loopVal.html', model), '<p>a</p><p>b</p><p>c</p>');
     done();
