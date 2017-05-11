@@ -1,7 +1,7 @@
 
 Teddy templating engine
 ===
-[![NPM version](https://badge.fury.io/js/teddy.png)](http://badge.fury.io/js/teddy) [![Dependency Status](https://gemnasium.com/kethinov/teddy.png)](https://gemnasium.com/kethinov/teddy) [![Gittip](http://img.shields.io/gittip/kethinov.png)](https://www.gittip.com/kethinov/) [![Build Status](https://travis-ci.org/kethinov/teddy.svg?branch=master)](https://travis-ci.org/kethinov/teddy) [![Coverage Status](https://coveralls.io/repos/github/kethinov/teddy/badge.svg?branch=master)](https://coveralls.io/github/kethinov/teddy?branch=master)
+[![NPM version](https://badge.fury.io/js/teddy.png)](http://badge.fury.io/js/teddy) [![Dependency Status](https://gemnasium.com/kethinov/teddy.png)](https://gemnasium.com/kethinov/teddy) [![Gittip](http://img.shields.io/gittip/kethinov.png)](https://www.gittip.com/kethinov/) [![Build Status](https://travis-ci.org/kethinov/teddy.svg?branch=master)](https://travis-ci.org/kethinov/teddy) [![Build status](https://ci.appveyor.com/api/projects/status/6w5a9jbw2gsw16rs?svg=true)](https://ci.appveyor.com/project/kethinov/teddy) [![Coverage Status](https://coveralls.io/repos/github/kethinov/teddy/badge.svg?branch=master)](https://coveralls.io/github/kethinov/teddy?branch=master)
 
 Teddy is the most readable and easy to learn templating language there is!
 
@@ -392,11 +392,11 @@ API documentation
 ===
 
 - `teddy.compile(template)`: Compile a template by supplying either source code or a file name (in Node.js).
-  - Returns template source code with `{! teddy comments !}` removed. 
-  - Populates `teddy.templates` with the new template in the format of `teddy.templates[path]: compiledSource`. 
+  - Returns template source code with `{! teddy comments !}` removed.
+  - Populates `teddy.templates` with the new template in the format of `teddy.templates[path]: compiledSource`.
 - `teddy.render(template, model)`: Render a template by supplying either source code or a file name (in Node.js).
   - Returns fully rendered HTML.
-- `teddy.setTemplateRoot(path)`: Set the location of your templates directory. 
+- `teddy.setTemplateRoot(path)`: Set the location of your templates directory.
   - Default is the current directory.
 - `teddy.setVerbosity(n)`: Sets the level of verbosity in Teddy's console logs. Call `teddy.setVerbosity(n)` where `n` equals one of the below values to change the default:
   - `0`: No logging.
@@ -419,7 +419,7 @@ API documentation
 - `teddy.setDefaultParams()`: Reset all params to default.
 - `teddy.flushCache(template)`: Delete all the caches of a given template by supplying either its source code or a file name (in Node.js).
 - `teddy.flushCache(template, model)`: Delete the cache of a specific template and model combination by supplying the template's source code or file name (in Node.js) along with the desired model to match.
-- `teddy.maxPasses(n)`: Sets the maximum number of passes the parser can execute over your template. If this maximum is exceeded, Teddy will stop attempting to render the template. The limit exists to prevent the possibility of teddy producing infinite loops due to improperly coded templates.  
+- `teddy.maxPasses(n)`: Sets the maximum number of passes the parser can execute over your template. If this maximum is exceeded, Teddy will stop attempting to render the template. The limit exists to prevent the possibility of teddy producing infinite loops due to improperly coded templates.
   - Default: 25000.
 - `teddy.compileAtEveryRender(true/false)`: When this setting is enabled, Teddy will compile the template at each render rather than caching previous compiles.
   - Default is false. *(Not recommended to enable in production for performance reasons.)*
@@ -448,7 +448,7 @@ git clone git@github.com:kethinov/teddy.git
 cd teddy
 ```
 
-Install dependencies for the server test:
+Install dependencies for the tests:
 
 ```
 npm i
@@ -458,4 +458,12 @@ Run tests:
 
 ```
 npm test
+```
+
+The default `npm test` command runs the tests server-side in Node.js and client-side in Chrome. See below commands for other browsers:
+
+```
+npm run test-firefox
+npm run test-ie
+npm run test-safari
 ```
