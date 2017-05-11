@@ -1,7 +1,7 @@
 
 Teddy templating engine
 ===
-[![NPM version](https://badge.fury.io/js/teddy.png)](http://badge.fury.io/js/teddy) [![Dependency Status](https://gemnasium.com/kethinov/teddy.png)](https://gemnasium.com/kethinov/teddy) [![Gittip](http://img.shields.io/gittip/kethinov.png)](https://www.gittip.com/kethinov/) [![Build Status](https://travis-ci.org/kethinov/teddy.svg?branch=master)](https://travis-ci.org/kethinov/teddy) [![Coverage Status](https://coveralls.io/repos/github/kethinov/teddy/badge.svg?branch=master)](https://coveralls.io/github/kethinov/teddy?branch=master)
+[![NPM version](https://badge.fury.io/js/teddy.png)](http://badge.fury.io/js/teddy) [![Dependency Status](https://gemnasium.com/kethinov/teddy.png)](https://gemnasium.com/kethinov/teddy) [![Gittip](http://img.shields.io/gittip/kethinov.png)](https://www.gittip.com/kethinov/) [![Build Status](https://travis-ci.org/kethinov/teddy.svg?branch=master)](https://travis-ci.org/kethinov/teddy) [![Build status](https://ci.appveyor.com/api/projects/status/6w5a9jbw2gsw16rs?svg=true)](https://ci.appveyor.com/project/kethinov/teddy) [![Coverage Status](https://coveralls.io/repos/github/kethinov/teddy/badge.svg?branch=master)](https://coveralls.io/github/kethinov/teddy?branch=master)
 
 Teddy is the most readable and easy to learn templating language there is!
 
@@ -454,15 +454,13 @@ Install dependencies for the tests:
 npm i
 ```
 
-For client side tests you'll need the browser you want to test on installed. (Chrome is default)
-
-Run tests (server and chrome:
+Run tests:
 
 ```
 npm test
 ```
 
-Other browsers:
+The default `npm test` command runs the tests server-side in Node.js and client-side in Chrome. See below commands for other browsers:
 
 ```
 npm run test-firefox
