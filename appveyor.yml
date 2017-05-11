@@ -1,0 +1,10 @@
+version: "{build}"
+install:
+  - node --version
+  - npm --version
+  - npm install
+test_script:
+  - npm run test
+  - npm run test-firefox
+  - npm run test-ie
+build: off

@@ -6,6 +6,17 @@ if (typeof process === 'object') {
   global.teddy = require('../teddy');
   global.model = makeModel();
 }
+else {
+  var assert = chai.assert,
+      templates = window.__html__,
+      i;
+
+  teddy.setVerbosity(0);
+
+  for (i in templates) {
+    teddy.templates[i] = teddy.compile(templates[i]);
+  }
+}
 
 before(function() {
   teddy.setTemplateRoot('test/templates');

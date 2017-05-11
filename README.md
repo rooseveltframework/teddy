@@ -392,11 +392,11 @@ API documentation
 ===
 
 - `teddy.compile(template)`: Compile a template by supplying either source code or a file name (in Node.js).
-  - Returns template source code with `{! teddy comments !}` removed. 
-  - Populates `teddy.templates` with the new template in the format of `teddy.templates[path]: compiledSource`. 
+  - Returns template source code with `{! teddy comments !}` removed.
+  - Populates `teddy.templates` with the new template in the format of `teddy.templates[path]: compiledSource`.
 - `teddy.render(template, model)`: Render a template by supplying either source code or a file name (in Node.js).
   - Returns fully rendered HTML.
-- `teddy.setTemplateRoot(path)`: Set the location of your templates directory. 
+- `teddy.setTemplateRoot(path)`: Set the location of your templates directory.
   - Default is the current directory.
 - `teddy.setVerbosity(n)`: Sets the level of verbosity in Teddy's console logs. Call `teddy.setVerbosity(n)` where `n` equals one of the below values to change the default:
   - `0`: No logging.
@@ -419,7 +419,7 @@ API documentation
 - `teddy.setDefaultParams()`: Reset all params to default.
 - `teddy.flushCache(template)`: Delete all the caches of a given template by supplying either its source code or a file name (in Node.js).
 - `teddy.flushCache(template, model)`: Delete the cache of a specific template and model combination by supplying the template's source code or file name (in Node.js) along with the desired model to match.
-- `teddy.maxPasses(n)`: Sets the maximum number of passes the parser can execute over your template. If this maximum is exceeded, Teddy will stop attempting to render the template. The limit exists to prevent the possibility of teddy producing infinite loops due to improperly coded templates.  
+- `teddy.maxPasses(n)`: Sets the maximum number of passes the parser can execute over your template. If this maximum is exceeded, Teddy will stop attempting to render the template. The limit exists to prevent the possibility of teddy producing infinite loops due to improperly coded templates.
   - Default: 25000.
 - `teddy.compileAtEveryRender(true/false)`: When this setting is enabled, Teddy will compile the template at each render rather than caching previous compiles.
   - Default is false. *(Not recommended to enable in production for performance reasons.)*
@@ -448,14 +448,24 @@ git clone git@github.com:kethinov/teddy.git
 cd teddy
 ```
 
-Install dependencies for the server test:
+Install dependencies for the tests:
 
 ```
 npm i
 ```
 
-Run tests:
+For client side tests you'll need the browser you want to test on installed. (Chrome is default)
+
+Run tests (server and chrome:
 
 ```
 npm test
+```
+
+Other browsers:
+
+```
+npm run test-firefox
+npm run test-ie
+npm run test-safari
 ```
