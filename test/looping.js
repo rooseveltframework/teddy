@@ -145,7 +145,7 @@ describe('Looping', function() {
   });
 
   it('should ignore undefined members of objects and arrays (looping/loopUndefinedMember.html)', function(done) {
-    assert.equalIgnoreSpaces(teddy.render('looping/loopUndefinedMember.html', model), '<p>a</p><p>c</p><p>4</p><p>5</p><p>6</p><p>7</p><p>8</p><p>9</p>');
+    assert.equalIgnoreSpaces(teddy.render('looping/loopUndefinedMember.html', model), '<p>a</p><p></p></p><p>c</p><p></p><p></p><p></p></p><p>4</p><p>5</p><p>6</p><p>7</p><p>8</p><p>9</p>');
     done();
   });
 });
