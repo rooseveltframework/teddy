@@ -1,7 +1,7 @@
 
 Teddy templating engine
 ===
-[![npm](https://img.shields.io/npm/v/teddy.svg)](https://www.npmjs.com/package/teddy) [![Build Status](https://travis-ci.org/kethinov/teddy.svg?branch=master)](https://travis-ci.org/kethinov/teddy) [![Build status](https://ci.appveyor.com/api/projects/status/6w5a9jbw2gsw16rs?svg=true)](https://ci.appveyor.com/project/kethinov/teddy) [![Coverage Status](https://coveralls.io/repos/github/kethinov/teddy/badge.svg?branch=master)](https://coveralls.io/github/kethinov/teddy?branch=master)
+[![Build Status](https://travis-ci.org/kethinov/teddy.svg?branch=master)](https://travis-ci.org/kethinov/teddy) [![Build status](https://ci.appveyor.com/api/projects/status/6w5a9jbw2gsw16rs?svg=true)](https://ci.appveyor.com/project/kethinov/teddy) [![Coverage Status](https://coveralls.io/repos/github/kethinov/teddy/badge.svg?branch=master)](https://coveralls.io/github/kethinov/teddy?branch=master) [![npm](https://img.shields.io/npm/v/teddy.svg)](https://www.npmjs.com/package/teddy)
 
 Teddy is the most readable and easy to learn templating language there is!
 
