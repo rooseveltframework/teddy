@@ -180,4 +180,9 @@ describe('Misc', function() {
     assert.equalIgnoreSpaces(teddy.flushCache(5), '');
     done();
   });
+
+  it('should render undefined variables as text (misc/undefinedVar.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('misc/undefinedVar.html', model), '<p>{undefinedVar}</p><p>{definedParent.undefinedMember}</p>');
+    done();
+  });
 });

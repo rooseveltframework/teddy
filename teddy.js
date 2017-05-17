@@ -922,6 +922,9 @@
             }
           }
 
+          // cleanup model when loop finished
+          delete model[val];
+
           return parsedLoop;
         }
       }
