@@ -1,7 +1,7 @@
 
 Teddy templating engine
 ===
-[![Build Status](https://travis-ci.org/kethinov/teddy.svg?branch=master)](https://travis-ci.org/kethinov/teddy) [![Build status](https://ci.appveyor.com/api/projects/status/6w5a9jbw2gsw16rs?svg=true)](https://ci.appveyor.com/project/kethinov/teddy) [![Coverage Status](https://coveralls.io/repos/github/kethinov/teddy/badge.svg?branch=master)](https://coveralls.io/github/kethinov/teddy?branch=master) [![npm](https://img.shields.io/npm/v/teddy.svg)](https://www.npmjs.com/package/teddy)
+[![Build Status](https://travis-ci.org/rooseveltframework/teddy.svg?branch=master)](https://travis-ci.org/rooseveltframework/teddy) [![Build status](https://ci.appveyor.com/api/projects/status/6w5a9jbw2gsw16rs?svg=true)](https://ci.appveyor.com/project/rooseveltframework/teddy) [![Coverage Status](https://coveralls.io/repos/github/rooseveltframework/teddy/badge.svg?branch=master)](https://coveralls.io/github/rooseveltframework/teddy?branch=master) [![npm](https://img.shields.io/npm/v/teddy.svg)](https://www.npmjs.com/package/teddy)
 
 Teddy is the most readable and easy to learn templating language there is!
 
@@ -9,28 +9,28 @@ Or put a more technical way, Teddy is an easy to read, HTML-inspired, mostly log
 
 It uses HTML-like `<tags>` for rudimentary templating logic and Teddy Roosevelt's facial hair for `{variables}`.
 
-![Teddy Roosevelt's facial hair is a curly brace.](https://raw.github.com/kethinov/mkroosevelt/master/sampleApp/statics/images/teddy.jpg "Teddy Roosevelt's facial hair is a curly brace.")
+![Teddy Roosevelt's facial hair is a curly brace.](https://raw.github.com/rooseveltframework/mkroosevelt/master/sampleApp/statics/images/teddy.jpg "Teddy Roosevelt's facial hair is a curly brace.")
 
 
 Table of contents
 ===
 
-- [Why yet another templating engine?](https://github.com/kethinov/teddy#why-yet-another-templating-engine)
-  - [Other popular templating engines are too cryptic](https://github.com/kethinov/teddy#other-popular-templating-engines-are-too-cryptic)
-- [Teddy, symbol-buster extraordinaire](https://github.com/kethinov/teddy#teddy-symbol-buster-extraordinaire)
-- [How to write Teddy templates](https://github.com/kethinov/teddy#how-to-write-teddy-templates)
-  - [Variables](https://github.com/kethinov/teddy#variables)
-  - [Includes](https://github.com/kethinov/teddy#includes)
-  - [Conditionals](https://github.com/kethinov/teddy#conditionals)
-  - [Boolean logic](https://github.com/kethinov/teddy#boolean-logic)
-  - [One line ifs](https://github.com/kethinov/teddy#one-line-ifs)
-  - [Loops](https://github.com/kethinov/teddy#loops)
-  - [A complex example combining all tag types](https://github.com/kethinov/teddy#a-complex-example-combining-all-tag-types)
-- [Using Teddy in Node.js](https://github.com/kethinov/teddy#using-teddy-in-nodejs)
-- [Using Teddy with client-side JS](https://github.com/kethinov/teddy#using-teddy-with-client-side-js)
-- [API documentation](https://github.com/kethinov/teddy#api-documentation)
-- [Client-side browser support](https://github.com/kethinov/teddy#client-side-browser-support)
-- [How to run the unit tests](https://github.com/kethinov/teddy#how-to-run-the-unit-tests)
+- [Why yet another templating engine?](https://github.com/rooseveltframework/teddy#why-yet-another-templating-engine)
+  - [Other popular templating engines are too cryptic](https://github.com/rooseveltframework/teddy#other-popular-templating-engines-are-too-cryptic)
+- [Teddy, symbol-buster extraordinaire](https://github.com/rooseveltframework/teddy#teddy-symbol-buster-extraordinaire)
+- [How to write Teddy templates](https://github.com/rooseveltframework/teddy#how-to-write-teddy-templates)
+  - [Variables](https://github.com/rooseveltframework/teddy#variables)
+  - [Includes](https://github.com/rooseveltframework/teddy#includes)
+  - [Conditionals](https://github.com/rooseveltframework/teddy#conditionals)
+  - [Boolean logic](https://github.com/rooseveltframework/teddy#boolean-logic)
+  - [One line ifs](https://github.com/rooseveltframework/teddy#one-line-ifs)
+  - [Loops](https://github.com/rooseveltframework/teddy#loops)
+  - [A complex example combining all tag types](https://github.com/rooseveltframework/teddy#a-complex-example-combining-all-tag-types)
+- [Using Teddy in Node.js](https://github.com/rooseveltframework/teddy#using-teddy-in-nodejs)
+- [Using Teddy with client-side JS](https://github.com/rooseveltframework/teddy#using-teddy-with-client-side-js)
+- [API documentation](https://github.com/rooseveltframework/teddy#api-documentation)
+- [Client-side browser support](https://github.com/rooseveltframework/teddy#client-side-browser-support)
+- [How to run the unit tests](https://github.com/rooseveltframework/teddy#how-to-run-the-unit-tests)
 
 
 
@@ -377,7 +377,7 @@ Teddy is designed for use with [Express](http://expressjs.com) in [Node.js](http
 - Then initialize express and configure it to your liking.
 - In your express config, make sure to include this line: `app.engine('html', teddy.__express)`.
 
-If you're looking for a more fully-featured web framework to build web apps with using Teddy templates, then try out Teddy's companion, [Roosevelt](https://github.com/kethinov/roosevelt).
+If you're looking for a more fully-featured web framework to build web apps with using Teddy templates, then try out Teddy's companion, [Roosevelt](https://github.com/rooseveltframework/roosevelt).
 
 If you're interested in using Teddy with the [gulp.js](http://gulpjs.com) build system for Node apps, check out the [gulp-teddy](https://github.com/Csombek/gulp-teddy) project.
 
@@ -444,7 +444,7 @@ Want to hack teddy's code but don't want to break something and cause a regressi
 Start by cloning the git repo:
 
 ```
-git clone git@github.com:kethinov/teddy.git
+git clone git@github.com:rooseveltframework/teddy.git
 cd teddy
 ```
 
