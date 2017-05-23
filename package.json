@@ -3,7 +3,7 @@
   "description": "Teddy Templating Engine",
   "author": "Eric Newport <kethinov@gmail.com>",
   "version": "0.4.14",
-  "homepage": "https://github.com/kethinov/teddy",
+  "homepage": "https://github.com/rooseveltframework/teddy",
   "license": "CC-BY-4.0",
   "main": "teddy.js",
   "readmeFilename": "README.md",
@@ -82,7 +82,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/kethinov/teddy.git"
+    "url": "git://github.com/rooseveltframework/teddy.git"
   },
   "keywords": [
     "teddy.js",
