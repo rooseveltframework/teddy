@@ -51,7 +51,7 @@ module.exports = function(config) {
     singleRun: true,
     browsers: ['Chrome'],
     customLaunchers: {
-      Chrome_travis_ci: {
+      Chrome_travis_ci: { // eslint-disable-line camelcase
         base: 'Chrome',
         flags: ['--no-sandbox']
       }
