@@ -7,7 +7,7 @@ if (typeof process === 'object') {
   global.model = makeModel();
 }
 else {
-  var assert = chai.assert,
+  var assert = chai.assert, // eslint-disable-line no-unused-vars
       templates = window.__html__,
       i;
 
