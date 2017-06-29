@@ -11,8 +11,7 @@
     "node": ">=6.0.0"
   },
   "engineStrict": true,
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "eslint": "4.1.0",
     "mocha": "3.4.2",
@@ -32,7 +31,9 @@
     "karma-ie-launcher": "1.0.0",
     "lcov-result-merger": "1.2.0",
     "karma-html2js-preprocessor": "1.1.0",
-    "karma-spec-reporter": "0.0.31"
+    "karma-spec-reporter": "0.0.31",
+    "lint-staged": "^4.0.0",
+    "husky": "^0.13.4"
   },
   "eslintConfig": {
     "env": {
@@ -43,25 +44,77 @@
     "rules": {
       "curly": 2,
       "semi": 2,
-      "strict": [2, "never"],
-      "quotes": [2, "single"],
-      "no-trailing-spaces": ["error", { "skipBlankLines": false }],
-      "camelcase": [2, {"properties": "always"}],
-      "comma-spacing": [2, {"before": false, "after": true}],
-      "indent": [2, 2, {"VariableDeclarator": 2, "SwitchCase": 1}],
+      "strict": [
+        2,
+        "never"
+      ],
+      "quotes": [
+        2,
+        "single"
+      ],
+      "no-trailing-spaces": [
+        "error",
+        {
+          "skipBlankLines": false
+        }
+      ],
+      "camelcase": [
+        2,
+        {
+          "properties": "always"
+        }
+      ],
+      "comma-spacing": [
+        2,
+        {
+          "before": false,
+          "after": true
+        }
+      ],
+      "indent": [
+        2,
+        2,
+        {
+          "VariableDeclarator": 2,
+          "SwitchCase": 1
+        }
+      ],
       "eol-last": 0,
       "handle-callback-err": 0,
-      "no-use-before-define": [2, "nofunc"],
-      "no-unused-vars": [2, {"vars": "all", "args": "none"}],
+      "no-use-before-define": [
+        2,
+        "nofunc"
+      ],
+      "no-unused-vars": [
+        2,
+        {
+          "vars": "all",
+          "args": "none"
+        }
+      ],
       "no-console": 0,
       "no-mixed-requires": 0,
-      "one-var": [2, "always"],
+      "one-var": [
+        2,
+        "always"
+      ],
       "dot-notation": 0,
       "no-path-concat": 0,
       "no-alert": 0,
-      "brace-style": [2, "stroustrup"],
-      "keyword-spacing": ["error", { "before": true, "after": true }],
-      "space-before-blocks": ["error"]
+      "brace-style": [
+        2,
+        "stroustrup"
+      ],
+      "keyword-spacing": [
+        "error",
+        {
+          "before": true,
+          "after": true
+        }
+      ],
+      "space-before-blocks": [
+        "error"
+      ]
     }
   },
   "scripts": {
@@ -74,12 +127,12 @@
     "test-safari": "karma start --browsers Safari",
     "eslint": "eslint .",
     "cover": "cross-env NODE_ENV=cover istanbul cover _mocha --recursive test",
-    "coverage": "npm run cover"
+    "coverage": "npm run cover",
+    "precommit": "lint-staged && npm run test" 
   },
-  "pre-commit": [
-    "test",
-    "eslint"
-  ],
+  "lint-staged": {
+    "*.js": "./node_modules/.bin/eslint"
+  },
   "repository": {
     "type": "git",
     "url": "git://github.com/rooseveltframework/teddy.git"
