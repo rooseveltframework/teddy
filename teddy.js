@@ -1240,7 +1240,6 @@
         el = el[0];
         el = el.split(' ');
         el = el[0];
-        //console.log(el);
         return el;
       }
       else {
