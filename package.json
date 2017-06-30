@@ -2,7 +2,7 @@
   "name": "teddy",
   "description": "Teddy Templating Engine",
   "author": "Eric Newport <kethinov@gmail.com>",
-  "version": "0.4.14",
+  "version": "0.4.15",
   "homepage": "https://github.com/rooseveltframework/teddy",
   "license": "CC-BY-4.0",
   "main": "teddy.js",
@@ -11,8 +11,7 @@
     "node": ">=6.0.0"
   },
   "engineStrict": true,
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "eslint": "3.19.0",
     "mocha": "3.4.2",
@@ -43,25 +42,77 @@
     "rules": {
       "curly": 2,
       "semi": 2,
-      "strict": [2, "never"],
-      "quotes": [2, "single"],
-      "no-trailing-spaces": ["error", { "skipBlankLines": false }],
-      "camelcase": [2, {"properties": "always"}],
-      "comma-spacing": [2, {"before": false, "after": true}],
-      "indent": [2, 2, {"VariableDeclarator": 2, "SwitchCase": 1}],
+      "strict": [
+        2,
+        "never"
+      ],
+      "quotes": [
+        2,
+        "single"
+      ],
+      "no-trailing-spaces": [
+        "error",
+        {
+          "skipBlankLines": false
+        }
+      ],
+      "camelcase": [
+        2,
+        {
+          "properties": "always"
+        }
+      ],
+      "comma-spacing": [
+        2,
+        {
+          "before": false,
+          "after": true
+        }
+      ],
+      "indent": [
+        2,
+        2,
+        {
+          "VariableDeclarator": 2,
+          "SwitchCase": 1
+        }
+      ],
       "eol-last": 0,
       "handle-callback-err": 0,
-      "no-use-before-define": [2, "nofunc"],
-      "no-unused-vars": [2, {"vars": "all", "args": "none"}],
+      "no-use-before-define": [
+        2,
+        "nofunc"
+      ],
+      "no-unused-vars": [
+        2,
+        {
+          "vars": "all",
+          "args": "none"
+        }
+      ],
       "no-console": 0,
       "no-mixed-requires": 0,
-      "one-var": [2, "always"],
+      "one-var": [
+        2,
+        "always"
+      ],
       "dot-notation": 0,
       "no-path-concat": 0,
       "no-alert": 0,
-      "brace-style": [2, "stroustrup"],
-      "keyword-spacing": ["error", { "before": true, "after": true }],
-      "space-before-blocks": ["error"]
+      "brace-style": [
+        2,
+        "stroustrup"
+      ],
+      "keyword-spacing": [
+        "error",
+        {
+          "before": true,
+          "after": true
+        }
+      ],
+      "space-before-blocks": [
+        "error"
+      ]
     }
   },
   "scripts": {

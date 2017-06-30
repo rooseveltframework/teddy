@@ -81,7 +81,7 @@ describe('Includes', function() {
   });
 
   it('should evaluate a nested reverse quotes oneliner with an arg passed to it (includes/nestedOneliner.html)', function(done) {
-    assert.equalIgnoreSpaces(teddy.render('includes/nestedOneliner', model), '<p class=\'Some content\'>One line if.</p>');
+    assert.equalIgnoreSpaces(teddy.render('includes/nestedOneliner', model), '<p class="Some content">One line if.</p>');
     done();
   });
 });
