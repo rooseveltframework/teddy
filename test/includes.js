@@ -79,4 +79,9 @@ describe('Includes', function() {
     assert.equal(teddy.render('includes/includeInfiniteLoop.html', model), 'Render aborted due to max number of passes (100) exceeded; there is a possible infinite loop in your template logic.');
     done();
   });
+
+  it('should evaluate a nested reverse quotes oneliner with an arg passed to it (includes/nestedOneliner.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('includes/nestedOneliner', model), '<p class=\'Some content\'>One line if.</p>');
+    done();
+  });
 });
