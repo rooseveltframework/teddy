@@ -453,7 +453,7 @@
               if (loop) {
 
                 // try for a version of this loop that might have a data model attached to it now
-                el = renderedTemplate.match(new RegExp('(?:{' + ( i + 1 ) + '_loop data-local-model=\\\'[\\S\\s]*?\\\'})'));
+                el = renderedTemplate.match(new RegExp('(?:{' + ( i + 1 ) + '_loop data-local-model=[0-9]*})'));
 
                 if (el && el[0]) {
                   el = el[0];
@@ -690,13 +690,13 @@
           match = parseVars(match, model);
           nmatch = match;
 
-          match = match.split('data-local-model=\'');
+          match = match.split('data-local-model=');
           localModelString = match[1]; // the variable's local model (if any)
           varname = match[0].trim(); // the variable's name (plus any flags)
           ovarname = varname;
           varname = varname.split('|s')[0]; // remove escape flag if present
           if (localModelString) {
-            localModel = applyLocalModel('{'+varname+' ' + 'data-local-model=\'' + localModelString + '}', Object.assign({}, model));
+            localModel = applyLocalModel('{'+varname+' ' + 'data-local-model=' + localModelString + '}', Object.assign({}, model));
           }
           dots = varname.split('.');
           numDots = dots.length;
@@ -714,7 +714,7 @@
             return replaceNonRegex(docstring, '{' + omatch + '}', renderVar('{' + ovarname + '}', ovarname, curVar));
           }
           else {
-            return replaceNonRegex(docstring, '{' + omatch + '}', ('{' + nmatch + '}').replace(/ data-local-model=\'[\S\s]*?\'/, ''));
+            return replaceNonRegex(docstring, '{' + omatch + '}', ('{' + nmatch + '}').replace(/ data-local-model=[0-9]*/g, ''));
           }
         }
 
@@ -835,10 +835,10 @@
             localModel = Object.assign(localModel, extraModel);
             modelNumber = contextModels.push(localModel);
             modelNumber--;
-            return match.replace(lastChar, ' data-local-model=\'' + modelNumber + '\'' + lastChar);
+            return match.replace(lastChar, ' data-local-model=' + modelNumber + lastChar);
           }
           else if (match.indexOf('data-local-model') === -1) {
-            return match.replace(lastChar, ' data-local-model=\'' + modelNumber + '\'' + lastChar);
+            return match.replace(lastChar, ' data-local-model=' + modelNumber + lastChar);
           }
           else {
             return match;
@@ -850,12 +850,12 @@
 
       // retrieve local model from cache and apply it to full model for parsing
       function applyLocalModel(el, model) {
-        var localModel = el.match(/data-local-model=\'[\S\s]*?\'/),
+        var localModel = el.match(/data-local-model=[0-9]*/),
             i;
 
         if (localModel) {
           localModel = localModel[0];
-          localModel = localModel.replace('data-local-model=\'', '');
+          localModel = localModel.replace('data-local-model=', '');
           localModel = localModel.substring(0, localModel.length);
           localModel = contextModels[parseInt(localModel)];
           for (i in localModel) {
@@ -1231,6 +1231,22 @@
   // get a specific attribute from a given element
   function getAttribute(el, attr) {
     var i, l, a, match;
+
+    if (attr === 'data-local-model') {
+      el = el.split('data-local-model=');
+      if (el[1]) {
+        el = el[1];
+        el = el.split('>');
+        el = el[0];
+        el = el.split(' ');
+        el = el[0];
+        return el;
+      }
+      else {
+        return false;
+      }
+    }
+
     match = el.match(new RegExp(attr.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&') + '=(\\\'.*?\\\'|\\".*?\\")'));
 
     if (!match) {

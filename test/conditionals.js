@@ -173,4 +173,14 @@ describe('Conditionals', function() {
     assert.equalIgnoreSpaces(teddy.render('conditionals/ifNestedProperties.html', model), '<p>Should render</p>');
     done();
   });
+
+  it('should evaluate one line if "if-something" as true with quote types reversed (conditionals/oneLineReverseQuotes.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineReverseQuotes.html', model), '<p class="something-true">One line if.</p>');
+    done();
+  });
+
+  it('should evaluate one line if "if-something" as true with quote types reversed and a variable result (conditionals/oneLineReverseQuotesVar.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineReverseQuotesVar.html', model), '<p class="Some content">One line if.</p>');
+    done();
+  });
 });
