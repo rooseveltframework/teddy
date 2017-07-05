@@ -14,6 +14,11 @@ describe('Misc', function() {
     done();
   });
 
+  it('should not render nested {variables|p} (misc/nestedVarsParseFlag.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('misc/nestedVarsParseFlag.html', model), '<p>Variable with a variable inside: {subVar}</p>');
+    done();
+  });
+
   it('should properly escape HTML entities present in {variables} (misc/varEscaping.html)', function(done) {
     assert.equalIgnoreSpaces(teddy.render('misc/varEscaping.html', model), '<p>&lt;span&gt;raw html&lt;/span&gt;</p>');
     done();

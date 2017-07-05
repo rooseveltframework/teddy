@@ -712,6 +712,7 @@
           varname = match[0].trim(); // the variable's name (plus any flags)
           ovarname = varname;
           varname = varname.split('|s')[0]; // remove escape flag if present
+          varname = varname.split('|p')[0]; // remove no parse flag if present
           if (localModelString) {
             localModel = applyLocalModel('{'+varname+' ' + 'data-local-model=' + localModelString + '}', Object.assign({}, model));
           }
@@ -1205,6 +1206,11 @@
           if (!escapeOverride) {
             varval = escapeHtmlEntities(varval);
           }
+        }
+
+        // check for no parse flag
+        if (varname.slice(-2) === '|p' || varname.slice(-3) === '|p`') {
+          varval = '<noteddy>' + varval + '</noteddy>';
         }
 
         return replaceNonRegex(str, new RegExp('{' + varname.replace(/\|/g, '\\|') + '}', 'g'), varval);
