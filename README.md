@@ -351,6 +351,11 @@ To skip teddy parsing a block of code, use a `<noteddy>` tag:
 <p><noteddy>{this_var_will_not_be_parsed}</noteddy></p>
 ```
 
+You can also instruct the contents of a variable to not be parsed after that variable is rendered using the `|p` flag:
+
+```html
+<p>{this_var_will_be_parsed_but_its_contents_will_not_be|p}</p>
+```
 
 A complex example combining many tags
 ---
