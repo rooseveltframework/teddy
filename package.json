@@ -2,7 +2,7 @@
   "name": "teddy",
   "description": "Teddy Templating Engine",
   "author": "Eric Newport <kethinov@gmail.com>",
-  "version": "0.4.15",
+  "version": "0.4.16",
   "homepage": "https://github.com/rooseveltframework/teddy",
   "license": "CC-BY-4.0",
   "main": "teddy.js",
@@ -128,7 +128,7 @@
     "eslint": "eslint .",
     "cover": "cross-env NODE_ENV=cover istanbul cover _mocha --recursive test",
     "coverage": "npm run cover",
-    "precommit": "lint-staged && npm run test" 
+    "precommit": "lint-staged && npm run test"
   },
   "lint-staged": {
     "*.js": "./node_modules/.bin/eslint"

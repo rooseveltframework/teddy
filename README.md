@@ -27,7 +27,8 @@ Table of contents
   - [Boolean logic](https://github.com/rooseveltframework/teddy#boolean-logic)
   - [One line ifs](https://github.com/rooseveltframework/teddy#one-line-ifs)
   - [Loops](https://github.com/rooseveltframework/teddy#loops)
-  - [A complex example combining all tag types](https://github.com/rooseveltframework/teddy#a-complex-example-combining-all-tag-types)
+  - [Non-parsed-blocks](https://github.com/rooseveltframework/teddy#non-parsed-blocks)
+  - [A complex example combining many tags](https://github.com/rooseveltframework/teddy#a-complex-example-combining-many-tags)
 - [Using Teddy in Node.js](https://github.com/rooseveltframework/teddy#using-teddy-in-nodejs)
 - [Using Teddy with client-side JS](https://github.com/rooseveltframework/teddy#using-teddy-with-client-side-js)
 - [API documentation](https://github.com/rooseveltframework/teddy#api-documentation)
@@ -342,8 +343,16 @@ For the above array of objects, we can combine the techniques illustrated above 
 
 *Note: you can also use `in` in place of `through` if you like a more concise syntax.*
 
+## Non-parsed blocks
 
-A complex example combining all tag types
+To skip teddy parsing a block of code, use a `<noteddy>` tag:
+
+```html
+<p><noteddy>{this_var_will_not_be_parsed}</noteddy></p>
+```
+
+
+A complex example combining many tags
 ---
 
 Supposing the following JS model again:

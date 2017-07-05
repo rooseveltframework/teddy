@@ -24,6 +24,11 @@ describe('Misc', function() {
     done();
   });
 
+  it('should not parse any code in <noteddy> tags (misc/varNoParsing.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('misc/varNoParsing.html', model), '<p>{escapeTest}</p>');
+    done();
+  });
+
   it('should remove {! server side comments !} (misc/serverSideComments.html)', function(done) {
     assert.equalIgnoreSpaces(teddy.render('misc/serverSideComments.html', model), '<p>test test</p>');
     done();

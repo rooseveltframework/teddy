@@ -327,6 +327,9 @@
           loops = [],
           loopCount,
           loop,
+          noteddys = [],
+          noteddysMatches,
+          noteddysCount,
           i,
           l,
           el,
@@ -444,6 +447,13 @@
 
       do {
         do {
+          // replace <noteddy> blocks
+          noteddysMatches = matchRecursive(renderedTemplate, '<noteddy>...<\/noteddy>');
+          noteddysCount = noteddysMatches.length;
+          for (i = 0; i < noteddysCount; i++) {
+            renderedTemplate = renderedTemplate.replace('<noteddy>' + noteddysMatches[i] + '<\/noteddy>', '<restoreteddy' + (noteddys.push(noteddysMatches[i]) - 1) + '>');
+          }
+
           if (parseNonLoopedElements()) {
 
             // parse removed loops
@@ -502,6 +512,13 @@
         }
       }
       while (diff !== renderedTemplate); // do another pass if this introduced new code to parse
+
+      // restore <noteddy> blocks
+      noteddysMatches = matchRecursive(renderedTemplate, '<restoreteddy...>');
+      noteddysCount = noteddysMatches.length;
+      for (i = 0; i < noteddysCount; i++) {
+        renderedTemplate = renderedTemplate.replace('<restoreteddy' + noteddysMatches[i] + '>', noteddys[i]);
+      }
 
       // clean up temp vars
       contextModels = [];
