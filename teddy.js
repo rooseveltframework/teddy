@@ -680,7 +680,7 @@
 
             model = applyLocalModel(el, model);
 
-            console.log(el);
+            // console.log(el);
             // enter black box? then break
 
             //break;
@@ -1008,14 +1008,14 @@
             midIfUnaryConditionalRegexp  = /(?: if-[\S]*? )/,
             endIfUnaryConditionalRegexp  = /(?: if-[\S]*?>)/;
 
-        console.log(parts);
+        // console.log(parts);
         if (l === 1) { // seems like this is a root cause of the bug, of the bug.
           // do nothing with the el if the parts needed for eval are not there.
           return el;
         }
 
         for (i = 1; i < l; i++) {
-          console.log('the other suh dude');
+          // console.log('the other suh dude');
           part = parts[i];
           if (flip) {
             extraString += ' if-' + part;
@@ -1100,7 +1100,7 @@
           for (i = 0; i < length; i++) {
             // console.log('a single attr:  ', attributes[i]);
             if (attributes[i].indexOf('if') === -1) {
-              console.log('suh dude');
+              // console.log('suh dude');
             }
             conditionAttr = attributes[i].split('=');
             if (conditionAttr[0].substr(0, 3) === 'if-') {

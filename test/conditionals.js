@@ -195,7 +195,7 @@ describe.only('Conditionals', function() {
   });
 
   // it.only('should ignore \'if-\' when not part of an if statement when combined with a one line if statement. (conditionals/nestedIfOutsideIf.html)', function(done) {
-  //   assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineIfOutsideIf.html', model), '<p> gif-jpg-png Some content </p>');
+  //   assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineIfOutsideIf.html', model), '<p> gif-jpg-png hello </p>');
   //   done();
   // });
 
