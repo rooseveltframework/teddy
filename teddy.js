@@ -601,7 +601,7 @@
             el,
             l,
             result,
-            i;
+            i, regex, match;
 
         do {
           if (ifsDone) {
@@ -669,21 +669,33 @@
 
         // do one line ifs now...
         if (renderedTemplate.indexOf('if-') > -1) {
-          onelines = renderedTemplate.match(/[^<]*?if-[^>]+/g);
-          l = onelines ? onelines.length : 0;
+          console.log('rendered template', renderedTemplate);
 
+          // TEST recursive match. 
+          regex = new RegExp('<((?!>)[^>]*)', 'g');
+          do {
+            match  = regex.exec(renderedTemplate);
+
+            if (match) {
+              match = match[1].match(/[^<]*?if-[^>]+/g); // second pass with old and stable
+              if (match !== null) {
+                onelines = match;
+                console.log('TEMP:  ', onelines);
+              }
+            }
+
+          } while (match !== null);
+
+
+          // onelines = renderedTemplate.match(/[^<]*?if-[^>]+/g); // old stable
+          // onelines = renderedTemplate.match(/[^<]*?>/g);
+          // onelines = renderedTemplate.match(/([^<]*?)(?:>)/g);
+          console.log('NORMAL: ', onelines);
+          console.log();
+          l = onelines ? onelines.length : 0;
           for (i = 0; i < l; i++) {
             el = '<' + onelines[i] + '>';
-
-
-
-
             model = applyLocalModel(el, model);
-
-            // console.log(el);
-            // enter black box? then break
-
-            //break;
 
             result = renderOneLineConditional(el, model);
 
@@ -1009,10 +1021,10 @@
             endIfUnaryConditionalRegexp  = /(?: if-[\S]*?>)/;
 
         // console.log(parts);
-        if (l === 1) { // seems like this is a root cause of the bug, of the bug.
-          // do nothing with the el if the parts needed for eval are not there.
-          return el;
-        }
+        // if (l === 1) { // seems like this is a root cause of the bug, of the bug.
+        //   // do nothing with the el if the parts needed for eval are not there.
+        //   return el;
+        // }
 
         for (i = 1; i < l; i++) {
           // console.log('the other suh dude');
