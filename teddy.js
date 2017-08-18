@@ -586,7 +586,6 @@
 
       // finds all <if> and <unless> tags and renders them along with any related <elseif>, <elseunless>, and <else> tags
       function parseConditionals(renderedTemplate, model) {
-
         var conds,
             loopTypesLeft = true,
             findElses = true,
@@ -994,6 +993,7 @@
             flip = false,
             extraString = '',
 
+            // One line if statement regexp
             midIfBinaryConditionalRegexp = /(?: if-[\S]*?=(?:"[\S\s]*?"|'[\S\s]*?') )/,
             endIfBinaryConditionalRegexp = /(?: if-[\S]*?=(?:"[\S\s]*?"|'[\S\s]*?')>)/,
             midIfUnaryConditionalRegexp  = /(?: if-[\S]*? )/,
