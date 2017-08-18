@@ -587,7 +587,6 @@
       // finds all <if> and <unless> tags and renders them along with any related <elseif>, <elseunless>, and <else> tags
       function parseConditionals(renderedTemplate, model) {
 
-        // console.log(renderedTemplate);
         var conds,
             loopTypesLeft = true,
             findElses = true,
@@ -601,7 +600,7 @@
             el,
             l,
             result,
-            i, regex, match;
+            i;
 
         do {
           if (ifsDone) {
@@ -669,38 +668,19 @@
 
         // do one line ifs now...
         if (renderedTemplate.indexOf('if-') > -1) {
-          console.log('rendered template', renderedTemplate);
-
-          // TEST recursive match. 
-          regex = new RegExp('<((?!>)[^>]*)', 'g');
-          do {
-            match  = regex.exec(renderedTemplate);
-
-            if (match) {
-              match = match[1].match(/[^<]*?if-[^>]+/g); // second pass with old and stable
-              if (match !== null) {
-                onelines = match;
-                console.log('TEMP:  ', onelines);
-              }
-            }
-
-          } while (match !== null);
-
-
-          // onelines = renderedTemplate.match(/[^<]*?if-[^>]+/g); // old stable
-          // onelines = renderedTemplate.match(/[^<]*?>/g);
-          // onelines = renderedTemplate.match(/([^<]*?)(?:>)/g);
-          console.log('NORMAL: ', onelines);
-          console.log();
+          onelines = renderedTemplate.match(/[^<]*?if-[^>]+/g); // old stable
           l = onelines ? onelines.length : 0;
           for (i = 0; i < l; i++) {
+
+            // completely ignore the matches if they contain any angle brackets.
+            if (onelines[i].indexOf('>') > -1 || onelines[i].indexOf('<') > -1) {
+              continue;
+            }
+
             el = '<' + onelines[i] + '>';
             model = applyLocalModel(el, model);
-
             result = renderOneLineConditional(el, model);
-
             renderedTemplate = replaceNonRegex(renderedTemplate, el, result);
-
           }
         }
 
@@ -1020,14 +1000,7 @@
             midIfUnaryConditionalRegexp  = /(?: if-[\S]*? )/,
             endIfUnaryConditionalRegexp  = /(?: if-[\S]*?>)/;
 
-        // console.log(parts);
-        // if (l === 1) { // seems like this is a root cause of the bug, of the bug.
-        //   // do nothing with the el if the parts needed for eval are not there.
-        //   return el;
-        // }
-
         for (i = 1; i < l; i++) {
-          // console.log('the other suh dude');
           part = parts[i];
           if (flip) {
             extraString += ' if-' + part;
@@ -1087,20 +1060,9 @@
             condResult,
             truthStack = [];
 
-
-        // console.log('element:  ', el);
-
-        // test for if- in the soon to be text node
-        // console.log('match:  ', el.match(/[>](.*)[<]/));
-        // console.log(el.indexOf('if-'));
-
-        // if tag has not attributes  and the .indexof('if-') is wiht the text node do nothing(?)
         conditionType = getNodeName(el);
-        // console.log(conditionType);
         attributes = getAttributes(el);
         length = attributes.length;
-        // console.log('aretibutes:   ', attributes);
-        // console.log('attributes length:  ', length);
 
         if (conditionType === 'else') {
           return true;
@@ -1110,10 +1072,6 @@
           // it's a one-liner
           conditionType = 'onelineif';
           for (i = 0; i < length; i++) {
-            // console.log('a single attr:  ', attributes[i]);
-            if (attributes[i].indexOf('if') === -1) {
-              // console.log('suh dude');
-            }
             conditionAttr = attributes[i].split('=');
             if (conditionAttr[0].substr(0, 3) === 'if-') {
               conditionVal = conditionAttr[1];
