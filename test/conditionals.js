@@ -1,4 +1,4 @@
-describe.only('Conditionals', function() {
+describe('Conditionals', function() {
   it('should evaluate <if something> as true (conditionals/if.html)', function(done) {
     assert.equalIgnoreSpaces(teddy.render('conditionals/if.html', model), '<p>The variable \'something\' is present</p>');
     done();
@@ -98,7 +98,6 @@ describe.only('Conditionals', function() {
   });
 
   it('should evaluate one line if "if-something" as true (conditionals/oneLine.html)', function(done) {
-    // console.log('render:  ', teddy.render('conditionals/oneLine.html', model));
     assert.equalIgnoreSpaces(teddy.render('conditionals/oneLine.html', model), '<p class=\'something-is-present\'>One line if.</p>');
     done();
   });

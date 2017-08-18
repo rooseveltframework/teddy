@@ -668,7 +668,7 @@
 
         // do one line ifs now...
         if (renderedTemplate.indexOf('if-') > -1) {
-          onelines = renderedTemplate.match(/[^<]*?if-[^>]+/g); // old stable
+          onelines = renderedTemplate.match(/[^<]*?if-[^>]+/g);
           l = onelines ? onelines.length : 0;
           for (i = 0; i < l; i++) {
 
@@ -994,7 +994,6 @@
             flip = false,
             extraString = '',
 
-            // One line if statement regexp (add another here?)
             midIfBinaryConditionalRegexp = /(?: if-[\S]*?=(?:"[\S\s]*?"|'[\S\s]*?') )/,
             endIfBinaryConditionalRegexp = /(?: if-[\S]*?=(?:"[\S\s]*?"|'[\S\s]*?')>)/,
             midIfUnaryConditionalRegexp  = /(?: if-[\S]*? )/,
@@ -1043,7 +1042,7 @@
       function evalCondition(el, model) {
         el = el.trim();
 
-        var conditionType, // new condition type isloatedIf?
+        var conditionType,
             attrCount = 0,
             conditionAttr,
             attributes,
