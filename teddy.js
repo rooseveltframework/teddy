@@ -682,11 +682,6 @@
 
               // iterate over stable match within the recursed match
               for (i = 0; i < l; i++) {
-
-                // completely ignore the matches if they contain any angle brackets.
-                if (onelines[i].indexOf('>') > -1 || onelines[i].indexOf('<') > -1) {
-                  continue;
-                }
                 el = '<' + onelines[i] + '>';
                 model = applyLocalModel(el, model);
                 result = renderOneLineConditional(el, model);
