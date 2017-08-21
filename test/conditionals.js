@@ -1,4 +1,4 @@
-describe('Conditionals', function() {
+describe.only('Conditionals', function() {
   it('should evaluate <if something> as true (conditionals/if.html)', function(done) {
     assert.equalIgnoreSpaces(teddy.render('conditionals/if.html', model), '<p>The variable \'something\' is present</p>');
     done();
@@ -196,6 +196,16 @@ describe('Conditionals', function() {
 
   it('should ignore \'if-\' when not part of an if statement when combined with a normal if statement. (conditionals/nestedIfOutsideIf.html)', function(done) {
     assert.equalIgnoreSpaces(teddy.render('conditionals/nestedIfOutsideIf.html', model), '<p> gif-jpg-png If that should not be parsed, How art thou? </p>');
+    done();
+  });
+
+  it('should ignore \'if-\' when not part of an if statement when combined with a one line if statement. (conditionals/oneLineIfOutsideIf.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineIfOutsideIf.html', model), '<p> gif-jpg-png <p class=\'something-is-present\'> hello </p> </p>');
+    done();
+  });
+
+  it.only('should ignore \'if-\' when not part of an if statement when combined with a one line if statement, reversed. (conditionals/oneLineIfOutsideIfReverse.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineIfOutsideIfReverse.html', model), '<p class=\'something-is-present\'>  gif-jpg-png </p>');
     done();
   });
 });
