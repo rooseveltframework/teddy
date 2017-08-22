@@ -183,4 +183,29 @@ describe('Conditionals', function() {
     assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineReverseQuotesVar.html', model), '<p class="Some content">One line if.</p>');
     done();
   });
+
+  it('should ignore \'if-\' when not part of an if statement. (conditionals/ifOutsideIf.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/ifOutsideIf.html', model), '<p> gif-something-jpg-png </p>');
+    done();
+  });
+
+  it('should ignore \'if-\' when not part of an if statement with a varibale. (conditionals/variableIfOutsideIf.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/varIfOutsideIf.html', model), '<p> gif-Some content-jpg-png </p>');
+    done();
+  });
+
+  it('should ignore \'if-\' when not part of an if statement when combined with a normal if statement. (conditionals/nestedIfOutsideIf.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/nestedIfOutsideIf.html', model), '<p> gif-jpg-png If that should not be parsed, How art thou? </p>');
+    done();
+  });
+
+  it('should ignore \'if-\' when not part of an if statement when combined with a one line if statement. (conditionals/oneLineIfOutsideIf.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineIfOutsideIf.html', model), '<p> gif-jpg-png <p class=\'something-is-present\'> hello </p> </p>');
+    done();
+  });
+
+  it('should ignore \'if-\' when not part of an if statement when combined with a one line if statement, reversed. (conditionals/oneLineIfOutsideIfReverse.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineIfOutsideIfReverse.html', model), '<p class=\'something-is-present\'>  gif-jpg-png </p>');
+    done();
+  });
 });
