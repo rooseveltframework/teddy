@@ -43,6 +43,7 @@ function makeModel() {
         subVar: 'And another: {something}',
         dynamicInclude: 'misc/variable',
         escapeTest: '<span>raw html</span>',
+        doubleFlagEscapeTest: '<h1>double bars</h1> {something}',
         nullVar: null,
         emptyArray: [],
         hello: 'world',
