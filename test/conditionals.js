@@ -208,4 +208,17 @@ describe('Conditionals', function() {
     assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineIfOutsideIfReverse.html', model), '<p class=\'something-is-present\'>  gif-jpg-png </p>');
     done();
   });
+
+  it('should evalulate 5000 one line ifs in under 5000ms (conditionals/oneLinePerformance.html)', function (done) {
+    var start, end, time;
+    start = new Date().getTime();
+
+    teddy.render('conditionals/oneLinePerformance.html', model);
+
+    end = new Date().getTime();
+    time = end - start;
+
+    assert.isAtMost(time, 5000);
+    done();
+  });
 });
