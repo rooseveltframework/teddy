@@ -1203,21 +1203,24 @@
 
         //contains either |s|p or |p|s in the correct position
         if (varname.slice(-4) === '|s|p' || varname.slice(-4) === '|p|s') {
+
           // only act on the no parse flag
           varval = '<noteddy>' + varval + '</noteddy>';
         }
         else {
+
           // escape html entities
           if (varname.slice(-2) !== '|s' && varname.slice(-3) !== '|s`') {
+
             if (!escapeOverride) {
               varval = escapeHtmlEntities(varval);
             }
           }
+
           // check for no parse flag
           if (varname.slice(-2) === '|p' || varname.slice(-3) === '|p`') {
             varval = '<noteddy>' + varval + '</noteddy>';
           }
-
         }
         return replaceNonRegex(str, new RegExp('{' + varname.replace(/\|/g, '\\|') + '}', 'g'), varval);
       }
