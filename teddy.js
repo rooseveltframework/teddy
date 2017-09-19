@@ -1234,6 +1234,7 @@
 
           // check for no parse flag
           if (varname.slice(-2) === '|p' || varname.slice(-3) === '|p`') {
+
             varval = '<noteddy>' + varval + '</noteddy>';
           }
         }
