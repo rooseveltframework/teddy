@@ -595,6 +595,9 @@
             parts,
             elseCond,
             result,
+            recursedOnelines,
+            recursedLength,
+            recursedCount,
             onelines,
             el,
             l,
@@ -667,15 +670,27 @@
 
         // do one line ifs now...
         if (renderedTemplate.indexOf('if-') > -1) {
-          onelines = renderedTemplate.match(/[^<]*?if-[^>]+/g);
-          l = onelines ? onelines.length : 0;
 
-          for (i = 0; i < l; i++) {
-            el = '<' + onelines[i] + '>';
-            model = applyLocalModel(el, model);
-            result = renderOneLineConditional(el, model);
-            renderedTemplate = replaceNonRegex(renderedTemplate, el, result);
+          recursedOnelines = matchRecursive(renderedTemplate, '<...>');
+          recursedLength = recursedOnelines.length;
+          // iterate over recursed match(es)
+          for (recursedCount = 0; recursedCount < recursedLength; recursedCount++) {
+
+            if (recursedOnelines[recursedCount].indexOf('if-') > -1) {
+              onelines = recursedOnelines[recursedCount].match(/[^<]*?if-[^>]+/g);
+              l = onelines ? onelines.length : 0;
+
+              // iterate over stable match within the recursed match
+              for (i = 0; i < l; i++) {
+                el = '<' + onelines[i] + '>';
+                model = applyLocalModel(el, model);
+                result = renderOneLineConditional(el, model);
+                renderedTemplate = replaceNonRegex(renderedTemplate, el, result);
+              }
+
+            }
           }
+
         }
 
         return renderedTemplate;
