@@ -1,4 +1,15 @@
 describe('Misc', function() {
+
+  it('should not escape HTML entities present in {variables} which are properly {flagged|p|s} (misc/barPandSTest.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('misc/barPandSTest.html', model), '<h1>double bars</h1> {something}');
+    done();
+  });
+
+  it('should not escape HTML entities present in {variables} which are properly {flagged|s|p} (misc/barSandPTest.html)', function(done) {
+    assert.equalIgnoreSpaces(teddy.render('misc/barSandPTest.html', model), '<h1>double bars</h1> {something}');
+    done();
+  });
+
   it('should render {variables} (misc/variable.html)', function(done) {
     assert.equalIgnoreSpaces(teddy.render('misc/variable.html', model), '<p>Some content</p>');
     done();

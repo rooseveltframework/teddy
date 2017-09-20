@@ -46,7 +46,7 @@ describe('Looping', function() {
     done();
   });
 
-  it('should loop through same array of 5000 elements in < 700ms during second attempt due to caching (looping/largeDataSet.html)', function(done) {
+  it('should loop through same array of 5000 elements in < 900ms during second attempt due to caching (looping/largeDataSet.html)', function(done) {
     var start, end, time;
     start = new Date().getTime();
 
@@ -55,7 +55,7 @@ describe('Looping', function() {
     end = new Date().getTime();
     time = end - start;
 
-    assert.isAtMost(time, 700);
+    assert.isAtMost(time, 900);
     done();
   });
 
@@ -73,7 +73,7 @@ describe('Looping', function() {
     done();
   });
 
-  it('should loop through same array of 5000 elements in < 700ms during second attempt due to caching (looping/largeDataSet.html)', function(done) {
+  it('should loop through same array of 5000 elements in < 900ms during second attempt due to caching (looping/largeDataSet.html)', function(done) {
     var start, end, time;
     start = new Date().getTime();
 
@@ -82,7 +82,7 @@ describe('Looping', function() {
     end = new Date().getTime();
     time = end - start;
 
-    assert.isAtMost(time, 700);
+    assert.isAtMost(time, 900);
     done();
   });
 
@@ -100,7 +100,7 @@ describe('Looping', function() {
     done();
   });
 
-  it('should loop through same array of 5000 elements in < 700ms during second attempt due to caching (looping/largeDataSet.html)', function(done) {
+  it('should loop through same array of 5000 elements in < 900ms during second attempt due to caching (looping/largeDataSet.html)', function(done) {
     var start, end, time;
     start = new Date().getTime();
 
@@ -110,7 +110,7 @@ describe('Looping', function() {
     time = end - start;
 
     teddy.cacheRenders(false);
-    assert.isAtMost(time, 700);
+    assert.isAtMost(time, 900);
     done();
   });
 
