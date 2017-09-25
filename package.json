@@ -2,7 +2,7 @@
   "name": "teddy",
   "description": "Teddy Templating Engine",
   "author": "Eric Newport <kethinov@gmail.com>",
-  "version": "0.4.18",
+  "version": "0.4.19",
   "homepage": "https://github.com/rooseveltframework/teddy",
   "license": "CC-BY-4.0",
   "main": "teddy.js",
@@ -11,9 +11,11 @@
     "node": ">=6.0.0"
   },
   "engineStrict": true,
-  "dependencies": {},
+  "dependencies": {
+    "i": "^0.3.5"
+  },
   "devDependencies": {
-    "eslint": "4.7.1",
+    "eslint": "4.7.2",
     "mocha": "3.5.3",
     "chai": "4.1.2",
     "chai-string": "1.3.0",
