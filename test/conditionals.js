@@ -209,6 +209,21 @@ describe('Conditionals', function() {
     done();
   });
 
+  it('should evaluate 5000 one line ifs in under 5000ms (conditionals/oneLinePerformance.html)', function (done) {
+
+    var start, end, time;
+    start = new Date().getTime();
+
+    teddy.render('conditionals/oneLinePerformance.html', model);
+
+    end = new Date().getTime();
+    time = end - start;
+
+    assert.isAtMost(time, 5000);
+
+    done();
+  });
+
   it('should evaluate <if doesntexist> as false and trigger <else> condition containing very few characters (conditionals/ifElseLowChars.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('conditionals/ifElseLowChars.html', model), '<p>B</p>');
     done();
