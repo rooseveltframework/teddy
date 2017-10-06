@@ -228,4 +228,9 @@ describe('Conditionals', function() {
     assert.equalIgnoreSpaces(teddy.render('conditionals/ifElseLowChars.html', model), '<p>B</p>');
     done();
   });
+
+  it('should evaluate <if doesntexist> as false and trigger <else> condition with preceding HTML comment (conditionals/ifCommentElse.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/ifCommentElse.html', model), '<!-- HTML comment --><p>The variable \'doesntexist\' is not present</p>');
+    done();
+  });
 });
