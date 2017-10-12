@@ -591,6 +591,7 @@
             findElses = true,
             condString,
             sibling,
+            siblingComments,
             ifsDone = false,
             parts,
             elseCond,
@@ -625,10 +626,17 @@
             parts = [condString];
             findElses = true;
             do {
-              sibling = renderedTemplate.match(new RegExp(condString.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&') + '[\\s]*[^>]{1,}'));
+              sibling = renderedTemplate.match(new RegExp(condString.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&') + '([^>]*-->)*[^>]*[>]'));
               if (sibling) {
-                sibling = sibling[0] + '>';
+                sibling = sibling[0];
                 sibling = replaceNonRegex(sibling, condString, '');
+
+                // detect HTML comments preceding sibling
+                if (sibling.trim().substring(0, 4) === '<!--') {
+                  siblingComments = sibling.match(/([^>]*-->)*/)[0];
+                  sibling = sibling.replace(/([^>]*-->)*/, '');
+                  condString += siblingComments;
+                }
 
                 if (sibling.replace(/^\s+/, '').substring(0, 8) === '<elseif ') {
                   elseCond = matchRecursive(renderedTemplate, condString + sibling + '...<\/elseif>');
@@ -662,6 +670,12 @@
             while (findElses);
 
             result = renderConditional(condString, parts, model);
+
+            // replace HTML comments if they exist
+            if (siblingComments) {
+              result = siblingComments + result;
+            }
+
             renderedTemplate = replaceNonRegex(renderedTemplate, condString, result);
           }
           ifsDone = true;

@@ -1,0 +1,12 @@
+{!
+  should evaluate <if doesntexist> as false and trigger <else> condition with multiple preceding HTML comments
+!}
+<if doesntexist>
+  <p>The variable 'doesntexist' is present</p>
+</if>
+
+<!-- HTML comment -->
+<!-- MOAR HTML comments -->
+<else>
+  <p>The variable 'doesntexist' is not present</p>
+</else>
