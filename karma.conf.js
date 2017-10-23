@@ -1,6 +1,6 @@
 // Karma configuration
 
-module.exports = function(config) {
+module.exports = function (config) {
   var configuration = {
     basePath: '',
     frameworks: ['mocha'],
@@ -16,7 +16,7 @@ module.exports = function(config) {
     reporters: ['spec', 'coverage'],
     port: 8000,
     proxies: {
-      '/templates/': '/base/test/templates/',
+      '/templates/': '/base/test/templates/'
     },
     preprocessors: {
       'teddy.js': ['coverage'],
@@ -36,8 +36,8 @@ module.exports = function(config) {
     coverageReporter: {
       type: 'lcov',
       dir: 'coverage/',
-      subdir: function(browser) {
-        return browser.toLowerCase().split(/[ /-]/)[0];
+      subdir: function (browser) {
+        return browser.toLowerCase().split(/[ /-]/)[0]
       }
     },
     client: {
@@ -57,11 +57,11 @@ module.exports = function(config) {
       }
     },
     concurrency: 1
-  };
-
-  if (process.env.TRAVIS) {
-    configuration.browsers = ['Chrome_travis_ci'];
   }
 
-  config.set(configuration);
-};
+  if (process.env.TRAVIS) {
+    configuration.browsers = ['Chrome_travis_ci']
+  }
+
+  config.set(configuration)
+}

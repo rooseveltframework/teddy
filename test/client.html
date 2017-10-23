@@ -292,27 +292,19 @@
     <script src='../teddy.js'></script>
     <script src='models/model.js'></script>
 
-    <!-- include unit testing libraries -->
-    <script src='../node_modules/mocha/mocha.js'></script>
-    <script src='../node_modules/chai/chai.js'></script>
-    <script src='../node_modules/chai-string/chai-string.js'></script>
-
     <!-- setup test suite -->
     <script>
-      var assert = chai.assert,
-          templates = window.__html__,
-          i;
+      var assert = chai.assert
+      var templates = window.__html__
+      var i
 
       teddy.setVerbosity(0);
 
       for (i in templates) {
-        teddy.templates[i] = teddy.compile(templates[i]);
+        teddy.templates[i] = teddy.compile(templates[i])
       }
 
-      mocha.setup('bdd');
+      mocha.setup('bdd')
     </script>
-
-    <!-- run tests -->
-    <script>mocha.run();</script>
   </body>
 </html>
