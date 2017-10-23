@@ -983,12 +983,6 @@
         var flip = false
         var extraString = ''
 
-        // One line if statement regexp
-        var midIfBinaryConditionalRegexp = /(?: if-[\S]*?=(?:"[\S\s]*?"|'[\S\s]*?') )/
-        var endIfBinaryConditionalRegexp = /(?: if-[\S]*?=(?:"[\S\s]*?"|'[\S\s]*?')>)/
-        var midIfUnaryConditionalRegexp = /(?: if-[\S]*? )/
-        var endIfUnaryConditionalRegexp = /(?: if-[\S]*?>)/
-
         el = parts[0]
 
         for (i = 1; i < l; i++) {
@@ -1012,10 +1006,7 @@
         el = removeAttribute(el, 'false')
 
         // Remove all if-conditionals and append condition eval value
-        el = el.replace(midIfBinaryConditionalRegexp, conditionContent ? ' ' + conditionContent + ' ' : ' ')
-        el = el.replace(endIfBinaryConditionalRegexp, conditionContent ? ' ' + conditionContent + ' ' : ' ')
-        el = el.replace(midIfUnaryConditionalRegexp, conditionContent ? ' ' + conditionContent + ' ' : ' ')
-        el = el.replace(endIfUnaryConditionalRegexp, conditionContent ? ' ' + conditionContent + ' ' : ' ')
+        el = el.replace(/ if-[^=\s>]*(=["'][\S\s]*?["'][^> ]*)*[\s>]{0,1}/, conditionContent ? ' ' + conditionContent + ' ' : ' ')
 
         // append additional one line content if any
         el += extraString
