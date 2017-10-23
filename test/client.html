@@ -287,24 +287,5 @@
     <h1>Teddy Templating Engine unit tests</h1>
 
     <div id='mocha'></div>
-
-    <!-- include teddy library -->
-    <script src='../teddy.js'></script>
-    <script src='models/model.js'></script>
-
-    <!-- setup test suite -->
-    <script>
-      var assert = chai.assert
-      var templates = window.__html__
-      var i
-
-      teddy.setVerbosity(0);
-
-      for (i in templates) {
-        teddy.templates[i] = teddy.compile(templates[i])
-      }
-
-      mocha.setup('bdd')
-    </script>
   </body>
 </html>
