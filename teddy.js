@@ -1006,7 +1006,7 @@
         el = removeAttribute(el, 'false')
 
         // Remove all if-conditionals and append condition eval value
-        el = el.replace(/ if-[^=\s>]*(=["'][\S\s]*?["'][^> ]*)*[\s>]{0,1}/, conditionContent ? ' ' + conditionContent + ' ' : ' ')
+        el = el.replace(/ if-[^=\s>]*(=["'][^"']*["'])*[\s>]/, conditionContent ? ' ' + conditionContent + ' ' : ' ')
 
         // append additional one line content if any
         el += extraString
