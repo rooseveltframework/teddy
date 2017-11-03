@@ -341,6 +341,7 @@
       var renderStringyModel
       var maxPasses = teddy.params.maxPasses
       var maxPassesError = 'Render aborted due to max number of passes (' + maxPasses + ') exceeded; there is a possible infinite loop in your template logic.'
+      var dontParse = false
 
       // overload console logs
       consoleWarnings = ''
@@ -417,7 +418,6 @@
           loops.push(match)
           return '{' + loops.length + '_loop}'
         }
-
         do {
           diff = renderedTemplate
 
@@ -430,7 +430,6 @@
 
           // parse non-looped conditionals
           renderedTemplate = parseConditionals(renderedTemplate, model)
-
           // parse non-looped includes
           renderedTemplate = parseIncludes(renderedTemplate, model)
 
@@ -460,7 +459,6 @@
               if (loop) {
                 // try for a version of this loop that might have a data model attached to it now
                 el = renderedTemplate.match(new RegExp('(?:{' + (i + 1) + '_loop data-local-model=[0-9]*})'))
-
                 if (el && el[0]) {
                   el = el[0]
                   localModel = el.split(' ')
@@ -480,6 +478,7 @@
             }
             return maxPassesError
           }
+
           passes++
           if (passes >= maxPasses) {
             if (teddy.params.verbosity) {
@@ -492,10 +491,8 @@
 
         // clean up any remaining unnecessary <elseif>, <elseunless>, <else>, and orphaned <arg> tags
         renderedTemplate = renderedTemplate.replace(/(?:<elseif[\S\s]*?<\/elseif>|<elseunless[\S\s]*?<\/elseunless>|<else[\S\s]*?<\/else>|<arg[\S\s]*?<\/arg>)/g, '')
-
         // processes all remaining {vars}
         renderedTemplate = parseVars(renderedTemplate, model)
-
         passes++
         if (passes >= maxPasses) {
           if (teddy.params.verbosity) {
@@ -509,10 +506,10 @@
       // restore <noteddy> blocks
       noteddysMatches = matchRecursive(renderedTemplate, '<restoreteddy...>')
       noteddysCount = noteddysMatches.length
+
       for (i = 0; i < noteddysCount; i++) {
         renderedTemplate = renderedTemplate.replace('<restoreteddy' + noteddysMatches[i] + '>', noteddys[i])
       }
-
       // clean up temp vars
       contextModels = []
       passes = 0
@@ -571,7 +568,6 @@
           result = renderInclude(el, model)
           renderedTemplate = replaceNonRegex(renderedTemplate, el, result)
         }
-
         return renderedTemplate
       }
 
@@ -594,98 +590,108 @@
         var el
         var l
         var i
+        var noparse
+        var noteddy
 
-        do {
-          if (ifsDone) {
-            conds = matchRecursive(renderedTemplate, '<unless ...</unless>')
-            loopTypesLeft = false
-          } else {
-            conds = matchRecursive(renderedTemplate, '<if ...</if>')
-          }
-          l = conds.length
+        noparse = renderedTemplate.match(/noparse/g)
+        noteddy = renderedTemplate.match(/noteddy/g)
 
-          for (i = 0; i < l; i++) {
-            condString = conds[i]
+        // if 'noparse' or 'noteddy' attribute exists, set dontParse to true
+        if (noparse || noteddy) {
+          dontParse = true
+        }
+        if (dontParse !== true) {
+          do {
             if (ifsDone) {
-              condString = '<unless ' + condString + '</unless>'
+              conds = matchRecursive(renderedTemplate, '<unless ...</unless>')
+              loopTypesLeft = false
             } else {
-              condString = '<if ' + condString + '</if>'
+              conds = matchRecursive(renderedTemplate, '<if ...</if>')
             }
-            parts = [condString]
-            findElses = true
-            do {
-              sibling = renderedTemplate.match(new RegExp(condString.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&') + '([^>]*-->)*[^>]*[>]'))
-              if (sibling) {
-                sibling = sibling[0]
-                sibling = replaceNonRegex(sibling, condString, '')
-
-                // detect HTML comments preceding sibling
-                if (sibling.trim().substring(0, 4) === '<!--') {
-                  siblingComments = sibling.match(/([^>]*-->)*/)[0]
-                  sibling = sibling.replace(/([^>]*-->)*/, '')
-                  condString += siblingComments
-                }
-
-                if (sibling.replace(/^\s+/, '').substring(0, 8) === '<elseif ') {
-                  elseCond = matchRecursive(renderedTemplate, condString + sibling + '...</elseif>')
-                  elseCond = elseCond ? sibling + replaceNonRegex(elseCond[0], condString, '') + '</elseif>' : null
-                } else if (sibling.replace(/^\s+/, '').substring(0, 12) === '<elseunless ') {
-                  elseCond = matchRecursive(renderedTemplate, condString + sibling + '...</elseunless>')
-                  elseCond = elseCond ? sibling + replaceNonRegex(elseCond[0], condString, '') + '</elseunless>' : null
-                } else if (sibling.replace(/^\s+/, '').substring(0, 6) === '<else>') {
-                  elseCond = matchRecursive(renderedTemplate, condString + sibling + '...</else>')
-                  elseCond = elseCond ? sibling + replaceNonRegex(elseCond[0], condString, '') + '</else>' : null
-                } else {
-                  findElses = false
-                  elseCond = false
-                }
-
-                if (elseCond) {
-                  parts.push(elseCond)
-                  condString += elseCond
-                } else {
-                  findElses = false
-                }
+            l = conds.length
+            for (i = 0; i < l; i++) {
+              condString = conds[i]
+              if (ifsDone) {
+                condString = '<unless ' + condString + '</unless>'
               } else {
-                findElses = false
+                condString = '<if ' + condString + '</if>'
+              }
+              parts = [condString]
+              findElses = true
+              do {
+                sibling = renderedTemplate.match(new RegExp(condString.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&') + '([^>]*-->)*[^>]*[>]'))
+                if (sibling) {
+                  sibling = sibling[0]
+                  sibling = replaceNonRegex(sibling, condString, '')
+
+                  // detect HTML comments preceding sibling
+                  if (sibling.trim().substring(0, 4) === '<!--') {
+                    siblingComments = sibling.match(/([^>]*-->)*/)[0]
+                    sibling = sibling.replace(/([^>]*-->)*/, '')
+                    condString += siblingComments
+                  }
+
+                  if (sibling.replace(/^\s+/, '').substring(0, 8) === '<elseif ') {
+                    elseCond = matchRecursive(renderedTemplate, condString + sibling + '...</elseif>')
+                    elseCond = elseCond ? sibling + replaceNonRegex(elseCond[0], condString, '') + '</elseif>' : null
+                  } else if (sibling.replace(/^\s+/, '').substring(0, 12) === '<elseunless ') {
+                    elseCond = matchRecursive(renderedTemplate, condString + sibling + '...</elseunless>')
+                    elseCond = elseCond ? sibling + replaceNonRegex(elseCond[0], condString, '') + '</elseunless>' : null
+                  } else if (sibling.replace(/^\s+/, '').substring(0, 6) === '<else>') {
+                    elseCond = matchRecursive(renderedTemplate, condString + sibling + '...</else>')
+                    elseCond = elseCond ? sibling + replaceNonRegex(elseCond[0], condString, '') + '</else>' : null
+                  } else {
+                    findElses = false
+                    elseCond = false
+                  }
+
+                  if (elseCond) {
+                    parts.push(elseCond)
+                    condString += elseCond
+                  } else {
+                    findElses = false
+                  }
+                } else {
+                  findElses = false
+                }
+              }
+              while (findElses)
+
+              result = renderConditional(condString, parts, model)
+
+              // replace HTML comments if they exist
+              if (siblingComments) {
+                result = siblingComments + result
+              }
+
+              renderedTemplate = replaceNonRegex(renderedTemplate, condString, result)
+            }
+            ifsDone = true
+          }
+          while (loopTypesLeft)
+
+          // do one line ifs now...
+          if (renderedTemplate.indexOf('if-') > -1) {
+            recursedOnelines = matchRecursive(renderedTemplate, '<...>')
+            recursedLength = recursedOnelines.length
+            // iterate over recursed match(es)
+            for (recursedCount = 0; recursedCount < recursedLength; recursedCount++) {
+              if (recursedOnelines[recursedCount].indexOf('if-') > -1) {
+                onelines = recursedOnelines[recursedCount].match(/[^<]*?if-[^>]+/g)
+                l = onelines ? onelines.length : 0
+
+                // iterate over stable match within the recursed match
+                for (i = 0; i < l; i++) {
+                  el = '<' + onelines[i] + '>'
+                  model = applyLocalModel(el, model)
+                  result = renderOneLineConditional(el, model)
+                  renderedTemplate = replaceNonRegex(renderedTemplate, el, result)
+                }
               }
             }
-            while (findElses)
-
-            result = renderConditional(condString, parts, model)
-
-            // replace HTML comments if they exist
-            if (siblingComments) {
-              result = siblingComments + result
-            }
-
-            renderedTemplate = replaceNonRegex(renderedTemplate, condString, result)
           }
-          ifsDone = true
-        }
-        while (loopTypesLeft)
-
-        // do one line ifs now...
-        if (renderedTemplate.indexOf('if-') > -1) {
-          recursedOnelines = matchRecursive(renderedTemplate, '<...>')
-          recursedLength = recursedOnelines.length
-          // iterate over recursed match(es)
-          for (recursedCount = 0; recursedCount < recursedLength; recursedCount++) {
-            if (recursedOnelines[recursedCount].indexOf('if-') > -1) {
-              onelines = recursedOnelines[recursedCount].match(/[^<]*?if-[^>]+/g)
-              l = onelines ? onelines.length : 0
-
-              // iterate over stable match within the recursed match
-              for (i = 0; i < l; i++) {
-                el = '<' + onelines[i] + '>'
-                model = applyLocalModel(el, model)
-                result = renderOneLineConditional(el, model)
-                renderedTemplate = replaceNonRegex(renderedTemplate, el, result)
-              }
-            }
-          }
-        }
-
+          return renderedTemplate
+        } // dontParse
         return renderedTemplate
       }
 
@@ -695,8 +701,11 @@
         var l = vars.length
         var i
 
-        for (i = 0; i < l; i++) {
-          docstring = replaceVar(docstring, vars[i])
+        // replace var only if dontparse is not equal to true
+        if (dontParse !== true) {
+          for (i = 0; i < l; i++) {
+            docstring = replaceVar(docstring, vars[i])
+          }
         }
 
         function replaceVar (docstring, match) {
@@ -742,7 +751,6 @@
             return replaceNonRegex(docstring, '{' + omatch + '}', ('{' + nmatch + '}').replace(/ data-local-model=[0-9]*/g, ''))
           }
         }
-
         return docstring
       }
 
@@ -752,9 +760,15 @@
 
       // parses a single <include> tag
       function renderInclude (el, model) {
-        var src, incdoc, args, argl, argname, argval, i, localModel
+        var src, incdoc, args, argl, argname, argval, i, localModel, noparse, noteddy
+        noparse = el.match(/noparse/g)
+        noteddy = el.match(/noteddy/g)
 
         src = getAttribute(el, 'src')
+        // if 'noparse' or 'noteddy' attribute exists, set dontParse to true
+        if (noparse || noteddy) {
+          dontParse = true
+        }
         if (!src) {
           if (teddy.params.verbosity) {
             teddy.console.warn('<include> element found with no src attribute. Ignoring element.')
@@ -826,7 +840,7 @@
             // apply local model to child conditionals and loops
             incdoc = tagLocalModels(incdoc, localModel)
           }
-
+          console.log('indoc', incdoc)
           return incdoc
         }
       }
@@ -950,10 +964,10 @@
         var el = parts[0]
         var satisfiedCondition = false
         var nextSibling = el
-
+        // console.log('dontParse', dontParse) TRUE
         // add local vars to model
         model = applyLocalModel(el, model)
-
+        // if (dontParse !== true) {
         while (!satisfiedCondition) {
           if (evalCondition(el, model)) {
             satisfiedCondition = true
@@ -971,6 +985,8 @@
             return ''
           }
         }
+        // }
+        return parts
       }
 
       // parses a single one line conditional
@@ -1150,7 +1166,7 @@
           }
         }
 
-        // loop through the results
+      // loop through the results
         for (i = 0; i < length; i++) {
           condition = truthStack[i]
           condResult = condResult !== undefined ? condResult : truthStack[i - 1]
@@ -1162,7 +1178,6 @@
             condResult = Boolean((condResult && !truthStack[i + 1]) || (!condResult && truthStack[i + 1]))
           }
         }
-
         return condResult !== undefined ? condResult : condition
       }
 
