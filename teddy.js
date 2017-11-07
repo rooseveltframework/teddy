@@ -490,7 +490,9 @@
         while (diff !== renderedTemplate) // do another pass if this introduced new code to parse
 
         // clean up any remaining unnecessary <elseif>, <elseunless>, <else>, and orphaned <arg> tags
-        renderedTemplate = renderedTemplate.replace(/(?:<elseif[\S\s]*?<\/elseif>|<elseunless[\S\s]*?<\/elseunless>|<else[\S\s]*?<\/else>|<arg[\S\s]*?<\/arg>)/g, '')
+        if (dontParse !== true) {
+          renderedTemplate = renderedTemplate.replace(/(?:<elseif[\S\s]*?<\/elseif>|<elseunless[\S\s]*?<\/elseunless>|<else[\S\s]*?<\/else>|<arg[\S\s]*?<\/arg>)/g, '')
+        }
         // processes all remaining {vars}
         renderedTemplate = parseVars(renderedTemplate, model)
         passes++
@@ -840,7 +842,7 @@
             // apply local model to child conditionals and loops
             incdoc = tagLocalModels(incdoc, localModel)
           }
-          console.log('indoc', incdoc)
+
           return incdoc
         }
       }
