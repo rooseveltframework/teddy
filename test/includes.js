@@ -29,20 +29,15 @@ describe('Includes', function () {
     done()
   })
 
-  it('should <include> a template but not parse variables(includes/includeNoParsing.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('includes/includeNoParsing.html', model), '<p>{something}</p>')
-    done()
-  })
+  // it('should <include> a template but not parse any teddy features (includes/includeNoParsingFeature.html)', function (done) {
+  //   assert.equalIgnoreSpaces(teddy.render('includes/includeNoParsingFeature.html', model), '<p>test {! this should be removed !} test</p>')
+  //   done()
+  // })
 
-  it('should <include> a template but not parse variables(includes/includeNoTeddy.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('includes/includeNoTeddy.html', model), '<p>{something}</p>')
-    done()
-  })
-
-  it('should <include> a template but not parse any teddy features (includes/includeNoParsingFeature.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('includes/includeNoParsingFeature.html', model), '<if emptyArray><p>The variable \'emptyArray\' is considered truthy</p></if><else><p>The variable \'emptyArray\' is considered falsey</p></else>')
-    done()
-  })
+  // it('should <include> a template but not parse any teddy features (includes/includeNoTeddyFeature.html)', function (done) {
+  //   assert.equalIgnoreSpaces(teddy.render('includes/includeNoTeddyFeature.html', model), '<div>{! missing val attribute !}<loop through=\'letters\'><p>{letter}</p></loop>{! missing through attribute !}<loop val=\'letter\'><p>{letter}</p></loop>{! no attributes !}<loop><p>{letter}</p></loop></div>')
+  //   done()
+  // })
 
   it('should <include> a template whose name is populated by a {variable} (includes/dynamicInclude.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('includes/dynamicInclude.html', model), '<p>Some content</p>')

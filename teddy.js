@@ -203,6 +203,10 @@
       var l
       var i
       var register = false
+      var dontParse = false
+      var noparse
+      var noteddy
+      var count = 0
 
       // it's assumed that the argument is already a template string if we're not server-side
       if (typeof template !== 'string') {
@@ -235,24 +239,41 @@
           register = true
         }
       }
+      
+      noparse = template.match(/noparse/g)
+      noteddy = template.match(/noteddy/g)
 
+      // if noparse or noteddy flag exist, set dontParse flag to true
+      if (noparse || noteddy) {
+        dontParse = true
+        count++
+      }
+      
       // remove {! comments !} and (optionally) unnecessary whitespace
       do {
         oldTemplate = template
-
         if (teddy.params.minify) {
           template = template
             .replace(/[\f\n\r\t\v]*/g, '')
             .replace(/\s{2,}/g, ' ')
         }
-
         comments = matchRecursive(template, '{!...!}')
         l = comments.length
 
         for (i = 0; i < l; i++) {
           template = replaceNonRegex(template, '{!' + comments[i] + '!}', '')
         }
-      }
+        // if (l >= 2) {
+        //   template = replaceNonRegex(template, '{!' + comments[0] + '!}', '')
+        //   oldTemplate = template
+        // } else {
+        //   for (i = 0; i < l; i++) {
+        //     template = replaceNonRegex(template, '{!' + comments[i] + '!}', '')
+        //   }
+        // }
+        
+        }
+
       while (oldTemplate !== template)
 
       if (register) {
@@ -261,6 +282,7 @@
       } else {
         return template.slice(-5) === '.html' ? template.substring(0, template.length - 5) : template
       }
+  
     },
 
     // invalidates cache of a given template and model combination
@@ -342,6 +364,7 @@
       var maxPasses = teddy.params.maxPasses
       var maxPassesError = 'Render aborted due to max number of passes (' + maxPasses + ') exceeded; there is a possible infinite loop in your template logic.'
       var dontParse = false
+      var loopCounter = 0
 
       // overload console logs
       consoleWarnings = ''
@@ -418,21 +441,25 @@
           loops.push(match)
           return '{' + loops.length + '_loop}'
         }
+      
         do {
           diff = renderedTemplate
-
-          // find loops and remove them for now
-          outerLoops = matchRecursive(renderedTemplate, '<loop...</loop>')
-          outerLoopsCount = outerLoops.length
-          for (i = 0; i < outerLoopsCount; i++) {
-            renderedTemplate = renderedTemplate.replace('<loop' + outerLoops[i] + '</loop>', replaceLoops)
+          // does not render loop tabs if within an include tag that has the noparse or noteddy attribute
+          if (dontParse !== true) {
+            // find loops and remove them for now
+            outerLoops = matchRecursive(renderedTemplate, '<loop...</loop>')
+            outerLoopsCount = outerLoops.length
+            for (i = 0; i < outerLoopsCount; i++) {
+              renderedTemplate = renderedTemplate.replace('<loop' + outerLoops[i] + '</loop>', replaceLoops)
+            }
           }
-
           // parse non-looped conditionals
           renderedTemplate = parseConditionals(renderedTemplate, model)
-          // parse non-looped includes
-          renderedTemplate = parseIncludes(renderedTemplate, model)
 
+          // parse non-looped includes
+          if (loopCounter === 0) {
+            renderedTemplate = parseIncludes(renderedTemplate, model)
+          }
           passes++
           if (passes >= maxPasses) {
             return false
@@ -770,7 +797,9 @@
         // if 'noparse' or 'noteddy' attribute exists, set dontParse to true
         if (noparse || noteddy) {
           dontParse = true
+          loopCounter++
         }
+
         if (!src) {
           if (teddy.params.verbosity) {
             teddy.console.warn('<include> element found with no src attribute. Ignoring element.')
@@ -784,7 +813,7 @@
           if (src.slice(-5) !== '.html') {
             src += '.html'
           }
-
+          
           // compile included template if necessary
           if (!teddy.templates[src] || teddy.params.compileAtEveryRender) {
             incdoc = teddy.compile(src)
@@ -792,7 +821,7 @@
 
           // get the template as a string
           incdoc = teddy.templates[src] || incdoc
-
+  
           // if source is the same as the file name, we consider it a template that doesn't exist
           if (incdoc === src || incdoc + '.html' === src) {
             incdoc = null
@@ -812,7 +841,7 @@
           } else {
             localModel = {}
           }
-
+          
           args = matchRecursive(el, '<arg...</arg>')
           argl = args ? args.length : 0
           for (i = 0; i < argl; i++) {
@@ -830,55 +859,51 @@
             argname = argname.split('>')
             argname = argname[0]
             argval = getInnerHTML(args[i])
-
+            
             // replace template string argument {var} with argument value
             incdoc = renderVar(incdoc, argname, argval, true)
-
             // add arg to local model
             localModel[argname] = argval
           }
-
+          
           if (argl) {
             // apply local model to child conditionals and loops
             incdoc = tagLocalModels(incdoc, localModel)
           }
-
           return incdoc
         }
       }
 
       // finds all <include>, <if>, <elseif>, <unless>, <elseunless>, one line ifs, and <loop> tags and applies their local models
       function tagLocalModels (doc, extraModel) {
-        doc = doc.replace(/(?:{[\S\s]*?}|<include[\S\s]*?>|<if[\S\s]*?>|<elseif[\S\s]*?>|<unless[\S\s]*?>|<elseunless[\S\s]*?>|<loop[\S\s]*?>|<[\S\s]if-[\S\s](?:="[\S\s]"|='[\S\s]')[\S\s](?:true=|false=)(?:="[\S\s]"|='[\S\s]')*?>)/g, addTag)
+          doc = doc.replace(/(?:{[\S\s]*?}|<include[\S\s]*?>|<if[\S\s]*?>|<elseif[\S\s]*?>|<unless[\S\s]*?>|<elseunless[\S\s]*?>|<loop[\S\s]*?>|<[\S\s]if-[\S\s](?:="[\S\s]"|='[\S\s]')[\S\s](?:true=|false=)(?:="[\S\s]"|='[\S\s]')*?>)/g, addTag)
+          function addTag (match) {
+            var modelNumber = -1
+            var localModel = getAttribute(match, 'data-local-model')
+            var lastChar = match.charAt(match.length - 1)
 
-        function addTag (match) {
-          var modelNumber = -1
-          var localModel = getAttribute(match, 'data-local-model')
-          var lastChar = match.charAt(match.length - 1)
+            // get existing derivative
+            if (localModel) {
+              localModel = contextModels[parseInt(localModel)]
+            } else {
+              // possibly new derivative
+              localModel = extraModel
+            }
+            // check for duplicates
+            modelNumber = contextModels.indexOf(localModel)
 
-          // get existing derivative
-          if (localModel) {
-            localModel = contextModels[parseInt(localModel)]
-          } else {
-            // possibly new derivative
-            localModel = extraModel
+            // if no duplicates
+            if (modelNumber < 0) {
+              localModel = Object.assign(localModel, extraModel)
+              modelNumber = contextModels.push(localModel)
+              modelNumber--
+              return match.replace(lastChar, ' data-local-model=' + modelNumber + lastChar)
+            } else if (match.indexOf('data-local-model') === -1) {
+              return match.replace(lastChar, ' data-local-model=' + modelNumber + lastChar)
+            } else {
+              return match
+            }
           }
-          // check for duplicates
-          modelNumber = contextModels.indexOf(localModel)
-
-          // if no duplicates
-          if (modelNumber < 0) {
-            localModel = Object.assign(localModel, extraModel)
-            modelNumber = contextModels.push(localModel)
-            modelNumber--
-            return match.replace(lastChar, ' data-local-model=' + modelNumber + lastChar)
-          } else if (match.indexOf('data-local-model') === -1) {
-            return match.replace(lastChar, ' data-local-model=' + modelNumber + lastChar)
-          } else {
-            return match
-          }
-        }
-
         return doc
       }
 
@@ -886,7 +911,7 @@
       function applyLocalModel (el, model) {
         var localModel = el.match(/data-local-model=[0-9]*/)
         var i
-
+        if (dontParse !== true) {
         if (localModel) {
           localModel = localModel[0]
           localModel = localModel.replace('data-local-model=', '')
@@ -896,6 +921,7 @@
             model[i] = localModel[i]
           }
         }
+      } //dontParse
         return model
       }
 
@@ -966,7 +992,7 @@
         var el = parts[0]
         var satisfiedCondition = false
         var nextSibling = el
-        // console.log('dontParse', dontParse) TRUE
+
         // add local vars to model
         model = applyLocalModel(el, model)
         // if (dontParse !== true) {
