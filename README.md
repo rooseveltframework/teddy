@@ -357,6 +357,16 @@ You can also instruct the contents of a variable to not be parsed after that var
 <p>{this_var_will_be_parsed_but_its_contents_will_not_be|p}</p>
 ```
 
+To include a template but not render the contents, add a `noparse` or `noteddy` flag to the `<include>` tag:
+
+```html
+<include src='test.html' noparse></include>
+```
+or
+```html
+<include src='test.html' noteddy></include>
+```
+
 A complex example combining many tags
 ---
 
