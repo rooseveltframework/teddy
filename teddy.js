@@ -234,31 +234,6 @@
         }
       }
 
-      // remove {! comments !} and (optionally) unnecessary whitespace
-      do {
-        oldTemplate = template
-        if (teddy.params.minify) {
-          template = template
-            .replace(/[\f\n\r\t\v]*/g, '')
-            .replace(/\s{2,}/g, ' ')
-        }
-        comments = matchRecursive(template, '{!...!}')
-        l = comments.length
-
-        // only remove comments if noparse tag is not flagged
-        if (dontParse === false || dontParse === undefined) {
-          for (i = 0; i < l; i++) {
-            template = replaceNonRegex(template, '{!' + comments[i] + '!}', '')
-          }
-        } else if (dontParse === true) {
-          template = replaceNonRegex(template, '{!' + comments[0] + '!}', '')
-          oldTemplate = template
-        }
-      }
-
-      while (oldTemplate !== template)
-      // console.log('template after compile', template)
-
       if (register) {
         teddy.templates[name] = template
         return template
@@ -582,6 +557,29 @@
       if (teddy.params.cacheRenders && teddy.templates[template] && (!teddy.params.cacheWhitelist || teddy.params.cacheWhitelist[template]) && teddy.params.cacheBlacklist.indexOf(template) < 0) {
         teddy.renderedTemplates[template][l - 1].renderedTemplate = renderedTemplate
       }
+
+      // remove {! comments !} and (optionally) unnecessary whitespace
+      do {
+        oldTemplate = renderedTemplate
+        if (teddy.params.minify) {
+          renderedTemplate = renderedTemplate
+            .replace(/[\f\n\r\t\v]*/g, '')
+            .replace(/\s{2,}/g, ' ')
+        }
+        comments = matchRecursive(renderedTemplate, '{!...!}')
+        l = comments.length
+
+        // only remove comments if noparse tag is not flagged
+        if (dontParse === false || dontParse === undefined) {
+          for (i = 0; i < l; i++) {
+            renderedTemplate = replaceNonRegex(renderedTemplate, '{!' + comments[i] + '!}', '')
+          }
+        } else if (dontParse === true) {
+          renderedTemplate = replaceNonRegex(renderedTemplate, '{!' + comments[0] + '!}', '')
+          oldTemplate = renderedTemplate
+        }
+      }
+      while (oldTemplate !== renderedTemplate)
 
       // execute callback if present, otherwise simply return the rendered template string
       if (typeof callback === 'function') {
