@@ -418,10 +418,10 @@ API documentation
 ===
 
 - `teddy.compile(template)`: Compile a template by supplying either source code or a file name (in Node.js).
-  - Returns template source code with `{! teddy comments !}` removed.
   - Populates `teddy.templates` with the new template in the format of `teddy.templates[path]: compiledSource`.
 - `teddy.render(template, model)`: Render a template by supplying either source code or a file name (in Node.js).
   - Returns fully rendered HTML.
+  - Removes `{! teddy comments !}`
 - `teddy.setTemplateRoot(path)`: Set the location of your templates directory.
   - Default is the current directory.
 - `teddy.setVerbosity(n)`: Sets the level of verbosity in Teddy's console logs. Call `teddy.setVerbosity(n)` where `n` equals one of the below values to change the default:

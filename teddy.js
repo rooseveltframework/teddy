@@ -195,12 +195,8 @@
      */
 
     // compiles a template (removes {! comments !} and unnecessary whitespace)
-    compile: function (template, dontParse) {
+    compile: function (template) {
       var name = template
-      var oldTemplate
-      var comments
-      var l
-      var i
       var register = false
 
       // it's assumed that the argument is already a template string if we're not server-side
@@ -227,7 +223,7 @@
             }
           }
         }
-      } else {  
+      } else {
         if (teddy.templates[template]) {
           template = teddy.templates[template]
           register = true
@@ -327,6 +323,7 @@
       var noparse
       var noteddy
       var comments
+      var oldTemplate
 
       // overload console logs
       consoleWarnings = ''
@@ -368,13 +365,13 @@
 
       // compile template if necessary
       if (!teddy.templates[template] || teddy.params.compileAtEveryRender) {
-        renderedTemplate = teddy.compile(template, dontParse)
+        renderedTemplate = teddy.compile(template)
       }
 
       renderedTemplate = teddy.templates[template] || renderedTemplate
 
       // check if noparse or noteddy tag exist
-      noparse = renderedTemplate.match(/noparse/g)
+      noparse = renderedTemplate.match(/\snoparse/g)
       noteddy = renderedTemplate.match(/\snoteddy/g)
 
       // if 'noparse' or 'noteddy' attribute exists, set dontParse to true
@@ -394,7 +391,7 @@
           if (src.slice(-5) !== '.html') {
             src += '.html'
           }
-          incdoc = teddy.compile(src, dontParse)
+          incdoc = teddy.compile(src)
           return incdoc
         }
       } else if (dontParse === false) {
@@ -574,9 +571,6 @@
           for (i = 0; i < l; i++) {
             renderedTemplate = replaceNonRegex(renderedTemplate, '{!' + comments[i] + '!}', '')
           }
-        } else if (dontParse === true) {
-          renderedTemplate = replaceNonRegex(renderedTemplate, '{!' + comments[0] + '!}', '')
-          oldTemplate = renderedTemplate
         }
       }
       while (oldTemplate !== renderedTemplate)
@@ -806,7 +800,7 @@
 
           // compile included template if necessary
           if (!teddy.templates[src] || teddy.params.compileAtEveryRender) {
-            incdoc = teddy.compile(src, dontParse)
+            incdoc = teddy.compile(src)
           }
           // get the template as a string
           incdoc = teddy.templates[src] || incdoc
