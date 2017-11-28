@@ -1003,7 +1003,6 @@
         var extraString = ''
 
         el = parts[0]
-
         for (i = 1; i < l; i++) {
           part = parts[i]
           if (flip) {
@@ -1023,13 +1022,10 @@
         // remove conditionals from element
         el = removeAttribute(el, 'true')
         el = removeAttribute(el, 'false')
-
         // Remove all if-conditionals and append condition eval value
-        el = el.replace(/if-[^=\s>]*(=["'][^"']*["'])*[>]*/, conditionContent || '')
-
+        el = el.replace(/if-[^=\s>]*(=["'{}][^"']*["'{}])*[>]*/, conditionContent || '')
         // append additional one line content if any
         el += extraString
-
         if (el.charAt(el.length - 1) !== '>') {
           el = el.trim()
           el += '>'
@@ -1136,12 +1132,10 @@
           }
 
           modelVal = curVar
-
           // force empty arrays and empty objects to be falsey (#44)
           if (modelVal && ((Array.isArray(modelVal) && modelVal.length === 0) || (typeof modelVal === 'object' && Object.keys(modelVal).length === 0 && modelVal.constructor === Object))) {
             modelVal = false
           }
-
           if (conditionType === 'if' || conditionType === 'onelineif' || conditionType === 'elseif') {
             if (condition === conditionVal || (conditionType === 'onelineif' && 'if-' + condition === conditionVal)) {
               if (modelVal) {
@@ -1168,7 +1162,6 @@
             }
           }
         }
-
         // loop through the results
         for (i = 0; i < length; i++) {
           condition = truthStack[i]
