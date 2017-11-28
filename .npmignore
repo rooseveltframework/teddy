@@ -1,3 +1,2 @@
 .travis.yml
-playground.html
-test
+appveyor.yml
