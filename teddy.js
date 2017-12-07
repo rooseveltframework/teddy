@@ -316,12 +316,10 @@
       var renderStringyModel
       var maxPasses = teddy.params.maxPasses
       var maxPassesError = 'Render aborted due to max number of passes (' + maxPasses + ') exceeded; there is a possible infinite loop in your template logic.'
-      var dontParse = false
+      var dontParse
       var loopCounter = 0
       var src
       var incdoc
-      var noparse
-      var noteddy
       var comments
       var oldTemplate
 
@@ -371,15 +369,9 @@
       renderedTemplate = teddy.templates[template] || renderedTemplate
 
       // check if noparse or noteddy tag exist
-      noparse = renderedTemplate.match(/\snoparse/g)
-      noteddy = renderedTemplate.match(/\snoteddy/g)
+      dontParse = renderedTemplate.match(/<include[^>]*( noparse| noteddy)[^>]*>/g)
 
-      // if 'noparse' or 'noteddy' attribute exists, set dontParse to true
-      if (noparse || noteddy) {
-        dontParse = true
-      }
-
-      if (dontParse === true) {
+      if (dontParse) {
         src = getAttribute(renderedTemplate, 'src')
         if (!src) {
           if (teddy.params.verbosity) {
@@ -394,7 +386,7 @@
           incdoc = teddy.compile(src)
           return incdoc
         }
-      } else if (dontParse === false) {
+      } else if (!dontParse) {
         comments = matchRecursive(renderedTemplate, '{!...!}')
         l = comments.length
 
@@ -566,8 +558,8 @@
         comments = matchRecursive(renderedTemplate, '{!...!}')
         l = comments.length
 
-        // only remove comments if noparse tag is not flagged
-        if (dontParse === false || dontParse === undefined) {
+        // only remove comments if dontParse tag is not flagged
+        if (!dontParse || dontParse === undefined) {
           for (i = 0; i < l; i++) {
             renderedTemplate = replaceNonRegex(renderedTemplate, '{!' + comments[i] + '!}', '')
           }
