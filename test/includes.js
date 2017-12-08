@@ -40,7 +40,7 @@ describe('Includes', function () {
   })
 
   it('should <include> a template as an argument but not parse any teddy features (includes/includeNoTeddyFeatureAsArgument.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('includes/includeNoTeddyFeature1.html', model), '{!should remove {! server side comments !}!}<p>test {! this should be removed !} test</p>')
+    assert.equalIgnoreSpaces(teddy.render('includes/includeNoTeddyFeatureAsArgument.html', model), '{!should remove {! server side comments !}!}<p>test {! this should be removed !} test</p>')
     done()
   })
 

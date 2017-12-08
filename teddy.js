@@ -372,7 +372,7 @@
       dontParse = renderedTemplate.match(/<include[^>]*( noparse| noteddy)[^>]*>/g)
 
       if (dontParse) {
-        src = getAttribute(renderedTemplate, 'src')
+        src = getAttribute(dontParse[0], 'src')
         if (!src) {
           if (teddy.params.verbosity) {
             teddy.console.warn('<include> element found with no src attribute. Ignoring element.')
