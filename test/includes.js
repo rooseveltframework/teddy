@@ -39,6 +39,16 @@ describe('Includes', function () {
     done()
   })
 
+  it('should <include> a template as an argument but not parse any teddy features (includes/includeNoTeddyFeatureAsArgument.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('includes/includeNoTeddyFeature1.html', model), '{!should remove {! server side comments !}!}<p>test {! this should be removed !} test</p>')
+    done()
+  })
+
+  it('should <include> a template as an argument but not parse any teddy features (includes/includeNoParsingFeatureAsArgument.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('includes/includeNoParsingFeatureAsArgument.html', model), '{!should remove {! server side comments !}!}<p>test {! this should be removed !} test</p>')
+    done()
+  })
+
   it('should <include> a template whose name is populated by a {variable} (includes/dynamicInclude.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('includes/dynamicInclude.html', model), '<p>Some content</p>')
     done()
