@@ -305,6 +305,7 @@
       var noteddysMatches
       var noteddysCount
       var i
+      var j
       var l
       var el
       var localModel
@@ -317,6 +318,9 @@
       var maxPasses = teddy.params.maxPasses
       var maxPassesError = 'Render aborted due to max number of passes (' + maxPasses + ') exceeded; there is a possible infinite loop in your template logic.'
       var dontParse
+      var dontParseLength
+      var srcArray = []
+      var incdocArray = []
       var loopCounter = 0
       var src
       var incdoc
@@ -372,24 +376,33 @@
       dontParse = renderedTemplate.match(/<include[^>]*( noparse| noteddy)[^>]*>/g)
 
       if (dontParse) {
-        src = getAttribute(dontParse[0], 'src')
+        // cache length
+        dontParseLength = dontParse.length
+
+        // if multiple noparse or noteddy exist, push src names into an array
+        for (i = 0; i < dontParseLength; i++) {
+          src = getAttribute(dontParse[i], 'src')
+          srcArray.push(src)
+        }
         if (!src) {
           if (teddy.params.verbosity) {
             teddy.console.warn('<include> element found with no src attribute. Ignoring element.')
           }
           return ''
         } else {
-          // append extension if not present
-          if (src.slice(-5) !== '.html') {
-            src += '.html'
+          for (j = 0; j < srcArray.length; j++) {
+            // append extension if not present
+            if (srcArray[j].slice(-5) !== '.html') {
+              srcArray[j] += '.html'
+            }
+            incdoc = teddy.compile(srcArray[j])
+            incdocArray.push(incdoc)
           }
-          incdoc = teddy.compile(src)
-          return incdoc
+          return incdocArray.join(' ')
         }
       } else if (!dontParse) {
         comments = matchRecursive(renderedTemplate, '{!...!}')
         l = comments.length
-
         for (i = 0; i < l; i++) {
           renderedTemplate = replaceNonRegex(renderedTemplate, '{!' + comments[i] + '!}', '')
         }
