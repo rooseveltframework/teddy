@@ -305,7 +305,6 @@
       var noteddysMatches
       var noteddysCount
       var i
-      var j
       var l
       var el
       var localModel
@@ -320,6 +319,7 @@
       var dontParse
       var dontParseLength
       var srcArray = []
+      var srcArrayLength
       var incdocArray = []
       var loopCounter = 0
       var src
@@ -383,6 +383,9 @@
         for (i = 0; i < dontParseLength; i++) {
           src = getAttribute(dontParse[i], 'src')
           srcArray.push(src)
+
+          // cache length
+          srcArrayLength = srcArray.length
         }
         if (!src) {
           if (teddy.params.verbosity) {
@@ -390,12 +393,12 @@
           }
           return ''
         } else {
-          for (j = 0; j < srcArray.length; j++) {
+          for (i = 0; i < srcArrayLength; i++) {
             // append extension if not present
-            if (srcArray[j].slice(-5) !== '.html') {
-              srcArray[j] += '.html'
+            if (srcArray[i].slice(-5) !== '.html') {
+              srcArray[i] += '.html'
             }
-            incdoc = teddy.compile(srcArray[j])
+            incdoc = teddy.compile(srcArray[i])
             incdocArray.push(incdoc)
           }
           return incdocArray.join(' ')
