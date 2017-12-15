@@ -316,12 +316,8 @@
       var renderStringyModel
       var maxPasses = teddy.params.maxPasses
       var maxPassesError = 'Render aborted due to max number of passes (' + maxPasses + ') exceeded; there is a possible infinite loop in your template logic.'
-      var dontParse
-      var dontParseLength
-      var srcArray = []
-      var srcArrayLength
-      var incdocArray = []
-      var loopCounter = 0
+      var tags = []
+      var tag
       var src
       var incdoc
       var comments
@@ -372,50 +368,13 @@
 
       renderedTemplate = teddy.templates[template] || renderedTemplate
 
-      // check if noparse or noteddy tag exist
-      dontParse = renderedTemplate.match(/<include[^>]*( noparse| noteddy)[^>]*>/g)
-
-      if (dontParse) {
-        // cache length
-        dontParseLength = dontParse.length
-
-        // if multiple noparse or noteddy exist, push src names into an array
-        for (i = 0; i < dontParseLength; i++) {
-          src = getAttribute(dontParse[i], 'src')
-          srcArray.push(src)
-
-          // cache length
-          srcArrayLength = srcArray.length
-        }
-        if (!src) {
-          if (teddy.params.verbosity) {
-            teddy.console.warn('<include> element found with no src attribute. Ignoring element.')
-          }
-          return ''
-        } else {
-          for (i = 0; i < srcArrayLength; i++) {
-            // append extension if not present
-            if (srcArray[i].slice(-5) !== '.html') {
-              srcArray[i] += '.html'
-            }
-            incdoc = teddy.compile(srcArray[i])
-            incdocArray.push(incdoc)
-          }
-          return incdocArray.join(' ')
-        }
-      } else if (!dontParse) {
-        comments = matchRecursive(renderedTemplate, '{!...!}')
-        l = comments.length
-        for (i = 0; i < l; i++) {
-          renderedTemplate = replaceNonRegex(renderedTemplate, '{!' + comments[i] + '!}', '')
-        }
-      }
-
       // prepare to cache the template if caching is enabled and this template is eligible
       if (teddy.params.cacheRenders && teddy.templates[template] && (!teddy.params.cacheWhitelist || teddy.params.cacheWhitelist[template]) && teddy.params.cacheBlacklist.indexOf(template) < 0) {
+        // console.log('This tempalte is eligble')
+        // console.log('teddy.renderedTemplates[template]', teddy.renderedTemplates[template])
         teddy.renderedTemplates[template] = teddy.renderedTemplates[template] || []
         l = teddy.renderedTemplates[template].length
-
+        // console.log('LLLLLL', l)
         // remove first (oldest) item from the array if cache limit is reached
         if ((teddy.params.templateMaxCaches[template] && l >= teddy.params.templateMaxCaches[template]) || (!teddy.params.templateMaxCaches[template] && l >= teddy.params.defaultCaches)) {
           teddy.renderedTemplates[template].shift()
@@ -436,10 +395,17 @@
       function parseNonLoopedElements () {
         var outerLoops
         var outerLoopsCount
+        var dontParseMatches
+        var dontParseCount
 
         function replaceLoops (match) {
           loops.push(match)
           return '{' + loops.length + '_loop}'
+        }
+
+        function replaceTags (match) {
+          tags.push(match)
+          return '{' + tags.length + '_tag}'
         }
         do {
           diff = renderedTemplate
@@ -449,13 +415,25 @@
           for (i = 0; i < outerLoopsCount; i++) {
             renderedTemplate = renderedTemplate.replace('<loop' + outerLoops[i] + '</loop>', replaceLoops)
           }
+
+          // find includes with noparse or noteddy tag and remove them for now
+          dontParseMatches = renderedTemplate.match(/<include[^>]*( noparse| noteddy)[^>]*>([\s\S]*?)<\/include>/g)
+
+          if (dontParseMatches) {
+            dontParseCount = dontParseMatches.length
+            for (i = 0; i < dontParseCount; i++) {
+              // console.log('renderedTemplate 472', renderedTemplate)
+              renderedTemplate = renderedTemplate.replace(dontParseMatches[i], replaceTags)
+              // console.log('renderedTemplate 474', renderedTemplate)
+            }
+          }
+
           // parse non-looped conditionals
           renderedTemplate = parseConditionals(renderedTemplate, model)
 
           // parse non-looped includes
-          if (loopCounter === 0) {
-            renderedTemplate = parseIncludes(renderedTemplate, model)
-          }
+          renderedTemplate = parseIncludes(renderedTemplate, model)
+
           passes++
           if (passes >= maxPasses) {
             return false
@@ -558,11 +536,6 @@
         consoleErrors = ''
       }
 
-      // cache the template if caching is enabled and this template is eligible
-      if (teddy.params.cacheRenders && teddy.templates[template] && (!teddy.params.cacheWhitelist || teddy.params.cacheWhitelist[template]) && teddy.params.cacheBlacklist.indexOf(template) < 0) {
-        teddy.renderedTemplates[template][l - 1].renderedTemplate = renderedTemplate
-      }
-
       // remove {! comments !} and (optionally) unnecessary whitespace
       do {
         oldTemplate = renderedTemplate
@@ -572,16 +545,36 @@
             .replace(/\s{2,}/g, ' ')
         }
         comments = matchRecursive(renderedTemplate, '{!...!}')
-        l = comments.length
-
-        // only remove comments if dontParse tag is not flagged
-        if (!dontParse || dontParse === undefined) {
-          for (i = 0; i < l; i++) {
-            renderedTemplate = replaceNonRegex(renderedTemplate, '{!' + comments[i] + '!}', '')
-          }
+        var commentsL = comments.length
+        for (i = 0; i < commentsL; i++) {
+          renderedTemplate = replaceNonRegex(renderedTemplate, '{!' + comments[i] + '!}', '')
         }
       }
       while (oldTemplate !== renderedTemplate)
+
+      // parse removed noparse includes
+      for (i = 0; i < tags.length; i++) {
+        tag = tags[i]
+        if (tag) {
+          // try for a version of this loop that might have a data model attached to it now
+          el = renderedTemplate.match(new RegExp('(?:{' + (i + 1) + '_tag data-local-model=[0-9]*})'))
+          if (el && el[0]) {
+            el = el[0]
+            localModel = el.split(' ')
+            localModel = localModel[1].slice(0, -1)
+            renderedTemplate = parseIncludes(renderedTemplate, model)
+          } else {
+            // no data model on it, render it vanilla
+            renderedTemplate = replaceNonRegex(renderedTemplate, '{' + (i + 1) + '_tag}', parseIncludeWithFlag(tag))
+          }
+          tags[i] = null // this prevents renderLoop from attempting to render it again
+        }
+      }
+
+      // cache the template if caching is enabled and this template is eligible
+      if (teddy.params.cacheRenders && teddy.templates[template] && (!teddy.params.cacheWhitelist || teddy.params.cacheWhitelist[template]) && teddy.params.cacheBlacklist.indexOf(template) < 0) {
+        teddy.renderedTemplates[template][l - 1].renderedTemplate = renderedTemplate
+      }
 
       // execute callback if present, otherwise simply return the rendered template string
       if (typeof callback === 'function') {
@@ -908,6 +901,24 @@
           }
         }
         return model
+      }
+
+      // includes a single <include> tag with noparse or noteddy flag
+      function parseIncludeWithFlag (el) {
+        src = getAttribute(el, 'src')
+        if (!src) {
+          if (teddy.params.verbosity) {
+            teddy.console.warn('<include> element found with no src attribute. Ignoring element.')
+          }
+          return ''
+        } else {
+          // append extension if not present
+          if (src.slice(-5) !== '.html') {
+            src += '.html'
+          }
+          incdoc = teddy.compile(src)
+          return incdoc
+        }
       }
 
       // parses a single loop tag
