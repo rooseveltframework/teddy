@@ -1,0 +1,10 @@
+{!
+  should <include> a template passed as an argument but not parse features
+!}
+
+<include src='misc/markupArgument'>
+  <arg something>
+    <include src='misc/serverSideComments' noparse></include>
+  </arg>
+</include>
+

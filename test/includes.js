@@ -29,6 +29,36 @@ describe('Includes', function () {
     done()
   })
 
+  it('should <include> a template but not parse any teddy features (includes/includeNoParsingFeature.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('includes/includeNoParsingFeature.html', model), '{!should evaluate <if emptyArray> as false!}<if emptyArray><p>The variable \'emptyArray\' is considered truthy</p></if><else><p>The variable \'emptyArray\' is considered falsey</p></else>')
+    done()
+  })
+
+  it('should <include> a template but not parse any teddy features (includes/includeNoTeddyFeature.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('includes/includeNoTeddyFeature.html', model), '{!should remove {! server side comments !}!}<p>test {! this should be removed !} test</p>')
+    done()
+  })
+
+  it('should <include> a template as an argument but not parse any teddy features (includes/includeNoTeddyFeatureAsArgument.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('includes/includeNoTeddyFeatureAsArgument.html', model), '{!should remove {! server side comments !}!}<p>test {! this should be removed !} test</p>')
+    done()
+  })
+
+  it('should <include> a template as an argument but not parse any teddy features (includes/includeNoParsingFeatureAsArgument.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('includes/includeNoParsingFeatureAsArgument.html', model), '{!should remove {! server side comments !}!}<p>test {! this should be removed !} test</p>')
+    done()
+  })
+
+  it('should <include> all templates and only parse those without the noteddy tag (includes/includeMultipleTemplatesWithNoParseTag.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('includes/includeMultipleTemplatesWithNoParseTag.html', model), '{!should remove {! server side comments !}!}<p>test {! this should be removed !} test</p> <p>test test</p> {!should remove {! server side comments !}!}<p>test {! this should be removed !} test</p>')
+    done()
+  })
+
+  it('should <include> all templates and only parse those without the noparse tag (includes/includeMultipleTemplatesWithNoTeddyTag.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('includes/includeMultipleTemplatesWithNoTeddyTag.html', model), '{!should remove {! server side comments !}!}<p>test {! this should be removed !} test</p> <p>test test</p> {!should remove {! server side comments !}!}<p>test {! this should be removed !} test</p>')
+    done()
+  })
+
   it('should <include> a template whose name is populated by a {variable} (includes/dynamicInclude.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('includes/dynamicInclude.html', model), '<p>Some content</p>')
     done()

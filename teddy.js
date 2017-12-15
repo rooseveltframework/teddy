@@ -73,7 +73,6 @@
   })()
 
   teddy = {
-
     /**
      * public member vars
      */
@@ -195,13 +194,9 @@
      * public methods
      */
 
-    // compiles a template (removes {! comments !} and unnecessary whitespace)
+    // compiles a template
     compile: function (template) {
       var name = template
-      var oldTemplate
-      var comments
-      var l
-      var i
       var register = false
 
       // it's assumed that the argument is already a template string if we're not server-side
@@ -211,7 +206,6 @@
         }
         return ''
       }
-
       // get contents of file if template is a file
       if (template.indexOf('<') === -1 && fs) {
         register = true
@@ -235,25 +229,6 @@
           register = true
         }
       }
-
-      // remove {! comments !} and (optionally) unnecessary whitespace
-      do {
-        oldTemplate = template
-
-        if (teddy.params.minify) {
-          template = template
-            .replace(/[\f\n\r\t\v]*/g, '')
-            .replace(/\s{2,}/g, ' ')
-        }
-
-        comments = matchRecursive(template, '{!...!}')
-        l = comments.length
-
-        for (i = 0; i < l; i++) {
-          template = replaceNonRegex(template, '{!' + comments[i] + '!}', '')
-        }
-      }
-      while (oldTemplate !== template)
 
       if (register) {
         teddy.templates[name] = template
@@ -341,6 +316,12 @@
       var renderStringyModel
       var maxPasses = teddy.params.maxPasses
       var maxPassesError = 'Render aborted due to max number of passes (' + maxPasses + ') exceeded; there is a possible infinite loop in your template logic.'
+      var tags = []
+      var tag
+      var src
+      var incdoc
+      var comments
+      var oldTemplate
 
       // overload console logs
       consoleWarnings = ''
@@ -367,6 +348,7 @@
         stringyModel = JSON.stringify(model, jsonStringifyRemoveCircularReferences)
         teddy.renderedTemplates[template] = teddy.renderedTemplates[template] || []
         renders = teddy.renderedTemplates[template]
+
         l = renders.length
         for (i = 0; i < l; i++) {
           render = renders[i]
@@ -391,8 +373,6 @@
       if (teddy.params.cacheRenders && teddy.templates[template] && (!teddy.params.cacheWhitelist || teddy.params.cacheWhitelist[template]) && teddy.params.cacheBlacklist.indexOf(template) < 0) {
         teddy.renderedTemplates[template] = teddy.renderedTemplates[template] || []
         l = teddy.renderedTemplates[template].length
-
-        // remove first (oldest) item from the array if cache limit is reached
         if ((teddy.params.templateMaxCaches[template] && l >= teddy.params.templateMaxCaches[template]) || (!teddy.params.templateMaxCaches[template] && l >= teddy.params.defaultCaches)) {
           teddy.renderedTemplates[template].shift()
         }
@@ -412,20 +392,34 @@
       function parseNonLoopedElements () {
         var outerLoops
         var outerLoopsCount
+        var dontParseMatches
+        var dontParseCount
 
         function replaceLoops (match) {
           loops.push(match)
           return '{' + loops.length + '_loop}'
         }
 
+        function replaceTags (match) {
+          tags.push(match)
+          return '{' + tags.length + '_tag}'
+        }
         do {
           diff = renderedTemplate
-
           // find loops and remove them for now
           outerLoops = matchRecursive(renderedTemplate, '<loop...</loop>')
           outerLoopsCount = outerLoops.length
           for (i = 0; i < outerLoopsCount; i++) {
             renderedTemplate = renderedTemplate.replace('<loop' + outerLoops[i] + '</loop>', replaceLoops)
+          }
+
+          // find includes with noparse or noteddy tag and remove them for now
+          dontParseMatches = renderedTemplate.match(/<include[^>]*( noparse| noteddy)[^>]*>([\s\S]*?)<\/include>/g)
+          if (dontParseMatches) {
+            dontParseCount = dontParseMatches.length
+            for (i = 0; i < dontParseCount; i++) {
+              renderedTemplate = renderedTemplate.replace(dontParseMatches[i], replaceTags)
+            }
           }
 
           // parse non-looped conditionals
@@ -460,7 +454,6 @@
               if (loop) {
                 // try for a version of this loop that might have a data model attached to it now
                 el = renderedTemplate.match(new RegExp('(?:{' + (i + 1) + '_loop data-local-model=[0-9]*})'))
-
                 if (el && el[0]) {
                   el = el[0]
                   localModel = el.split(' ')
@@ -480,6 +473,7 @@
             }
             return maxPassesError
           }
+
           passes++
           if (passes >= maxPasses) {
             if (teddy.params.verbosity) {
@@ -495,7 +489,6 @@
 
         // processes all remaining {vars}
         renderedTemplate = parseVars(renderedTemplate, model)
-
         passes++
         if (passes >= maxPasses) {
           if (teddy.params.verbosity) {
@@ -509,10 +502,10 @@
       // restore <noteddy> blocks
       noteddysMatches = matchRecursive(renderedTemplate, '<restoreteddy...>')
       noteddysCount = noteddysMatches.length
+
       for (i = 0; i < noteddysCount; i++) {
         renderedTemplate = renderedTemplate.replace('<restoreteddy' + noteddysMatches[i] + '>', noteddys[i])
       }
-
       // clean up temp vars
       contextModels = []
       passes = 0
@@ -535,6 +528,41 @@
         renderedTemplate += '</body></html>'
         consoleWarnings = ''
         consoleErrors = ''
+      }
+
+      // remove {! comments !} and (optionally) unnecessary whitespace
+      do {
+        oldTemplate = renderedTemplate
+        if (teddy.params.minify) {
+          renderedTemplate = renderedTemplate
+            .replace(/[\f\n\r\t\v]*/g, '')
+            .replace(/\s{2,}/g, ' ')
+        }
+        comments = matchRecursive(renderedTemplate, '{!...!}')
+        var commentsLength = comments.length
+        for (i = 0; i < commentsLength; i++) {
+          renderedTemplate = replaceNonRegex(renderedTemplate, '{!' + comments[i] + '!}', '')
+        }
+      }
+      while (oldTemplate !== renderedTemplate)
+
+      // parse removed noparse or noteddy includes
+      for (i = 0; i < tags.length; i++) {
+        tag = tags[i]
+        if (tag) {
+          // try for a version of this loop that might have a data model attached to it now
+          el = renderedTemplate.match(new RegExp('(?:{' + (i + 1) + '_tag data-local-model=[0-9]*})'))
+          if (el && el[0]) {
+            el = el[0]
+            localModel = el.split(' ')
+            localModel = localModel[1].slice(0, -1)
+            renderedTemplate = parseIncludes(renderedTemplate, model)
+          } else {
+            // no data model on it, render it vanilla
+            renderedTemplate = replaceNonRegex(renderedTemplate, '{' + (i + 1) + '_tag}', parseIncludeWithFlag(tag))
+          }
+          tags[i] = null // this prevents parseIncludeWithFlag from attempting to render it again
+        }
       }
 
       // cache the template if caching is enabled and this template is eligible
@@ -571,7 +599,6 @@
           result = renderInclude(el, model)
           renderedTemplate = replaceNonRegex(renderedTemplate, el, result)
         }
-
         return renderedTemplate
       }
 
@@ -603,7 +630,6 @@
             conds = matchRecursive(renderedTemplate, '<if ...</if>')
           }
           l = conds.length
-
           for (i = 0; i < l; i++) {
             condString = conds[i]
             if (ifsDone) {
@@ -685,7 +711,6 @@
             }
           }
         }
-
         return renderedTemplate
       }
 
@@ -742,7 +767,6 @@
             return replaceNonRegex(docstring, '{' + omatch + '}', ('{' + nmatch + '}').replace(/ data-local-model=[0-9]*/g, ''))
           }
         }
-
         return docstring
       }
 
@@ -755,6 +779,7 @@
         var src, incdoc, args, argl, argname, argval, i, localModel
 
         src = getAttribute(el, 'src')
+
         if (!src) {
           if (teddy.params.verbosity) {
             teddy.console.warn('<include> element found with no src attribute. Ignoring element.')
@@ -763,7 +788,6 @@
         } else {
           // parse variables which may be included in src attribute
           src = parseVars(src, model)
-
           // append extension if not present
           if (src.slice(-5) !== '.html') {
             src += '.html'
@@ -773,10 +797,8 @@
           if (!teddy.templates[src] || teddy.params.compileAtEveryRender) {
             incdoc = teddy.compile(src)
           }
-
           // get the template as a string
           incdoc = teddy.templates[src] || incdoc
-
           // if source is the same as the file name, we consider it a template that doesn't exist
           if (incdoc === src || incdoc + '.html' === src) {
             incdoc = null
@@ -796,7 +818,6 @@
           } else {
             localModel = {}
           }
-
           args = matchRecursive(el, '<arg...</arg>')
           argl = args ? args.length : 0
           for (i = 0; i < argl; i++) {
@@ -814,19 +835,15 @@
             argname = argname.split('>')
             argname = argname[0]
             argval = getInnerHTML(args[i])
-
             // replace template string argument {var} with argument value
             incdoc = renderVar(incdoc, argname, argval, true)
-
             // add arg to local model
             localModel[argname] = argval
           }
-
           if (argl) {
             // apply local model to child conditionals and loops
             incdoc = tagLocalModels(incdoc, localModel)
           }
-
           return incdoc
         }
       }
@@ -834,7 +851,6 @@
       // finds all <include>, <if>, <elseif>, <unless>, <elseunless>, one line ifs, and <loop> tags and applies their local models
       function tagLocalModels (doc, extraModel) {
         doc = doc.replace(/(?:{[\S\s]*?}|<include[\S\s]*?>|<if[\S\s]*?>|<elseif[\S\s]*?>|<unless[\S\s]*?>|<elseunless[\S\s]*?>|<loop[\S\s]*?>|<[\S\s]if-[\S\s](?:="[\S\s]"|='[\S\s]')[\S\s](?:true=|false=)(?:="[\S\s]"|='[\S\s]')*?>)/g, addTag)
-
         function addTag (match) {
           var modelNumber = -1
           var localModel = getAttribute(match, 'data-local-model')
@@ -862,7 +878,6 @@
             return match
           }
         }
-
         return doc
       }
 
@@ -870,7 +885,6 @@
       function applyLocalModel (el, model) {
         var localModel = el.match(/data-local-model=[0-9]*/)
         var i
-
         if (localModel) {
           localModel = localModel[0]
           localModel = localModel.replace('data-local-model=', '')
@@ -881,6 +895,24 @@
           }
         }
         return model
+      }
+
+      // includes code from a single <include> tag with noparse or noteddy flag
+      function parseIncludeWithFlag (el) {
+        src = getAttribute(el, 'src')
+        if (!src) {
+          if (teddy.params.verbosity) {
+            teddy.console.warn('<include> element found with no src attribute. Ignoring element.')
+          }
+          return ''
+        } else {
+          // append extension if not present
+          if (src.slice(-5) !== '.html') {
+            src += '.html'
+          }
+          incdoc = teddy.compile(src)
+          return incdoc
+        }
       }
 
       // parses a single loop tag
@@ -953,7 +985,6 @@
 
         // add local vars to model
         model = applyLocalModel(el, model)
-
         while (!satisfiedCondition) {
           if (evalCondition(el, model)) {
             satisfiedCondition = true
@@ -971,6 +1002,7 @@
             return ''
           }
         }
+        return parts
       }
 
       // parses a single one line conditional
@@ -984,7 +1016,6 @@
         var extraString = ''
 
         el = parts[0]
-
         for (i = 1; i < l; i++) {
           part = parts[i]
           if (flip) {
@@ -1004,13 +1035,10 @@
         // remove conditionals from element
         el = removeAttribute(el, 'true')
         el = removeAttribute(el, 'false')
-
         // Remove all if-conditionals and append condition eval value
-        el = el.replace(/if-[^=\s>]*(=["'][^"']*["'])*[>]*/, conditionContent || '')
-
+        el = el.replace(/if-[^=\s>]*(=["'{}][^"']*["'{}])*[>]*/, conditionContent || '')
         // append additional one line content if any
         el += extraString
-
         if (el.charAt(el.length - 1) !== '>') {
           el = el.trim()
           el += '>'
@@ -1117,12 +1145,10 @@
           }
 
           modelVal = curVar
-
           // force empty arrays and empty objects to be falsey (#44)
           if (modelVal && ((Array.isArray(modelVal) && modelVal.length === 0) || (typeof modelVal === 'object' && Object.keys(modelVal).length === 0 && modelVal.constructor === Object))) {
             modelVal = false
           }
-
           if (conditionType === 'if' || conditionType === 'onelineif' || conditionType === 'elseif') {
             if (condition === conditionVal || (conditionType === 'onelineif' && 'if-' + condition === conditionVal)) {
               if (modelVal) {
@@ -1149,7 +1175,6 @@
             }
           }
         }
-
         // loop through the results
         for (i = 0; i < length; i++) {
           condition = truthStack[i]
@@ -1162,7 +1187,6 @@
             condResult = Boolean((condResult && !truthStack[i + 1]) || (!condResult && truthStack[i + 1]))
           }
         }
-
         return condResult !== undefined ? condResult : condition
       }
 
@@ -1193,7 +1217,6 @@
       }
     }
   }
-
   // set params to default values
   teddy.setDefaultParams()
 
