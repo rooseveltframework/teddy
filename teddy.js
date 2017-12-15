@@ -194,7 +194,7 @@
      * public methods
      */
 
-    // compiles a template (removes {! comments !} and unnecessary whitespace)
+    // compiles a template
     compile: function (template) {
       var name = template
       var register = false
@@ -348,6 +348,7 @@
         stringyModel = JSON.stringify(model, jsonStringifyRemoveCircularReferences)
         teddy.renderedTemplates[template] = teddy.renderedTemplates[template] || []
         renders = teddy.renderedTemplates[template]
+
         l = renders.length
         for (i = 0; i < l; i++) {
           render = renders[i]
@@ -370,12 +371,8 @@
 
       // prepare to cache the template if caching is enabled and this template is eligible
       if (teddy.params.cacheRenders && teddy.templates[template] && (!teddy.params.cacheWhitelist || teddy.params.cacheWhitelist[template]) && teddy.params.cacheBlacklist.indexOf(template) < 0) {
-        // console.log('This tempalte is eligble')
-        // console.log('teddy.renderedTemplates[template]', teddy.renderedTemplates[template])
         teddy.renderedTemplates[template] = teddy.renderedTemplates[template] || []
         l = teddy.renderedTemplates[template].length
-        // console.log('LLLLLL', l)
-        // remove first (oldest) item from the array if cache limit is reached
         if ((teddy.params.templateMaxCaches[template] && l >= teddy.params.templateMaxCaches[template]) || (!teddy.params.templateMaxCaches[template] && l >= teddy.params.defaultCaches)) {
           teddy.renderedTemplates[template].shift()
         }
@@ -418,13 +415,10 @@
 
           // find includes with noparse or noteddy tag and remove them for now
           dontParseMatches = renderedTemplate.match(/<include[^>]*( noparse| noteddy)[^>]*>([\s\S]*?)<\/include>/g)
-
           if (dontParseMatches) {
             dontParseCount = dontParseMatches.length
             for (i = 0; i < dontParseCount; i++) {
-              // console.log('renderedTemplate 472', renderedTemplate)
               renderedTemplate = renderedTemplate.replace(dontParseMatches[i], replaceTags)
-              // console.log('renderedTemplate 474', renderedTemplate)
             }
           }
 
@@ -545,14 +539,14 @@
             .replace(/\s{2,}/g, ' ')
         }
         comments = matchRecursive(renderedTemplate, '{!...!}')
-        var commentsL = comments.length
-        for (i = 0; i < commentsL; i++) {
+        var commentsLength = comments.length
+        for (i = 0; i < commentsLength; i++) {
           renderedTemplate = replaceNonRegex(renderedTemplate, '{!' + comments[i] + '!}', '')
         }
       }
       while (oldTemplate !== renderedTemplate)
 
-      // parse removed noparse includes
+      // parse removed noparse or noteddy includes
       for (i = 0; i < tags.length; i++) {
         tag = tags[i]
         if (tag) {
@@ -567,7 +561,7 @@
             // no data model on it, render it vanilla
             renderedTemplate = replaceNonRegex(renderedTemplate, '{' + (i + 1) + '_tag}', parseIncludeWithFlag(tag))
           }
-          tags[i] = null // this prevents renderLoop from attempting to render it again
+          tags[i] = null // this prevents parseIncludeWithFlag from attempting to render it again
         }
       }
 
@@ -903,7 +897,7 @@
         return model
       }
 
-      // includes a single <include> tag with noparse or noteddy flag
+      // includes code from a single <include> tag with noparse or noteddy flag
       function parseIncludeWithFlag (el) {
         src = getAttribute(el, 'src')
         if (!src) {
