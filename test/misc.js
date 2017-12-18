@@ -24,6 +24,21 @@ describe('Misc', function () {
     }
   })
 
+  it('should compile a template with source code as the parameter and populate teddy.templates', function (done) {
+    var templateAsString = '{! should properly escape HTML entities present in {variables} !} <p>{escapeTest}</p>'
+    var templateNameAndPath = 'something'
+    teddy.compile(templateAsString)
+    assert(teddy.templates[templateNameAndPath] !== undefined)
+    done()
+  })
+
+  it('should compile a template with a path to a template as the parameter and populate teddy.templates', function (done) {
+    var templateNameAndPath = 'misc/varNoEscaping.html'
+    teddy.compile(templateNameAndPath)
+    assert(teddy.templates[templateNameAndPath] !== undefined)
+    done()
+  })
+
   it('should not escape HTML entities present in {variables} which are properly {flagged|p|s} (misc/barPandSTest.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('misc/barPandSTest.html', model), '<h1>double bars</h1> {something}')
     done()
