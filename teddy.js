@@ -659,7 +659,7 @@
                   elseCond = matchRecursive(renderedTemplate, condString + sibling + '...</elseunless>')
                   elseCond = elseCond ? sibling + replaceNonRegex(elseCond[0], condString, '') + '</elseunless>' : null
                 } else if (sibling.replace(/^\s+/, '').substring(0, 6) === '<else>') {
-                  elseCond = matchRecursive(renderedTemplate, condString + sibling + '...</else>')
+                  elseCond = matchRecursive(replaceNonRegex(renderedTemplate, condString, ''), sibling + '...</else>')
                   elseCond = elseCond ? sibling + replaceNonRegex(elseCond[0], condString, '') + '</else>' : null
                 } else {
                   findElses = false

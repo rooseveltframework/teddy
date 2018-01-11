@@ -1,9 +1,9 @@
 {!
   should evaluate nested <unless> tag in the else
 !}
-<unless doesntexist>
+<if doesntexist>
   <p>The variable 'doesntexist' is not present</p>
-</unless>
+</if>
 <else>
   <p>The variable 'doesntexist' is present</p>
   <unless anotherdoesntexist>

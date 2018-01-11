@@ -56,17 +56,12 @@ describe('Conditionals', function () {
   })
 
   it('should evaluate nested <unless> tag in the if (conditionals/unlessNestedIf.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('conditionals/unless.html', model), '<p>The variable \'doesntexist\' is not present</p> <p>The variable \'anotherdoesntexist\' is not present</p>')
+    assert.equalIgnoreSpaces(teddy.render('conditionals/unlessNestedIf.html', model), '<p>The variable \'doesntexist\' is not present</p> <p>The variable \'anotherdoesntexist\' is not present</p>')
     done()
   })
 
   it('should evaluate nested <unless> tag in the else (conditionals/unlessNestedElse.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('conditionals/unless.html', model), '<p>The variable \'doesntexist\' is present</p> <p>The variable \'anotherdoesntexist\' is not present</p>')
-    done()
-  })
-
-  it('should evaluate <unless doesntexist> as true (conditionals/unless.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('conditionals/unless.html', model), '<p>The variable \'doesntexist\' is not present</p>')
+    assert.equalIgnoreSpaces(teddy.render('conditionals/unlessNestedElse.html', model), '<p>The variable \'doesntexist\' is present</p> <p>The variable \'anotherdoesntexist\' is not present</p>')
     done()
   })
 
