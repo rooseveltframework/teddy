@@ -1,0 +1,15 @@
+{!
+  should evaluate nested <unless> tag in the else
+!}
+<unless doesntexist>
+  <p>The variable 'doesntexist' is not present</p>
+</unless>
+<else>
+  <p>The variable 'doesntexist' is present</p>
+  <unless anotherdoesntexist>
+    <p>The variable 'anotherdoesntexist' is not present</p>
+  </unless>
+  <else>
+    <p>The variable 'anotherdoesntexist' is present</p>
+  </else>
+</else>
