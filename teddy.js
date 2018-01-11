@@ -653,10 +653,10 @@
                 }
 
                 if (sibling.replace(/^\s+/, '').substring(0, 8) === '<elseif ') {
-                  elseCond = matchRecursive(renderedTemplate, condString + sibling + '...</elseif>')
+                  elseCond = matchRecursive(replaceNonRegex(renderedTemplate, condString, ''), sibling + '...</elseif>')
                   elseCond = elseCond ? sibling + replaceNonRegex(elseCond[0], condString, '') + '</elseif>' : null
                 } else if (sibling.replace(/^\s+/, '').substring(0, 12) === '<elseunless ') {
-                  elseCond = matchRecursive(renderedTemplate, condString + sibling + '...</elseunless>')
+                  elseCond = matchRecursive(replaceNonRegex(renderedTemplate, condString, ''), sibling + '...</elseunless>')
                   elseCond = elseCond ? sibling + replaceNonRegex(elseCond[0], condString, '') + '</elseunless>' : null
                 } else if (sibling.replace(/^\s+/, '').substring(0, 6) === '<else>') {
                   elseCond = matchRecursive(replaceNonRegex(renderedTemplate, condString, ''), sibling + '...</else>')
