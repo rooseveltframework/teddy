@@ -65,8 +65,8 @@ describe('Conditionals', function () {
     done()
   })
 
-  it('should evaluate <unless doesntexist> as true (conditionals/unless.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('conditionals/unless.html', model), '<p>The variable \'doesntexist\' is not present</p>')
+  it('should evaluate nested <unless> tag in the if with a comment in between (conditionals/unlessNestedIfWithComment.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/unlessNestedIfWithComment.html', model), '<p>The variable \'doesntexist\' is not present</p> <p>The variable \'something\' is present</p>')
     done()
   })
 
