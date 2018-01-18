@@ -55,8 +55,8 @@ describe('Conditionals', function () {
     done()
   })
 
-  it('should evaluate <unless doesntexist> as true (conditionals/unless.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('conditionals/unless.html', model), '<p>The variable \'doesntexist\' is not present</p>')
+  it('should evaluate <unless something> as false and trigger <else> condition (conditionals/unlessElse.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/unlessElse.html', model), '<p>The variable \'something\' is present</p>')
     done()
   })
 
