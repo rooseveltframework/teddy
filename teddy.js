@@ -369,6 +369,8 @@
 
       renderedTemplate = teddy.templates[template] || renderedTemplate
 
+      renderedTemplate = removeComments(renderedTemplate)
+
       // prepare to cache the template if caching is enabled and this template is eligible
       if (teddy.params.cacheRenders && teddy.templates[template] && (!teddy.params.cacheWhitelist || teddy.params.cacheWhitelist[template]) && teddy.params.cacheBlacklist.indexOf(template) < 0) {
         teddy.renderedTemplates[template] = teddy.renderedTemplates[template] || []
@@ -387,6 +389,26 @@
           teddy.console.warn('teddy.render attempted to render a template which doesn\'t exist: ' + template)
         }
         return ''
+      }
+
+      function removeComments (template) {
+        // remove {! comments !} and (optionally) unnecessary whitespace
+        do {
+          oldTemplate = template
+          if (teddy.params.minify) {
+            template = template
+              .replace(/[\f\n\r\t\v]*/g, '')
+              .replace(/\s{2,}/g, ' ')
+          }
+          comments = matchRecursive(template, '{!...!}')
+          var commentsLength = comments.length
+          for (i = 0; i < commentsLength; i++) {
+            template = replaceNonRegex(template, '{!' + comments[i] + '!}', '')
+          }
+        }
+        while (oldTemplate !== template)
+
+        return template
       }
 
       function parseNonLoopedElements () {
@@ -530,22 +552,6 @@
         consoleErrors = ''
       }
 
-      // remove {! comments !} and (optionally) unnecessary whitespace
-      do {
-        oldTemplate = renderedTemplate
-        if (teddy.params.minify) {
-          renderedTemplate = renderedTemplate
-            .replace(/[\f\n\r\t\v]*/g, '')
-            .replace(/\s{2,}/g, ' ')
-        }
-        comments = matchRecursive(renderedTemplate, '{!...!}')
-        var commentsLength = comments.length
-        for (i = 0; i < commentsLength; i++) {
-          renderedTemplate = replaceNonRegex(renderedTemplate, '{!' + comments[i] + '!}', '')
-        }
-      }
-      while (oldTemplate !== renderedTemplate)
-
       // parse removed noparse or noteddy includes
       for (i = 0; i < tags.length; i++) {
         tag = tags[i]
@@ -592,6 +598,8 @@
         var l = els ? els.length : 0
         var result
         var i
+
+        renderedTemplate = removeComments(renderedTemplate)
 
         for (i = 0; i < l; i++) {
           el = '<include' + els[i] + '</include>'
