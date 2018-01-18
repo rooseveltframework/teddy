@@ -15,7 +15,7 @@
   "devDependencies": {
     "standard": "^10.0.0",
     "mocha-only-detector": "^0.1.0",
-    "mocha": "4.1.0",
+    "mocha": "5.0.0",
     "chai": "4.1.2",
     "chai-string": "1.4.0",
     "istanbul": "0.4.5",
