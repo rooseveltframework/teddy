@@ -55,6 +55,11 @@ describe('Conditionals', function () {
     done()
   })
 
+  it('should evaluate <unless something> as false and trigger <else> condition (conditionals/unlessElse.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/unlessElse.html', model), '<p>The variable \'something\' is present</p>')
+    done()
+  })
+
   it('should evaluate nested <unless> tag in the if (conditionals/unlessNestedIf.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('conditionals/unlessNestedIf.html', model), '<p>The variable \'doesntexist\' is not present</p> <p>The variable \'anotherdoesntexist\' is not present</p>')
     done()
@@ -62,6 +67,16 @@ describe('Conditionals', function () {
 
   it('should evaluate nested <unless> tag in the else (conditionals/unlessNestedElse.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('conditionals/unlessNestedElse.html', model), '<p>The variable \'doesntexist\' is present</p> <p>The variable \'anotherdoesntexist\' is not present</p>')
+    done()
+  })
+
+  it('should evaluate <unless something> as false and trigger <else> condition with comment in between (conditionals/unlessWithComment.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/unlessWithComment.html', model), '<p>The variable \'something\' is present</p>')
+    done()
+  })
+
+  it('should evaluate nested <unless> tag in the if with a comment in between (conditionals/unlessNestedIfWithComment.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/unlessNestedIfWithComment.html', model), '<p>The variable \'doesntexist\' is not present</p> <p>The variable \'something\' is present</p>')
     done()
   })
 
@@ -73,11 +88,6 @@ describe('Conditionals', function () {
 
   it('should evaluate <unless something=\'Some content\'> as true (conditionals/unlessValue.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('conditionals/unlessValue.html', model), '<p>The variable \'something\' is set to \'Some content\'</p>')
-    done()
-  })
-
-  it('should evaluate <unless something> as false and trigger <else> condition with comment in between (conditionals/unlessWithComment.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('conditionals/unlessWithComment.html', model), '<p>The variable \'something\' is present</p>')
     done()
   })
 
