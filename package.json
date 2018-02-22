@@ -1,14 +1,19 @@
 {
   "name": "teddy",
   "description": "Teddy Templating Engine",
-  "author": "Eric Newport <kethinov@gmail.com>",
+  "author": "Roosevelt Framework Team <rooseveltframework@gmail.com>",
+  "contributors": [
+    "Eric Newport <kethinov@gmail.com>",
+    "Troy Coutu <autre31415@gmail.com>",
+    "Alexander J. Lallier <alexanderlallier@aol.com>"
+  ],
   "version": "0.4.23",
   "homepage": "https://github.com/rooseveltframework/teddy",
   "license": "CC-BY-4.0",
   "main": "teddy.js",
   "readmeFilename": "README.md",
   "engines": {
-    "node": ">=6.0.0"
+    "node": ">=8.0.0"
   },
   "engineStrict": true,
   "dependencies": {},
