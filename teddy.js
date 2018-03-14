@@ -1044,13 +1044,9 @@
         el = removeAttribute(el, 'true')
         el = removeAttribute(el, 'false')
         // Remove all if-conditionals and append condition eval value
-        el = el.replace(/if-[^=\s>]*(=["'{}][^"']*["'{}])*[>]*/, conditionContent || '')
+        el = el.replace(/if-[^=\s>/]*(=["'{}][^"']*["'{}])*/, conditionContent || '')
         // append additional one line content if any
         el += extraString
-        if (el.charAt(el.length - 1) !== '>') {
-          el = el.trim()
-          el += '>'
-        }
 
         return el
       }
@@ -1301,11 +1297,8 @@
   // get a specific attribute from a given element
   function removeAttribute (el, attr) {
     attr = attr.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&')
-    var newEl = el.replace(new RegExp('(?: (?:' + attr + '(?: |>))| (?:' + attr + '=)(?:\\"([\\S\\s]*?)\\"|\\\'([\\S\\s]*?)\\\')(?: |>))'), ' ')
-    if (newEl.charAt(newEl.length - 1) !== '>') {
-      newEl = newEl.trim()
-      newEl += '>'
-    }
+    var newEl = el.replace(new RegExp('(?: (?:' + attr + '(?: |>))| (?:' + attr + '=)(?:[\'"](.*?)[\'"])($|(?=[ >/])))'), '')
+
     return newEl
   }
 
