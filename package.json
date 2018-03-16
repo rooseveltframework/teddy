@@ -7,7 +7,7 @@
     "Troy Coutu <autre31415@gmail.com>",
     "Alexander J. Lallier <alexanderlallier@aol.com>"
   ],
-  "version": "0.4.24",
+  "version": "0.4.25",
   "homepage": "https://github.com/rooseveltframework/teddy",
   "license": "CC-BY-4.0",
   "main": "teddy.js",
