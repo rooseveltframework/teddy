@@ -12,5 +12,6 @@ script:
   - npm run test-firefox
 after_success:
   - npm run coverage
+  - ls coverage
   - lcov-result-merger 'coverage/**/lcov.info' 'coverage/fullCoverage.info'
   - cat ./coverage/fullCoverage.info | ./node_modules/.bin/coveralls
