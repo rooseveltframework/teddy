@@ -2,12 +2,12 @@
   var teddy // @namespace
 
   // private utility vars
-  var consoleWarnings          // used to overload console.warn for the server-side error gui
-  var consoleErrors            // used to overload console.error for the server-side error gui
-  var fs                       // server-side filesystem module
-  var path                     // server-side utility for manipulating file paths
-  var contextModels = []       // stores local models for later consumption by template logic tags
-  var matchRecursive           // see below
+  var consoleWarnings // used to overload console.warn for the server-side error gui
+  var consoleErrors // used to overload console.error for the server-side error gui
+  var fs // server-side filesystem module
+  var path // server-side utility for manipulating file paths
+  var contextModels = [] // stores local models for later consumption by template logic tags
+  var matchRecursive // see below
   var jsonStringifyCache
 
   /* matchRecursive
@@ -1230,7 +1230,7 @@
 
   // gets nested object by string
   function getNestedObjectByString (o, s) {
-    s = s.replace(/\[(\w+)\]/g, '.$1')  // convert indexes to properties
+    s = s.replace(/\[(\w+)\]/g, '.$1') // convert indexes to properties
     s = s.replace(/^\./, '') // strip leading dot
     var a = s.split('.')
     var n
