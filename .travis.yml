@@ -1,6 +1,8 @@
 language: node_js
 node_js:
-  - "node"
+  - "10"
+  - "9"
+  - "8"
 before_install:
   - export CHROME_BIN=chromium-browser
   - export DISPLAY=:99.0
@@ -9,6 +11,6 @@ script:
   - npm run test
   - npm run test-firefox
 after_success:
-  - istanbul cover ./node_modules/mocha/bin/_mocha
+  - npm run coverage
   - lcov-result-merger 'coverage/**/lcov.info' 'coverage/fullCoverage.info'
   - cat ./coverage/fullCoverage.info | ./node_modules/.bin/coveralls

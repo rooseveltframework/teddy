@@ -15,5 +15,6 @@ npm-debug.log
 .DS_Store
 node_modules
 coverage
+.nyc_output
 
 .jshintrc

@@ -1,9 +1,14 @@
-version: "{build}"
+environment:
+  matrix:
+    - nodejs_version: "8"
+    - nodejs_version: "9"
+    - nodejs_version: "10"
 install:
-  - node --version
-  - npm --version
+  - ps: Install-Product node $env:nodejs_version
   - npm install
 test_script:
+  - node --version
+  - npm --version
   - npm run test
   - npm run test-firefox
   - npm run test-ie
