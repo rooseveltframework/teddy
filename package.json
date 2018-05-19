@@ -21,7 +21,7 @@
     "chai": "4.1.2",
     "chai-string": "1.4.0",
     "coveralls": "3.0.1",
-    "cross-env": "5.1.4",
+    "cross-env": "5.1.5",
     "eslint": "4.19.1",
     "eslint-plugin-mocha": "5.0.0",
     "husky": "0.14.3",
@@ -38,7 +38,7 @@
     "lcov-result-merger": "2.0.0",
     "lint-staged": "7.1.0",
     "mocha": "5.1.1",
-    "nyc": "11.7.1",
+    "nyc": "11.7.2",
     "standard": "11.0.1"
   },
   "standard": {
