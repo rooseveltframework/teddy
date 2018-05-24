@@ -35,7 +35,7 @@
     "karma-mocha": "1.3.0",
     "karma-safari-launcher": "1.0.0",
     "karma-spec-reporter": "0.0.32",
-    "lcov-result-merger": "2.0.0",
+    "lcov-result-merger": "3.0.0",
     "lint-staged": "7.1.0",
     "mocha": "5.1.1",
     "nyc": "11.7.2",
