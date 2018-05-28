@@ -4,15 +4,15 @@ os:
   - osx
 env:
   - MOZ_HEADLESS=1
+addons:
+  firefox: latest
+  chrome: latest
 node_js:
   - "10"
   - "9"
   - "8"
 before_install:
   - export CHROME_BIN=chromium-browser
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export DISPLAY=:99.0; fi
-  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sh -e /etc/init.d/xvfb start; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then ( sudo Xvfb :99 -ac -screen 0 1024x768x8; echo ok )& fi
 script:
   - npm run coverage
   - npm run test-chrome
