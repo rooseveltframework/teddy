@@ -20,7 +20,7 @@
   "devDependencies": {
     "chai": "4.1.2",
     "chai-string": "1.4.0",
-    "coveralls": "3.0.1",
+    "codecov": "3.0.2",
     "cross-env": "5.1.5",
     "eslint": "4.19.1",
     "eslint-plugin-mocha": "5.0.0",
@@ -35,7 +35,6 @@
     "karma-mocha": "1.3.0",
     "karma-safari-launcher": "1.0.0",
     "karma-spec-reporter": "0.0.32",
-    "lcov-result-merger": "2.0.0",
     "lint-staged": "7.1.0",
     "mocha": "5.2.0",
     "nyc": "11.7.2",
@@ -55,7 +54,6 @@
     }
   },
   "nyc": {
-    "report-dir": "./coverage/server",
     "reporter": [
       "html",
       "text",
@@ -63,6 +61,7 @@
     ]
   },
   "scripts": {
+    "codecov": "./node_modules/.bin/codecov",
     "coverage": "cross-env NODE_ENV=cover nyc mocha test",
     "lint": "standard && eslint ./test",
     "precommit": "lint-staged && eslint ./test",
