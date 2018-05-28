@@ -10,7 +10,7 @@ test_script:
   - node --version
   - npm --version
   - npm run coverage
-  - npm tun test-chrome
+  - npm run test-chrome
   - npm run test-firefox
   - npm run test-ie
   - npm run codecov
