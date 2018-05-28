@@ -54,6 +54,7 @@
     }
   },
   "nyc": {
+    "report-dir": "./coverage/server",
     "reporter": [
       "html",
       "text",
