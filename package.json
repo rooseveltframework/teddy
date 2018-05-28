@@ -66,10 +66,9 @@
     "coverage": "cross-env NODE_ENV=cover nyc mocha test",
     "lint": "standard && eslint ./test",
     "precommit": "lint-staged && eslint ./test",
-    "test": "cross-env NODE_ENV=test npm run lint && npm run test-server && npm run test-client",
+    "test": "cross-env NODE_ENV=test npm run lint && npm run test-server && npm run test-chrome",
     "test-server": "cross-env NODE_ENV=test mocha test",
-    "test-client": "karma start",
-    "test-chrome": "karma start --browsers Chrome",
+    "test-chrome": "karma start --browsers ChromeHeadless",
     "test-firefox": "karma start --browsers Firefox",
     "test-ie": "karma start --browsers IE",
     "test-safari": "karma start --browsers Safari"
