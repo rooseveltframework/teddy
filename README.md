@@ -3,7 +3,7 @@ Teddy templating engine
 ===
 
 [![Greenkeeper badge](https://badges.greenkeeper.io/rooseveltframework/teddy.svg)](https://greenkeeper.io/)
-[![Build Status](https://travis-ci.org/rooseveltframework/teddy.svg?branch=master)](https://travis-ci.org/rooseveltframework/teddy) [![Build status](https://ci.appveyor.com/api/projects/status/6w5a9jbw2gsw16rs?svg=true)](https://ci.appveyor.com/project/rooseveltframework/teddy) [![Coverage Status](https://coveralls.io/repos/github/rooseveltframework/teddy/badge.svg?branch=master)](https://coveralls.io/github/rooseveltframework/teddy?branch=master) [![npm](https://img.shields.io/npm/v/teddy.svg)](https://www.npmjs.com/package/teddy)
+[![Build Status](https://travis-ci.org/rooseveltframework/teddy.svg?branch=master)](https://travis-ci.org/rooseveltframework/teddy) [![Build status](https://ci.appveyor.com/api/projects/status/6w5a9jbw2gsw16rs?svg=true)](https://ci.appveyor.com/project/rooseveltframework/teddy) [![codecov](https://codecov.io/gh/rooseveltframework/teddy/branch/master/graph/badge.svg)](https://codecov.io/gh/rooseveltframework/teddy) [![npm](https://img.shields.io/npm/v/teddy.svg)](https://www.npmjs.com/package/teddy)
 
 Teddy is the most readable and easy to learn templating language there is!
 
