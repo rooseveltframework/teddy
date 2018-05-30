@@ -9,7 +9,9 @@ install:
 test_script:
   - node --version
   - npm --version
-  - npm run test
+  - npm run coverage
+  - npm run test-chrome
   - npm run test-firefox
   - npm run test-ie
+  - npm run codecov
 build: off
