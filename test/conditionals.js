@@ -147,6 +147,11 @@ describe('Conditionals', function () {
     done()
   })
 
+  it('should evaluate one line if "if-something" as true when attributes are split across multiple lines (conditionals/oneLineNewLine.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineNewLine.html', model), '<p class=\'something-is-present\'>One line if.</p>')
+    done()
+  })
+
   it('should evaluate one line if "if-something" as true in self-closing element (conditionals/oneLineSelfClosing.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineSelfClosing.html', model), '<input class=\'something-is-present\'/>')
     done()

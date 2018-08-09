@@ -392,6 +392,7 @@ We could perform many complex operations simultaneously. For instance, we could 
 </loop>
 ```
 
+*Tip: Using Teddy in [VS Code](https://code.visualstudio.com/)? Check out the [Teddy Snippets](https://marketplace.visualstudio.com/items?itemName=lannonbr.vscode-teddy-snippets) extension to help you write Teddy tags.*
 
 Using Teddy in Node.js
 ===
