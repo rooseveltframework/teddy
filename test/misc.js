@@ -110,7 +110,7 @@ describe('Misc', function () {
     teddy.cacheRenders(true)
     teddy.setDefaultCaches(10)
     for (i = 0; i < 100; i++) {
-      teddy.render('misc/variable.html', {something: i})
+      teddy.render('misc/variable.html', { something: i })
     }
     assert.equalIgnoreSpaces(teddy.renderedTemplates['misc/variable.html'][0].renderedTemplate, '<p>90</p>')
     teddy.setDefaultCaches(1)
@@ -122,8 +122,8 @@ describe('Misc', function () {
     teddy.cacheRenders(true)
     teddy.renderedTemplates = {}
     teddy.setCacheBlacklist(['misc/variable.html'])
-    teddy.render('misc/variable.html', {something: 1})
-    assert.equal(teddy.renderedTemplates['misc/variable.html'], undefined)
+    teddy.render('misc/variable.html', { something: 1 })
+    assert.strictEqual(teddy.renderedTemplates['misc/variable.html'], undefined)
     teddy.setCacheBlacklist([])
     teddy.cacheRenders(false)
     done()
@@ -132,10 +132,10 @@ describe('Misc', function () {
   it('should only cache whitelisted templates (misc/variable.html)', function (done) {
     teddy.cacheRenders(true)
     teddy.renderedTemplates = {}
-    teddy.setCacheWhitelist({'misc/variable.html': 1})
-    teddy.render('misc/plainHTML.html', {something: 1})
-    teddy.render('misc/variable.html', {something: 1})
-    assert.equal(teddy.renderedTemplates['misc/plainHTML.html'], undefined)
+    teddy.setCacheWhitelist({ 'misc/variable.html': 1 })
+    teddy.render('misc/plainHTML.html', { something: 1 })
+    teddy.render('misc/variable.html', { something: 1 })
+    assert.strictEqual(teddy.renderedTemplates['misc/plainHTML.html'], undefined)
     assert.equalIgnoreSpaces(teddy.renderedTemplates['misc/variable.html'][0].renderedTemplate, '<p>1</p>')
     teddy.setCacheWhitelist({})
     teddy.cacheRenders(false)
@@ -147,12 +147,12 @@ describe('Misc', function () {
     teddy.cacheRenders(true)
     teddy.renderedTemplates = {}
     teddy.setDefaultCaches(10)
-    teddy.setCacheWhitelist({'misc/variable.html': 10})
-    teddy.render('misc/plainHTML.html', {something: 1})
+    teddy.setCacheWhitelist({ 'misc/variable.html': 10 })
+    teddy.render('misc/plainHTML.html', { something: 1 })
     for (i = 0; i < 100; i++) {
-      teddy.render('misc/variable.html', {something: i})
+      teddy.render('misc/variable.html', { something: i })
     }
-    assert.equal(teddy.renderedTemplates['misc/plainHTML.html'], undefined)
+    assert.strictEqual(teddy.renderedTemplates['misc/plainHTML.html'], undefined)
     assert.equalIgnoreSpaces(teddy.renderedTemplates['misc/variable.html'][0].renderedTemplate, '<p>90</p>')
     teddy.setCacheWhitelist({})
     teddy.cacheRenders(false)
@@ -196,7 +196,7 @@ describe('Misc', function () {
     teddy.setVerbosity(3)
     verbosity += teddy.params.verbosity
 
-    assert.equal(verbosity, '1, 0, 0, 2, 2, 3, 3')
+    assert.strictEqual(verbosity, '1, 0, 0, 2, 2, 3, 3')
     verbosity = ''
     if (typeof process === 'object') {
       if (process.env.NODE_ENV === 'test') {
@@ -213,7 +213,7 @@ describe('Misc', function () {
   it('should minify template with internal minifier (misc/templateToMinify.html)', function (done) {
     teddy.compileAtEveryRender(true)
     teddy.minify(true)
-    assert.equal(teddy.render('misc/templateToMinify.html', model), '<!DOCTYPE html><html lang=\'en\'> <head> <meta charset=\'utf-8\'> <meta name=\'viewport\' content=\'width=device-width,initial-scale=1\'> <meta name=\'format-detection\' content=\'telephone=no\'> <title>Plain HTML</title> </head> <body> <main> <p>This template contains no teddy tags. Just HTML.</p> </main> </body></html>')
+    assert.strictEqual(teddy.render('misc/templateToMinify.html', model), '<!DOCTYPE html><html lang=\'en\'> <head> <meta charset=\'utf-8\'> <meta name=\'viewport\' content=\'width=device-width,initial-scale=1\'> <meta name=\'format-detection\' content=\'telephone=no\'> <title>Plain HTML</title> </head> <body> <main> <p>This template contains no teddy tags. Just HTML.</p> </main> </body></html>')
     teddy.minify(false)
     teddy.compileAtEveryRender(false)
     done()
