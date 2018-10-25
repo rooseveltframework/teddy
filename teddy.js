@@ -700,7 +700,7 @@
         while (loopTypesLeft)
 
         // do one line ifs now...
-        if (renderedTemplate.indexOf('if-') > -1) {
+        if (/\sif-/.test(renderedTemplate)) {
           recursedOnelines = matchRecursive(renderedTemplate, '<...>')
           recursedLength = recursedOnelines.length
           // iterate over recursed match(es)
