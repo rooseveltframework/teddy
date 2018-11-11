@@ -13,7 +13,7 @@
   "main": "teddy.js",
   "readmeFilename": "README.md",
   "engines": {
-    "node": ">=8.0.0"
+    "node": ">=10.0.0"
   },
   "engineStrict": true,
   "dependencies": {},
@@ -65,7 +65,6 @@
     "codecov": "./node_modules/.bin/codecov",
     "coverage": "cross-env NODE_ENV=cover nyc mocha test",
     "lint": "standard && eslint ./test",
-    "precommit": "lint-staged && eslint ./test",
     "test": "cross-env NODE_ENV=test npm run lint && npm run test-server && npm run test-chrome",
     "test-server": "cross-env NODE_ENV=test mocha test",
     "test-chrome": "karma start --browsers ChromeHeadless",
@@ -88,5 +87,10 @@
     "view"
   ],
   "_from": "teddy@*",
-  "gitHead": "1dbbc4c73d7c8878cbe7fc0ba527c91018b4cea7"
+  "gitHead": "1dbbc4c73d7c8878cbe7fc0ba527c91018b4cea7",
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged && eslint ./test"
+    }
+  }
 }
