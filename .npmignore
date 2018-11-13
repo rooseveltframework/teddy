@@ -1,1 +1,4 @@
+.nyc_output
 .travis.yml
+coverage
+renovate.json
