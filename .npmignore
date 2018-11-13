@@ -1,2 +1,4 @@
+.nyc_output
 .travis.yml
-appveyor.yml
+coverage
+renovate.json
