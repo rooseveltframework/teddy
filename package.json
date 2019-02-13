@@ -23,7 +23,7 @@
     "codecov": "3.1.0",
     "cross-env": "5.2.0",
     "eslint": "5.9.0",
-    "eslint-plugin-mocha": "5.2.0",
+    "eslint-plugin-mocha": "5.3.0",
     "husky": "1.1.4",
     "karma": "3.1.1",
     "karma-chrome-launcher": "2.2.0",
