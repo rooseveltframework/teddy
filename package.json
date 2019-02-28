@@ -25,7 +25,7 @@
     "eslint": "5.9.0",
     "eslint-plugin-mocha": "5.2.0",
     "husky": "1.1.4",
-    "karma": "3.1.1",
+    "karma": "4.0.1",
     "karma-chrome-launcher": "2.2.0",
     "karma-cli": "1.0.1",
     "karma-coverage": "1.1.2",
