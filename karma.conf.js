@@ -1,7 +1,22 @@
 // Karma configuration
+const os = require('os')
 
 module.exports = function (config) {
-  var configuration = {
+  // default browsers to test on
+  const testBrowsers = [
+    'ChromeHeadless',
+    'FirefoxHeadless'
+  ]
+
+  // add Safari if in macOS
+  if (os.platform() === 'darwin') {
+    testBrowsers.push('Safari')
+  } else if (os.platform() === 'win32') {
+    // add IE if in windows
+    testBrowsers.push('IE')
+  }
+
+  const configuration = {
     basePath: '',
     frameworks: ['mocha'],
     files: [
@@ -49,7 +64,7 @@ module.exports = function (config) {
     logLevel: config.LOG_INFO,
     autoWatch: false,
     singleRun: true,
-    browsers: [],
+    browsers: testBrowsers,
     concurrency: 1
   }
 

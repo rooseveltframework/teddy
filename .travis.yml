@@ -1,10 +1,7 @@
 language: node_js
 os:
-  - windows
   - linux
   - osx
-env:
-  - MOZ_HEADLESS=1
 addons:
   firefox: latest
   chrome: stable
@@ -13,7 +10,4 @@ node_js:
   - "10"
 script:
   - npm run coverage
-  - npm run test-chrome
-  - npm run test-firefox
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then npm run test-safari; fi
   - codecov
