@@ -2,7 +2,7 @@
 Teddy templating engine
 ===
 
-[![Build Status](https://travis-ci.org/rooseveltframework/teddy.svg?branch=master)](https://travis-ci.org/rooseveltframework/teddy) [![codecov](https://codecov.io/gh/rooseveltframework/teddy/branch/master/graph/badge.svg)](https://codecov.io/gh/rooseveltframework/teddy) [![npm](https://img.shields.io/npm/v/teddy.svg)](https://www.npmjs.com/package/teddy)
+[![Travis Build Status](https://travis-ci.org/rooseveltframework/teddy.svg?branch=master)](https://travis-ci.org/rooseveltframework/teddy) [![Appveyor Build status](https://ci.appveyor.com/api/projects/status/h56jyyna65dqian4?svg=true)](https://ci.appveyor.com/project/Autre31415/teddy-73r9h) [![codecov](https://codecov.io/gh/rooseveltframework/teddy/branch/master/graph/badge.svg)](https://codecov.io/gh/rooseveltframework/teddy) [![npm](https://img.shields.io/npm/v/teddy.svg)](https://www.npmjs.com/package/teddy)
 
 Teddy is the most readable and easy to learn templating language there is!
 
