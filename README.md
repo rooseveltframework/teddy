@@ -83,7 +83,7 @@ Are you tired of all those unnecessarily cryptic templating systems out there th
 {#names}{.}{@idx}{.}{/idx}{@sep}, {/sep}{/names}
 ```
 
-Want something simpler and more readable so you can stop wasting time memorizing what all those funky symbols do and just get work done?
+Want something simpler and more readable so you can stop wasting time memorizing what all those funky symbols do so you can focus more on getting actual work done?
 
 Well you're not the only one.
 
@@ -102,8 +102,6 @@ Here's how:
 - Flow control tags: `<if>`, `<unless>`, `<elseif>`, `<elseunless>`, and `<else>` for basic templating logic.
 - A `<loop>` tag for looping.
 - Server-side `{!comments!}` delimited by exclamation points in a fashion similar to `<!-- HTML comments -->`. Server-side comments are stripped out at the template compilation stage.
-- No funky symbols to memorize. Just `{variables}` for data and new HTML-like `<tags>` for rudimentary logic.
-
 
 
 How to write Teddy templates
@@ -260,7 +258,7 @@ Boolean logic operators are evaluated left to right.
 One line ifs
 ---
 
-If you need a more concise conditional just to control which attributes are applied to a given element, then use this syntax:
+If you need a more concise conditional to control which attributes are applied to a given element, then use this syntax:
 
 ```html
 <p if-something true="class='present'" false="class='not-present'">One line if.</p>
@@ -426,7 +424,7 @@ API documentation
   - Default is the current directory.
 - `teddy.setVerbosity(n)`: Sets the level of verbosity in Teddy's console logs. Call `teddy.setVerbosity(n)` where `n` equals one of the below values to change the default:
   - `0`: No logging.
-  - `1`: The default. Concise logging. Usually just logs serious errors.
+  - `1`: The default. Concise logging. Will usually only log serious errors.
   - `2`: Verbose logging. Logs even minor errors.
   - `3`: Debug mode. Very verbose.
 - `teddy.cacheRenders(true/false)`: When this setting is enabled, Teddy will cache all unique combinations of templates and models. Any time a template has been rendered before with the given model, the cached template will be returned instead, improving performance.
