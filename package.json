@@ -66,7 +66,7 @@
     "codecov": "./node_modules/.bin/codecov",
     "coverage": "cross-env NODE_ENV=cover nyc mocha test && karma start",
     "lint": "standard && eslint ./test",
-    "test": "cross-env NODE_ENV=test npm run lint && npm run test-server && karma start",
+    "test": "cross-env NODE_ENV=test npm run test-server && karma start",
     "test-chrome": "karma start --browsers ChromeHeadless",
     "test-edge": "karma start --browsers Edge",
     "test-firefox": "karma start --browsers Firefox",
@@ -75,7 +75,7 @@
     "test-server": "cross-env NODE_ENV=test mocha test"
   },
   "lint-staged": {
-    "*.js": "standard"
+    "*.js": "standard && && eslint ./test"
   },
   "repository": {
     "type": "git",
