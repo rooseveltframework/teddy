@@ -6,8 +6,9 @@ addons:
   firefox: latest
   chrome: stable
 node_js:
-  - "11"
   - "10"
+  - "11"
+  - "12"
 script:
   - npm run coverage
   - codecov
