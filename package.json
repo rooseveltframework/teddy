@@ -38,7 +38,7 @@
     "karma-spec-reporter": "0.0.32",
     "lint-staged": "8.1.5",
     "mocha": "6.1.4",
-    "nyc": "14.0.0",
+    "nyc": "14.1.1",
     "standard": "12.0.1"
   },
   "standard": {
