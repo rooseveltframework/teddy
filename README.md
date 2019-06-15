@@ -458,36 +458,3 @@ Client-side browser support
 Teddy is supported on all modern browsers.
 
 Teddy is also supported in Internet Explorer 9+. Teddy may work in earlier versions of IE too but that isn't easy to test because the mocha/chai unit tests do not work in IE8 and below.
-
-
-How to run the unit tests
-===
-
-Want to hack teddy's code but don't want to break something and cause a regression in the process? Run the supplied unit tests to sanity check existing features.
-
-Start by cloning the git repo:
-
-```
-git clone git@github.com:rooseveltframework/teddy.git
-cd teddy
-```
-
-Install dependencies for the tests:
-
-```
-npm i
-```
-
-Run tests:
-
-```
-npm test
-```
-
-The default `npm test` command runs the tests server-side in Node.js and client-side in Chrome. See below commands for other browsers:
-
-```
-npm run test-firefox
-npm run test-ie
-npm run test-safari
-```
