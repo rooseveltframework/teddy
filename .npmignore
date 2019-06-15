@@ -1,4 +1,29 @@
-.nyc_output
-.travis.yml
+# contents of .gitignore
+
+lib-cov
+*.seed
+*.log
+*.csv
+*.dat
+*.out
+*.pid
+*.gz
+
+pids
+logs
+results
+
+npm-debug.log
+.DS_Store
+node_modules
 coverage
+.nyc_output
+
+.jshintrc
+
+# exclusive to .npmignore
+.travis.yml
+.vscode
 renovate.json
+CONTRIBUTING.md
+CHANGELOG.md
