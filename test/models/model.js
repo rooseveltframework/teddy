@@ -11,6 +11,7 @@ function makeModel () {
     missingLetter: ['a', undefined, 'c'],
     names: {jack: 'guy', jill: 'girl', hill: 'landscape'},
     objects: [{a: 1, b: 2, c: 3}, {a: 4, b: 5, c: 6}, {a: 7, b: 8, c: 9}],
+    objectDefinedNoKeys: {},
     missingNumbers: [{a: undefined, b: undefined, c: undefined}, {a: 4, b: 5, c: 6}, {a: 7, b: 8, c: 9}],
     objectOfObjects: {one: {a: 1, b: 2, c: 3}, two: {a: 4, b: 5, c: 6}, three: {a: 7, b: 8, c: 9}},
     nestedObjects: [

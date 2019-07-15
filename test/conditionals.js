@@ -260,6 +260,11 @@ describe('Conditionals', function () {
     done()
   })
 
+  it('should resolve conditional as true if object is defined. (conditionals/ifObjectExistsConditional.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/ifObjectExistsConditional.html', model), '<p>This paragraph should be present</p>')
+    done()
+  })
+
   it('should ignore \'if-\' when not part of an if statement when combined with a one line if statement, reversed. (conditionals/oneLineIfOutsideIfReverse.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineIfOutsideIfReverse.html', model), '<p class=\'something-is-present\'>  gif-jpg-png </p>')
     done()
