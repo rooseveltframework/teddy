@@ -3,42 +3,44 @@
   "description": "Teddy Templating Engine",
   "author": "Roosevelt Framework Team <rooseveltframework@gmail.com>",
   "contributors": [
-    "Eric Newport <kethinov@gmail.com>",
-    "Troy Coutu <autre31415@gmail.com>",
-    "Alexander J. Lallier <alexanderlallier@aol.com>"
+    {
+      "name": "Contributors",
+      "url": "https://github.com/rooseveltframework/teddy/graphs/contributors"
+    }
   ],
-  "version": "0.4.25",
+  "version": "0.4.28",
   "homepage": "https://github.com/rooseveltframework/teddy",
   "license": "CC-BY-4.0",
   "main": "teddy.js",
   "readmeFilename": "README.md",
   "engines": {
-    "node": ">=8.0.0"
+    "node": ">=10.0.0"
   },
   "engineStrict": true,
   "dependencies": {},
   "devDependencies": {
-    "chai": "4.1.2",
-    "chai-string": "1.4.0",
-    "codecov": "3.0.2",
-    "cross-env": "5.1.5",
-    "eslint": "4.19.1",
-    "eslint-plugin-mocha": "5.0.0",
-    "husky": "0.14.3",
-    "karma": "2.0.2",
-    "karma-chrome-launcher": "2.2.0",
-    "karma-cli": "1.0.1",
-    "karma-coverage": "1.1.2",
-    "karma-firefox-launcher": "1.1.0",
-    "karma-html2js-preprocessor": "1.1.0",
-    "karma-ie-launcher": "1.0.0",
-    "karma-mocha": "1.3.0",
-    "karma-safari-launcher": "1.0.0",
-    "karma-spec-reporter": "0.0.32",
-    "lint-staged": "7.1.0",
-    "mocha": "5.2.0",
-    "nyc": "11.7.2",
-    "standard": "11.0.1"
+    "chai": "~4.2.0",
+    "chai-string": "~1.5.0",
+    "codecov": "~3.5.0",
+    "cross-env": "~5.2.0",
+    "eslint": "~6.0.1",
+    "eslint-plugin-mocha": "~5.3.0",
+    "husky": "~2.7.0",
+    "karma": "~4.1.0",
+    "karma-chrome-launcher": "~2.2.0",
+    "karma-cli": "~2.0.0",
+    "karma-coverage": "~1.1.2",
+    "karma-edge-launcher": "~0.4.2",
+    "karma-firefox-launcher": "~1.1.0",
+    "karma-html2js-preprocessor": "~1.1.0",
+    "karma-ie-launcher": "~1.0.0",
+    "karma-mocha": "~1.3.0",
+    "karma-safari-launcher": "~1.0.0",
+    "karma-spec-reporter": "~0.0.32",
+    "lint-staged": "~8.2.1",
+    "mocha": "~6.1.4",
+    "nyc": "~14.1.1",
+    "standard": "~12.0.1"
   },
   "standard": {
     "ignore": [
@@ -63,18 +65,18 @@
   },
   "scripts": {
     "codecov": "./node_modules/.bin/codecov",
-    "coverage": "cross-env NODE_ENV=cover nyc mocha test",
+    "coverage": "cross-env NODE_ENV=cover nyc mocha test && karma start",
     "lint": "standard && eslint ./test",
-    "precommit": "lint-staged && eslint ./test",
-    "test": "cross-env NODE_ENV=test npm run lint && npm run test-server && npm run test-chrome",
-    "test-server": "cross-env NODE_ENV=test mocha test",
+    "test": "cross-env NODE_ENV=test npm run test-server && karma start",
     "test-chrome": "karma start --browsers ChromeHeadless",
+    "test-edge": "karma start --browsers Edge",
     "test-firefox": "karma start --browsers Firefox",
     "test-ie": "karma start --browsers IE",
-    "test-safari": "karma start --browsers Safari"
+    "test-safari": "karma start --browsers Safari",
+    "test-server": "cross-env NODE_ENV=test mocha test"
   },
   "lint-staged": {
-    "*.js": "standard"
+    "*.js": "standard && && eslint ./test"
   },
   "repository": {
     "type": "git",
@@ -88,5 +90,10 @@
     "view"
   ],
   "_from": "teddy@*",
-  "gitHead": "1dbbc4c73d7c8878cbe7fc0ba527c91018b4cea7"
+  "gitHead": "1dbbc4c73d7c8878cbe7fc0ba527c91018b4cea7",
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged && eslint ./test"
+    }
+  }
 }

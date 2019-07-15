@@ -147,6 +147,11 @@ describe('Conditionals', function () {
     done()
   })
 
+  it('should evaluate one line if "if-something" as true when attributes are split across multiple lines (conditionals/oneLineNewLine.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineNewLine.html', model), '<p class=\'something-is-present\'>One line if.</p>')
+    done()
+  })
+
   it('should evaluate one line if "if-something" as true in self-closing element (conditionals/oneLineSelfClosing.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineSelfClosing.html', model), '<input class=\'something-is-present\'/>')
     done()
@@ -198,6 +203,10 @@ describe('Conditionals', function () {
   it('should render nothing if condition isn\'t met (conditionals/ifNotPresent.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('conditionals/ifNotPresent.html', model), '<div></div>')
     done()
+  })
+
+  it('should resolve conditional as true if object is defined. (conditionals/ifObjectExistsConditional.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/ifObjectExistsConditional.html', model), '<p>This paragraph should be present</p>')
   })
 
   it('should evaluate one line if as false and apply no class (conditionals/oneLineFalse.html)', function (done) {
@@ -260,8 +269,8 @@ describe('Conditionals', function () {
     done()
   })
 
-  it('should resolve conditional as true if object is defined. (conditionals/ifObjectExistsConditional.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('conditionals/ifObjectExistsConditional.html', model), '<p>This paragraph should be present</p>')
+  it('should ignore \'if-\' when not part of an if statement when \'if-\' is part of an attribute\'s value', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineIfInsideAttribute.html', model), '<p id=\'gif-jpg-png\'>hello</p> <p class=\'gif-jpg-png\'>hello</p><p filter=\'gif-jpg-png\'>hello</p>')
     done()
   })
 

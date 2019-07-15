@@ -2,8 +2,7 @@
 Teddy templating engine
 ===
 
-[![Greenkeeper badge](https://badges.greenkeeper.io/rooseveltframework/teddy.svg)](https://greenkeeper.io/)
-[![Build Status](https://travis-ci.org/rooseveltframework/teddy.svg?branch=master)](https://travis-ci.org/rooseveltframework/teddy) [![Build status](https://ci.appveyor.com/api/projects/status/6w5a9jbw2gsw16rs?svg=true)](https://ci.appveyor.com/project/rooseveltframework/teddy) [![codecov](https://codecov.io/gh/rooseveltframework/teddy/branch/master/graph/badge.svg)](https://codecov.io/gh/rooseveltframework/teddy) [![npm](https://img.shields.io/npm/v/teddy.svg)](https://www.npmjs.com/package/teddy)
+[![Travis build status](https://travis-ci.org/rooseveltframework/teddy.svg?branch=master)](https://travis-ci.org/rooseveltframework/teddy) [![Appveyor build status](https://ci.appveyor.com/api/projects/status/r4va2t4hkni8vx8x?svg=true)](https://ci.appveyor.com/project/kethinov/teddy-uct05) [![codecov](https://codecov.io/gh/rooseveltframework/teddy/branch/master/graph/badge.svg)](https://codecov.io/gh/rooseveltframework/teddy) [![npm](https://img.shields.io/npm/v/teddy.svg)](https://www.npmjs.com/package/teddy)
 
 Teddy is the most readable and easy to learn templating language there is!
 
@@ -84,7 +83,7 @@ Are you tired of all those unnecessarily cryptic templating systems out there th
 {#names}{.}{@idx}{.}{/idx}{@sep}, {/sep}{/names}
 ```
 
-Want something simpler and more readable so you can stop wasting time memorizing what all those funky symbols do and just get work done?
+Want something simpler and more readable so you can stop wasting time memorizing what all those funky symbols do so you can focus more on getting actual work done?
 
 Well you're not the only one.
 
@@ -103,8 +102,6 @@ Here's how:
 - Flow control tags: `<if>`, `<unless>`, `<elseif>`, `<elseunless>`, and `<else>` for basic templating logic.
 - A `<loop>` tag for looping.
 - Server-side `{!comments!}` delimited by exclamation points in a fashion similar to `<!-- HTML comments -->`. Server-side comments are stripped out at the template compilation stage.
-- No funky symbols to memorize. Just `{variables}` for data and new HTML-like `<tags>` for rudimentary logic.
-
 
 
 How to write Teddy templates
@@ -261,7 +258,7 @@ Boolean logic operators are evaluated left to right.
 One line ifs
 ---
 
-If you need a more concise conditional just to control which attributes are applied to a given element, then use this syntax:
+If you need a more concise conditional to control which attributes are applied to a given element, then use this syntax:
 
 ```html
 <p if-something true="class='present'" false="class='not-present'">One line if.</p>
@@ -393,6 +390,7 @@ We could perform many complex operations simultaneously. For instance, we could 
 </loop>
 ```
 
+*Tip: Using Teddy in [VS Code](https://code.visualstudio.com/)? Check out the [Teddy Snippets](https://marketplace.visualstudio.com/items?itemName=lannonbr.vscode-teddy-snippets) extension to help you write Teddy tags.*
 
 Using Teddy in Node.js
 ===
@@ -426,7 +424,7 @@ API documentation
   - Default is the current directory.
 - `teddy.setVerbosity(n)`: Sets the level of verbosity in Teddy's console logs. Call `teddy.setVerbosity(n)` where `n` equals one of the below values to change the default:
   - `0`: No logging.
-  - `1`: The default. Concise logging. Usually just logs serious errors.
+  - `1`: The default. Concise logging. Will usually only log serious errors.
   - `2`: Verbose logging. Logs even minor errors.
   - `3`: Debug mode. Very verbose.
 - `teddy.cacheRenders(true/false)`: When this setting is enabled, Teddy will cache all unique combinations of templates and models. Any time a template has been rendered before with the given model, the cached template will be returned instead, improving performance.
@@ -460,36 +458,3 @@ Client-side browser support
 Teddy is supported on all modern browsers.
 
 Teddy is also supported in Internet Explorer 9+. Teddy may work in earlier versions of IE too but that isn't easy to test because the mocha/chai unit tests do not work in IE8 and below.
-
-
-How to run the unit tests
-===
-
-Want to hack teddy's code but don't want to break something and cause a regression in the process? Run the supplied unit tests to sanity check existing features.
-
-Start by cloning the git repo:
-
-```
-git clone git@github.com:rooseveltframework/teddy.git
-cd teddy
-```
-
-Install dependencies for the tests:
-
-```
-npm i
-```
-
-Run tests:
-
-```
-npm test
-```
-
-The default `npm test` command runs the tests server-side in Node.js and client-side in Chrome. See below commands for other browsers:
-
-```
-npm run test-firefox
-npm run test-ie
-npm run test-safari
-```

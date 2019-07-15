@@ -700,7 +700,7 @@
         while (loopTypesLeft)
 
         // do one line ifs now...
-        if (renderedTemplate.indexOf('if-') > -1) {
+        if (/\sif-/.test(renderedTemplate)) {
           recursedOnelines = matchRecursive(renderedTemplate, '<...>')
           recursedLength = recursedOnelines.length
           // iterate over recursed match(es)
@@ -1297,8 +1297,7 @@
   // get a specific attribute from a given element
   function removeAttribute (el, attr) {
     attr = attr.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&')
-    var newEl = el.replace(new RegExp('(?: (?:' + attr + '(?: |>))| (?:' + attr + '=)(?:("(.*?)")|(\'(.*?)\'))($|(?=[ >/])))'), '')
-
+    var newEl = el.replace(new RegExp('(?: (?:' + attr + '(?: |>))| (?:' + attr + '=)(?:("(.*?)")|(\'(.*?)\'))($|(?=[\\s >/])))'), '')
     return newEl
   }
 
