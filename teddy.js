@@ -962,7 +962,7 @@
 
           // process loop
           for (i in collection) {
-            if (collection.hasOwnProperty(i)) {
+            if (Object.prototype.hasOwnProperty.call(collection, i)) {
               item = collection[i]
               localModel = {}
 
