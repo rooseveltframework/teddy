@@ -1,6 +1,6 @@
 var assert = require('assert')
 var makeModel = require('./modelTest')
-var myRender = require('../lib/render')
+var myRender = require('../render.js')
 var model
 
 

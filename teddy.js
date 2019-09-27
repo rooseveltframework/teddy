@@ -10,67 +10,17 @@
   var matchRecursive // see below
   var jsonStringifyCache
 
-  /* matchRecursive
-   * accepts a string to search and a format (start and end tokens separated by "...").
-   * returns an array of matches, allowing nested instances of format.
-   *
-   * examples:
-   *   matchRecursive("test",          "(...)")   -> []
-   *   matchRecursive("(t(e)s)()t",    "(...)")   -> ["t(e)s", ""]
-   *   matchRecursive("t<e>>st",       "<...>")   -> ["e"]
-   *   matchRecursive("t<<e>st",       "<...>")   -> ["e"]
-   *   matchRecursive("t<<e>>st",      "<...>")   -> ["<e>"]
-   *   matchRecursive("<|t<e<|s|>t|>", "<|...|>") -> ["t<e<|s|>t"]
-   *
-   * (c) 2007 Steven Levithan <stevenlevithan.com>
-   * MIT License
-   *
-   * altered for use within teddy
-   */
-  matchRecursive = (function () {
-    var formatParts = /^([\S\s]+?)\.\.\.([\S\s]+)/
-    var metaChar = /[-[\]{}()*+?.\\^$|,]/g
-
-    function escape (str) {
-      return str.replace(metaChar, '\\$&')
-    }
-
-    return function (str, format) {
-      var p = formatParts.exec(format)
-      var opener
-      var closer
-      var iterator
-      var results = []
-      var openTokens
-      var matchStartIndex
-      var match
-
-      opener = p[1]
-      closer = p[2]
-      // use an optimized regex when opener and closer are one character each
-      iterator = new RegExp(format.length === 5 ? '[' + escape(opener + closer) + ']' : escape(opener) + '|' + escape(closer), 'g')
-
-      do {
-        openTokens = 0
-        while (match = iterator.exec(str)) { // eslint-disable-line
-          if (match[0] === opener) {
-            if (!openTokens) {
-              matchStartIndex = iterator.lastIndex
-            }
-            openTokens++
-          } else if (openTokens) {
-            openTokens--
-            if (!openTokens) {
-              results.push(str.slice(matchStartIndex, match.index))
-            }
-          }
-        }
-      }
-      while (openTokens && (iterator.lastIndex = matchStartIndex))
-
-      return results
-    }
-  })()
+  var primaryTags = [
+    ['<', 'i', 'f', ' '],
+    ['<', 'u', 'n', 'l', 'e', 's', 's', ' '],
+    ['<', 'i', 'n', 'c', 'l', 'u', 'd', 'e', ' '],
+    ['<', 'l', 'o', 'o', 'p', ' ']
+  ]
+  var secondaryTags = [
+    ['<', 'e', 'l', 's', 'e', '>'],
+    ['<', 'e', 'l', 's', 'e', 'i', 'f', ' '],
+    ['<', 'e', 'l', 's', 'e', 'u', 'n', 'l', 'e', 's', 's', ' ']
+  ]
 
   teddy = {
     /**
@@ -338,9 +288,12 @@
       }
 
       // append extension if not present
+      // TODO: handle logic differently
+      /*
       if (template.slice(-5) !== '.html') {
         template += '.html'
       }
+      */
 
       // return cached template if one exists
       if (teddy.params.cacheRenders && teddy.templates[template] && (!teddy.params.cacheWhitelist || teddy.params.cacheWhitelist[template]) && teddy.params.cacheBlacklist.indexOf(template) < 0) {
@@ -369,7 +322,8 @@
 
       renderedTemplate = teddy.templates[template] || renderedTemplate
 
-      renderedTemplate = removeComments(renderedTemplate)
+      // TODO: rewrite method
+      // renderedTemplate = removeComments(renderedTemplate)
 
       // prepare to cache the template if caching is enabled and this template is eligible
       if (teddy.params.cacheRenders && teddy.templates[template] && (!teddy.params.cacheWhitelist || teddy.params.cacheWhitelist[template]) && teddy.params.cacheBlacklist.indexOf(template) < 0) {
@@ -411,123 +365,26 @@
         return template
       }
 
-      function parseNonLoopedElements () {
-        var outerLoops
-        var outerLoopsCount
-        var dontParseMatches
-        var dontParseCount
+      // NEW LOGIC HERE
+      // TODO: finish
+      var templateArray = [...template] // https://stackoverflow.com/questions/6484670/how-do-i-split-a-string-into-an-array-of-characters
+      var renderedTemplate = ''
+      var replaceOperation
 
-        function replaceLoops (match) {
-          loops.push(match)
-          return '{' + loops.length + '_loop}'
+      while (templateArray[0] !== undefined) {
+        replaceOperation = tagScanner(templateArray, primaryTags, model)
+
+        if (replaceOperation) {
+          templateArray = replaceOperation
         }
-
-        function replaceTags (match) {
-          tags.push(match)
-          return '{' + tags.length + '_tag}'
-        }
-        do {
-          diff = renderedTemplate
-          // find loops and remove them for now
-          outerLoops = matchRecursive(renderedTemplate, '<loop...</loop>')
-          outerLoopsCount = outerLoops.length
-          for (i = 0; i < outerLoopsCount; i++) {
-            renderedTemplate = renderedTemplate.replace('<loop' + outerLoops[i] + '</loop>', replaceLoops)
-          }
-
-          // find includes with noparse or noteddy tag and remove them for now
-          dontParseMatches = renderedTemplate.match(/<include[^>]*( noparse| noteddy)[^>]*>([\s\S]*?)<\/include>/g)
-          if (dontParseMatches) {
-            dontParseCount = dontParseMatches.length
-            for (i = 0; i < dontParseCount; i++) {
-              renderedTemplate = renderedTemplate.replace(dontParseMatches[i], replaceTags)
-            }
-          }
-
-          // parse non-looped conditionals
-          renderedTemplate = parseConditionals(renderedTemplate, model)
-
-          // parse non-looped includes
-          renderedTemplate = parseIncludes(renderedTemplate, model)
-
-          passes++
-          if (passes >= maxPasses) {
-            return false
-          }
-        }
-        while (diff !== renderedTemplate) // do another pass if this introduced new code to parse
-        return true
-      }
-
-      do {
-        do {
-          // replace <noteddy> blocks
-          noteddysMatches = matchRecursive(renderedTemplate, '<noteddy>...</noteddy>')
-          noteddysCount = noteddysMatches.length
-          for (i = 0; i < noteddysCount; i++) {
-            renderedTemplate = renderedTemplate.replace('<noteddy>' + noteddysMatches[i] + '</noteddy>', '<restoreteddy' + (noteddys.push(noteddysMatches[i]) - 1) + '>')
-          }
-
-          if (parseNonLoopedElements()) {
-            // parse removed loops
-            loopCount = loops.length
-            for (i = 0; i < loopCount; i++) {
-              loop = loops[i]
-              if (loop) {
-                // try for a version of this loop that might have a data model attached to it now
-                el = renderedTemplate.match(new RegExp('(?:{' + (i + 1) + '_loop data-local-model=[0-9]*})'))
-                if (el && el[0]) {
-                  el = el[0]
-                  localModel = el.split(' ')
-                  localModel = localModel[1].slice(0, -1)
-                  loop = loop.replace('>', ' ' + localModel + '>')
-                  renderedTemplate = replaceNonRegex(renderedTemplate, el, renderLoop(loop, model))
-                } else {
-                  // no data model on it, render it vanilla
-                  renderedTemplate = replaceNonRegex(renderedTemplate, '{' + (i + 1) + '_loop}', renderLoop(loop, model))
-                }
-                loops[i] = null // this prevents renderLoop from attempting to render it again
-              }
-            }
-          } else {
-            if (teddy.params.verbosity) {
-              teddy.console.error(maxPassesError)
-            }
-            return maxPassesError
-          }
-
-          passes++
-          if (passes >= maxPasses) {
-            if (teddy.params.verbosity) {
-              teddy.console.error(maxPassesError)
-            }
-            return maxPassesError
-          }
-        }
-        while (diff !== renderedTemplate) // do another pass if this introduced new code to parse
-
-        // clean up any remaining unnecessary <elseif>, <elseunless>, <else>, and orphaned <arg> tags
-        renderedTemplate = renderedTemplate.replace(/(?:<elseif[\S\s]*?<\/elseif>|<elseunless[\S\s]*?<\/elseunless>|<else[\S\s]*?<\/else>|<arg[\S\s]*?<\/arg>)/g, '')
-
-        // processes all remaining {vars}
-        renderedTemplate = parseVars(renderedTemplate, model)
-        passes++
-        if (passes >= maxPasses) {
-          if (teddy.params.verbosity) {
-            teddy.console.error(maxPassesError)
-          }
-          return maxPassesError
+        else {
+          // next character
+          renderedTemplate += templateArray.shift()
         }
       }
-      while (diff !== renderedTemplate) // do another pass if this introduced new code to parse
+      // NEW LOGIC ENDS
+      // TODO: finish
 
-      // restore <noteddy> blocks
-      noteddysMatches = matchRecursive(renderedTemplate, '<restoreteddy...>')
-      noteddysCount = noteddysMatches.length
-
-      for (i = 0; i < noteddysCount; i++) {
-        renderedTemplate = renderedTemplate.replace('<restoreteddy' + noteddysMatches[i] + '>', noteddys[i])
-      }
       // clean up temp vars
       contextModels = []
       passes = 0
@@ -553,6 +410,7 @@
       }
 
       // parse removed noparse or noteddy includes
+      // TODO: remove?
       for (i = 0; i < tags.length; i++) {
         tag = tags[i]
         if (tag) {
@@ -584,649 +442,210 @@
           callback(consoleErrors, renderedTemplate)
         }
       } else {
+        console.log(renderedTemplate)
         return renderedTemplate
-      }
-
-      /**
-       * private methods
-       */
-
-      // finds all <include> tags and renders them
-      function parseIncludes (renderedTemplate, model) {
-        var els = matchRecursive(renderedTemplate, '<include...</include>')
-        var el
-        var l = els ? els.length : 0
-        var result
-        var i
-
-        renderedTemplate = removeComments(renderedTemplate)
-
-        for (i = 0; i < l; i++) {
-          el = '<include' + els[i] + '</include>'
-          model = applyLocalModel(el, model)
-          result = renderInclude(el, model)
-          renderedTemplate = replaceNonRegex(renderedTemplate, el, result)
-        }
-        return renderedTemplate
-      }
-
-      // finds all <if> and <unless> tags and renders them along with any related <elseif>, <elseunless>, and <else> tags
-      function parseConditionals (renderedTemplate, model) {
-        var conds
-        var loopTypesLeft = true
-        var findElses = true
-        var condString
-        var sibling
-        var siblingComments
-        var ifsDone = false
-        var parts
-        var elseCond
-        var result
-        var recursedOnelines
-        var recursedLength
-        var recursedCount
-        var onelines
-        var el
-        var l
-        var i
-
-        do {
-          if (ifsDone) {
-            conds = matchRecursive(renderedTemplate, '<unless ...</unless>')
-            loopTypesLeft = false
-          } else {
-            conds = matchRecursive(renderedTemplate, '<if ...</if>')
-          }
-          l = conds.length
-          for (i = 0; i < l; i++) {
-            condString = conds[i]
-            if (ifsDone) {
-              condString = '<unless ' + condString + '</unless>'
-            } else {
-              condString = '<if ' + condString + '</if>'
-            }
-            parts = [condString]
-            findElses = true
-            do {
-              sibling = renderedTemplate.match(new RegExp(condString.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&') + '([^>]*-->)*[^>]*[>]'))
-              if (sibling) {
-                sibling = sibling[0]
-                sibling = replaceNonRegex(sibling, condString, '')
-
-                // detect HTML comments preceding sibling
-                if (sibling.trim().substring(0, 4) === '<!--') {
-                  siblingComments = sibling.match(/([^>]*-->)*/)[0]
-                  sibling = sibling.replace(/([^>]*-->)*/, '')
-                  condString += siblingComments
-                }
-
-                if (sibling.replace(/^\s+/, '').substring(0, 8) === '<elseif ') {
-                  elseCond = matchRecursive(replaceNonRegex(renderedTemplate, condString, ''), sibling + '...</elseif>')
-                  elseCond = elseCond ? sibling + replaceNonRegex(elseCond[0], condString, '') + '</elseif>' : null
-                } else if (sibling.replace(/^\s+/, '').substring(0, 12) === '<elseunless ') {
-                  elseCond = matchRecursive(replaceNonRegex(renderedTemplate, condString, ''), sibling + '...</elseunless>')
-                  elseCond = elseCond ? sibling + replaceNonRegex(elseCond[0], condString, '') + '</elseunless>' : null
-                } else if (sibling.replace(/^\s+/, '').substring(0, 6) === '<else>') {
-                  elseCond = matchRecursive(replaceNonRegex(renderedTemplate, condString, ''), sibling + '...</else>')
-                  elseCond = elseCond ? sibling + replaceNonRegex(elseCond[0], condString, '') + '</else>' : null
-                } else {
-                  findElses = false
-                  elseCond = false
-                }
-
-                if (elseCond) {
-                  parts.push(elseCond)
-                  condString += elseCond
-                } else {
-                  findElses = false
-                }
-              } else {
-                findElses = false
-              }
-            }
-            while (findElses)
-
-            result = renderConditional(condString, parts, model)
-
-            // replace HTML comments if they exist
-            if (siblingComments) {
-              result = siblingComments + result
-            }
-
-            renderedTemplate = replaceNonRegex(renderedTemplate, condString, result)
-          }
-          ifsDone = true
-        }
-        while (loopTypesLeft)
-
-        // do one line ifs now...
-        if (/\sif-/.test(renderedTemplate)) {
-          recursedOnelines = matchRecursive(renderedTemplate, '<...>')
-          recursedLength = recursedOnelines.length
-          // iterate over recursed match(es)
-          for (recursedCount = 0; recursedCount < recursedLength; recursedCount++) {
-            if (recursedOnelines[recursedCount].indexOf('if-') > -1) {
-              onelines = recursedOnelines[recursedCount].match(/[^<]*?if-[^>]+/g)
-              l = onelines ? onelines.length : 0
-
-              // iterate over stable match within the recursed match
-              for (i = 0; i < l; i++) {
-                el = '<' + onelines[i] + '>'
-                model = applyLocalModel(el, model)
-                result = renderOneLineConditional(el, model)
-                renderedTemplate = replaceNonRegex(renderedTemplate, el, result)
-              }
-            }
-          }
-        }
-        return renderedTemplate
-      }
-
-      // finds alls {vars} in a given document and replaces them with values from the model
-      function parseVars (docstring, model) {
-        var vars = matchRecursive(docstring, '{...}')
-        var l = vars.length
-        var i
-
-        for (i = 0; i < l; i++) {
-          docstring = replaceVar(docstring, vars[i])
-        }
-
-        function replaceVar (docstring, match) {
-          var localModelString
-          var localModel
-          var varname
-          var ovarname
-          var omatch = match
-          var nmatch = match
-          var dots
-          var numDots
-          var curVar
-          var doRender = true
-          var d
-
-          match = parseVars(match, model)
-          nmatch = match
-
-          match = match.split('data-local-model=')
-          localModelString = match[1] // the variable's local model (if any)
-          varname = match[0].trim() // the variable's name (plus any flags)
-          ovarname = varname
-          varname = varname.split('|s')[0] // remove escape flag if present
-          varname = varname.split('|p')[0] // remove no parse flag if present
-          if (localModelString) {
-            localModel = applyLocalModel('{' + varname + ' ' + 'data-local-model=' + localModelString + '}', Object.assign({}, model))
-          }
-          dots = varname.split('.')
-          numDots = dots.length
-          curVar = localModel || model
-
-          for (d = 0; d < numDots; d++) {
-            curVar = curVar[dots[d]]
-            if (typeof curVar === 'undefined') {
-              doRender = false
-              break
-            }
-          }
-
-          if (doRender) {
-            return replaceNonRegex(docstring, '{' + omatch + '}', renderVar('{' + ovarname + '}', ovarname, curVar))
-          } else {
-            return replaceNonRegex(docstring, '{' + omatch + '}', ('{' + nmatch + '}').replace(/ data-local-model=[0-9]*/g, ''))
-          }
-        }
-        return docstring
-      }
-
-      /**
-       * Teddy render methods
-       */
-
-      // parses a single <include> tag
-      function renderInclude (el, model) {
-        var src, incdoc, args, argl, argname, argval, i, localModel
-
-        src = getAttribute(el, 'src')
-
-        if (!src) {
-          if (teddy.params.verbosity) {
-            teddy.console.warn('<include> element found with no src attribute. Ignoring element.')
-          }
-          return ''
-        } else {
-          // parse variables which may be included in src attribute
-          src = parseVars(src, model)
-          // append extension if not present
-          if (src.slice(-5) !== '.html') {
-            src += '.html'
-          }
-
-          // compile included template if necessary
-          if (!teddy.templates[src] || teddy.params.compileAtEveryRender) {
-            incdoc = teddy.compile(src)
-          }
-          // get the template as a string
-          incdoc = teddy.templates[src] || incdoc
-          // if source is the same as the file name, we consider it a template that doesn't exist
-          if (incdoc === src || incdoc + '.html' === src) {
-            incdoc = null
-          }
-
-          if (!incdoc) {
-            if (teddy.params.verbosity) {
-              teddy.console.warn('<include> element found which references a nonexistent template ("' + src + '"). Ignoring element.')
-            }
-            return ''
-          }
-          localModel = getAttribute(el, 'data-local-model')
-
-          // extend from the include's own local model
-          if (localModel) {
-            localModel = contextModels[parseInt(localModel)]
-          } else {
-            localModel = {}
-          }
-          args = matchRecursive(el, '<arg...</arg>')
-          argl = args ? args.length : 0
-          for (i = 0; i < argl; i++) {
-            args[i] = '<arg' + args[i] + '</arg>'
-            argname = args[i].split('<arg ')
-            argname = argname[1]
-
-            if (!argname) {
-              if (teddy.params.verbosity) {
-                teddy.console.warn('<arg> element found with no attribute. Ignoring parent <include> element. (<include src="' + src + '">)')
-              }
-              return ''
-            }
-
-            argname = argname.split('>')
-            argname = argname[0]
-            argval = getInnerHTML(args[i])
-            // replace template string argument {var} with argument value
-            incdoc = renderVar(incdoc, argname, argval, true)
-            // add arg to local model
-            localModel[argname] = argval
-          }
-          if (argl) {
-            // apply local model to child conditionals and loops
-            incdoc = tagLocalModels(incdoc, localModel)
-          }
-          return incdoc
-        }
-      }
-
-      // finds all <include>, <if>, <elseif>, <unless>, <elseunless>, one line ifs, and <loop> tags and applies their local models
-      function tagLocalModels (doc, extraModel) {
-        doc = doc.replace(/(?:{[\S\s]*?}|<include[\S\s]*?>|<if[\S\s]*?>|<elseif[\S\s]*?>|<unless[\S\s]*?>|<elseunless[\S\s]*?>|<loop[\S\s]*?>|<[\S\s]if-[\S\s](?:="[\S\s]"|='[\S\s]')[\S\s](?:true=|false=)(?:="[\S\s]"|='[\S\s]')*?>)/g, addTag)
-        function addTag (match) {
-          var modelNumber = -1
-          var localModel = getAttribute(match, 'data-local-model')
-          var lastChar = match.charAt(match.length - 1)
-
-          // get existing derivative
-          if (localModel) {
-            localModel = contextModels[parseInt(localModel)]
-          } else {
-            // possibly new derivative
-            localModel = extraModel
-          }
-          // check for duplicates
-          modelNumber = contextModels.indexOf(localModel)
-
-          // if no duplicates
-          if (modelNumber < 0) {
-            localModel = Object.assign(localModel, extraModel)
-            modelNumber = contextModels.push(localModel)
-            modelNumber--
-            return match.replace(lastChar, ' data-local-model=' + modelNumber + lastChar)
-          } else if (match.indexOf('data-local-model') === -1) {
-            return match.replace(lastChar, ' data-local-model=' + modelNumber + lastChar)
-          } else {
-            return match
-          }
-        }
-        return doc
-      }
-
-      // retrieve local model from cache and apply it to full model for parsing
-      function applyLocalModel (el, model) {
-        var localModel = el.match(/data-local-model=[0-9]*/)
-        var i
-        if (localModel) {
-          localModel = localModel[0]
-          localModel = localModel.replace('data-local-model=', '')
-          localModel = localModel.substring(0, localModel.length)
-          localModel = contextModels[parseInt(localModel)]
-          for (i in localModel) {
-            model[i] = localModel[i]
-          }
-        }
-        return model
-      }
-
-      // includes code from a single <include> tag with noparse or noteddy flag
-      function parseIncludeWithFlag (el) {
-        src = getAttribute(el, 'src')
-        if (!src) {
-          if (teddy.params.verbosity) {
-            teddy.console.warn('<include> element found with no src attribute. Ignoring element.')
-          }
-          return ''
-        } else {
-          // append extension if not present
-          if (src.slice(-5) !== '.html') {
-            src += '.html'
-          }
-          incdoc = teddy.compile(src)
-          return incdoc
-        }
-      }
-
-      // parses a single loop tag
-      function renderLoop (el, model) {
-        var key = getAttribute(el, 'key')
-        var val = getAttribute(el, 'val')
-        var collection = getAttribute(el, 'through')
-        var collectionString = collection
-        var loopContent
-        var localModel
-        var item
-        var i
-        var parsedLoop = ''
-
-        if (!val) {
-          if (teddy.params.verbosity) {
-            teddy.console.warn('loop element found with no "val" attribute. Ignoring element.')
-          }
-          return ''
-        }
-        if (!collection) {
-          if (teddy.params.verbosity) {
-            teddy.console.warn('loop element found with no "through" attribute. Ignoring element.')
-          }
-          return ''
-        }
-
-        model = applyLocalModel(el, model)
-        collection = getNestedObjectByString(model, collection)
-
-        if (!collection) {
-          if (teddy.params.verbosity > 1) {
-            teddy.console.warn('loop element found with undefined value "' + collectionString + '" specified for "through" or "in" attribute. Ignoring element.')
-          }
-
-          return ''
-        } else {
-          loopContent = getInnerHTML(el)
-
-          // process loop
-          for (i in collection) {
-            if (collection.hasOwnProperty(i)) {
-              item = collection[i]
-              localModel = {}
-
-              // define local model for the iteration
-              // if model[val] or model[key] preexist, they will be overwritten by the locally supplied variables
-              if (key) {
-                model[key] = i
-                localModel[key] = i
-              }
-              model[val] = item
-              localModel[val] = item
-              parsedLoop += teddy.render(loopContent, model)
-            }
-          }
-
-          // cleanup model when loop finished
-          delete model[val]
-
-          return parsedLoop
-        }
-      }
-
-      // parses a single <if> or <unless> tag and any related <elseif>, <elseunless>, and <else> tags
-      function renderConditional (condString, parts, model) {
-        var el = parts[0]
-        var satisfiedCondition = false
-        var nextSibling = el
-
-        // add local vars to model
-        model = applyLocalModel(el, model)
-        while (!satisfiedCondition) {
-          if (evalCondition(el, model)) {
-            satisfiedCondition = true
-            return getInnerHTML(el)
-          } else {
-            do {
-              nextSibling = parts[parts.indexOf(nextSibling) + 1]
-              if (nextSibling && evalCondition(nextSibling, model)) {
-                satisfiedCondition = true
-                return getInnerHTML(nextSibling)
-              }
-            }
-            while (nextSibling)
-
-            return ''
-          }
-        }
-        return parts
-      }
-
-      // parses a single one line conditional
-      function renderOneLineConditional (el, model) {
-        var conditionContent
-        var parts = el.split(' if-')
-        var part
-        var l = parts.length
-        var i
-        var flip = false
-        var extraString = ''
-
-        el = parts[0]
-        for (i = 1; i < l; i++) {
-          part = parts[i]
-          if (flip) {
-            extraString += ' if-' + part
-          } else {
-            el += ' if-' + part
-            flip = true
-          }
-        }
-
-        if (evalCondition(el, model)) {
-          conditionContent = getAttribute(el, 'true')
-        } else {
-          conditionContent = getAttribute(el, 'false')
-        }
-
-        // remove conditionals from element
-        el = removeAttribute(el, 'true')
-        el = removeAttribute(el, 'false')
-        // Remove all if-conditionals and append condition eval value
-        el = el.replace(/if-[^=\s>/]*(=["'{}][^"']*["'{}])*/, conditionContent || '')
-        // append additional one line content if any
-        el += extraString
-
-        return el
-      }
-
-      // determines if a condition is true for <if>, <unless>, <elseif>, and <elseunless>, and one-liners
-      function evalCondition (el, model) {
-        el = el.trim()
-
-        var conditionType
-        var attrCount = 0
-        var conditionAttr
-        var attributes
-        var length
-        var i
-        var condition
-        var conditionVal
-        var modelVal
-        var curVar
-        var dots
-        var numDots
-        var d
-        var notDone = true
-        var condResult
-        var truthStack = []
-
-        conditionType = getNodeName(el)
-        attributes = getAttributes(el)
-        length = attributes.length
-
-        if (conditionType === 'else') {
-          return true
-        } else if (conditionType !== 'if' && conditionType !== 'unless' && conditionType !== 'elseif' && conditionType !== 'elseunless') {
-          // it's a one-liner
-          conditionType = 'onelineif'
-          for (i = 0; i < length; i++) {
-            conditionAttr = attributes[i].split('=')
-            if (conditionAttr[0].substr(0, 3) === 'if-') {
-              conditionVal = conditionAttr[1]
-              if (conditionVal) {
-                conditionVal = conditionVal.substring(1, conditionVal.length - 1)
-                conditionVal = parseVars(conditionVal, model)
-              }
-              conditionAttr = replaceNonRegex(attributes[i], 'if-', '')
-              break
-            }
-          }
-          return evalStatement()
-        }
-
-        // regular conditional, could be multipart
-        do {
-          // examine each of the condition attributes
-          conditionAttr = attributes[attrCount]
-          if (conditionAttr) {
-            condition = undefined
-            conditionVal = undefined
-            truthStack.push(evalStatement())
-            attrCount++
-          } else {
-            notDone = false
-            length = truthStack.length
-          }
-        }
-        while (notDone)
-
-        function evalStatement () {
-          conditionAttr = conditionAttr.split('=')
-          condition = conditionAttr[0]
-
-          var hasNotOperator
-          if (condition.substr(0, 4) === 'not:') {
-            hasNotOperator = true
-            condition = condition.substring(4)
-          } else {
-            hasNotOperator = false
-          }
-
-          if (condition === 'or' || condition === 'and' || condition === 'xor') {
-            return condition // this is a logical operator, not a condition to evaluate
-          }
-
-          if (conditionVal === undefined) {
-            conditionVal = conditionAttr[1]
-            if (conditionVal) {
-              conditionVal = conditionVal.substring(1, conditionVal.length - 1)
-              conditionVal = parseVars(conditionVal, model)
-            } else {
-              conditionVal = condition
-            }
-          }
-
-          dots = condition.split('.')
-          numDots = dots.length
-          curVar = model
-
-          for (d = 0; d < numDots; d++) {
-            if (typeof curVar !== 'undefined') {
-              curVar = curVar[dots[d]]
-            }
-          }
-
-          modelVal = curVar
-          // force empty arrays and empty objects to be falsey (#44)
-          if (modelVal && ((Array.isArray(modelVal) && modelVal.length === 0) || (typeof modelVal === 'object' && Object.keys(modelVal).length === 0 && modelVal.constructor === Object))) {
-            modelVal = false
-          }
-          if (conditionType === 'if' || conditionType === 'onelineif' || conditionType === 'elseif') {
-            if (condition === conditionVal || (conditionType === 'onelineif' && 'if-' + condition === conditionVal)) {
-              if (modelVal) {
-                return !hasNotOperator
-              } else {
-                return !!hasNotOperator
-              }
-            } else if (modelVal === conditionVal) {
-              return !hasNotOperator
-            } else {
-              return !!hasNotOperator
-            }
-          } else {
-            if (condition === conditionVal) {
-              if (modelVal) {
-                return !!hasNotOperator
-              } else {
-                return !hasNotOperator
-              }
-            } else if (modelVal !== conditionVal) {
-              return !hasNotOperator
-            } else {
-              return !!hasNotOperator
-            }
-          }
-        }
-        // loop through the results
-        for (i = 0; i < length; i++) {
-          condition = truthStack[i]
-          condResult = condResult !== undefined ? condResult : truthStack[i - 1]
-          if (condition === 'and') {
-            condResult = Boolean(condResult && truthStack[i + 1])
-          } else if (condition === 'or') {
-            condResult = Boolean(condResult || truthStack[i + 1])
-          } else if (condition === 'xor') {
-            condResult = Boolean((condResult && !truthStack[i + 1]) || (!condResult && truthStack[i + 1]))
-          }
-        }
-        return condResult !== undefined ? condResult : condition
-      }
-
-      // replaces a single {var} with its value from a given model
-      function renderVar (str, varname, varval, escapeOverride) {
-        if (!isNaN(parseInt(varname))) {
-          varname = '[' + varname + ']'
-        }
-
-        // contains either |s|p or |p|s in the correct position
-        if (varname.slice(-4) === '|s|p' || varname.slice(-4) === '|p|s') {
-          // only act on the no parse flag
-          varval = '<noteddy>' + varval + '</noteddy>'
-        } else {
-          // escape html entities
-          if (varname.slice(-2) !== '|s' && varname.slice(-3) !== '|s`') {
-            if (!escapeOverride) {
-              varval = escapeHtmlEntities(varval)
-            }
-          }
-
-          // check for no parse flag
-          if (varname.slice(-2) === '|p' || varname.slice(-3) === '|p`') {
-            varval = '<noteddy>' + varval + '</noteddy>'
-          }
-        }
-        return replaceNonRegex(str, new RegExp('{' + varname.replace(/\|/g, '\\|') + '}', 'g'), varval)
       }
     }
   }
+
   // set params to default values
   teddy.setDefaultParams()
 
   /**
    * private utility methods
    */
+
+  // NEW LOGIC HERE
+  // TODO: finish
+  function tagScanner(templateArray, tagList, model) {
+    tagList = tagList.slice() // copy the array
+    var endChars
+    var endLength
+    var done = false
+    var ec = 0
+    var cc = 0
+    var tmplChar
+    var testChar
+    var eligibleCharArray
+    var eligibleCharArraysLength = tagList.length
+    var tag
+
+    while (done === false) {
+      for (ec = 0; ec < eligibleCharArraysLength; ec++) {
+        tmplChar = templateArray[cc]
+        eligibleCharArray = tagList[ec]
+        testChar = eligibleCharArray[cc]
+        if (tmplChar !== testChar) {
+          tagList.splice(ec, 1)
+          eligibleCharArraysLength--
+        }
+        else if (cc === eligibleCharArray.length - 1) {
+          beginChars = eligibleCharArray
+          beginLength = eligibleCharArray.length
+          endChars = eligibleCharArray.slice()
+          endChars[beginLength - 1] = '>'
+          endChars.splice(1, 0, '/')
+          endLength = endChars.length - 1
+          tag = beginChars.join('')
+          tag = tag.substring(1, tag.length - 1)
+          done = true
+        }
+      }
+      if (eligibleCharArraysLength === 0) {
+        return false
+      }
+      cc++
+    }
+
+    // if we get here we found an if tag
+    var endCounter
+
+    var templateArrayCounter
+    var templateArrayLength = templateArray.length
+    var templateArrayStart = beginLength
+    var templateArrayEnd
+    var lookAheadArray
+    var nestCount = 0
+    var tagContents
+    var tagAttributes
+    var metadata
+    var replaceString
+    var updatedTemplate
+
+    // loop through the rest of the template array
+    for (templateArrayCounter = templateArrayStart; templateArrayCounter < templateArrayLength; templateArrayCounter++) {
+      lookAheadArray = templateArray.slice(templateArrayCounter, templateArrayCounter + endLength)
+      if (isAnotherOpeningTag(lookAheadArray, beginChars)) {
+        nestCount++
+        // found another '<if '
+      }
+      else if (isClosingTag(lookAheadArray, endChars)) {
+        if (nestCount === 0) {
+          templateArrayEnd = templateArrayCounter
+          tagContents = templateArray.slice(templateArrayStart, templateArrayEnd).join('')
+          if (tag === 'else') {
+            tagAttributes = ''
+          }
+          else {
+            tagContents = tagContents.split('>')
+            tagAttributes = tagContents[0]
+            tagContents.shift()
+            tagContents = tagContents.join('>')
+          }
+
+          metadata = {
+            templateArray: templateArray,
+            templateArrayStringWithoutTag: (templateArray.join('').substring(templateArrayEnd + endLength + 1)).trim(),
+            tag: tag,
+            tagAttributes: tagAttributes,
+            tagContents: tagContents,
+            model: model,
+          }
+
+          switch (tag) {
+            case 'if':
+            case 'unless':
+            case 'elseif':
+            case 'elseunless':
+            case 'else':
+              replaceString = parseConditional(metadata)
+              break
+            case 'include':
+              replaceString = parseInclude(metadata)
+              break
+            case 'loop':
+              replaceString = parseLoop(metadata)
+              break
+          }
+
+          return [...replaceString]
+        }
+        else {
+          // this '</if>' matches a nested tag
+          nestCount--
+        }
+      }
+    }
+    return false
+  }
+
+  // if, unless, elseif, elseunless
+  function parseConditional(metadata) {
+    var templateArray = metadata.templateArray
+    var tag = metadata.tag
+    var tagAttributes = metadata.tagAttributes
+    var tagContents = metadata.tagContents
+    var model = metadata.model
+    var satisfiedCondition = false
+    var foundSibling = false
+
+    if (tag === 'else') {
+      satisfiedCondition = true
+    }
+    else if (tag === 'if' || tag === 'elseif') {
+      if (model[tagAttributes]) {
+        satisfiedCondition = true
+      }
+      else {
+        metadata.templateArrayStringWithoutTag = scanForSiblings()
+      }
+    }
+    else if (tag === 'unless' || tag === 'elseunless') {
+      if (!model[tagAttributes]) {
+        satisfiedCondition = true
+      }
+      else {
+        metadata.templateArrayStringWithoutTag = scanForSiblings()
+      }
+    }
+
+    function scanForSiblings() {
+      var notDone = true
+      var replaceOperation
+      var templateArray = [...metadata.templateArrayStringWithoutTag]
+      do {
+        replaceOperation = tagScanner(templateArray, secondaryTags, model)
+        if (replaceOperation) {
+          return replaceOperation.join('')
+        }
+        else {
+          // no sibling found
+          return metadata.templateArrayStringWithoutTag
+        }
+      }
+      while (notDone === true)
+    }
+
+    if (satisfiedCondition) {
+      return tagContents + metadata.templateArrayStringWithoutTag
+    }
+    else {
+      return '' + metadata.templateArrayStringWithoutTag
+    }
+    //process.exit()
+  }
+
+  function isAnotherOpeningTag(a1, a2) {
+    a1.pop()
+    return twoArraysEqual(a1, a2)
+  }
+
+  function isClosingTag(a1, a2) {
+    return twoArraysEqual(a1, a2)
+  }
+
+  function twoArraysEqual(a1, a2) {
+    var a1l = a1.length
+    var i
+    for (i = 0; i < a1l; i++) {
+      if (a1[i] !== a2[i]) {
+        return false
+      }
+    }
+    return true
+  }
+  // NEW LOGIC ENDS
+  // TODO: finish
 
   // gets nested object by string
   function getNestedObjectByString (o, s) {

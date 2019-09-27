@@ -1,6 +1,5 @@
 var fs = require('fs')
 var path = require('path')
-var utils = require('./utils')
 
 var teddy // @namespace
 
