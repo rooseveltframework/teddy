@@ -53,6 +53,12 @@
     ],
     "rules": {
       "mocha/no-exclusive-tests": "error"
+    },
+    "parserOptions": {
+      "ecmaVersion": 2017
+    },
+    "env": {
+        "es6": true
     }
   },
   "nyc": {
@@ -64,9 +70,10 @@
     ]
   },
   "scripts": {
+    "unit": "./node_modules/.bin/mocha --timeout 10000 verTest/tests.js",
     "codecov": "./node_modules/.bin/codecov",
     "coverage": "cross-env NODE_ENV=cover nyc mocha test && karma start",
-    "lint": "standard && eslint ./test",
+    "lint": "standard ./lib && eslint ./lib",
     "test": "cross-env NODE_ENV=test npm run test-server && karma start",
     "test-chrome": "karma start --browsers ChromeHeadless",
     "test-edge": "karma start --browsers Edge",
