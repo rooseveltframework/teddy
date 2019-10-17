@@ -14,7 +14,7 @@ describe('Conditionals', function () {
       assert.strictEqual(myRender('html/if', model).trim(), '<p>The variable \'something\' is present</p>')
       done()
     })
-    it('should evaluate 1000 nested <if something> as true (conditionals/ifif.html)', function (done) {
+    it.skip('should evaluate 1000 nested <if something> as true (conditionals/ifif.html)', function (done) {
       assert.strictEqual(myRender('html/ifif', model).trim(), '<p>The variable \'something\' is present</p>')
       done()
     })
@@ -26,13 +26,41 @@ describe('Conditionals', function () {
       assert.strictEqual(myRender('html/ifElseIf.html', model).trim(), '<p>The variable \'somethingElse\' is present</p>')
       done()
     })
+    it('should evaluate one line if "if-something" as true (conditionals/oneLine.html)', function (done) {
+      assert.strictEqual(myRender('html/oneLine.html', model).trim(), '<p class=\'something-is-present\'>One line if.</p>')
+      done()
+    })
+    it('should evaluate one line if "if-something=\'Some content\'" as true (conditionals/oneLineValue.html)', function (done) {
+      assert.strictEqual(myRender('html/oneLineValue.html', model).trim(), '<p class=\'something-is-value\'>One line if.</p>')
+      done()
+    })
+    it.skip('should evaluate 5000 one line ifs in under 5000ms (conditionals/oneLinePerformance.html)', function (done) {
+      var start, end, time
+      start = new Date().getTime()
+  
+      myRender('html/oneLinePerformance.html', model)
+  
+      end = new Date().getTime()
+      time = end - start
+  
+      assert.strictEqual(time < 5000, true)
+      done()
+    })
+    it('should evaluate `and` truth table as <p>and: true</p> (conditionals/andTruthTable.html)', function (done) {
+      assert.strictEqual(myRender('html/andTruthTable.html', model).trim(), '<p>and: true true</p>')
+      done()
+    })
+    it('should evaluate <if something xor somethingElse> as false (conditionals/xor.html)', function (done) {
+      assert.strictEqual(myRender('html/xor.html', model).trim(), '<p>xor: false</p>')
+      done()
+    })
   })
   describe('<unless> tests', function() {
     it('should evaluate <unless doesntexist> as true (conditionals/unless.html)', function (done) {
       assert.strictEqual(myRender('html/unless', model).trim(), '<p>The variable \'doesntexist\' is not present</p>')
       done()
     })
-    it('should evaluate 1000 nested <unless doesntexist> as true (conditionals/unlessunless.html)', function (done) {
+    it.skip('should evaluate 1000 nested <unless doesntexist> as true (conditionals/unlessunless.html)', function (done) {
       assert.strictEqual(myRender('html/unlessunless', model).trim(), '<p>The variable \'doesntexist\' is not present</p>')
       done()
     })
@@ -44,8 +72,12 @@ describe('Conditionals', function () {
       assert.strictEqual(myRender('html/unlesselseunless', model).trim(), '<p>The variable \'doesntexist\' is not present</p>')
       done()
     })
+    it('should evaluate nested <unless> tag in the else (conditionals/unlessNestedElse.html)', function (done) {
+      assert.strictEqual(myRender('html/unlessNestedElse.html', model).trim(), '<p>The variable \'doesntexist\' is present</p> <p>The variable \'anotherdoesntexist\' is not present</p>')
+      done()
+    })
   })
-  describe('<loop> tests', function() {
+  describe.skip('<loop> tests', function() {
     it('should loop through an array correctly <loop through="letters" val="letter">', function (done) {
       assert.strictEqual(myRender('html/loopVal', model).trim(), '<p>a</p><p>b</p><p>c</p>')      
       done()
@@ -119,7 +151,19 @@ describe('Conditionals', function () {
       done()
     })
     it('should escape the contents of a script when included in a template (includes/inlineScriptTag.html)', function (done) {
-      assert.strictEqual(myRender('html/inlineScriptTag.html', model).trim(), '<p>Hello!</p><script>console.log(\'Hello world\'); for (var i = 0; i < 2; i++) { console.log(\'Test\') } </script>')
+      assert.strictEqual(myRender('html/inlineScriptTag.html', model).trim(), '<p>Hello!</p><script>console.log(\'Hello world\'); for (var i = 0; i < 2; i++) { console.log(\'Test\') }</script>')
+      done()
+    })
+    it('should <include> a template that contains numerical {variables} (includes/numericVarInArg.html)', function (done) {
+      assert.strictEqual(myRender('html/numericVarInArg.html', model).trim(), '<p>STRING!</p>')
+      done()
+    })
+    it('should <include> a template with numeric arguments (includes/numericArgument.html)', function (done) {
+      assert.strictEqual(myRender('html/numericArgument.html', model).trim(), '<p>Hello!</p>')
+      done()
+    })
+    it('should evaluate {variable} outside of include as original model value (includes/argRedefineModelVar.html)', function (done) {
+      assert.strictEqual(myRender('html/argRedefineModelVar.html', model).trim(), '<style>p { height: 10px; }</style><p>Some content</p>')
       done()
     })
   })

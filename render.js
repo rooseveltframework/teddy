@@ -18,13 +18,16 @@ var endParse = false
 const TEDDY_TAGS = {
   primary: {
     include: ['<', 'i', 'n', 'c', 'l', 'u', 'd', 'e', ' '],
+    arg: ['<', 'a', 'r', 'g', ' '],
     if: ['<', 'i', 'f', ' '],
     loop: ['<', 'l', 'o', 'o', 'p', ' '],
     unless: ['<', 'u', 'n', 'l', 'e', 's', 's', ' '],
+    argInvalid: ['<', 'a', 'r', 'g', '>'],
     includeInvalid: ['<', 'i', 'n', 'c', 'l', 'u', 'd', 'e', '>'],
     ifInvalid: ['<', 'i', 'f', '>'],
     loopInvalid: ['<', 'l', 'o', 'o', 'p', '>'],
     unlessInvalid: ['<', 'u', 'n', 'l', 'e', 's', 's', '>'],
+    carg: ['<', '/', 'a', 'r', 'g', '>'],
     cinclude: ['<', '/', 'i', 'n', 'c', 'l', 'u', 'd', 'e', '>'],
     cif: ['<', '/', 'i', 'f', '>'],
     cloop: ['<', '/', 'l', 'o', 'o', 'p', '>'],
@@ -52,8 +55,7 @@ function render (template, model, callback) {
   }
 
   let consoleErrors = ''
-  let removeAgain = false
-  var replaceOperation
+  let renderedTemplate
 
   // overload console logs
   consoleWarnings = ''
@@ -76,58 +78,8 @@ function render (template, model, callback) {
   
   template = compile(template) // read file
 
-  var templateArray = [...template]
-  var renderedTemplate = ''
-
-  while (templateArray[0]) {
-    if (!endParse) {
-      switch (templateArray[0]) {
-        case '{': // Detects teddy curly bracket (comment or variable)
-          removeAgain = false
-          if (templateArray[1] === '!') {
-            templateArray = removeTeddyComment(templateArray)
-          } else if (templateArray[1] === '|') { // Other logic
-
-          }
-          break
-        case '<': // Teddy/HTML tag
-          removeAgain = false
-          if (templateArray[1] === '/') {
-          } else {
-            let primaryTag = detectTeddyPrimaryTag(templateArray, TEDDY_TAGS.primary)
-            switch (primaryTag) {
-              case 'if':
-              case 'unless':
-                templateArray = parseConditional(templateArray, primaryTag, model)
-                break
-              case 'include':
-                templateArray = parseInclude(templateArray, model)
-                break
-              case 'loop':
-                templateArray = parseLoop(templateArray, model)
-                break
-            }
-          }
-          break
-      }
-      
-      if (templateArray[0].search(/^[0-9a-zA-Z]+$/) === 0) {
-        removeAgain = false
-      }
-
-      if (removeAgain || ((templateArray[0] === '\n' || templateArray[0] === ' ') && (templateArray[1] === '\n' || templateArray[1] === ' ' || templateArray[1] === '<' || (templateArray[1] === '{' && templateArray[2] === '!')))) {
-        removeAgain = true
-      } else {
-        renderedTemplate += templateArray[0]
-        removeAgain = false
-      }
-      templateArray.shift()
-    } else {
-      renderedTemplate = templateArray.join('')
-      endParse = false
-      break
-    }
-  }
+  // Parse and return template
+  renderedTemplate = scanTemplate([...template], model)
 
   // execute callback if present, otherwise simply return the rendered template string
   if (typeof callback === 'function') {
@@ -186,6 +138,74 @@ function compile (template) {
   }
 }
 
+// Scan template file
+function scanTemplate(templateArray, model) {
+  var renderedTemplate = ''
+
+  while (templateArray[0]) {
+    if (!endParse) {
+      switch (templateArray[0]) {
+        case '{': // Detects teddy curly bracket (comment or variable)
+          if (templateArray[1] === '!') {
+            templateArray = removeTeddyComment(templateArray)
+          } else if (templateArray[1] === '|') { // Other logic
+
+          } else {
+            templateArray = insertTeddyVariable(templateArray, model)
+          }
+          break
+        case '<': // Teddy/HTML tag
+          if (templateArray[1] === '/') {
+          } else {
+            let primaryTag = detectTeddyPrimaryTag(templateArray, TEDDY_TAGS.primary)
+            switch (primaryTag) {
+              case 'if':
+              case 'unless':
+                templateArray = parseConditional(templateArray, primaryTag, model)
+                break
+              case 'include':
+                templateArray = parseInclude(templateArray, model)
+                break
+              case 'loop':
+                templateArray = parseLoop(templateArray, model)
+                break
+              case 'one-line-if':
+                templateArray = parseOneLineIf(templateArray, model)
+                break
+            }
+          }
+          break
+      }
+
+      // Remove extra whitespace
+      if ((templateArray[0] === ' ' || templateArray[0] === '\n') && (templateArray[1] === ' ' || templateArray[1] === '\n' || (templateArray[1] === '<' && templateArray[2] !== ' ') || (templateArray[1] === '{' && templateArray[2] === '!'))) {
+        while (templateArray[0] === ' ' || templateArray[0] === '\n') {
+          if (templateArray[1] === '}' && renderedTemplate[renderedTemplate.length-1] !== ' ') {
+            renderedTemplate += ' '
+          }
+          templateArray.shift()
+        }
+      } else {
+        renderedTemplate += templateArray[0]
+
+        // add an extra space for js within html template
+        if ((templateArray[0] === '{' || templateArray[0] === ';') && templateArray[1] === '\n') {
+          renderedTemplate += ' '
+        } 
+        templateArray.shift()
+      }
+    } else {
+      renderedTemplate = templateArray.join('')
+      endParse = false
+      break
+    }
+  }
+
+  // return parsed html file
+  return renderedTemplate
+}
+
+
 // Parse <if> <unless> <elseif> <elseunless> <else>
 function parseConditional (statement, type, model) {
   var currentClosingTag = TEDDY_TAGS.primary['c' + type] // </if> </unless>
@@ -194,8 +214,7 @@ function parseConditional (statement, type, model) {
 
   // Primary variables
   var condition =  {
-    type: type,
-    text: '',
+    type: type
   }
   var varList = []
   var conditionList = []
@@ -204,71 +223,68 @@ function parseConditional (statement, type, model) {
   var nested = 0
   var teddyVarName = ''
   var teddyVarExpected = ''
-  var conditionText = ''
   var readingConditional = true // start parsing by reading first <if> statement
   var readMode = false          // start parsing equality condition (ex: <if something='here'>)
 
   // Look for begin/end of conditionals
-  for (let i = 0; i < statement.length; i++) {
+  for (let i = currentOpenTag.length; i < statement.length; i++) {
     if (readingConditional) {
-      for (let j = i + currentOpenTag.length; j < statement.length; j++) {
-        if (statement[j] === ' ' || statement[j] === ':') {
-          if (teddyVarName === 'or' || teddyVarName === 'and' || teddyVarName === 'xor' || teddyVarName === 'not') {
-            condition.operator = teddyVarName
-          } else {
-            varList.push({
-              name: teddyVarName
-            })
-          }
-          teddyVarName = ''
-        }
-        else if (statement[j] === '>') { 
-          // Push teddy var to list of teddy vars
+      if (!readMode && (statement[i] === ' ' || statement[i] === ':')) {
+        if (teddyVarName === 'or' || teddyVarName === 'and' || teddyVarName === 'xor' || teddyVarName === 'not') {
+          condition.operator = teddyVarName
+        } else {
           varList.push({
             name: teddyVarName,
-            expected: (teddyVarExpected === '') ? undefined : teddyVarExpected.slice(2, teddyVarExpected.length-1)
+            expected: (teddyVarExpected === '') ? undefined : teddyVarExpected.slice(2, -1)
           })
+        }
+        teddyVarName = ''
+        teddyVarExpected = ''
+      }
+      else if (statement[i] === '>') {
+        // Push teddy var to list of teddy vars
+        varList.push({
+          name: teddyVarName,
+          expected: (teddyVarExpected === '') ? undefined : teddyVarExpected.slice(2, -1)
+        })
 
-          // push to list of all conditionals
-          condition.text = conditionText
-          condition.variables = varList
-          conditionList.push(condition)
+        // push to list of all conditionals
+        condition.variables = varList
+        conditionList.push(condition)
 
-          // Reset important lists
-          varList = []
-          conditionText = ''
-          teddyVarName = ''
-          teddyVarExpected = ''
-          condition = {
-            type: type,
-            text: ''
-          }
+        // Reset important lists
+        varList = []
+        teddyVarName = ''
+        teddyVarExpected = ''
+        condition = {
+          type: type
+        }
+        readMode = false
+        readingConditional = false
+        
+        bocList.push([i+1])
+        currentOpenTag = TEDDY_TAGS.secondary['else' + type]
+      }
+      else {
+        // begin reading literal value
+        if (statement[i] === '=' && (statement[i+1] === '\'' || statement[i+1] === '"')) {
+          readMode = true
+        } 
+        // stop reading literal value
+        else if ((statement[i] === '\'' || statement[i] === '"') && statement[i+1] === ' ') {
           readMode = false
-          readingConditional = false
-          
-          bocList.push([j+1])
-          currentOpenTag = TEDDY_TAGS.secondary['else' + type]
-          i = j
-          break
         }
-        else {
-          // begin reading literal value
-          if (statement[j] === '=' && (statement[j+1] === '\'' || statement[j+1] === '"')) {
-            readMode = true
-          } 
-          // stop reading literal value
-          else if ((statement[j] === '\'' || statement[j] === '"') && statement[j+1] === ' ') {
-            readMode = false
-          }
 
-          // read teddy var names and values
-          if (readMode) {
-            teddyVarExpected += statement[j]
+        // read teddy var names and values
+        if (readMode) {
+          teddyVarExpected += statement[i]
+        } else {
+          if (statement[i] === '"' || statement[i] === "'") {
+            teddyVarExpected += statement[i]            
           } else {
-            teddyVarName += statement[j]
+            teddyVarName += statement[i]
           }
         }
-        conditionText += statement[j]
       }
     }
     // found tag
@@ -278,7 +294,7 @@ function parseConditional (statement, type, model) {
         nested++
       }
       // Closing <if> tag
-      else if (twoArraysEqual(statement.slice(i, i + currentClosingTag.length), currentClosingTag)) {
+      else if (twoArraysEqual(statement.slice(i, i + currentClosingTag.length), currentClosingTag) || (twoArraysEqual(statement.slice(i, i + closingElseTag.length), closingElseTag) && nested > 0)) {
         if (nested > 0) {
           nested--
         }
@@ -290,17 +306,17 @@ function parseConditional (statement, type, model) {
         }
       } 
       // Closing <else> tag
-      else if (twoArraysEqual(statement.slice(i, i + closingElseTag.length), closingElseTag)) {
+      else if (twoArraysEqual(statement.slice(i, i + closingElseTag.length), closingElseTag) && nested < 1) {
         eocList.push([i, i + closingElseTag.length]) // important indices
         break
       }
       // Opening <elseif> or <elseunless> tag
       else if (twoArraysEqual(statement.slice(i, i + currentOpenTag.length), currentOpenTag)) {
         readingConditional = true
-        i--
+        i += currentOpenTag.length -1
       } 
       // Opening <else> tag
-      else if (twoArraysEqual(statement.slice(i, i + TEDDY_TAGS.secondary.else.length), TEDDY_TAGS.secondary.else)) {
+      else if (twoArraysEqual(statement.slice(i, i + TEDDY_TAGS.secondary.else.length), TEDDY_TAGS.secondary.else) && nested < 1) {
         bocList.push([i + TEDDY_TAGS.secondary.else.length]) // important indices
       }
     }
@@ -308,62 +324,20 @@ function parseConditional (statement, type, model) {
 
   // Evaluate conditionals
   for (let i = 0; i < conditionList.length; i++) {
-    teddyValue = model[conditionList[i].variables[0].name]
-    teddyExpected = conditionList[i].variables[0].expected
-    switch (conditionList[i].operator) {
-      case 'or':
-        if (model[conditionList[i].variables[0].name] || model[conditionList[i].variables[1].name]) {
-          return [...statement.slice(bocList[i][0], eocList[i][0]), ...statement.slice(eocList[eocList.length-1][1])]
-        } else if (conditionList[i].type === 'unless' && (!model[conditionList[i].variables[0].name] || !model[conditionList[i].variables[1].name])) {
-          return [...statement.slice(bocList[i][0], eocList[i][0]), ...statement.slice(eocList[eocList.length-1][1])]
-        }
-        break
-      case 'and':
-        if (model[conditionList[i].variables[0].name] && model[conditionList[i].variables[1].name]) {
-          return [...statement.slice(bocList[i][0], eocList[i][0]), ...statement.slice(eocList[eocList.length-1][1])]
-        } else if (conditionList[i].type === 'unless' && !model[conditionList[i].variables[0].name] && !model[conditionList[i].variables[1].name]) {
-          return [...statement.slice(bocList[i][0], eocList[i][0]), ...statement.slice(eocList[eocList.length-1][1])]
-        }
-        break
-      case 'xor': // (WIP for unless)
-        if (model[conditionList[i].variables[0].name] && model[conditionList[i].variables[0].name]) {
-        } else if (model[conditionList[i].variables[0].name]) {
-          return [...statement.slice(bocList[i][0], eocList[i][0]), ...statement.slice(eocList[eocList.length-1][1])]
-        } else if (model[conditionList[i].variables[1].name]) {
-          return [...statement.slice(bocList[i][0], eocList[i][0]), ...statement.slice(eocList[eocList.length-1][1])]
-        }
-        break
-      case 'not':
-        if (!model[conditionList[i].variables[0].name]) {
-          return [...statement.slice(bocList[i][0], eocList[i][0]), ...statement.slice(eocList[eocList.length-1][1])]
-        } else if (conditionList[i].type === 'unless' && model[conditionList[i].variables[0].name]) {
-          return [...statement.slice(bocList[i][0], eocList[i][0]), ...statement.slice(eocList[eocList.length-1][1])]
-        }
-        break
-      default: // (WIP for unless)
-        if (conditionList[i].variables[0].expected) {
-          if (model[conditionList[i].variables[0].name] === conditionList[i].variables[0].expected) {
-            return [...statement.slice(bocList[i][0], eocList[i][0]), ...statement.slice(eocList[eocList.length-1][1])]
-          }
-        } else {
-          if (conditionList[i].type === 'if' && model[conditionList[i].variables[0].name]) {
-            if (eocList.length === 1) {
-              return [...statement.slice(bocList[0][0], eocList[0][0]), ...statement.slice(eocList[0][0]+TEDDY_TAGS.primary['c' + type].length)]
-            } else {
-              return [...statement.slice(bocList[i][0], eocList[i][0]), ...statement.slice(eocList[eocList.length-1][1])]
-            }
-          } else if (conditionList[i].type === 'unless' && !model[conditionList[i].variables[0].name]) {
-            if (eocList.length === 1) {
-              return [...statement.slice(bocList[0][0], eocList[0][0]), ...statement.slice(eocList[0][0]+TEDDY_TAGS.primary['c' + type].length)]
-            } else {
-              return [...statement.slice(bocList[i][0], eocList[i][0]), ...statement.slice(eocList[eocList.length-1][1])]
-            }
-          }
-        }
+    if (evaluateCondition(conditionList[i], model)) {
+      if (eocList.length === 1) {
+        return [...statement.slice(bocList[0][0], eocList[0][0]), ...statement.slice(eocList[0][0]+TEDDY_TAGS.primary['c' + type].length)]
+      } else {
+        return [...statement.slice(bocList[i][0], eocList[i][0]), ...statement.slice(eocList[eocList.length-1][1])]
+      }
     }
   }
 
-  return [...statement.slice(bocList[bocList.length-1][0], eocList[eocList.length-1][0]), ...statement.slice(eocList[eocList.length-1][1])]
+  if (eocList.length === 1) {
+    return [...statement.slice(eocList[0][0]+TEDDY_TAGS.primary['c' + type].length)]
+  } else {
+    return [...statement.slice(bocList[bocList.length-1][0], eocList[eocList.length-1][0]), ...statement.slice(eocList[eocList.length-1][1])]
+  }
 }
 
 // Parse <loop> 
@@ -386,8 +360,10 @@ function parseLoop (statement, model) {
   var isNested = false 
   var containsTag = false
   var containsComment = false
+  var parsedContents = false
   var sol // start of loop
   var eol // end of loop
+
 
   // Read <loop> inner contents 
   for (let i = TEDDY_TAGS.primary.loop.length; i < statement.length; i++) {
@@ -420,6 +396,8 @@ function parseLoop (statement, model) {
       } else if (twoArraysEqual(statement.slice(i, i + TEDDY_TAGS.primary.unless.length), TEDDY_TAGS.primary.unless)) {
         containsTag = true
       } else if (twoArraysEqual(statement.slice(i, i + TEDDY_TAGS.primary.include.length), TEDDY_TAGS.primary.include)) {
+        containsTag = true
+      } else if (statement.slice(i, i+24).join('').includes(' if-')) {
         containsTag = true
       }
     } 
@@ -473,11 +451,11 @@ function parseLoop (statement, model) {
             } else if (teddyName.indexOf('.') >= 0 && (teddyName.slice(0, teddyName.indexOf('.')) === params.val)) {
               teddyString = `${itValues[i][teddyName.slice(teddyName.indexOf('.')+1)]}`
             }
-
             // Replace Teddy var name with actual value
             if (teddyString !== '' && teddyString !== 'undefined') {
-              slicedStatement = insertValue(slicedStatement, teddyString, sov, j)
-              // Recalibrate iterator based on length of inserted model value (if necessary)
+              slicedStatement = insertValue(slicedStatement, teddyString, sov, j+1)
+
+              // Recalibrate iterator based on length of inserted value (if necessary)
               if (teddyString.length < teddyName.length) {
                 j -= (teddyName.length - teddyString.length)
               }
@@ -498,9 +476,17 @@ function parseLoop (statement, model) {
           containsComment = true
         }
       }
+    
       // Join parsed templates together
-      modifiedStatement += slicedStatement.join('')
+      if (containsTag) {
+        slicedStatement = scanTemplate(slicedStatement, model)
+        modifiedStatement += slicedStatement
+        parsedContents = true
+      } else {
+        modifiedStatement += slicedStatement.join('')
+      }
 
+      
       // Reset template back to a copy
       slicedStatement = statementCopy
 
@@ -514,7 +500,7 @@ function parseLoop (statement, model) {
     return [...statement.slice(eol + TEDDY_TAGS.primary.cloop.length)]
   }
 
-  if (modifiedStatement.length > 49999 && endOfStatement.length === 1 && !containsTag && !containsComment) {
+  if (modifiedStatement.length > 49999 && endOfStatement.length <= 1 && (parsedContents || (!containsTag && !containsComment))) {
     endParse = true
   }
 
@@ -523,15 +509,201 @@ function parseLoop (statement, model) {
 }
 
 // Parse <include>
-// function parseInclude (statement, model) {
-//   let getSrc = false
-//   let srcName = ''
-//   for (let i = TEDDY_TAGS.primary.include.length; i < statement.length; i++) {
-//     if (statement[i] === '>') {
-//     }
-//     srcName += statement[i]
-//   }
-// }
+function parseInclude (statement, model) {
+  let inArg = false
+  let readingVar = false
+  let inComment = false
+  let srcName = ''
+  let teddyVarName = ''
+  let includeTemplate
+  let startInclude
+  let endInclude
+  let startIndex
+
+  // 
+  let includeArgs = []
+  let includeArg = {
+    name: '',
+    value: '',
+    start: 0,
+    end: 0
+  }
+
+  // Get HTML source from include tag
+  for (let i = TEDDY_TAGS.primary.include.length; i < statement.length; i++) {
+    if (statement[i] === '>') {
+      startInclude = i + 1
+      break
+    }
+    srcName += statement[i]
+  }
+
+  // Clean src name so we can read it
+  if (srcName.indexOf('src=') >= 0) {
+    srcName = srcName.slice(5, srcName.length - 1)
+
+    if (srcName.slice(-5) !== '.html') {
+      srcName += '.html'
+    }
+  }
+
+  includeTemplate = [...fs.readFileSync('html/' + srcName, 'utf8')]
+
+  // Read contents of <include> tag
+  for (let i = startInclude; i < statement.length; i++) {
+    if (inArg) {
+      // Get include argument value
+      if (includeArg.start > 0) {
+        if (statement[i] === '<' && twoArraysEqual(statement.slice(i, i + TEDDY_TAGS.primary.carg.length), TEDDY_TAGS.primary.carg)) {
+          includeArg.end = i
+          includeArgs.push(includeArg)
+
+          // reset
+          inArg = false
+          includeArg = {
+            name: '',
+            value: '',
+            start: 0,
+            end: 0
+          }
+        } else {
+          includeArg.value += statement[i]
+        }
+      }
+      // Get include argument name
+      else if (statement[i] === '>') {
+        includeArg.start = i + 1
+      } else {
+        includeArg.name += statement[i]
+      }
+    }
+    // Check if we hit a teddy <arg> tag
+    else if (statement[i] === '<' && twoArraysEqual(statement.slice(i, i + TEDDY_TAGS.primary.arg.length), TEDDY_TAGS.primary.arg)) {
+      inArg = true
+      i += 4
+    }
+    else if (statement[i] === '<' && statement[i + 1] === '/' && twoArraysEqual(statement.slice(i, i + TEDDY_TAGS.primary.cinclude.length), TEDDY_TAGS.primary.cinclude)) {
+      endInclude = i + TEDDY_TAGS.primary.cinclude.length
+      break
+    }
+  }
+
+  // Read contents of include src template
+  for (let i = 0; i < includeTemplate.length; i++) {
+    if (inComment) {
+      if (includeTemplate[i] === '!' && includeTemplate[i+1] === '}') {
+        inComment = false
+      }
+    }
+    else if (readingVar) {
+      if (includeTemplate[i] === '}') {
+        readingVar = false
+        // find appropriate arg value
+        for (let j = 0; j < includeArgs.length; j++) {
+          if (teddyVarName === includeArgs[j].name) {
+            includeTemplate = insertValue(includeTemplate, includeArgs[j].value, startIndex, i+1)
+          }
+        }
+      } else {
+        teddyVarName += includeTemplate[i]
+      }
+    }
+    else if (includeTemplate[i] === '{') {
+      if (includeTemplate[i+1] === '!') {
+        inComment = true
+      } else {
+        startIndex = i
+        readingVar = true
+      }
+    }
+  }
+  includeTemplate.unshift(' ')
+  return insertValue(statement, includeTemplate, 0, endInclude+1)
+}
+
+// Parse <tag if-something>
+function parseOneLineIf(statement, model) {
+  let readingName = false
+  let readingLiteral = false
+  let readingConditions = false
+  let startIndex
+  let endIndex
+  let conditionText = ''
+  let condition = {
+    varName: '',
+    varLiteral: '',
+    true: '',
+    false: ''
+  }
+  for (let i = 0; i < statement.length; i++) {
+    // Get teddy var name
+    if (readingName) {
+      if (statement[i] === ' ') {
+        readingConditions = true
+        readingName = false
+      } else if (statement[i] === '=') {
+        readingLiteral = true
+        readingName = false
+      } else {
+        condition.varName += statement[i]
+      }
+    } else if (readingLiteral) {
+      if (statement[i] === ' ' && (statement[i-1] === '"' || statement[i-1] === "'")) {
+        readingConditions = true
+        readingLiteral = false
+        condition.varLiteral = condition.varLiteral.slice(1, -1)
+      } else {
+        condition.varLiteral += statement[i]
+      }
+    } else if (readingConditions) {
+      // Get first condition
+      if (statement[i] === ' ') {
+        if (conditionText[0] === 't') {
+          condition.true = conditionText.slice(6, -1)
+        } else {
+          condition.false = conditionText.slice(7, -1)
+        }
+        conditionText = ''
+      }
+      // Get second condition
+      else if (statement[i] === '>') {
+        if (conditionText[0] === 't') {
+          condition.true = conditionText.slice(6, -1)
+        } else {
+          condition.false = conditionText.slice(7, -1)
+          console.log('hello')
+        }
+        conditionText = ''
+        endIndex = i
+        break
+      } else {
+        conditionText += statement[i]
+      }
+    }
+    else if (statement[i] === ' ') {
+      startIndex = i + 1
+    }
+    else if (statement[i] === '-') {
+      readingName = true
+    }
+  }
+
+  // Evaluate condition to true or false
+  if (condition.varLiteral.length > 0) {
+    if (model[condition.varName] === condition.varLiteral) {
+      return insertValue(statement, condition.true, startIndex, endIndex)
+    } else {
+      return insertValue(statement, condition.false, startIndex, endIndex)      
+    }
+  } else {
+    // if var is present in model
+    if (model[condition.varName]) {
+      return insertValue(statement, condition.true, startIndex, endIndex)
+    } else {
+      return insertValue(statement, condition.false, startIndex, endIndex)      
+    }
+  }
+}
 
 // Returns teddy primary tag name
 function detectTeddyPrimaryTag (charList, tags) {
@@ -539,6 +711,7 @@ function detectTeddyPrimaryTag (charList, tags) {
   let keys = Object.keys(tags)
   let currentTag
 
+  // check through teddy primary tags
   for (let i = 0; i < keys.length; i++) {
     currentTag = tags[keys[i]]
     if (twoArraysEqual(currentTag, charList.slice(0, currentTag.length))) {
@@ -547,9 +720,17 @@ function detectTeddyPrimaryTag (charList, tags) {
       } else {
         type = keys[i]
       }
-      break
+      return type
+    } 
+  }
+
+  // check if it is a one-line if statement
+  for (let i = 0; i < charList.length; i++) {
+    if (twoArraysEqual(charList.slice(i, i + 3), ['i', 'f', '-'])) {
+      return 'one-line-if'
     }
   }
+
   return type
 }
 
@@ -569,7 +750,7 @@ function twoArraysEqual(a1, a2) {
 // Returns a list of characters with teddy var names replaced with actual values
 function insertValue(str, val, start, end) {
   // String before value + new value + String after value
-  return [...str.slice(0, start), ...val, ...str.slice(end + 1)]
+  return [...str.slice(0, start), ...val, ...str.slice(end)]
 }
 
 // Finds correct context for a nested loop
@@ -597,6 +778,152 @@ function removeTeddyComment (myTemplate) {
 
   return myTemplate
 }
+
+// Handles calls to variables in the model
+function insertTeddyVariable(myTemplate, myModel) {
+  let varName = ''
+
+  for (let i = 1; i < myTemplate.length; i++) {
+    if (myTemplate[i] === '}') {
+      if (myModel[varName]) {
+        return insertValue(myTemplate, myModel[varName], 0, i+1)
+      } else {
+        return myTemplate
+      }
+    } else {
+      varName += myTemplate[i]
+    }
+  }
+}
+
+  // Goes through condition logic and returns true/false
+  function evaluateCondition(condition, model) {
+    switch (condition.operator) {
+      case 'or':  // <if something or somethingElse>
+        if (condition.variables[0].expected && condition.variables[1].expected) { // Two conditions compare against literal values
+          if (model[condition.variables[0].name] === condition.variables[0].expected || model[condition.variables[1].name] === condition.variables[1].expected) {
+            return (condition.type === 'if') ? true : false
+          } else {
+            return (condition.type === 'if') ? false : true
+          }
+        } else if (condition.variables[0].expected) { // One condition needs to be compared to a literal value
+          if (model[condition.variables[0].name] === condition.variables[0].expected || model[condition.variables[1].name]) {
+            return (condition.type === 'if') ? true : false
+          } else {
+            return (condition.type === 'if') ? false : true
+          }
+        } else if (condition.variables[1].expected) { // One condition needs to be compared to a literal value
+          if (model[condition.variables[0].name] || model[condition.variables[1].name] === condition.variables[1].expected) {
+            return (condition.type === 'if') ? true : false
+          } else {
+            return (condition.type === 'if') ? false : true
+          }
+        } else { // No conditions need to be compared to a literal value
+          if (model[condition.variables[0].name] || model[condition.variables[1].name]) {
+            return (condition.type === 'if') ? true : false
+          } else {
+            return (condition.type === 'if') ? false : true
+          }
+        }
+      case 'and': // <if something and somethingElse>
+        if (condition.variables[0].expected && condition.variables[1].expected) { // Two conditions compare against literal values
+          if (model[condition.variables[0].name] === condition.variables[0].expected && model[condition.variables[1].name] === condition.variables[1].expected) {
+            return (condition.type === 'if') ? true : false
+          } else {
+            return (condition.type === 'if') ? false : true
+          }
+        } else if (condition.variables[0].expected) { // One condition needs to be compared to a literal value
+          if (model[condition.variables[0].name] === condition.variables[0].expected && model[condition.variables[1].name]) {
+            return (condition.type === 'if') ? true : false
+          } else {
+            return (condition.type === 'if') ? false : true
+          }
+        } else if (condition.variables[1].expected) { // One condition needs to be compared to a literal value
+          if (model[condition.variables[0].name] && model[condition.variables[1].name] === condition.variables[1].expected) {
+            return (condition.type === 'if') ? true : false
+          } else {
+            return (condition.type === 'if') ? false : true
+          }
+        } else { // No conditions need to be compared to a literal value
+          if (model[condition.variables[0].name] && model[condition.variables[1].name]) {
+            return (condition.type === 'if') ? true : false
+          } else {
+            return (condition.type === 'if') ? false : true
+          }
+        }
+      case 'xor': // <if something xor somethingElse>
+        if (condition.variables[0].expected && condition.variables[1].expected) { // Two conditions compare against literal values
+          if (model[condition.variables[0].name] === condition.variables[0].expected) {
+            return (condition.type === 'if') ? true : false
+          } else if (model[condition.variables[1].name] === condition.variables[1].expected) {
+            return (condition.type === 'if') ? true : false
+          } else {
+            return (condition.type === 'if') ? false : true
+          }
+        } else if (condition.variables[0].expected) { // One condition needs to be compared to a literal value
+          if (model[condition.variables[0].name] === condition.variables[0].expected) {
+            return (condition.type === 'if') ? true : false
+          } else if (isTruthy(model[condition.variables[1].name])) {
+            return (condition.type === 'if') ? true : false
+          } else {
+            return (condition.type === 'if') ? false : true
+          }
+        } else if (condition.variables[1].expected) { // One condition needs to be compared to a literal value
+          if (isTruthy(model[condition.variables[0].name])) {
+            return (condition.type === 'if') ? true : false
+          } else if (model[condition.variables[1].name] === condition.variables[1].expected) {
+            return (condition.type === 'if') ? true : false
+          } else {
+            return (condition.type === 'if') ? false : true
+          }
+        } else { // No conditions need to be compared to a literal value
+          if (isTruthy(model[condition.variables[0].name]) && isTruthy(model[condition.variables[1].name])) {
+            return (condition.type === 'if') ? false : true
+          } else if (isTruthy(model[condition.variables[0].name])) {
+            return (condition.type === 'if') ? true : false            
+          } else if (isTruthy(model[condition.variables[1].name])) {
+            return (condition.type === 'if') ? true : false
+          } else {
+            return (condition.type === 'if') ? false : true
+          }
+        }
+      case 'not': // <if not:something>
+        if (isTruthy(model[condition.variables[0].name])) {
+          return (condition.type === 'if') ? false : true
+        } else {
+          return (condition.type === 'if') ? true : false
+        }
+      default:    // <if something>
+        if (condition.variables[0].expected) {
+          if (model[condition.variables[0].name] === condition.variables[0].expected) {
+            return (condition.type === 'if') ? true : false
+          } else {
+            return (condition.type === 'if') ? false : true
+          }
+        }
+        else if (isTruthy(model[condition.variables[0].name])) {
+          return (condition.type === 'if') ? true : false
+        } else {
+          return (condition.type === 'if') ? false : true
+        }
+    }
+  }
+
+    // Get truthyness of a value 
+    function isTruthy(myVar) {
+      if (typeof myVar === 'object') {
+        if (myVar === null) {
+          return !!myVar
+        } else {
+          return !!myVar.length
+        }
+      } else if (typeof myVar === 'boolean') {
+        return true
+      } else {
+        return !!myVar
+      }
+    }
+  
 
 // handles absolute value teddy statements <if {|true|}> 
 function resolveAbsTeddyValue (myTemplate) {
