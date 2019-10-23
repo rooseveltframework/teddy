@@ -275,7 +275,7 @@ describe('Conditionals', function () {
     done()
   })
 
-  it.skip('should evaluate 5000 one line ifs in under 5000ms (conditionals/oneLinePerformance.html)', function (done) {
+  it('should evaluate 5000 one line ifs in under 5000ms (conditionals/oneLinePerformance.html)', function (done) {
     var start, end, time
     start = new Date().getTime()
 

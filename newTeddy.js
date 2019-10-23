@@ -18,6 +18,7 @@
     if: ['<', 'i', 'f', ' '],
     loop: ['<', 'l', 'o', 'o', 'p', ' '],
     unless: ['<', 'u', 'n', 'l', 'e', 's', 's', ' '],
+    noteddy: ['<', 'n', 'o', 't', 'e', 'd', 'd', 'y', '>'],
     argInvalid: ['<', 'a', 'r', 'g', '>'],
     includeInvalid: ['<', 'i', 'n', 'c', 'l', 'u', 'd', 'e', '>'],
     ifInvalid: ['<', 'i', 'f', '>'],
@@ -27,7 +28,8 @@
     cinclude: ['<', '/', 'i', 'n', 'c', 'l', 'u', 'd', 'e', '>'],
     cif: ['<', '/', 'i', 'f', '>'],
     cloop: ['<', '/', 'l', 'o', 'o', 'p', '>'],
-    cunless: ['<', '/', 'u', 'n', 'l', 'e', 's', 's', '>']
+    cunless: ['<', '/', 'u', 'n', 'l', 'e', 's', 's', '>'],
+    cnoteddy: ['<', '/', 'n', 'o', 't', 'e', 'd', 'd', 'y', '>']
   }
 
   var secondaryTags = {
@@ -367,7 +369,6 @@
 
       // clean up temp vars
       contextModels = []
-      passes = 0
 
       // if we have no template and we have errors, render an error page
       if (!renderedTemplate && (consoleErrors || consoleWarnings)) {
@@ -875,6 +876,10 @@
     let startInclude
     let endInclude
     let startIndex
+    let readingSrc = false
+    let noTeddyFlag = false
+    let noParseFlag = false
+    let teddyAttribute
 
     // 
     let includeArgs = []
@@ -887,23 +892,39 @@
 
     // Get HTML source from include tag
     for (let i = primaryTags.include.length; i < statement.length; i++) {
-      if (statement[i] === '>') {
+      teddyAttribute = statement.slice(i, i + 7).join('')
+      if (statement[i] === '=' && (statement[i+1] === '"' || statement[i+1] === "'")) {
+        readingSrc = true
+      }
+      else if (statement[i] === '>') {
         startInclude = i + 1
         break
+      } 
+      else if (readingSrc) {
+        if (statement[i] === ' ') {
+          readingSrc = false
+        } else {
+          srcName += statement[i]
+        }
       }
-      srcName += statement[i]
+      // noparse or noteddy attributes
+      else if (teddyAttribute === 'noteddy') {
+        noTeddyFlag = true
+      } else if (teddyAttribute === 'noparse') {
+        noParseFlag = true
+      }
     }
 
-    // Clean src name so we can read it
-    if (srcName.indexOf('src=') >= 0) {
-      srcName = srcName.slice(5, srcName.length - 1)
+    srcName = srcName.slice(1, -1)
 
-      if (srcName.slice(-5) !== '.html') {
-        srcName += '.html'
-      }
+    // check if dynamic src name
+    if (srcName[0] === '{') {
+      srcName = model[srcName.slice(1, -1)]
+    } else if (srcName.slice(-5) !== '.html') {
+      srcName += '.html'
     }
 
-    includeTemplate = [...fs.readFileSync('html/' + srcName, 'utf8')]
+    includeTemplate = [...teddy.compile(srcName)]
 
     // Read contents of <include> tag
     for (let i = startInclude; i < statement.length; i++) {
@@ -1061,6 +1082,17 @@
     }
   }
 
+  // Get inner content of <noteddy> tag without parsing teddy contents
+  function parseNoTeddy(statement) {
+    for (let i = 0; i < statement.length; i++) {
+      if (twoArraysEqual(statement.slice(i, i + primaryTags.cnoteddy.length), primaryTags.cnoteddy)) {
+        return [...statement.slice(primaryTags.noteddy.length, i), ...statement.slice(i + primaryTags.cnoteddy.length)]
+      }
+    }
+  
+    return statement
+  }
+
   // Returns teddy primary tag name
   function detectTeddyPrimaryTag (charList, tags) {
     let type = 'unknown'
@@ -1142,7 +1174,7 @@
     for (let i = 1; i < myTemplate.length; i++) {
       if (myTemplate[i] === '}') {
         if (myModel[varName]) {
-          return insertValue(myTemplate, myModel[varName], 0, i+1)
+          return insertValue(myTemplate, `${myModel[varName]}`, 0, i+1)
         } else {
           return myTemplate
         }
@@ -1296,10 +1328,19 @@
 
   // Scan template file
   function scanTemplate(templateArray, model) {
+    var passes = 0
+    var maxPasses = teddy.params.maxPasses
+    var maxPassesError = 'Render aborted due to max number of passes (' + maxPasses + ') exceeded; there is a possible infinite loop in your template logic.'
     var renderedTemplate = ''
+    var renderedTemplateLength
 
     while (templateArray[0]) {
       if (!endParse) {
+        // Return an error if in infinite loop
+        if (passes >= maxPasses) {
+          return maxPassesError
+        }
+
         switch (templateArray[0]) {
           case '{': // Detects teddy curly bracket (comment or variable)
             if (templateArray[1] === '!') {
@@ -1320,13 +1361,20 @@
                   templateArray = parseConditional(templateArray, primaryTag, model)
                   break
                 case 'include':
+                  renderedTemplateLength = templateArray.length
                   templateArray = parseInclude(templateArray, model)
+                  if (templateArray.length > renderedTemplateLength) {
+                    passes++
+                  }
                   break
                 case 'loop':
                   templateArray = parseLoop(templateArray, model)
                   break
                 case 'one-line-if':
                   templateArray = parseOneLineIf(templateArray, model)
+                  break
+                case 'noteddy':
+                  templateArray = parseNoTeddy(templateArray)
                   break
               }
             }

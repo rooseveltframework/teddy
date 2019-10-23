@@ -213,7 +213,7 @@ describe('Misc', function () {
   it('should minify template with internal minifier (misc/templateToMinify.html)', function (done) {
     teddy.compileAtEveryRender(true)
     teddy.minify(true)
-    assert.strictEqual(teddy.render('misc/templateToMinify.html', model), '<!DOCTYPE html><html lang=\'en\'> <head> <meta charset=\'utf-8\'> <meta name=\'viewport\' content=\'width=device-width,initial-scale=1\'> <meta name=\'format-detection\' content=\'telephone=no\'> <title>Plain HTML</title> </head> <body> <main> <p>This template contains no teddy tags. Just HTML.</p> </main> </body></html>')
+    assert.equalIgnoreSpaces(teddy.render('misc/templateToMinify.html', model), '<!DOCTYPE html><html lang=\'en\'> <head> <meta charset=\'utf-8\'> <meta name=\'viewport\' content=\'width=device-width,initial-scale=1\'> <meta name=\'format-detection\' content=\'telephone=no\'> <title>Plain HTML</title> </head> <body> <main> <p>This template contains no teddy tags. Just HTML.</p> </main> </body></html>')
     teddy.minify(false)
     teddy.compileAtEveryRender(false)
     done()
