@@ -265,12 +265,12 @@ describe('Conditionals', function () {
     done()
   })
 
-  it.skip('should ignore \'if-\' when not part of an if statement when \'if-\' is part of an attribute\'s value', function (done) {
+  it('should ignore \'if-\' when not part of an if statement when \'if-\' is part of an attribute\'s value', function (done) {
     assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineIfInsideAttribute.html', model), '<p id=\'gif-jpg-png\'>hello</p> <p class=\'gif-jpg-png\'>hello</p><p filter=\'gif-jpg-png\'>hello</p>')
     done()
   })
 
-  it.skip('should ignore \'if-\' when not part of an if statement when combined with a one line if statement, reversed. (conditionals/oneLineIfOutsideIfReverse.html)', function (done) {
+  it('should ignore \'if-\' when not part of an if statement when combined with a one line if statement, reversed. (conditionals/oneLineIfOutsideIfReverse.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineIfOutsideIfReverse.html', model), '<p class=\'something-is-present\'>  gif-jpg-png </p>')
     done()
   })
@@ -289,7 +289,7 @@ describe('Conditionals', function () {
     done()
   })
 
-  it.skip('should evaluate <if doesntexist> as false and trigger <else> condition containing very few characters (conditionals/ifElseLowChars.html)', function (done) {
+  it('should evaluate <if doesntexist> as false and trigger <else> condition containing very few characters (conditionals/ifElseLowChars.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('conditionals/ifElseLowChars.html', model), '<p>B</p>')
     done()
   })
