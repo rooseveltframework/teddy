@@ -5,7 +5,7 @@ if (typeof process === 'object') {
   var assert = chai.assert
   var chaiString = require('chai-string')
   var makeModel = require('./models/model')
-  var teddy = require('../newTeddy')
+  var teddy = require('../teddy')
   var model
 
   chai.use(chaiString)

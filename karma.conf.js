@@ -20,7 +20,7 @@ module.exports = function (config) {
     basePath: '',
     frameworks: ['mocha'],
     files: [
-      'newTeddy.js',
+      'teddy.js',
       'test/models/*.js',
       'node_modules/chai/chai.js',
       'node_modules/chai-string/chai-string.js',
@@ -34,7 +34,7 @@ module.exports = function (config) {
       '/templates/': '/base/test/templates/'
     },
     preprocessors: {
-      'newTeddy.js': ['coverage'],
+      'teddy.js': ['coverage'],
       'test/templates/**/*': ['html2js']
     },
     html2JsPreprocessor: {
