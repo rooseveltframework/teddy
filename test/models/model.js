@@ -53,7 +53,11 @@ function makeModel () {
     number: 10,
     nameReference: 'jack',
     4: 'STRING!',
-    largeDataSet: []
+    largeDataSet: [],
+    teddyObject: {
+      name: 'test'
+    },
+    teddyNull: null
   }
 
   model.circular.circular = model.circular

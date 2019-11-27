@@ -283,7 +283,6 @@
       var renderedTemplate
       var i
       var l
-      var errors
       var renders
       var render
       var stringyModel
@@ -383,7 +382,7 @@
 
       // execute callback if present, otherwise simply return the rendered template string
       if (typeof callback === 'function') {
-        if (!errors) {
+        if (consoleErrors.length < 1) {
           callback(null, renderedTemplate)
         } else {
           callback(consoleErrors, renderedTemplate)
@@ -414,6 +413,9 @@
       if (!endParse) {
         // Return an error if in infinite loop
         if (passes >= maxPasses) {
+          if (teddy.params.verbosity) {
+            teddy.console.error(maxPassesError)
+          }
           return maxPassesError
         }
 
@@ -494,10 +496,6 @@
         // Remove extra whitespace
         if ((templateArray[0] === ' ' || templateArray[0] === '\n') && (templateArray[1] === ' ' || templateArray[1] === '\n' || (templateArray[1] === '<' && templateArray[2] !== ' ') || (templateArray[1] === '{' && (templateArray[2] === '!' || templateArray[2] === '~')))) {
           if (templateArray[0] === ' ' || templateArray[0] === '\n') {
-            if (templateArray[1] === '}' && renderedTemplate[renderedTemplate.length - 1] !== ' ') {
-              renderedTemplate += ' '
-            }
-
             templateArray.shift()
           }
         } else {
@@ -539,6 +537,7 @@
     var nested = 0
     var teddyVarName = ''
     var teddyVarExpected = ''
+    var operators = []
     var commentList = []
     var commentIndices = []
     var readingConditional = true // start parsing by reading first <if> statement
@@ -548,16 +547,18 @@
     var i
     var j
     var l = myTemplate.length
+    var tagStart = 0
 
     // Look for begin/end of conditionals
     for (i = currentOpenTag.length; i < l; i++) {
       if (readingConditional) {
         if (!readMode && (myTemplate[i] === ' ' || myTemplate[i] === ':')) {
           if (teddyVarName === 'or' || teddyVarName === 'and' || teddyVarName === 'xor' || teddyVarName === 'not') {
-            condition.operator = teddyVarName
+            operators.push(teddyVarName)
           } else {
             varList.push({
               name: teddyVarName,
+              value: getTeddyVal(teddyVarName, model),
               expected: (teddyVarExpected === '') ? undefined : teddyVarExpected.slice(2, -1)
             })
           }
@@ -567,11 +568,13 @@
           // Push teddy var to list of teddy vars
           varList.push({
             name: teddyVarName,
+            value: getTeddyVal(teddyVarName, model),
             expected: (teddyVarExpected === '') ? undefined : teddyVarExpected.slice(2, -1)
           })
 
           // push to list of all conditionals
           condition.variables = varList
+          condition.operators = operators
           conditionList.push(condition)
 
           // Reset important lists
@@ -584,7 +587,7 @@
           readMode = false
           readingConditional = false
 
-          bocList.push([i + 1])
+          bocList.push([tagStart, i + 1])
           currentOpenTag = secondaryTags['else' + type]
         } else {
           // begin reading literal value
@@ -643,10 +646,11 @@
           }
         } else if (twoArraysEqual(myTemplate.slice(i, i + currentOpenTag.length), currentOpenTag) && nested < 1) { // Opening <elseif> or <elseunless> tag
           readingConditional = true
+          tagStart = i
           i += currentOpenTag.length - 1
         } else if (twoArraysEqual(myTemplate.slice(i, i + secondaryTags.else.length), secondaryTags.else) && nested < 1) { // Opening <else> tag
           if (!isNested) {
-            bocList.push([i + secondaryTags.else.length]) // important indices
+            bocList.push([i, i + secondaryTags.else.length]) // important indices
           }
         } else if (twoArraysEqual(myTemplate.slice(i, i + currentClosingTag.length), currentClosingTag)) {
           eocList.push([i, i + currentClosingTag.length]) // important indices
@@ -656,22 +660,18 @@
 
     // Evaluate conditionals
     for (i = 0; i < conditionList.length; i++) {
-      if (evaluateCondition(conditionList[i], model)) {
+      if (evaluateCondition(conditionList[i])) {
         if (eocList.length === 1) {
-          if (commentList.length === 1 && Math.abs(bocList[0][0] - commentList[0][1]) < 10) {
-            return [...myTemplate.slice(commentList[0][0], commentList[0][1]), ...myTemplate.slice(bocList[0][0], eocList[0][0]), ...myTemplate.slice(eocList[0][0] + primaryTags['c' + type].length)]
-          } else {
-            return [...myTemplate.slice(bocList[0][0], eocList[0][0]), ...myTemplate.slice(eocList[0][0] + primaryTags['c' + type].length)]
-          }
+          return [...myTemplate.slice(bocList[0][1], eocList[0][0]), ...myTemplate.slice(eocList[0][0] + primaryTags['c' + type].length)]
         } else {
           if (commentList.length > 0) {
-            for (j = 0; j < commentList.length; j++) {
+            for (j = 0; j < commentList.length - 1; j++) {
               if (Math.abs(bocList[i][0] - commentList[j][1]) < 10) {
-                return [...myTemplate.slice(commentList[j][0], commentList[j][1]), ...myTemplate.slice(bocList[i][0], eocList[i][0]), ...myTemplate.slice(eocList[eocList.length - 1][1])]
+                return [...myTemplate.slice(commentList[j][0], commentList[j][1]), ...myTemplate.slice(bocList[i][1], eocList[i][0]), ...myTemplate.slice(eocList[eocList.length - 1][1])]
               }
             }
           } else {
-            return [...myTemplate.slice(bocList[i][0], eocList[i][0]), ...myTemplate.slice(eocList[eocList.length - 1][1])]
+            return [...myTemplate.slice(bocList[i][1], eocList[i][0]), ...myTemplate.slice(eocList[eocList.length - 1][1])]
           }
         }
       }
@@ -683,128 +683,178 @@
       if (commentList.length > 0) {
         for (j = 0; j < commentList.length; j++) {
           if (Math.abs(bocList[bocList.length - 1][0] - commentList[j][1]) < 10) {
-            return [...myTemplate.slice(commentList[j][0], commentList[j][1]), ...myTemplate.slice(bocList[bocList.length - 1][0], eocList[eocList.length - 1][0]), ...myTemplate.slice(eocList[eocList.length - 1][1])]
+            return [...myTemplate.slice(commentList[j][0], commentList[j][1]), ...myTemplate.slice(bocList[bocList.length - 1][1], eocList[eocList.length - 1][0]), ...myTemplate.slice(eocList[eocList.length - 1][1])]
           }
         }
       } else {
-        return [...myTemplate.slice(bocList[bocList.length - 1][0], eocList[eocList.length - 1][0]), ...myTemplate.slice(eocList[eocList.length - 1][1])]
+        return [...myTemplate.slice(bocList[bocList.length - 1][1], eocList[eocList.length - 1][0]), ...myTemplate.slice(eocList[eocList.length - 1][1])]
       }
     }
   }
 
   // Goes through condition logic and returns true/false
-  function evaluateCondition (condition, model) {
+  function evaluateCondition (condition) {
     var isIf = (condition.type === 'if')
-    var isUnless = (condition.type === 'unless')
     var var1 = condition.variables[0]
     var var2 = condition.variables[1]
+    var partialCondition
 
-    switch (condition.operator) {
+    if (condition.operators.length > 1) { // More than 2 values to check in if statement
+      partialCondition = evaluatePartialCondition(condition)
+
+      // Keep evaluating expression until we have an result
+      while (partialCondition[0].variables.length > 0) {
+        partialCondition = evaluatePartialCondition(condition, partialCondition[1])
+      }
+
+      // Return a value based on teddy tag used
+      if (isIf) {
+        return partialCondition[1].value
+      } else {
+        return !partialCondition[1].value
+      }
+    } else {
+      return (isIf) ? teddyTruthTree(condition, condition.operators[0], var1, var2)[1].value : !teddyTruthTree(condition, condition.operators[0], var1, var2)[1].value
+    }
+  }
+
+  function evaluatePartialCondition (condition, pVal) {
+    var var1 = condition.variables.shift()
+    var operator = condition.operators.shift()
+    var var2
+
+    if (pVal) {
+      var2 = pVal
+    } else {
+      // We do not need a second variable in this case
+      if (operator === 'not') {
+      } else {
+        var2 = condition.variables.shift()
+      }
+    }
+
+    return teddyTruthTree(condition, operator, var1, var2)
+  }
+
+  function teddyTruthTree (condition, operator, firstVal, secondVal) {
+    // Check if we need to change values to false from {var}
+    if (firstVal.value[0] === '{') {
+      firstVal.value = false
+    }
+
+    // Make sure a second value exists and change value to false if necessary
+    if (secondVal && secondVal.value[0] === '{') {
+      secondVal.value = false
+    }
+
+    switch (operator) {
       case 'or': // <if something or somethingElse>
-        if (var1.expected && var2.expected) { // Two conditions compare against literal values
-          if (model[var1.name] === var1.expected || model[var2.name] === var2.expected) {
-            return isIf
+        if (firstVal.expected && secondVal.expected) { // Two conditions compare against literal values
+          if (firstVal.value === firstVal.expected || secondVal.value === secondVal.expected) {
+            return [condition, { value: true }]
           } else {
-            return isUnless
+            return [condition, { value: false }]
           }
-        } else if (var1.expected) { // One condition needs to be compared to a literal value
-          if (model[var1.name] === var1.expected || model[var2.name]) {
-            return isIf
+        } else if (firstVal.expected) { // One condition needs to be compared to a literal value
+          if (firstVal.value === firstVal.expected || isTruthy(secondVal.value)) {
+            return [condition, { value: true }]
           } else {
-            return isUnless
+            return [condition, { value: false }]
           }
-        } else if (var2.expected) { // One condition needs to be compared to a literal value
-          if (model[var1.name] || model[var2.name] === var2.expected) {
-            return isIf
+        } else if (secondVal.expected) { // One condition needs to be compared to a literal value
+          if (isTruthy(firstVal.value) || secondVal.value === secondVal.expected) {
+            return [condition, { value: true }]
           } else {
-            return isUnless
+            return [condition, { value: false }]
           }
         } else { // No conditions need to be compared to a literal value
-          if (model[var1.name] || model[var2.name]) {
-            return isIf
+          if (isTruthy(firstVal.value) || isTruthy(secondVal.value)) {
+            return [condition, { value: true }]
           } else {
-            return isUnless
+            return [condition, { value: false }]
           }
         }
       case 'and': // <if something and somethingElse>
-        if (var1.expected && var2.expected) { // Two conditions compare against literal values
-          if (model[var1.name] === var1.expected && model[var2.name] === var2.expected) {
-            return isIf
+        if (firstVal.expected && secondVal.expected) { // Two conditions compare against literal values
+          if (firstVal.value === firstVal.expected && secondVal.value === secondVal.expected) {
+            return [condition, { value: true }]
           } else {
-            return isUnless
+            return [condition, { value: false }]
           }
-        } else if (var1.expected) { // One condition needs to be compared to a literal value
-          if (model[var1.name] === var1.expected && model[var2.name]) {
-            return isIf
+        } else if (firstVal.expected) { // One condition needs to be compared to a literal value
+          if (firstVal.value === firstVal.expected && isTruthy(secondVal.value)) {
+            return [condition, { value: true }]
           } else {
-            return isUnless
+            return [condition, { value: false }]
           }
-        } else if (var2.expected) { // One condition needs to be compared to a literal value
-          if (model[var1.name] && model[var2.name] === var2.expected) {
-            return isIf
+        } else if (secondVal.expected) { // One condition needs to be compared to a literal value
+          if (isTruthy(firstVal.value) && secondVal.value === secondVal.expected) {
+            return [condition, { value: true }]
           } else {
-            return isUnless
+            return [condition, { value: false }]
           }
         } else { // No conditions need to be compared to a literal value
-          if (model[var1.name] && model[var2.name]) {
-            return isIf
+          if (isTruthy(firstVal.value) && isTruthy(secondVal.value)) {
+            return [condition, { value: true }]
           } else {
-            return isUnless
+            return [condition, { value: false }]
           }
         }
       case 'xor': // <if something xor somethingElse>
-        if (var1.expected && var2.expected) { // Two conditions compare against literal values
-          if (model[var1.name] === var1.expected) {
-            return isIf
-          } else if (model[var2.name] === var2.expected) {
-            return isIf
+        if (firstVal.expected && secondVal.expected) { // Two conditions compare against literal values
+          if (firstVal.value === firstVal.expected && secondVal.value === secondVal.expected) {
+            return [condition, { value: false }]
+          } else if (firstVal.value === firstVal.expected) {
+            return [condition, { value: true }]
+          } else if (secondVal.value === secondVal.expected) {
+            return [condition, { value: true }]
           } else {
-            return isUnless
+            return [condition, { value: false }]
           }
-        } else if (var1.expected) { // One condition needs to be compared to a literal value
-          if (model[var1.name] === var1.expected) {
-            return isIf
-          } else if (isTruthy(model[var2.name])) {
-            return isIf
+        } else if (firstVal.expected) { // One condition needs to be compared to a literal value
+          if (firstVal.value === firstVal.expected) {
+            return [condition, { value: true }]
+          } else if (isTruthy(secondVal.value)) {
+            return [condition, { value: true }]
           } else {
-            return isUnless
+            return [condition, { value: false }]
           }
-        } else if (var2.expected) { // One condition needs to be compared to a literal value
-          if (isTruthy(model[var1.name])) {
-            return isIf
-          } else if (model[var2.name] === var2.expected) {
-            return isIf
+        } else if (secondVal.expected) { // One condition needs to be compared to a literal value
+          if (secondVal.value === secondVal.expected) {
+            return [condition, { value: true }]
+          } else if (isTruthy(firstVal.value)) {
+            return [condition, { value: true }]
           } else {
-            return isUnless
+            return [condition, { value: false }]
           }
         } else { // No conditions need to be compared to a literal value
-          if (isTruthy(model[var1.name]) && isTruthy(model[var2.name])) {
-            return isUnless
-          } else if (isTruthy(model[var1.name])) {
-            return isIf
-          } else if (isTruthy(model[var2.name])) {
-            return isIf
+          if (isTruthy(firstVal.value) && isTruthy(secondVal.value)) {
+            return [condition, { value: false }]
+          } else if (isTruthy(firstVal.value)) {
+            return [condition, { value: true }]
+          } else if (isTruthy(secondVal.value)) {
+            return [condition, { value: true }]
           } else {
-            return isUnless
+            return [condition, { value: false }]
           }
         }
       case 'not': // <if not:something>
-        if (isTruthy(model[var1.name])) {
-          return isUnless
+        if (isTruthy(firstVal.value)) {
+          return [condition, { value: false }]
         } else {
-          return isIf
+          return [condition, { value: true }]
         }
       default: // <if something>
-        if (var1.expected) {
-          if (model[var1.name] === var1.expected) {
-            return isIf
+        if (firstVal.expected) {
+          if (firstVal.value === firstVal.expected) {
+            return [condition, { value: true }]
           } else {
-            return isUnless
+            return [condition, { value: false }]
           }
-        } else if (isTruthy(model[var1.name])) {
-          return isIf
+        } else if (isTruthy(firstVal.value)) {
+          return [condition, { value: true }]
         } else {
-          return isUnless
+          return [condition, { value: false }]
         }
     }
   }
@@ -1233,20 +1283,18 @@
         return [...myTemplate.slice(primaryTags.noteddy.length, i), ...myTemplate.slice(i + cntl)]
       }
     }
-
-    // return myTemplate
   }
 
   // Get truthyness of a value
   function isTruthy (val) {
     if (typeof val === 'object') {
-      if (val === null) {
-        return !!val
+      if (Object.keys(val).length > 0) {
+        return true
       } else {
         return !!val.length
       }
     } else if (typeof val === 'boolean') {
-      return true
+      return val
     } else {
       return !!val
     }
@@ -1417,7 +1465,11 @@
         }
       } else { // something
         if (model[teddyName]) {
-          return escapeEntities(model[teddyName])
+          if (typeof model[teddyName] === 'boolean' || typeof model[teddyName] === 'object') {
+            return model[teddyName]
+          } else {
+            return escapeEntities(model[teddyName])
+          }
         }
       }
     }
@@ -1522,42 +1574,42 @@
   if (typeof document !== 'undefined' && typeof window !== 'undefined') {
     global.teddy = teddy
 
-    // IE does not populate console unless the developer tools are opened
-    if (typeof console === 'undefined') {
-      window.console = {}
-      console.log = console.warn = console.error = function () { }
-    }
+    // // IE does not populate console unless the developer tools are opened
+    // if (typeof console === 'undefined') {
+    //   window.console = {}
+    //   console.log = console.warn = console.error = function () { }
+    // }
 
     // Object.assign polyfill
-    if (typeof Object.assign !== 'function') {
-      Object.assign = function (target, varArgs) { // .length of function is 2
-        var i,
-          l,
-          to,
-          nextSource,
-          nextKey
+    // if (typeof Object.assign !== 'function') {
+    //   Object.assign = function (target, varArgs) { // .length of function is 2
+    //     var i,
+    //       l,
+    //       to,
+    //       nextSource,
+    //       nextKey
 
-        if (target === null) { // TypeError if undefined or null
-          throw new TypeError('Cannot convert undefined or null to object')
-        }
+    //     if (target === null) { // TypeError if undefined or null
+    //       throw new TypeError('Cannot convert undefined or null to object')
+    //     }
 
-        to = Object(target)
+    //     to = Object(target)
 
-        l = arguments.length
-        for (i = 1; i < l; i++) {
-          nextSource = arguments[i]
+    //     l = arguments.length
+    //     for (i = 1; i < l; i++) {
+    //       nextSource = arguments[i]
 
-          if (nextSource !== null) { // skip over if undefined or null
-            for (nextKey in nextSource) {
-              // avoid bugs when hasOwnProperty is shadowed
-              if (Object.prototype.hasOwnProperty.call(nextSource, nextKey)) {
-                to[nextKey] = nextSource[nextKey]
-              }
-            }
-          }
-        }
-        return to
-      }
-    }
+    //       if (nextSource !== null) { // skip over if undefined or null
+    //         for (nextKey in nextSource) {
+    //           // avoid bugs when hasOwnProperty is shadowed
+    //           if (Object.prototype.hasOwnProperty.call(nextSource, nextKey)) {
+    //             to[nextKey] = nextSource[nextKey]
+    //           }
+    //         }
+    //       }
+    //     }
+    //     return to
+    //   }
+    // }
   }
 })(this)

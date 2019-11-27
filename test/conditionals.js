@@ -96,6 +96,16 @@ describe('Conditionals', function () {
     done()
   })
 
+  it('should evaluate <unless something and notDefined or somethingElse> as false (conditionals/unlessAndOr.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/unlessAndOr.html', model), '<p>should render</p>')
+    done()
+  })
+
+  it('should evaluate entire conditional and correctly show HTML comments (conditionals/commentConditional.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/commentConditional.html', model), '<!-- COMMENT 1 --><p>The variable \'something\' is present</p>')
+    done()
+  })
+
   it('should evaluate <if something=\'no\'> as false and <elseif somethingElse> as true (conditionals/ifElseIf.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('conditionals/ifElseIf.html', model), '<p>The variable \'somethingElse\' is present</p>')
     done()
@@ -111,13 +121,23 @@ describe('Conditionals', function () {
     done()
   })
 
+  it('should evaluate `and` correctly when not using explicit values (conditionals/andImplicit.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/andImplicit.html', model), '<p>should render</p><p>and: false</p><p>and: false</p><p>and: false</p>')
+    done()
+  })
+
+  it('should evaluate `and` correctly using explicit values (conditionals/andExplicit.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/andExplicit.html', model), '<p>should render</p><p>should render</p><p>should render</p><p>and: false</p><p>and: false</p><p>and: false</p><p>and: false</p><p>and: false</p>')
+    done()
+  })
+
   it('should evaluate `and` truth table as <p>and: true</p> (conditionals/andTruthTable.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('conditionals/andTruthTable.html', model), ' <p>and: true true</p>')
     done()
   })
 
   it('should evaluate `or` truth table as <p>or: true true</p> <p>or: true false</p> <p>or: false true</p> (conditionals/orTruthTable.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('conditionals/orTruthTable.html', model), ' <p>or: true true</p> <p>or: true false</p> <p>or: false true</p>')
+    assert.equalIgnoreSpaces(teddy.render('conditionals/orTruthTable.html', model), '<p>or: true true</p><p>or: true false</p><p>or: true false</p><p>or: false true</p><p>or: false false</p><p>or: false true</p><p>or: true false</p><p>or: true true</p><p>or: false false</p><p>or: false false</p><p>or: false false</p>')
     done()
   })
 
@@ -129,6 +149,16 @@ describe('Conditionals', function () {
 
   it('should evaluate <if something xor somethingElse> as false (conditionals/xor.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('conditionals/xor.html', model), ' <p>xor: false</p>')
+    done()
+  })
+
+  it('should evaluate xor correctly when not using explicit values (conditionals/xorImplicit.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/xorImplicit.html', model), '<p>xor: false</p><p>should render</p><p>should render</p>')
+    done()
+  })
+
+  it('should evaluate xor correctly using explicit values (conditionals/xorExplicit.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/xorExplicit.html', model), '<p>xor: false</p><p>xor: false</p><p>xor: false</p><p>xor: false</p><p>should render</p><p>should render</p><p>should render</p><p>should render</p><p>should render</p><p>should render</p>')
     done()
   })
 

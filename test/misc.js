@@ -228,4 +228,19 @@ describe('Misc', function () {
     assert.equalIgnoreSpaces(teddy.render('misc/undefinedVar.html', model), '<p>{undefinedVar}</p><p>{definedParent.undefinedMember}</p>')
     done()
   })
+
+  it('should execute render callback function for errors and non errors', function (done) {
+    teddy.setMaxPasses(100)
+    teddy.setVerbosity(3)
+    teddy.render('includes/includeInfiniteLoop.html', model, function (err, html) {
+      assert.equalIgnoreSpaces(err, '<li>Render aborted due to max number of passes (100) exceeded; there is a possible infinite loop in your template logic.</li>')
+      teddy.render('misc/variable.html', model, function (err, html) {
+        if (err) {
+          assert(err)
+        }
+        assert.equalIgnoreSpaces(html, '<p>Some content</p>')
+        done()
+      })
+    })
+  })
 })

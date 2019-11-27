@@ -173,4 +173,9 @@ describe('Looping', function () {
     assert.equalIgnoreSpaces(teddy.render('looping/loopUndefinedMember.html', model), '<p>a</p><p>{letter}</p><p>c</p><p>{item.a}</p><p>{item.b}</p><p>{item.c}</p><p>4</p><p>5</p><p>6</p><p>7</p><p>8</p><p>9</p>')
     done()
   })
+
+  it('should evaluate evaluate include, if, and unless statements inside of loop (conditionals/loopIncludesIfUnless.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('looping/loopIncludesIfUnless.html', model), '<p>a</p><p>Some content</p><p>Hello</p><p>b</p><p>Some content</p><p>Hello</p><p>c</p><p>Some content</p><p>Hello</p>')
+    done()
+  })
 })

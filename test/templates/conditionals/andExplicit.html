@@ -1,0 +1,68 @@
+{!
+  should evaluate implicit calls to `and` correctly
+!}
+
+    {! true !}                   {! true !}
+<if something='Some content' and somethingMore='More content'>
+  <p>should render</p>
+</if>
+<else>
+  <p>and: false</p>
+</else>
+
+    {! true !}                   {! true !}
+<if something='Some content' and somethingMore>
+  <p>should render</p>
+</if>
+<else>
+  <p>and: false</p>
+</else>
+
+    {! true !}        {! true !}
+<if somethingMore and something='Some content'>
+  <p>should render</p>
+</if>
+<else>
+  <p>and: false</p>
+</else>
+
+    {! false !}                  {! false !}
+<if something='No content' and somethingMore='Even more no content'>
+  <p>should not render</p>
+</if>
+<else>
+  <p>and: false</p>
+</else>
+
+    {! true !}                   {! false !}
+<if something='Some content' and somethingMore='No content'>
+  <p>should not render</p>
+</if>
+<else>
+  <p>and: false</p>
+</else>
+
+    {! false !}                    {! true !}
+<if somethingMore='No content' and something='Some content'>
+  <p>should not render</p>
+</if>
+<else>
+  <p>and: false</p>
+</else>
+
+    {! false !}     {! true !}
+<if doesntexist and something='Some content'>
+  <p>should not render</p>
+</if>
+<else>
+  <p>and: false</p>
+</else>
+
+    {! true !}                   {! false !}
+<if something='Some content' and doesntexist>
+  <p>should not render</p>
+</if>
+<else>
+  <p>and: false</p>
+</else>
+
