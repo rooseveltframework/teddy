@@ -10,6 +10,8 @@
   var jsonStringifyCache
   var endParse = false // Stops rendering if necessary
 
+  // COMMENT THIS THING... ESPECIALLY WHERE IT STARTS TO BRANCH
+
   // List of all relevant teddy tags
   var primaryTags = {
     include: ['<', 'i', 'n', 'c', 'l', 'u', 'd', 'e', ' '],
@@ -350,7 +352,7 @@
         return ''
       }
 
-      // NEW LOGIC HERE
+      // Parse template
       renderedTemplate = scanTemplate([...renderedTemplate], model)
 
       // clean up temp vars
@@ -662,10 +664,11 @@
 
     // Evaluate conditionals
     for (i = 0; i < conditionList.length; i++) {
-      if (evaluateCondition(conditionList[i])) {
-        if (eocList.length === 1) {
+      if (evaluateCondition(conditionList[i])) { // if elseif elseif
+        if (eocList.length === 1) { // <if>
           return [...myTemplate.slice(bocList[0][1], eocList[0][0]), ...myTemplate.slice(eocList[0][0] + primaryTags['c' + type].length)]
         } else {
+          // <if></if><!-- html comment --><elseif> // AND TEDDY COMMENTS PLEASE
           if (commentList.length > 0) {
             for (j = 0; j < commentList.length - 1; j++) {
               if (Math.abs(bocList[i][0] - commentList[j][1]) < 10) {
@@ -673,15 +676,18 @@
               }
             }
           } else {
+            // return contents in true conditional
             return [...myTemplate.slice(bocList[i][1], eocList[i][0]), ...myTemplate.slice(eocList[eocList.length - 1][1])]
           }
         }
       }
     }
 
-    if (eocList.length === 1) {
+    // Render template if there are no true conditionals
+    if (eocList.length === 1) { // strip if statement if condition isnt met and there are no else siblings
       return [...myTemplate.slice(eocList[0][0] + primaryTags['c' + type].length)]
-    } else {
+    } else { // Return template with <else> tag contents
+      // <if></if><!-- html comment --><else> // AND TEDDY COMMENTS PLEASE
       if (commentList.length > 0) {
         for (j = 0; j < commentList.length; j++) {
           if (Math.abs(bocList[bocList.length - 1][0] - commentList[j][1]) < 10) {
@@ -895,6 +901,7 @@
         if (teddyName[0] === 't') {
           params.through = teddyName.slice(9, teddyName.length - 1) // params.through
         } else { // key/val
+          // Deal for cases when user puts incorrect attributes (i.e. params.flarg)
           params[teddyName.slice(0, 3)] = teddyName.slice(5, teddyName.length - 1) // params.key || params.val
         }
         teddyName = ''
@@ -942,7 +949,7 @@
       // <loop through='list' key='index' val='value'>
       if (periodIndex < 0) {
         itTeddy = model[params.through]
-      } else {
+      } else { // TODO: Infinite nesting
         // Nested loop that requires context
         if (model[params.through.slice(0, periodIndex)] === undefined) {
           context = findContext(contextModels, params.through)
@@ -1056,6 +1063,7 @@
     let itl
 
     // Get HTML source from include tag
+    // TODO: look for 'src' cannot be other things
     for (i = primaryTags.include.length; i < l; i++) {
       if (myTemplate[i] === '=' && (myTemplate[i + 1] === '"' || myTemplate[i + 1] === "'")) {
         readingSrc = true
@@ -1085,6 +1093,7 @@
     itl = includeTemplate.length
 
     // Read contents of <include> tag
+    // TODO: check for nonarguments
     for (i = startInclude; i < l; i++) {
       if (inArg) {
         // Get include argument value
@@ -1124,6 +1133,7 @@
       return insertValue(myTemplate, '', 0, endInclude)
     }
 
+    // TODO: noparse should return the include tag with its contents
     if (noTeddyFlag) {
       return insertValue(myTemplate, [...`{~ ${includeTemplate.join('')} ~}`], 0, endInclude)
     }
@@ -1162,12 +1172,13 @@
         }
       }
     }
+    // TODO: dont do this
     includeTemplate.unshift(' ')
 
     return insertValue(myTemplate, includeTemplate, 0, endInclude)
   }
 
-  // Parse <tag if-something> NEEDS WORK
+  // Parse <tag if-something> STILL NEEDS WORK
   function parseOneLineIf (myTemplate, model) {
     let readingName = false
     let readingLiteral = false
@@ -1368,8 +1379,6 @@
     if (str.indexOf(current[0]) > -1) {
       return current[1]
     }
-
-    // return false
   }
 
   // Removes comment from teddy template
