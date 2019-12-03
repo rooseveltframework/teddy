@@ -287,6 +287,7 @@
       var render
       var stringyModel
       var renderStringyModel
+      var errorMessage
 
       // overload console logs
       consoleWarnings = ''
@@ -356,7 +357,8 @@
       contextModels = []
 
       // if we have no template and we have errors, render an error page
-      if (!renderedTemplate && (consoleErrors || consoleWarnings)) {
+      if (teddy.errors.includes(renderedTemplate) && (consoleErrors || consoleWarnings)) {
+        errorMessage = consoleErrors
         renderedTemplate = '<!DOCTYPE html><html lang=\'en\'><head><meta charset=\'utf-8\'><title>Could not parse template</title></head><body><h1>Could not parse template</h1>'
         if (consoleErrors) {
           renderedTemplate += '<p>The following errors occurred while parsing the template:</p>'
@@ -382,10 +384,10 @@
 
       // execute callback if present, otherwise simply return the rendered template string
       if (typeof callback === 'function') {
-        if (consoleErrors.length < 1) {
-          callback(null, renderedTemplate)
+        if (errorMessage) {
+          callback(errorMessage, renderedTemplate)
         } else {
-          callback(consoleErrors, renderedTemplate)
+          callback(null, renderedTemplate)
         }
       } else {
         return renderedTemplate

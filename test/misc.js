@@ -236,7 +236,7 @@ describe('Misc', function () {
       assert.equalIgnoreSpaces(err, '<li>Render aborted due to max number of passes (100) exceeded; there is a possible infinite loop in your template logic.</li>')
       teddy.render('misc/variable.html', model, function (err, html) {
         if (err) {
-          assert(err)
+          assert.fail(err)
         }
         assert.equalIgnoreSpaces(html, '<p>Some content</p>')
         done()
