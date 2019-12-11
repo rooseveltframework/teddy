@@ -130,6 +130,7 @@ describe('Includes', function () {
   })
 
   it('should escape from infinite loop of includes via setMaxPasses (includes/includeInfiniteLoop.html)', function (done) {
+    teddy.setVerbosity(3)
     teddy.setMaxPasses(100)
     assert.strictEqual(teddy.render('includes/includeInfiniteLoop.html', model), `<!DOCTYPE html><html lang='en'><head><meta charset='utf-8'><title>Could not parse template</title></head><body><h1>Could not parse template</h1><p>The following errors occurred while parsing the template:</p><ul><li>Render aborted due to max number of passes (100) exceeded; there is a possible infinite loop in your template logic.</li></ul></body></html>`)
     done()
