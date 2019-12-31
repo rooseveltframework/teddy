@@ -57,7 +57,96 @@ function makeModel () {
     teddyObject: {
       name: 'test'
     },
-    teddyNull: null
+    teddyNull: null,
+    moreNestedObjects: [
+      {
+        num: 1,
+        children: [
+          {
+            num: 1,
+            children: [
+              'one',
+              'two',
+              'three'
+            ]
+          },
+          {
+            num: 2,
+            children: [
+              'four',
+              'five',
+              'six'
+            ]
+          },
+          {
+            num: 3,
+            children: [
+              'seven',
+              'eight',
+              'nine'
+            ]
+          }
+        ]
+      },
+      {
+        num: 2,
+        children: [
+          {
+            num: 1,
+            children: [
+              'one',
+              'two',
+              'three'
+            ]
+          },
+          {
+            num: 2,
+            children: [
+              'four',
+              'five',
+              'six'
+            ]
+          },
+          {
+            num: 3,
+            children: [
+              'seven',
+              'eight',
+              'nine'
+            ]
+          }
+        ]
+      },
+      {
+        num: 3,
+        children: [
+          {
+            num: 1,
+            children: [
+              'one',
+              'two',
+              'three'
+            ]
+          },
+          {
+            num: 2,
+            children: [
+              'four',
+              'five',
+              'six'
+            ]
+          },
+          {
+            num: 3,
+            children: [
+              'seven',
+              'eight',
+              'nine'
+            ]
+          }
+        ]
+      }
+    ]
   }
 
   model.circular.circular = model.circular

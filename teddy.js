@@ -9,6 +9,7 @@
   var contextModels = [] // stores local models for later consumption by template logic tags
   var jsonStringifyCache
   var endParse = false // Stops rendering if necessary
+  var currentContext
 
   // List of all primary teddy tags
   var primaryTags = {
@@ -351,11 +352,12 @@
         return ''
       }
 
-      // Parse template
-      renderedTemplate = scanTemplate([...renderedTemplate], model)
-
       // clean up temp vars
       contextModels = []
+      currentContext = []
+
+      // Parse template
+      renderedTemplate = scanTemplate([...renderedTemplate], model)
 
       // if we have no template and we have errors, render an error page
       if (teddy.errors.includes(renderedTemplate) && (consoleErrors || consoleWarnings)) {
@@ -635,7 +637,7 @@
             nested--
 
             if (nested === 0) { // In case the nested conditional has an else tag
-              isNested = true // TODO: needs fixing
+              isNested = true
             }
           } else { // Push [start, end] index of closing conditional tag to our list marking the ends of condition tags (i.e. </if> </unless>)
             eoc.push([i, i + primaryTags['c' + type].length])
@@ -868,7 +870,6 @@
     }
   }
 
-  // TODO: infinite loop context
   // Parse looping teddy tags (i.e <loop through='list' val='item'>)
   function parseLoop (charList, model) {
     let nested = 0 // Nested counter
@@ -964,8 +965,8 @@
         through = model[params.through]
       } else { // Loop through value is an object
         if (model[params.through.slice(0, periodIndex)] === undefined) { // Loop through object value requires context
-          context = findContext(contextModels, params.through)
-          through = model[context.slice(0, context.indexOf('['))][context.slice(context.indexOf('[') + 1, context.length - 1)][params.through.slice(periodIndex + 1)]
+          context = findContext(params.through)
+          through = getContext(model, context, params.through.slice(periodIndex + 1))
         } else { // Loop through object value does not require context
           through = model[params.through.slice(0, periodIndex)][params.through.slice(periodIndex + 1)]
         }
@@ -1033,7 +1034,11 @@
 
         // Save context if template contains a nested loop
         if (isNested) {
-          contextModels.push([params.val, `${params.through}[${i}]`])
+          if (currentContext.length > 0 && params.val !== currentContext[0]) {
+            contextModels.push([params.val, `${currentContext[1] + params.through.slice(params.through.indexOf('.'))}[${i}]`])
+          } else {
+            contextModels.push([params.val, `${params.through}[${i}]`])
+          }
         }
       }
     } else {
@@ -1218,7 +1223,7 @@
     return insertValue(charList, includeTemplate, 0, endInclude)
   }
 
-  // Parse <tag if-something> STILL NEEDS WORK
+  // Parse <tag if-something>
   function parseOneLineIf (charList, model) {
     let readingName = false
     let readingLiteral = false
@@ -1274,9 +1279,9 @@
         }
       } else if (readingConditions) { // Get True/False conditions in the oneline-if
         if (currentChar === ' ' || currentChar === '\n') {
-          if (conditionText[0] === 't') {
+          if (conditionText.slice(0, 4) === 'true') {
             condition.true = conditionText.slice(6, -1)
-          } else {
+          } else if (conditionText.slice(0, 5) === 'false') {
             condition.false = conditionText.slice(7, -1)
           }
 
@@ -1292,9 +1297,9 @@
           // Reset to get other condition
           conditionText = ''
         } else if (currentChar === '>' || (currentChar === '/' && charList[i + 1] === '>')) { // Get second condition
-          if (conditionText[0] === 't') {
+          if (conditionText.slice(0, 4) === 'true') {
             condition.true = conditionText.slice(6, -1)
-          } else {
+          } else if (conditionText.slice(0, 5) === 'false') {
             condition.false = conditionText.slice(7, -1)
           }
 
@@ -1416,13 +1421,49 @@
     return [...str.slice(0, start), ...val, ...str.slice(end)]
   }
 
-  // Finds correct context for a nested loop TODO: make it handle more use casess
-  function findContext (models, str) {
-    let current = models.shift()
-
-    if (str.indexOf(current[0]) > -1) {
-      return current[1]
+  // Finds correct context for a nested loop
+  function findContext (str) {
+    for (let i = 0; i < contextModels.length; i++) {
+      if (str.indexOf(contextModels[i][0]) > -1) {
+        currentContext = contextModels[i] // save required context from list
+        contextModels.splice(i, 1) // remove current context from list
+        return currentContext[1]
+      }
     }
+  }
+
+  // Gets contextual value from model
+  function getContext (model, str, thru) {
+    let currentValue
+    let tempStr = ''
+    let tempIndex = ''
+    let getIndex = false
+
+    for (let i = 0; i < str.length; i++) { // Found index
+      if (getIndex) { // Get numerical index to select from
+        if (str[i] === ']') {
+          currentValue = currentValue[tempIndex]
+          getIndex = false
+          tempIndex = ''
+        } else {
+          tempIndex += str[i]
+        }
+      } else if (str[i] === '[') { // Found index
+        if (currentValue) {
+          currentValue = currentValue[tempStr] // Fetch value from current spot in nested object
+        } else {
+          currentValue = model[tempStr] // Fetch value from model
+        }
+        getIndex = true
+        tempStr = ''
+      } else if (str[i] === '.') { // Do nothing
+      } else { // Get attribute name from model
+        tempStr += str[i]
+      }
+    }
+
+    // Contains contextual value to loop through
+    return currentValue[thru]
   }
 
   // Removes comment from teddy template
