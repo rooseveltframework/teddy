@@ -1497,11 +1497,19 @@
       // If we find the ending curly bracket, replace {variable} in template with its value in the model
       if (charList[i] === '}' && charList[i + 1] !== '}') {
         varVal = getTeddyVal(varName, myModel) // Check if value is in the model
+        if (varVal.slice(1, -1) === varName) {
+          break
+        }
+        if (varVal[0] === '{') {
+          varVal = getValueAndReplace([...varVal], myModel).join('')
+        }
         return insertValue(charList, `${varVal}`, 0, i + 1) // Replace and return template
       } else { // Get teddy variable name from template
         varName += charList[i]
       }
     }
+
+    return charList
   }
 
   // Get a usable value from a teddy var
