@@ -1687,43 +1687,5 @@
   // set env specific vars for client-side
   if (typeof document !== 'undefined' && typeof window !== 'undefined') {
     global.teddy = teddy
-
-    // // IE does not populate console unless the developer tools are opened
-    // if (typeof console === 'undefined') {
-    //   window.console = {}
-    //   console.log = console.warn = console.error = function () { }
-    // }
-
-    // Object.assign polyfill
-    // if (typeof Object.assign !== 'function') {
-    //   Object.assign = function (target, varArgs) { // .length of function is 2
-    //     var i,
-    //       l,
-    //       to,
-    //       nextSource,
-    //       nextKey
-
-    //     if (target === null) { // TypeError if undefined or null
-    //       throw new TypeError('Cannot convert undefined or null to object')
-    //     }
-
-    //     to = Object(target)
-
-    //     l = arguments.length
-    //     for (i = 1; i < l; i++) {
-    //       nextSource = arguments[i]
-
-    //       if (nextSource !== null) { // skip over if undefined or null
-    //         for (nextKey in nextSource) {
-    //           // avoid bugs when hasOwnProperty is shadowed
-    //           if (Object.prototype.hasOwnProperty.call(nextSource, nextKey)) {
-    //             to[nextKey] = nextSource[nextKey]
-    //           }
-    //         }
-    //       }
-    //     }
-    //     return to
-    //   }
-    // }
   }
 })(this)
