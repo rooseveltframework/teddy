@@ -5,6 +5,8 @@ function makeModel () {
   var model = {
     letters: ['a', 'b', 'c'],
     circular: {},
+    foo: '{bar}',
+    bar: '{foo}',
     undefinedVar: undefined,
     definedParent: { undefinedMember: undefined },
     camelLetters: ['a', 'b', 'c'],

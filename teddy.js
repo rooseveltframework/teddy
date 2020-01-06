@@ -1482,7 +1482,7 @@
   }
 
   // Replace {variable} in template with value taken from model
-  function getValueAndReplace (charList, myModel) {
+  function getValueAndReplace (charList, myModel, pName) {
     let varName = ''
     let varVal
     let i
@@ -1493,12 +1493,19 @@
       // If we find the ending curly bracket, replace {variable} in template with its value in the model
       if (charList[i] === '}' && charList[i + 1] !== '}') {
         varVal = getTeddyVal(varName, myModel) // Check if value is in the model
-        if (varVal.slice(1, -1) === varName) {
+
+        if (varVal.slice(1, -1) === varName) { // Teddy variable is referencing itself
           break
         }
-        if (varVal[0] === '{') {
-          varVal = getValueAndReplace([...varVal], myModel).join('')
+
+        if (varVal[0] === '{') { // Get Teddy variable value within teddy variable value
+          if (varVal.indexOf(pName) >= 0) { // Infinitely referencing teddy variables
+            break
+          } else {
+            varVal = getValueAndReplace([...varVal], myModel, `{${varName}}`).join('')
+          }
         }
+
         return insertValue(charList, `${varVal}`, 0, i + 1) // Replace and return template
       } else { // Get teddy variable name from template
         varName += charList[i]

@@ -229,6 +229,11 @@ describe('Misc', function () {
     done()
   })
 
+  it('should prevent infinitely referencing variables (misc/varRefVar.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('misc/varRefVar.html', model), '{bar}')
+    done()
+  })
+
   it('should execute render callback function for errors and non errors', function (done) {
     teddy.setMaxPasses(100)
     teddy.setVerbosity(3)
