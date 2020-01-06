@@ -439,7 +439,7 @@
             if (charList[1] === '/') { // Closing template tag
             } else {
               // Find out if the tag we hit is a teddy tag
-              let primaryTag = findTeddyTag(charList, primaryTags)
+              const primaryTag = findTeddyTag(charList, primaryTags)
               switch (primaryTag) {
                 case 'if':
                 case 'unless':
@@ -873,7 +873,7 @@
   // Parse looping teddy tags (i.e <loop through='list' val='item'>)
   function parseLoop (charList, model) {
     let nested = 0 // Nested counter
-    let params = {} // Save all loop parameters in this object
+    const params = {} // Save all loop parameters in this object
     let teddyName = '' // Name of teddy variable
     let periodIndex // Index of '.' if a teddy variable name includes one
     let through // through=
@@ -886,9 +886,7 @@
     let sov // Index of '{' when reading a teddy variable
     let currentChar // Current character in character lists
     let slicedTemplate // Contents of <loop>
-    let templateCopy // Copy of sliced template
     let modifiedStatement = '' // slicedTemplate after parsing {vars}
-    let endOfStatement // Rest of template after <loop>
     let teddyString = '' // Actual value to insert into template inside <loop>
     let isNested = false // <loop> is nested
     let readingVar = false // reading a teddy variable name within a <loop>
@@ -897,8 +895,8 @@
     let parsedTags = false // <loop> variable has been parsed more than once due to additional teddy tags
     let i
     let j
-    let l = charList.length
-    let badParamsError = 'Render aborted due a syntax error in your <loop>, make sure you are using "through", "key", and "val" correctly'
+    const l = charList.length
+    const badParamsError = 'Render aborted due a syntax error in your <loop>, make sure you are using "through", "key", and "val" correctly'
 
     // Read <loop> inner contents
     for (i = primaryTags.loop.length; i < l; i++) {
@@ -952,9 +950,9 @@
       }
     }
 
-    endOfStatement = charList.slice(eol + primaryTags.cloop.length) // Rest of the template array after the <loop>
+    const endOfStatement = charList.slice(eol + primaryTags.cloop.length) // Rest of the template array after the <loop>
     slicedTemplate = charList.slice(sol, eol) // Contents of <loop>
-    templateCopy = slicedTemplate // Keep a copy of <loop> contents
+    const templateCopy = slicedTemplate // Keep a copy of <loop> contents
 
     // Get object values/keys
     if (params.through) {
@@ -1064,7 +1062,7 @@
     let startInclude // Starting index of <include> for slicing
     let endInclude // Ending index of <include> for slicing
     let startIndex
-    let includeArgs = [] // List of <arg> objects
+    const includeArgs = [] // List of <arg> objects
     let includeArg = { // <arg> object containing relevant information
       name: '',
       value: ''
@@ -1081,9 +1079,8 @@
     let i
     let j
     let currentChar
-    let l = charList.length
-    let itl // Include template src content length
-    let badSrcError = 'Render aborted due a syntax error in your <include>, make sure you are using "src", "noteddy", or "noparse" correctly'
+    const l = charList.length
+    const badSrcError = 'Render aborted due a syntax error in your <include>, make sure you are using "src", "noteddy", or "noparse" correctly'
 
     // Get HTML source from include tag
     for (i = primaryTags.include.length; i < l; i++) {
@@ -1130,7 +1127,7 @@
 
     // Parse <include> src
     includeTemplate = [...teddy.compile(src)]
-    itl = includeTemplate.length
+    const itl = includeTemplate.length // Include template src content length
 
     // Read contents of <include> tag
     for (i = startInclude; i < l; i++) {
@@ -1233,15 +1230,14 @@
     let conditionText = ''
     let conditionVarName = ''
     let conditionLiteral = ''
-    let condition = {
+    const condition = {
       varName: null,
       varLiteral: null,
       true: '',
       false: ''
     }
-    let varVal
     let i
-    let l = charList.length
+    const l = charList.length
     let currentChar
 
     // Go through our template to parse the oneline-if
@@ -1315,7 +1311,7 @@
     }
 
     // Get a value from teddy var name (if it exists)
-    varVal = getTeddyVal(condition.varName, model)
+    const varVal = getTeddyVal(condition.varName, model)
 
     // Evaluate condition to true or false
     if (condition.varLiteral !== null) { // There is a value to compare against
@@ -1336,7 +1332,7 @@
   // Get inner content of <noteddy> tag without parsing teddy contents
   function parseNoTeddy (charList) {
     let i
-    let l = charList.length
+    const l = charList.length
 
     for (i = 0; i < l; i++) {
       if (twoArraysEqual(charList.slice(i, i + primaryTags.cnoteddy.length), primaryTags.cnoteddy)) { // Return contents of <noteddy>
@@ -1363,11 +1359,11 @@
   // Returns teddy primary tag name
   function findTeddyTag (charList, tags) {
     let type = 'unknown'
-    let keys = Object.keys(tags)
+    const keys = Object.keys(tags)
     let currentTag
     let i
-    let kl = keys.length
-    let l = charList.length
+    const kl = keys.length
+    const l = charList.length
     let currentChar
 
     // Loop through teddy primary tags
@@ -1401,8 +1397,8 @@
   // Returns true if two arrays are equal
   function twoArraysEqual (a1, a2) {
     let i
-    let l1 = a1.length
-    let l2 = a2.length
+    const l1 = a1.length
+    const l2 = a2.length
 
     // Check if the arrays are the same length
     if (l1 !== l2) return false
@@ -1470,7 +1466,7 @@
   function removeTeddyComment (charList) {
     let nested = 0
     let i
-    let l = charList.length
+    const l = charList.length
 
     for (i = 2; i < l; i++) {
       if (charList[i] === '{' && charList[i + 1] === '!') { // Teddy comment within teddy comment
@@ -1490,7 +1486,7 @@
     let varName = ''
     let varVal
     let i
-    let l = charList.length
+    const l = charList.length
 
     // Find start/end points of curly brackets
     for (i = 1; i < l; i++) {
@@ -1522,8 +1518,8 @@
     let teddyPeriodNameEnd
     let teddyLongName
     let i
-    let l = name.length
-    let periodIndex = name.indexOf('.')
+    const l = name.length
+    const periodIndex = name.indexOf('.')
 
     // Check teddy var name for any exceptions
     for (i = 0; i < l; i++) {
@@ -1549,25 +1545,25 @@
     if (periodIndex >= 0) {
       teddyPeriodNameStart = teddyName.slice(0, periodIndex) // something
       teddyPeriodNameEnd = teddyName.slice(periodIndex + 1) // moreSomething
-      if (model[teddyPeriodNameStart] && model[teddyPeriodNameStart][teddyPeriodNameEnd]) { // Make sure we are not accessing teddy model with undefined reference
+      if (model[teddyPeriodNameStart] && (model[teddyPeriodNameStart][teddyPeriodNameEnd] || model[teddyPeriodNameStart][teddyPeriodNameEnd] === '')) { // Make sure we are not accessing teddy model with undefined reference
         return model[teddyPeriodNameStart][teddyPeriodNameEnd]
       }
     } else { // Var contains a 'p' or 's' or no flag at all
       teddyLongName = teddyName.slice(0, name.indexOf('|')) // something
       if (noParse && noSuppress) { // something|p|s
-        if (model[teddyLongName]) {
+        if (model[teddyLongName] || model[teddyLongName] === '') {
           return noParseFlag(model[teddyLongName])
         }
       } else if (noSuppress) { // something|s
-        if (model[teddyLongName]) {
+        if (model[teddyLongName] || model[teddyLongName] === '') {
           return model[teddyLongName]
         }
       } else if (noParse) { // something|p
-        if (model[teddyLongName]) {
+        if (model[teddyLongName] || model[teddyLongName] === '') {
           return escapeEntities(noParseFlag(model[teddyLongName]))
         }
       } else { // something
-        if (model[teddyName]) {
+        if (model[teddyName] || model[teddyName] === '') {
           if (typeof model[teddyName] === 'boolean' || typeof model[teddyName] === 'object') {
             return model[teddyName]
           } else {
@@ -1582,13 +1578,13 @@
 
   // Escapes HTML entities within a teddy value
   function escapeEntities (value) {
-    let entityKeys = Object.keys(escapeHtmlEntities)
+    const entityKeys = Object.keys(escapeHtmlEntities)
     let escapedEntity = false
     let newValue = ''
     let i
     let j
-    let l = value.length
-    let ekl = entityKeys.length
+    const l = value.length
+    const ekl = entityKeys.length
 
     if (typeof value === 'number') { // Value is a number, no reason to escape
       return `${value}`
@@ -1618,12 +1614,12 @@
 
   // Applies noparse logic to a teddy var value (ex: {varName|p})
   function noParseFlag (value) {
-    let teddyVarList = [] // keep track of all teddy vars
+    const teddyVarList = [] // keep track of all teddy vars
     let noTeddyParse = [] // [start, end] indices for brackets of a teddy var
     let newValue = value
     let i
     let j
-    let l = value.length
+    const l = value.length
 
     // Loop through block of teddy content to find all teddy variables to apply noparse logic to
     for (i = 0; i < l; i++) {
@@ -1648,7 +1644,7 @@
   // Handles <noteddy>content</noteddy> using this notation internally {~ content ~}
   function noParseTeddyVariable (charList) {
     let i
-    let l = charList.length
+    const l = charList.length
 
     // Scan until end of <noteddy>
     for (i = 0; i < l; i++) {
