@@ -11,9 +11,6 @@ module.exports = function (config) {
   // add Safari if in macOS
   if (os.platform() === 'darwin') {
     testBrowsers.push('Safari')
-  } else if (os.platform() === 'win32') {
-    // add IE if in windows
-    testBrowsers.push('IE')
   }
 
   const configuration = {
