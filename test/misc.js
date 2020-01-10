@@ -234,6 +234,11 @@ describe('Misc', function () {
     done()
   })
 
+  it('should render empty strings as is for variables that are empty strings (misc/emptyStringVariable.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('misc/emptyStringVariable.html', model), '<p></p><p></p>')
+    done()
+  })
+
   it('should execute render callback function for errors and non errors', function (done) {
     teddy.setMaxPasses(100)
     teddy.setVerbosity(3)
