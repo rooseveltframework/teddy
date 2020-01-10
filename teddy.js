@@ -10,6 +10,7 @@
   var jsonStringifyCache
   var endParse = false // Stops rendering if necessary
   var currentContext
+  var passes
 
   // List of all primary teddy tags
   var primaryTags = {
@@ -159,14 +160,18 @@
     errors: [],
     console: {
       warn: function (value) {
-        console.warn(value)
-        teddy.warnings.push(value)
-        consoleWarnings += '<li>' + escapeEntities(value) + '</li>'
+        if (!teddy.warnings.includes(value)) {
+          console.warn(value)
+          teddy.warnings.push(value)
+          consoleWarnings += '<li>' + escapeEntities(value) + '</li>'
+        }
       },
       error: function (value) {
-        console.error(value)
-        teddy.errors.push(value)
-        consoleErrors += '<li>' + escapeEntities(value) + '</li>'
+        if (!teddy.errors.includes(value)) {
+          console.error(value)
+          teddy.errors.push(value)
+          consoleErrors += '<li>' + escapeEntities(value) + '</li>'
+        }
       }
     },
 
@@ -272,6 +277,7 @@
     // parses a template
     render: function (template, model, callback) {
       model = Object.assign({}, model) // make a copy of the model
+      passes = 0
 
       // ensure template is a string
       if (typeof template !== 'string') {
@@ -294,6 +300,10 @@
       // overload console logs
       consoleWarnings = ''
       consoleErrors = ''
+
+      // reset errors and warnings
+      teddy.errors = []
+      teddy.warnings = []
 
       // express.js support
       if (model.settings && model.settings.views) {
@@ -385,6 +395,8 @@
         teddy.renderedTemplates[template][l - 1].renderedTemplate = renderedTemplate
       }
 
+      renderedTemplate = cleanNoParseContent(renderedTemplate)
+
       // execute callback if present, otherwise simply return the rendered template string
       if (typeof callback === 'function') {
         if (errorMessage) {
@@ -406,8 +418,7 @@
    */
 
   // Scan template file and return a usable HTML document
-  function scanTemplate (charList, model) {
-    var passes = 0
+  function scanTemplate (charList, model, escapeOverride) {
     var maxPasses = teddy.params.maxPasses
     var maxPassesError = 'Render aborted due to max number of passes (' + maxPasses + ') exceeded; there is a possible infinite loop in your template logic.'
     var renderedTemplate = ''
@@ -429,10 +440,10 @@
             if (charList[1] === '!') { // Teddy comment
               charList = removeTeddyComment(charList)
             } else if (charList[1] === '~') { // Internal notation for a noteddy block of text
-              charList = noParseTeddyVariable(charList)
+              [charList, renderedTemplate] = noParseTeddyVariable(charList, renderedTemplate)
             } else if (charList[1] === ' ' || charList[1] === '\n') { // Plain text curly bracket
             } else { // Replace teddy {variable} with its value in the model
-              charList = getValueAndReplace(charList, model)
+              charList = getValueAndReplace(charList, model, escapeOverride)
             }
             break
           case '<': // Teddy/HTML tag
@@ -447,26 +458,8 @@
                   break
                 case 'include':
                   charList = parseInclude(charList, model)
-
-                  // noparse option used in include tag
-                  if (charList[0] === '{' && charList[1] === '~') { // noparse block logic
-                    charList.shift()
-                    charList.shift()
-
-                    while (charList[0]) {
-                      if (charList[0] === '~' && charList[1] === '}') { // end of noparse block
-                        charList.shift()
-                        charList.shift()
-                        break
-                      } else {
-                        renderedTemplate += charList[0]
-                      }
-                      charList.shift()
-                    }
-                  }
-
                   passes++
-                  break
+                  continue
                 case 'loop':
                   charList = parseLoop(charList, model)
                   break
@@ -896,7 +889,6 @@
     let i
     let j
     const l = charList.length
-    const badParamsError = 'Render aborted due a syntax error in your <loop>, make sure you are using "through", "key", and "val" correctly'
 
     // Read <loop> inner contents
     for (i = primaryTags.loop.length; i < l; i++) {
@@ -908,11 +900,6 @@
           params.val = teddyName.slice(5, teddyName.length - 1)
         } else if (teddyName.slice(0, 7) === 'through') { // params.through
           params.through = teddyName.slice(9, teddyName.length - 1)
-        } else { // Return an error if a bad attribute name is used
-          if (teddy.params.verbosity) {
-            teddy.console.error(badParamsError)
-          }
-          return badParamsError
         }
         teddyName = ''
       } else if (currentChar === '>' && teddyName.length > 6) { // End of opening <loop>
@@ -1057,30 +1044,25 @@
   function parseInclude (charList, model) {
     let src = '' // src=
     let noParseSlice // slices out 'noparse' or 'noteddy' from <include>
-    let teddyVarName = '' // Teddy variable name
     let includeTemplate // Contents of src
     let startInclude // Starting index of <include> for slicing
     let endInclude // Ending index of <include> for slicing
-    let startIndex
-    const includeArgs = [] // List of <arg> objects
-    let includeArg = { // <arg> object containing relevant information
-      name: '',
-      value: ''
-    }
+    const includeArgs = {} // Object of <arg>'s
+    let modifiedModel = Object.assign({}, model)
+    let argName = ''
+    let argValue = ''
 
     let inArg = false // Reading a <arg> tag
     let readingArgVal = false // Reading a teddy arg value
-    let readingVar = false // Reading a teddy variable name
-    let inComment = false // Signals that we are reading a comment
     let invalidArg = false // Signals to stop parsing if this is triggered when reading include args
     let stopReading = false // Signals to stop reading either the src value or teddy variable name
     let noParseFlag = false // noteddy or noparse tag inside <include>
+    let inLoop = false
+    let nested = 0
 
     let i
-    let j
     let currentChar
     const l = charList.length
-    const badSrcError = 'Render aborted due a syntax error in your <include>, make sure you are using "src", "noteddy", or "noparse" correctly'
 
     // Get HTML source from include tag
     for (i = primaryTags.include.length; i < l; i++) {
@@ -1088,11 +1070,6 @@
       if (currentChar === '=') { // Reached src value
         if (src === 'src') {
           src = '' // Reset to obtain value
-        } else { // Bad syntax of 'src'
-          if (teddy.params.verbosity) {
-            teddy.console.error(badSrcError)
-          }
-          return badSrcError
         }
       } else if (currentChar === '>') { // End of <include> open tag
         src = src.slice(1, -1) // Remove quotations from src
@@ -1103,11 +1080,6 @@
         if (noParseSlice === 'noteddy' || noParseSlice === 'noparse') { // noteddy or noparse attribute in <include>
           noParseFlag = true
           stopReading = true
-        } else { // Bad syntax of 'noteddy' or 'noparse'
-          if (teddy.params.verbosity) {
-            teddy.console.error(badSrcError)
-          }
-          return badSrcError
         }
       } else if (currentChar === '<') { // This only happens in this case <include></include>
         if (charList.slice(i, i + 10)) {
@@ -1127,7 +1099,6 @@
 
     // Parse <include> src
     includeTemplate = [...teddy.compile(src)]
-    const itl = includeTemplate.length // Include template src content length
 
     // Read contents of <include> tag
     for (i = startInclude; i < l; i++) {
@@ -1135,30 +1106,41 @@
       if (inArg) { // Read contents of <arg>
         if (readingArgVal) { // Get include argument value
           if (currentChar === '<' && twoArraysEqual(charList.slice(i, i + primaryTags.carg.length), primaryTags.carg)) { // Closing argument tag, push arg object to list of args
-            includeArgs.push(includeArg)
-
-            // Reset important variables
-            inArg = false
-            readingArgVal = false
-            includeArg = {
-              name: '',
-              value: ''
+            if (nested > 0) {
+              argValue += currentChar
+              nested--
+            } else {
+              includeArgs[argName] = argValue
+              // Reset important variables
+              inArg = false
+              readingArgVal = false
+              argName = ''
+              argValue = ''
             }
+          } else if (currentChar === '<' && twoArraysEqual(charList.slice(i, i + primaryTags.arg.length), primaryTags.arg)) { // We found another argument tag inside of an argument tag
+            argValue += currentChar
+            nested++
           } else { // Get include argument value
-            includeArg.value += currentChar
+            argValue += currentChar
           }
         } else if (currentChar === '>') { // Start reading arg value
           readingArgVal = true
         } else { // Get include argument name
-          includeArg.name += currentChar
+          argName += currentChar
         }
       } else if (currentChar === '<') { // Found a tag
         if (twoArraysEqual(charList.slice(i, i + primaryTags.arg.length), primaryTags.arg)) { // Check if we hit a teddy <arg> tag
           inArg = true
           i += 4 // increment to start reading arg name right away
         } else if (twoArraysEqual(charList.slice(i, i + primaryTags.cinclude.length), primaryTags.cinclude)) { // Found </include>
-          endInclude = i + primaryTags.cinclude.length
-          break
+          if (nested > 0) {
+            nested--
+          } else {
+            endInclude = i + primaryTags.cinclude.length
+            break
+          }
+        } else if (twoArraysEqual(charList.slice(i, i + primaryTags.include.length), primaryTags.include)) {
+          nested++
         } else { // Triggers on any tag that is not supposed to be in here
           if (charList[i + 1] !== '/') { // make sure this does not trigger on closing tags
             invalidArg = true
@@ -1170,54 +1152,28 @@
     // Actions that do not require parsing includeTemplate
     if (includeTemplate.length === src.length - 5) { // Could not find src file
       return charList.slice(endInclude)
-    } else if (noParseFlag) { // noparse in <include>
-      return insertValue(charList, [...`{~ ${includeTemplate.join('')} ~}`], 0, endInclude)
+    } else if (noParseFlag) { // noparse in <include>, returns {~includeTemplate~}
+      return insertValue(charList, [...`{~${includeTemplate.join('')}~}`], 0, endInclude)
     } else if (invalidArg) { // <include> uses invalid use of <arg>
       return charList.slice(endInclude)
-    }
-
-    // Read contents of include src template
-    for (i = 0; i < itl; i++) {
-      currentChar = includeTemplate[i]
-      if (inComment) { // Make sure we skip over teddy comment
-        if (currentChar === '!' && includeTemplate[i + 1] === '}') {
-          inComment = false
+    } else {
+      // Add all include arguments to the model copy (only in this scanTemplate call)
+      for (let key in includeArgs) {
+        if (includeArgs[key] === model[key]) { // Make sure we aren't stuck in a loop,
+          passes = teddy.params.maxPasses
+          inLoop = true
+          break
         }
-      } else if (readingVar) { // Reading a teddy argument within includeTemplate
-        if (currentChar === '}') { // Done reading var name
-          readingVar = false
-
-          // Find appropriate arg value for arg name
-          for (j = 0; j < includeArgs.length; j++) {
-            if (teddyVarName === includeArgs[j].name) { // Found correct value and inserting into includeTemplate
-              includeTemplate = insertValue(includeTemplate, includeArgs[j].value, startIndex, i + 1)
-            }
-          }
-          teddyVarName = ''
-        } else {
-          if (currentChar === '|') { // Flag added to includeTemplate arg, stop reading name
-            stopReading = true
-          } else { // Get teddy var name
-            if (!stopReading) {
-              teddyVarName += currentChar
-            }
-          }
-        }
-      } else if (currentChar === '{') { // Possible teddy comment or variable
-        if (includeTemplate[i + 1] === '!') { // Found a teddy comment
-          inComment = true
-        } else { // Found a teddy var
-          startIndex = i
-          readingVar = true
-          stopReading = false
-        }
+        modifiedModel[key] = includeArgs[key]
       }
-    }
-    // We do this because we always charList.shift() after this executes, most likely a better way to do this...
-    includeTemplate.unshift(' ')
 
-    // Return parsed include src along with the rest of the template
-    return insertValue(charList, includeTemplate, 0, endInclude)
+      if (!inLoop) {
+        includeTemplate = scanTemplate(includeTemplate, modifiedModel, true)
+      }
+
+      // Return parsed include src along with the rest of the template
+      return insertValue(charList, includeTemplate, 0, endInclude)
+    }
   }
 
   // Parse <tag if-something>
@@ -1239,6 +1195,7 @@
     let i
     const l = charList.length
     let currentChar
+    let currentQuote
 
     // Go through our template to parse the oneline-if
     for (i = 2; i < l; i++) {
@@ -1274,7 +1231,7 @@
           conditionLiteral += currentChar
         }
       } else if (readingConditions) { // Get True/False conditions in the oneline-if
-        if (currentChar === ' ' || currentChar === '\n') {
+        if ((currentChar === ' ' || currentChar === '\n') && (charList[i - 1] === currentQuote || charList[i - 1] === ' ' || charList[i - 1] === '\n')) {
           if (conditionText.slice(0, 4) === 'true') {
             condition.true = conditionText.slice(6, -1)
           } else if (conditionText.slice(0, 5) === 'false') {
@@ -1298,10 +1255,12 @@
           } else if (conditionText.slice(0, 5) === 'false') {
             condition.false = conditionText.slice(7, -1)
           }
-
           endIndex = i
           break
         } else {
+          if (conditionText.length < 7 && (conditionText === 'true=' || conditionText === 'false=')) { // Get type of quote used in condition
+            currentQuote = currentChar
+          }
           conditionText += currentChar
         }
       } else if ((currentChar === ' ' || currentChar === '\n') && twoArraysEqual(charList.slice(i + 1, i + 4), primaryTags.olif)) { // Possible beginning for oneline-if
@@ -1482,7 +1441,7 @@
   }
 
   // Replace {variable} in template with value taken from model
-  function getValueAndReplace (charList, myModel, pName) {
+  function getValueAndReplace (charList, myModel, escapeOverride, pName) {
     let varName = ''
     let varVal
     let i
@@ -1492,7 +1451,7 @@
     for (i = 1; i < l; i++) {
       // If we find the ending curly bracket, replace {variable} in template with its value in the model
       if (charList[i] === '}' && charList[i + 1] !== '}') {
-        varVal = getTeddyVal(varName, myModel) // Check if value is in the model
+        varVal = getTeddyVal(varName, myModel, escapeOverride) // Check if value is in the model
 
         if (varVal.slice(1, -1) === varName) { // Teddy variable is referencing itself
           break
@@ -1502,7 +1461,7 @@
           if (varVal.indexOf(pName) >= 0) { // Infinitely referencing teddy variables
             break
           } else {
-            varVal = getValueAndReplace([...varVal], myModel, `{${varName}}`).join('')
+            varVal = getValueAndReplace([...varVal], myModel, escapeOverride, `{${varName}}`).join('')
           }
         }
 
@@ -1516,7 +1475,7 @@
   }
 
   // Get a usable value from a teddy var
-  function getTeddyVal (name, model) {
+  function getTeddyVal (name, model, escapeOverride) {
     let teddyName = name // Name of teddy variable
     let attributeValue // used for dynamic variable names
     let noParse = false // 'p' flag
@@ -1574,7 +1533,11 @@
           if (typeof model[teddyName] === 'boolean' || typeof model[teddyName] === 'object') {
             return model[teddyName]
           } else {
-            return escapeEntities(model[teddyName])
+            if (!escapeOverride) {
+              return escapeEntities(model[teddyName])
+            } else {
+              return model[teddyName]
+            }
           }
         }
       }
@@ -1631,9 +1594,9 @@
     // Loop through block of teddy content to find all teddy variables to apply noparse logic to
     for (i = 0; i < l; i++) {
       if (value[i] === '{' && noTeddyParse.length < 1) { // Start of teddy variable
-        noTeddyParse.push(i + 1)
-      } else if (value[i] === '}' && value[i + 1] !== '}') { // End of teddy variable
         noTeddyParse.push(i)
+      } else if (value[i] === '}' && value[i + 1] !== '}') { // End of teddy variable
+        noTeddyParse.push(i + 1)
         teddyVarList.push(noTeddyParse)
         noTeddyParse = []
       }
@@ -1641,24 +1604,34 @@
 
     for (j = teddyVarList.length - 1; j >= 0; j--) {
       // Replace {varName} with {~varName~} to imply noparse internally
-      newValue = newValue.slice(0, teddyVarList[j][0]) + '~' + newValue.slice(teddyVarList[j][0], teddyVarList[j][1]) + '~' + newValue.slice(teddyVarList[j][1])
+      newValue = newValue.slice(0, teddyVarList[j][0]) + '{~' + newValue.slice(teddyVarList[j][0], teddyVarList[j][1]) + '~}' + newValue.slice(teddyVarList[j][1])
     }
 
     // Returns modified value
     return newValue
   }
 
-  // Handles <noteddy>content</noteddy> using this notation internally {~ content ~}
-  function noParseTeddyVariable (charList) {
+  // Handles <noteddy>content</noteddy> using this notation internally {~content~}
+  function noParseTeddyVariable (charList, renderedTemplate) {
     let i
     const l = charList.length
+    let noparseBlock = ''
+    let currentChar
 
     // Scan until end of <noteddy>
     for (i = 0; i < l; i++) {
-      if (charList[i] === '~' && charList[i + 1] === '}') { // Return content
-        return insertValue(charList, charList.slice(2, i).join(''), 1, i + 1)
+      currentChar = charList[i]
+      if (currentChar === '~' && charList[i + 1] === '}') { // Return content
+        return [insertValue(charList, '', 0, i + 2), `${renderedTemplate}${noparseBlock}~}`]
+      } else {
+        noparseBlock += currentChar
       }
     }
+  }
+
+  // Handles cleaning up all {~ content ~}
+  function cleanNoParseContent (rt) {
+    return rt.replace(/({~|~})/g, '')
   }
 
   function jsonStringifyRemoveCircularReferences (key, value) {

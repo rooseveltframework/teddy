@@ -7,6 +7,7 @@ function makeModel () {
     circular: {},
     foo: '{bar}',
     bar: '{foo}',
+    pageContent: '<body>hello</body>',
     undefinedVar: undefined,
     definedParent: { undefinedMember: undefined },
     camelLetters: ['a', 'b', 'c'],

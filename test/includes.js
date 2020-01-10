@@ -119,6 +119,11 @@ describe('Includes', function () {
     done()
   })
 
+  it('should get pageContent and render it within an <if> (includes/includeIfContent.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('includes/includeIfContent.html', model), '<body>hello</body>')
+    done()
+  })
+
   it('should <include> a template and escape regex pattern in argument (includes/includeEscapeRegex.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('includes/includeEscapeRegex.html', model), '<input type=\'text\' name=\'date\' placeholder=\'DD/MM/YYYY\' id=\'date\' pattern=\'^(3[0-1]|[1-2]\\d|[1-9]|0\\d)\\/(1[0-2]|[1-9]|0\\d)\\/[1-2]\\d{3}$\'>')
     done()

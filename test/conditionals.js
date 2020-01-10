@@ -198,6 +198,11 @@ describe('Conditionals', function () {
     done()
   })
 
+  it('should evaluate one line if "if-something" as false even with no false condition supplied (conditionals/oneLineNoFalse.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineNoFalse.html', model), '<h2>{content.subTitle}</h2>')
+    done()
+  })
+
   it('should evaluate one line if "if-something=\'Some content\'" as true (conditionals/oneLineValue.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineValue.html', model), '<p class=\'something-is-value\'>One line if.</p>')
     done()
