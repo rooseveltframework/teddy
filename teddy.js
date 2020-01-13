@@ -1048,7 +1048,7 @@
     let startInclude // Starting index of <include> for slicing
     let endInclude // Ending index of <include> for slicing
     const includeArgs = {} // Object of <arg>'s
-    let modifiedModel = Object.assign({}, model)
+    const modifiedModel = Object.assign({}, model)
     let argName = ''
     let argValue = ''
 
@@ -1158,7 +1158,7 @@
       return charList.slice(endInclude)
     } else {
       // Add all include arguments to the model copy (only in this scanTemplate call)
-      for (let key in includeArgs) {
+      for (const key in includeArgs) {
         if (includeArgs[key] === model[key]) { // Make sure we aren't stuck in a loop,
           passes = teddy.params.maxPasses
           inLoop = true
@@ -1453,7 +1453,7 @@
       if (charList[i] === '}' && charList[i + 1] !== '}') {
         varVal = getTeddyVal(varName, myModel, escapeOverride) // Check if value is in the model
 
-        if (varVal.slice(1, -1) === varName) { // Teddy variable is referencing itself
+        if (typeof varVal === 'string' && varVal.slice(1, -1) === varName) { // Teddy variable is referencing itself
           break
         }
 
