@@ -553,7 +553,7 @@
             varList.push({
               name: teddyVarName,
               value: getTeddyVal(teddyVarName, model),
-              expected: (teddyVarExpected === '') ? undefined : teddyVarExpected.slice(2, -1)
+              expected: (teddyVarExpected === '') ? false : teddyVarExpected.slice(2, -1)
             })
           }
           // Reset relevant string variables
@@ -563,7 +563,7 @@
           varList.push({
             name: teddyVarName,
             value: getTeddyVal(teddyVarName, model),
-            expected: (teddyVarExpected === '') ? undefined : teddyVarExpected.slice(2, -1)
+            expected: (teddyVarExpected === '') ? false : teddyVarExpected.slice(2, -1)
           })
 
           // Add relevant variable and operator information to condition object
