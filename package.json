@@ -73,7 +73,7 @@
   },
   "scripts": {
     "codecov": "./node_modules/.bin/codecov",
-    "coverage": "cross-env NODE_ENV=cover nyc mocha test && karma start",
+    "coverage": "cross-env NODE_ENV=cover nyc mocha --timeout 5000 test && karma start",
     "lint": "standard && eslint ./test",
     "test": "cross-env NODE_ENV=test npm run test-server && karma start",
     "test-chrome": "karma start --browsers ChromeHeadless",
