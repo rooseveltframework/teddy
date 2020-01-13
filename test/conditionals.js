@@ -230,6 +230,11 @@ describe('Conditionals', function () {
     done()
   })
 
+  it('should evaluate one line if "if-something" with a dynamic value (conditionals/oneLineDynamicVariable.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineDynamicVariable.html', model), '<p class="some-class">Some content</p>')
+    done()
+  })
+
   it('should parse nested conditionals correctly (conditionals/nestedConditional.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('conditionals/nestedConditional.html', model), '<p>The variable \'something\' and \'somethingElse\' are both present</p>')
     done()

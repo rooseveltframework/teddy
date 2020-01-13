@@ -44,6 +44,7 @@ function makeModel () {
       }
     ],
     something: 'Some content',
+    dynamicValue: 'Some content',
     somethingMore: 'More content',
     somethingElse: true,
     varWithVarInside: 'Variable with a variable inside: {subVar}',

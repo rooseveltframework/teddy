@@ -1222,7 +1222,7 @@
           readingLiteral = false
 
           // Expected literal value is a teddy variable
-          if (conditionLiteral[0] === '{') {
+          if (conditionLiteral[1] === '{') {
             condition.varLiteral = getTeddyVal(conditionLiteral.slice(1, -1), model)
           } else { // else is a value wrapped in quotations
             condition.varLiteral = conditionLiteral.slice(1, -1)
