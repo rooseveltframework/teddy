@@ -44,6 +44,27 @@
     celseunless: ['<', '/', 'e', 'l', 's', 'e', 'u', 'n', 'l', 'e', 's', 's', '>']
   }
 
+  var tagLengths = {
+    if: 4,
+    cif: 5,
+    elseif: 8,
+    celseif: 9,
+    else: 6,
+    celse: 7,
+    unless: 8,
+    cunless: 9,
+    elseunless: 12,
+    celseunless: 13,
+    loop: 6,
+    cloop: 7,
+    include: 9,
+    cinclude: 10,
+    arg: 5,
+    carg: 6,
+    noteddy: 9,
+    cnoteddy: 10
+  }
+
   // HTML entities to escape
   var escapeHtmlEntities = {
     '&': '&amp;',
@@ -422,8 +443,6 @@
     var maxPasses = teddy.params.maxPasses
     var maxPassesError = 'Render aborted due to max number of passes (' + maxPasses + ') exceeded; there is a possible infinite loop in your template logic.'
     var renderedTemplate = ''
-    var i
-    var cal
 
     while (charList[0]) {
       if (!endParse) {
@@ -475,11 +494,10 @@
                   charList = parseNoTeddy(charList)
                   break
                 case 'arg': // orphaned arg
-                  cal = primaryTags.carg.length
                   while (charList[0]) {
                     if (charList[0] === '<' && charList[1] === '/') { // closing tag
-                      if (twoArraysEqual(charList.slice(0, primaryTags.carg.length), primaryTags.carg)) {
-                        for (i = 0; i < cal; i++) {
+                      if (twoArraysEqual(charList.slice(0, tagLengths.carg), primaryTags.carg)) {
+                        for (let i = 0; i < tagLengths.carg; i++) {
                           charList.shift()
                         }
                         break
@@ -623,9 +641,9 @@
         if (charList[i + 1] === '!') { // Hit the start of HTML comment inbetween teddy tags
           outsideTags = true
           commentIndices.push(i)
-        } else if (twoArraysEqual(charList.slice(i, i + primaryTags.if.length), primaryTags.if) || twoArraysEqual(charList.slice(i, i + primaryTags.unless.length), primaryTags.unless)) { // nested <if> or <unless>
+        } else if (twoArraysEqual(charList.slice(i, i + tagLengths.if), primaryTags.if) || twoArraysEqual(charList.slice(i, i + tagLengths.unless), primaryTags.unless)) { // nested <if> or <unless>
           nested++
-        } else if (twoArraysEqual(charList.slice(i, i + primaryTags.cif.length), primaryTags.cif) || twoArraysEqual(charList.slice(i, i + primaryTags.cunless.length), primaryTags.cunless) || (twoArraysEqual(charList.slice(i, i + secondaryTags.celse.length), secondaryTags.celse) && nested > 0)) { // Closing <if> tag
+        } else if (twoArraysEqual(charList.slice(i, i + tagLengths.cif), primaryTags.cif) || twoArraysEqual(charList.slice(i, i + tagLengths.cunless), primaryTags.cunless) || (twoArraysEqual(charList.slice(i, i + tagLengths.celse), secondaryTags.celse) && nested > 0)) { // Closing <if> tag
           if (nested > 0) { // Outside one level of nested conditional (only looks for <if> or <unless>)
             nested--
 
@@ -633,7 +651,7 @@
               isNested = true
             }
           } else { // Push [start, end] index of closing conditional tag to our list marking the ends of condition tags (i.e. </if> </unless>)
-            eoc.push([i, i + primaryTags['c' + type].length])
+            eoc.push([i, i + tagLengths['c' + type]])
           }
         } else if (twoArraysEqual(charList.slice(i, i + currentOpenTag.length), currentOpenTag) && nested < 1) { // Beginning <elseif> or <elseunless> tag
           readingConditional = true
@@ -641,15 +659,15 @@
           i += currentOpenTag.length - 1
         } else if (twoArraysEqual(charList.slice(i, i + currentClosingTag.length), currentClosingTag)) { // Get [start, end] indices of </elseif> or </elseunless>
           eoc.push([i, i + currentClosingTag.length]) // important indices
-        } else if (twoArraysEqual(charList.slice(i, i + secondaryTags.else.length), secondaryTags.else) && nested < 1) { // <else> tag
+        } else if (twoArraysEqual(charList.slice(i, i + tagLengths.else), secondaryTags.else) && nested < 1) { // <else> tag
           if (!isNested) { // Push [start, end] indices of <else> to list
-            boc.push([i, i + secondaryTags.else.length])
+            boc.push([i, i + tagLengths.else])
           }
-        } else if (twoArraysEqual(charList.slice(i, i + secondaryTags.celse.length), secondaryTags.celse) && nested < 1) { // </else> tag
+        } else if (twoArraysEqual(charList.slice(i, i + tagLengths.celse), secondaryTags.celse) && nested < 1) { // </else> tag
           if (isNested) { // skip </else> tag for a nested condition
             isNested = false
           } else { // Push [start, end] indices of </else> to list
-            eoc.push([i, i + secondaryTags.celse.length])
+            eoc.push([i, i + tagLengths.celse])
             break
           }
         }
@@ -660,7 +678,7 @@
     for (i = 0; i < conditions.length; i++) {
       if (evalCondition(conditions[i])) { // If one of our conditions is true, return contents along with the rest of the template
         if (eoc.length === 1) { // There is a single <if> or <unless> tag without an <else>
-          return [...charList.slice(boc[0][1], eoc[0][0]), ...charList.slice(eoc[0][0] + primaryTags['c' + type].length)]
+          return [...charList.slice(boc[0][1], eoc[0][0]), ...charList.slice(eoc[0][0] + tagLengths['c' + type])]
         } else {
           // Check if there are HTML comments inbetween our conditional tags
           if (commentList.length > 0) {
@@ -681,7 +699,7 @@
 
     // Render template if there are no true conditionals
     if (eoc.length === 1) { // Skip conditional content if evaluated to false and there are no <else> siblings
-      return [...charList.slice(eoc[0][0] + primaryTags['c' + type].length)]
+      return [...charList.slice(eoc[0][0] + tagLengths['c' + type])]
     } else { // Return template with <else> tag contents
       // Check if there are HTML comments inbetween our conditional tags
       if (commentList.length > 0) {
@@ -867,6 +885,7 @@
   function parseLoop (charList, model) {
     let nested = 0 // Nested counter
     const params = {} // Save all loop parameters in this object
+    const modifiedModel = Object.assign({}, model) // Used when we need to scan inner loop contents
     let teddyName = '' // Name of teddy variable
     let periodIndex // Index of '.' if a teddy variable name includes one
     let through // through=
@@ -891,7 +910,7 @@
     const l = charList.length
 
     // Read <loop> inner contents
-    for (i = primaryTags.loop.length; i < l; i++) {
+    for (i = tagLengths.loop; i < l; i++) {
       currentChar = charList[i]
       if (currentChar === ' ' && teddyName.length > 6) { // Whitespace inbetween <loop> attributes
         if (teddyName.slice(0, 3) === 'key') { // params.key
@@ -911,21 +930,21 @@
         sol = i + 1 // Save index location after '>' of <loop> tag
         teddyName = ''
       } else if (currentChar === '<') { // Found either an HTML tag or teddy tag
-        if (twoArraysEqual(charList.slice(i, i + primaryTags.loop.length), primaryTags.loop)) { // Found a nested <loop>
+        if (twoArraysEqual(charList.slice(i, i + tagLengths.loop), primaryTags.loop)) { // Found a nested <loop>
           isNested = true
           nested++
-        } else if (twoArraysEqual(charList.slice(i, i + primaryTags.cloop.length), primaryTags.cloop)) { // Found </loop>
+        } else if (twoArraysEqual(charList.slice(i, i + tagLengths.cloop), primaryTags.cloop)) { // Found </loop>
           if (nested > 0) { // Belongs to a nested <loop>
             nested--
           } else { // Not a nested <loop>
             eol = i
             break
           }
-        } else if (twoArraysEqual(charList.slice(i, i + primaryTags.if.length), primaryTags.if)) { // Found <if>
+        } else if (twoArraysEqual(charList.slice(i, i + tagLengths.if), primaryTags.if)) { // Found <if>
           containsTag = true
-        } else if (twoArraysEqual(charList.slice(i, i + primaryTags.unless.length), primaryTags.unless)) { // Found <unless>
+        } else if (twoArraysEqual(charList.slice(i, i + tagLengths.unless), primaryTags.unless)) { // Found <unless>
           containsTag = true
-        } else if (twoArraysEqual(charList.slice(i, i + primaryTags.include.length), primaryTags.include)) { // Found <include>
+        } else if (twoArraysEqual(charList.slice(i, i + tagLengths.include), primaryTags.include)) { // Found <include>
           containsTag = true
         } else if (charList.slice(i, i + 24).join('').includes(' if-')) { // Found one line if
           containsTag = true
@@ -937,9 +956,9 @@
       }
     }
 
-    const endOfStatement = charList.slice(eol + primaryTags.cloop.length) // Rest of the template array after the <loop>
+    const endOfStatement = charList.slice(eol + tagLengths.cloop) // Rest of the template array after the <loop>
     slicedTemplate = charList.slice(sol, eol) // Contents of <loop>
-    const templateCopy = slicedTemplate // Keep a copy of <loop> contents
+    const templateCopy = charList.slice(sol, eol) // Keep a copy of <loop> contents
 
     // Get object values/keys
     if (params.through) {
@@ -1007,7 +1026,9 @@
 
         // Join parsed templates together
         if (containsTag) { // If loop contents contain a teddy tag, parse template again until no extra teddy tags remain
-          slicedTemplate = scanTemplate(slicedTemplate, model)
+          modifiedModel[params.val] = vals[i]
+          slicedTemplate = scanTemplate(slicedTemplate, modifiedModel)
+
           modifiedStatement += slicedTemplate
           parsedTags = true
         } else {
@@ -1028,7 +1049,7 @@
       }
     } else {
       // Could not parse <loop>, return rest of template
-      return [...charList.slice(eol + primaryTags.cloop.length)]
+      return [...charList.slice(eol + tagLengths.cloop)]
     }
 
     // In cases of very large datasets, we use the global endParse var to save time (since it will go character by character)
@@ -1065,7 +1086,7 @@
     const l = charList.length
 
     // Get HTML source from include tag
-    for (i = primaryTags.include.length; i < l; i++) {
+    for (i = tagLengths.include; i < l; i++) {
       currentChar = charList[i]
       if (currentChar === '=') { // Reached src value
         if (src === 'src') {
@@ -1105,7 +1126,7 @@
       currentChar = charList[i]
       if (inArg) { // Read contents of <arg>
         if (readingArgVal) { // Get include argument value
-          if (currentChar === '<' && twoArraysEqual(charList.slice(i, i + primaryTags.carg.length), primaryTags.carg)) { // Closing argument tag, push arg object to list of args
+          if (currentChar === '<' && twoArraysEqual(charList.slice(i, i + tagLengths.carg), primaryTags.carg)) { // Closing argument tag, push arg object to list of args
             if (nested > 0) {
               argValue += currentChar
               nested--
@@ -1117,7 +1138,7 @@
               argName = ''
               argValue = ''
             }
-          } else if (currentChar === '<' && twoArraysEqual(charList.slice(i, i + primaryTags.arg.length), primaryTags.arg)) { // We found another argument tag inside of an argument tag
+          } else if (currentChar === '<' && twoArraysEqual(charList.slice(i, i + tagLengths.arg), primaryTags.arg)) { // We found another argument tag inside of an argument tag
             argValue += currentChar
             nested++
           } else { // Get include argument value
@@ -1129,17 +1150,17 @@
           argName += currentChar
         }
       } else if (currentChar === '<') { // Found a tag
-        if (twoArraysEqual(charList.slice(i, i + primaryTags.arg.length), primaryTags.arg)) { // Check if we hit a teddy <arg> tag
+        if (twoArraysEqual(charList.slice(i, i + tagLengths.arg), primaryTags.arg)) { // Check if we hit a teddy <arg> tag
           inArg = true
           i += 4 // increment to start reading arg name right away
-        } else if (twoArraysEqual(charList.slice(i, i + primaryTags.cinclude.length), primaryTags.cinclude)) { // Found </include>
+        } else if (twoArraysEqual(charList.slice(i, i + tagLengths.cinclude), primaryTags.cinclude)) { // Found </include>
           if (nested > 0) {
             nested--
           } else {
-            endInclude = i + primaryTags.cinclude.length
+            endInclude = i + tagLengths.cinclude
             break
           }
-        } else if (twoArraysEqual(charList.slice(i, i + primaryTags.include.length), primaryTags.include)) {
+        } else if (twoArraysEqual(charList.slice(i, i + tagLengths.include), primaryTags.include)) {
           nested++
         } else { // Triggers on any tag that is not supposed to be in here
           if (charList[i + 1] !== '/') { // make sure this does not trigger on closing tags
@@ -1290,12 +1311,12 @@
 
   // Get inner content of <noteddy> tag without parsing teddy contents
   function parseNoTeddy (charList) {
-    let i
     const l = charList.length
+    let i
 
     for (i = 0; i < l; i++) {
-      if (twoArraysEqual(charList.slice(i, i + primaryTags.cnoteddy.length), primaryTags.cnoteddy)) { // Return contents of <noteddy>
-        return [...charList.slice(primaryTags.noteddy.length, i), ...charList.slice(i + primaryTags.cnoteddy.length)]
+      if (twoArraysEqual(charList.slice(i, i + tagLengths.cnoteddy), primaryTags.cnoteddy)) { // Return contents of <noteddy>
+        return [...charList.slice(tagLengths.noteddy, i), ...charList.slice(i + tagLengths.cnoteddy)]
       }
     }
   }
@@ -1317,12 +1338,12 @@
 
   // Returns teddy primary tag name
   function findTeddyTag (charList, tags) {
-    let type = 'unknown'
     const keys = Object.keys(tags)
-    let currentTag
-    let i
     const kl = keys.length
     const l = charList.length
+    let type = 'unknown'
+    let currentTag
+    let i
     let currentChar
 
     // Loop through teddy primary tags
@@ -1464,7 +1485,6 @@
             varVal = getValueAndReplace([...varVal], myModel, escapeOverride, `{${varName}}`).join('')
           }
         }
-
         return insertValue(charList, `${varVal}`, 0, i + 1) // Replace and return template
       } else { // Get teddy variable name from template
         varName += charList[i]
@@ -1476,91 +1496,99 @@
 
   // Get a usable value from a teddy var
   function getTeddyVal (name, model, escapeOverride) {
-    let teddyName = name // Name of teddy variable
-    let attributeValue // used for dynamic variable names
+    const l = name.length
     let noParse = false // 'p' flag
     let noSuppress = false // 's' flag
-    let teddyPeriodNameStart
-    let teddyPeriodNameEnd
-    let teddyLongName
+    let tempName = ''
+    let tempValue
+    let flagSlice
     let i
-    const l = name.length
-    const periodIndex = name.indexOf('.')
 
     // Check teddy var name for any exceptions
     for (i = 0; i < l; i++) {
-      // something.{person}
-      if (name[i] === '{' && name[l - 1] === '}') {
-        attributeValue = model[name.slice(i + 1, l - 1)]
-        if (periodIndex >= 0) {
-          teddyName = name.slice(0, periodIndex)
-          return model[teddyName][attributeValue]
+      if (name[i] === '.') {
+        if (tempValue) {
+          tempValue = tempValue[tempName]
         } else {
-          return attributeValue
+          tempValue = model[tempName]
         }
-      } else if (name[i] === '|') { // Looks for 'p' or 's' flags in teddy var name
-        if (name[i + 1] === 'p') {
+        tempName = ''
+      } else if (name[i] === '{') { // some.{thing}
+        tempName = ''
+      } else if (name[i] === '}') { // some.{thing}
+        if (tempValue) {
+          tempValue = tempValue[model[tempName]]
+        } else {
+          tempValue = model[tempName]
+        }
+      } else if (name[i] === '|') { // Looks for 'p' or 's' flags
+        flagSlice = name.slice(i)
+        if (flagSlice.indexOf('p') >= 0) { // catch noparse flag
           noParse = true
-        } else if (name[i + 1] === 's') {
+        }
+        if (flagSlice.indexOf('s') >= 0) { // catch suppress html entities flag
           noSuppress = true
         }
-      }
-    }
 
-    // something.moreSomething
-    if (periodIndex >= 0) {
-      teddyPeriodNameStart = teddyName.slice(0, periodIndex) // something
-      teddyPeriodNameEnd = teddyName.slice(periodIndex + 1) // moreSomething
-      if (model[teddyPeriodNameStart] && (model[teddyPeriodNameStart][teddyPeriodNameEnd] || model[teddyPeriodNameStart][teddyPeriodNameEnd] === '')) { // Make sure we are not accessing teddy model with undefined reference
-        return model[teddyPeriodNameStart][teddyPeriodNameEnd]
-      }
-    } else { // Var contains a 'p' or 's' or no flag at all
-      teddyLongName = teddyName.slice(0, name.indexOf('|')) // something
-      if (noParse && noSuppress) { // something|p|s
-        if (model[teddyLongName] || model[teddyLongName] === '') {
-          return noParseFlag(model[teddyLongName])
-        }
-      } else if (noSuppress) { // something|s
-        if (model[teddyLongName] || model[teddyLongName] === '') {
-          return model[teddyLongName]
-        }
-      } else if (noParse) { // something|p
-        if (model[teddyLongName] || model[teddyLongName] === '') {
-          return escapeEntities(noParseFlag(model[teddyLongName]))
-        }
-      } else { // something
-        if (model[teddyName] || model[teddyName] === '') {
-          if (typeof model[teddyName] === 'boolean' || typeof model[teddyName] === 'object') {
-            return model[teddyName]
+        // Move index to correct spot afterwards
+        i += flagSlice.length
+
+        // Reached the end of teddy name string
+        if (i === l) {
+          if (tempValue) {
+            tempValue = tempValue[tempName]
           } else {
-            if (!escapeOverride) {
-              return escapeEntities(model[teddyName])
-            } else {
-              return model[teddyName]
-            }
+            tempValue = model[tempName]
+          }
+        }
+      } else {
+        tempName += name[i]
+
+        if (i === l - 1) { // Reached the end of our teddy variablee reference
+          if (tempValue) {
+            tempValue = tempValue[tempName]
+          } else {
+            tempValue = model[tempName]
           }
         }
       }
     }
 
-    return `{${teddyName}}`
+    if (tempValue || tempValue === '') {
+      if (noParse && noSuppress) { // something|p|s
+        return noParseFlag(tempValue)
+      } else if (noSuppress) { // something|s
+        return tempValue
+      } else if (noParse) { // something|p
+        return escapeEntities(noParseFlag(tempValue))
+      } else { // something
+        if (escapeOverride) {
+          return tempValue
+        } else {
+          return escapeEntities(tempValue)
+        }
+      }
+    } else {
+      return `{${name}}`
+    }
   }
 
   // Escapes HTML entities within a teddy value
   function escapeEntities (value) {
     const entityKeys = Object.keys(escapeHtmlEntities)
+    const ekl = entityKeys.length
     let escapedEntity = false
     let newValue = ''
     let i
     let j
-    const l = value.length
-    const ekl = entityKeys.length
 
-    if (typeof value === 'number') { // Value is a number, no reason to escape
+    if (value === undefined || typeof value === 'boolean' || typeof value === 'object') { // Cannot escape on these values
+      return value
+    } else if (typeof value === 'number') { // Value is a number, no reason to escape
       return `${value}`
     } else {
       // Loop through value to find HTML entities
-      for (i = 0; i < l; i++) {
+      for (i = 0; i < value.length; i++) {
         escapedEntity = false
 
         // Loop through list of HTML entities to escape
@@ -1629,7 +1657,7 @@
     }
   }
 
-  // Handles cleaning up all {~ content ~}
+  // Handles cleaning up all {~content~}
   function cleanNoParseContent (rt) {
     return rt.replace(/({~|~})/g, '')
   }

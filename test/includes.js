@@ -124,6 +124,11 @@ describe('Includes', function () {
     done()
   })
 
+  it('should get pageContent <arg> contents and correctly parse <if>, <loop>, and <if> tags (includes/includeComplexContent.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('includes/includeComplexContent.html', model), `<section class='content'><article class='thing'><section class='blah'>other_prop_one</section></article><article class='thing'><section class='blah'>other_prop_two</section></article></section>`)
+    done()
+  })
+
   it('should <include> a template and escape regex pattern in argument (includes/includeEscapeRegex.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('includes/includeEscapeRegex.html', model), '<input type=\'text\' name=\'date\' placeholder=\'DD/MM/YYYY\' id=\'date\' pattern=\'^(3[0-1]|[1-2]\\d|[1-9]|0\\d)\\/(1[0-2]|[1-9]|0\\d)\\/[1-2]\\d{3}$\'>')
     done()

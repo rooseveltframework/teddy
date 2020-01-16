@@ -63,6 +63,16 @@ function makeModel () {
       name: 'test'
     },
     teddyNull: null,
+    obj: {
+      one: {
+        prop: 'prop_one',
+        other_prop: 'other_prop_one'
+      },
+      two: {
+        prop: 'prop_two',
+        other_prop: 'other_prop_two'
+      }
+    },
     moreNestedObjects: [
       {
         num: 1,
