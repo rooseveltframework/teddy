@@ -239,6 +239,11 @@ describe('Misc', function () {
     done()
   })
 
+  it('should render template with extraneous whitespace properly (misc/extraneousWhitespace.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('misc/extraneousWhitespace.html', model), '<p>a</p><p>Something exists</p><p>b</p><p>Something exists</p><p>c</p><p>Something exists</p>')
+    done()
+  })
+
   it('should execute render callback function for errors and non errors', function (done) {
     teddy.setMaxPasses(100)
     teddy.setVerbosity(3)
