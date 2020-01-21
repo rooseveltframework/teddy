@@ -558,7 +558,6 @@
     var commentList = [] // Array of 2-length lists that contain the start/end indices for template comments inbetween conditionals
     var commentIndices = [] // 2-length list containing start/end indices for template comments inbetween conditionals
 
-    var currentClosingTag = secondaryTags['celse' + type] // </elseif> </elseunless>
     var currentOpenTag = primaryTags[type] // <if> <unless> <elseif> <elseunless>
 
     // Look for begin/end of conditionals
@@ -596,11 +595,9 @@
           // Push [start, end] indices of opening <if> to a list
           boc.push([tagStart, i + 1])
 
-          // Start looking for <elseif> or <elseunless> tags
-          currentOpenTag = secondaryTags['else' + type]
-
           // Reset relevant variables
           varList = []
+          operators = []
           teddyVarName = ''
           teddyVarExpected = ''
           condition = {
@@ -655,14 +652,22 @@
           } else { // Push [start, end] index of closing conditional tag to our list marking the ends of condition tags (i.e. </if> </unless>)
             const endOfClosingTag = charList.indexOf('>', i)
             eoc.push([i, endOfClosingTag + 1])
+            isNested = false
           }
-        } else if (twoArraysEqual(charList.slice(i, i + currentOpenTag.length), currentOpenTag) && nested < 1) { // Beginning <elseif> or <elseunless> tag
-          readingConditional = true
-          tagStart = i
-          i += currentOpenTag.length - 1
-        } else if (validEndingTag(charList, i) && twoArraysEqual(charList.slice(i, i + currentClosingTag.length), currentClosingTag)) { // Get [start, end] indices of </elseif> or </elseunless>
-          const endOfClosingTag = charList.indexOf('>', i)
-          eoc.push([i, endOfClosingTag + 1]) // important indices
+        } else if ((twoArraysEqual(charList.slice(i, i + tagLengths.elseif), secondaryTags.elseif) || twoArraysEqual(charList.slice(i, i + tagLengths.elseunless), secondaryTags.elseunless)) && nested < 1) { // Beginning <elseif> or <elseunless> tag
+          if (!isNested) {
+            // Set the condition type to be either if or unless dependent on the tag being currently read
+            condition.type = charList[i + 5] === 'i' ? 'if' : 'unless'
+
+            readingConditional = true
+            tagStart = i
+            i = charList.indexOf(' ', i)
+          }
+        } else if (validEndingTag(charList, i) && (twoArraysEqual(charList.slice(i, i + tagLengths.celseif), secondaryTags.celseif) || twoArraysEqual(charList.slice(i, i + tagLengths.celseunless), secondaryTags.celseunless))) { // Get [start, end] indices of </elseif> or </elseunless>
+          if (!isNested) {
+            const endOfClosingTag = charList.indexOf('>', i)
+            eoc.push([i, endOfClosingTag + 1]) // important indices
+          }
         } else if (twoArraysEqual(charList.slice(i, i + tagLengths.else), secondaryTags.else) && nested < 1) { // <else> tag
           if (!isNested) { // Push [start, end] indices of <else> to list
             boc.push([i, i + tagLengths.else])
@@ -717,8 +722,13 @@
           }
         }
       } else {
-        // Return contents of <else> tag along with rest of template
-        return [...charList.slice(boc[boc.length - 1][1], eoc[eoc.length - 1][0]), ...charList.slice(eoc[eoc.length - 1][1])]
+        // If number of conditions === number of endOfConditions array, then the last one is not an else statement, return just the content after the last condition
+        if (conditions.length === eoc.length) {
+          return [...charList.slice(eoc[eoc.length - 1][1])]
+        } else {
+          // Return contents of <else> tag along with rest of template
+          return [...charList.slice(boc[boc.length - 1][1], eoc[eoc.length - 1][0]), ...charList.slice(eoc[eoc.length - 1][1])]
+        }
       }
     }
   }
@@ -1695,7 +1705,7 @@
     const l = charList.length
 
     // check for </
-    if (charList[startIndex] !== '<' && charList[startIndex + 1] !== '/') {
+    if (charList[startIndex] === '<' && charList[startIndex + 1] !== '/') {
       return false
     }
 

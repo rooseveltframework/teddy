@@ -116,6 +116,16 @@ describe('Conditionals', function () {
     done()
   })
 
+  it('should eval <if something=\'no\'> as false and <elseunless something=\'maybe\'> as true (conditionals/ifElseUnless.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/ifElseUnless.html', model), '<p>The variable \'something\' is not set to \'maybe\'</p>')
+    done()
+  })
+
+  it('should eval <unless something> as false and <elseif somethingElse> as true (conditionals/unlessElseIf.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/unlessElseIf.html', model), '<p>The variable \'somethingElse\' is present</p>')
+    done()
+  })
+
   it('should evaluate <if something and notDefined> as false (conditionals/and.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('conditionals/and.html', model), ' <p>and: false</p>')
     done()
