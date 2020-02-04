@@ -474,14 +474,14 @@
                 case 'if':
                 case 'unless':
                   charList = parseConditional(charList, primaryTag, model)
-                  break
+                  continue
                 case 'include':
                   charList = parseInclude(charList, model)
                   passes++
                   continue
                 case 'loop':
                   charList = parseLoop(charList, model)
-                  break
+                  continue
                 case 'one-line-if':
                   charList = parseOneLineIf(charList, model)
 
@@ -506,6 +506,7 @@
                     }
                     charList.pop()
                   }
+                  continue
               }
             }
             break
