@@ -14,34 +14,34 @@
 
   // List of all primary teddy tags
   var primaryTags = {
-    include: ['<', 'i', 'n', 'c', 'l', 'u', 'd', 'e', ' '].reverse(),
-    arg: ['<', 'a', 'r', 'g', ' '].reverse(),
-    if: ['<', 'i', 'f', ' '].reverse(),
-    loop: ['<', 'l', 'o', 'o', 'p', ' '].reverse(),
-    olif: ['i', 'f', '-'].reverse(),
-    unless: ['<', 'u', 'n', 'l', 'e', 's', 's', ' '].reverse(),
-    noteddy: ['<', 'n', 'o', 't', 'e', 'd', 'd', 'y', '>'].reverse(),
-    argInvalid: ['<', 'a', 'r', 'g', '>'].reverse(),
-    includeInvalid: ['<', 'i', 'n', 'c', 'l', 'u', 'd', 'e', '>'].reverse(),
-    ifInvalid: ['<', 'i', 'f', '>'].reverse(),
-    loopInvalid: ['<', 'l', 'o', 'o', 'p', '>'].reverse(),
-    unlessInvalid: ['<', 'u', 'n', 'l', 'e', 's', 's', '>'].reverse(),
-    carg: ['<', '/', 'a', 'r', 'g'].reverse(),
-    cinclude: ['<', '/', 'i', 'n', 'c', 'l', 'u', 'd', 'e'].reverse(),
-    cif: ['<', '/', 'i', 'f'].reverse(),
-    cloop: ['<', '/', 'l', 'o', 'o', 'p'].reverse(),
-    cunless: ['<', '/', 'u', 'n', 'l', 'e', 's', 's'].reverse(),
-    cnoteddy: ['<', '/', 'n', 'o', 't', 'e', 'd', 'd', 'y'].reverse()
+    include: [' ', 'e', 'd', 'u', 'l', 'c', 'n', 'i', '<'],
+    arg: [' ', 'g', 'r', 'a', '<'],
+    if: [' ', 'f', 'i', '<'],
+    loop: [' ', 'p', 'o', 'o', 'l', '<'],
+    olif: ['-', 'f', 'i'],
+    unless: [' ', 's', 's', 'e', 'l', 'n', 'u', '<'],
+    noteddy: ['>', 'y', 'd', 'd', 'e', 't', 'o', 'n', '<'],
+    argInvalid: ['>', 'g', 'r', 'a', '<'],
+    includeInvalid: ['>', 'e', 'd', 'u', 'l', 'c', 'n', 'i', '<'],
+    ifInvalid: ['>', 'f', 'i', '<'],
+    loopInvalid: ['>', 'p', 'o', 'o', 'l', '<'],
+    unlessInvalid: ['>', 's', 's', 'e', 'l', 'n', 'u', '<'],
+    carg: ['g', 'r', 'a', '/', '<'],
+    cinclude: ['e', 'd', 'u', 'l', 'c', 'n', 'i', '/', '<'],
+    cif: ['f', 'i', '/', '<'],
+    cloop: ['p', 'o', 'o', 'l', '/', '<'],
+    cunless: ['s', 's', 'e', 'l', 'n', 'u', '/', '<'],
+    cnoteddy: ['y', 'd', 'd', 'e', 't', 'o', 'n', '/', '<']
   }
 
   // List of all secondary tags for teddy conditionals
   var secondaryTags = {
-    elseif: ['<', 'e', 'l', 's', 'e', 'i', 'f', ' '].reverse(),
-    else: ['<', 'e', 'l', 's', 'e', '>'].reverse(),
-    elseunless: ['<', 'e', 'l', 's', 'e', 'u', 'n', 'l', 'e', 's', 's', ' '].reverse(),
-    celseif: ['<', '/', 'e', 'l', 's', 'e', 'i', 'f'].reverse(),
-    celse: ['<', '/', 'e', 'l', 's', 'e'].reverse(),
-    celseunless: ['<', '/', 'e', 'l', 's', 'e', 'u', 'n', 'l', 'e', 's', 's'].reverse()
+    elseif: [' ', 'f', 'i', 'e', 's', 'l', 'e', '<'],
+    else: ['>', 'e', 's', 'l', 'e', '<'],
+    elseunless: [' ', 's', 's', 'e', 'l', 'n', 'u', 'e', 's', 'l', 'e', '<'],
+    celseif: ['f', 'i', 'e', 's', 'l', 'e', '/', '<'],
+    celse: ['e', 's', 'l', 'e', '/', '<'],
+    celseunless: ['s', 's', 'e', 'l', 'n', 'u', 'e', 's', 'l', 'e', '/', '<']
   }
 
   var tagLengths = {
