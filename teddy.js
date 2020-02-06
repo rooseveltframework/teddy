@@ -1511,7 +1511,7 @@
             varVal = getValueAndReplace([...varVal].reverse(), myModel, escapeOverride, `{${varName}}`).reverse().join('')
           }
         }
-        return insertValue(charList, [...varVal].reverse(), charList.length, i) // Replace and return template
+        return insertValue(charList, [...varVal.toString()].reverse(), charList.length, i) // Replace and return template
       } else { // Get teddy variable name from template
         varName += charList[i]
       }
@@ -1580,7 +1580,7 @@
       }
     }
 
-    if (tempValue || tempValue === '') {
+    if (tempValue || tempValue === '' || tempValue === false) {
       if (noParse && noSuppress) { // something|p|s
         return noParseFlag(tempValue)
       } else if (noSuppress) { // something|s

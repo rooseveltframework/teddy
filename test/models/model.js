@@ -44,6 +44,8 @@ function makeModel () {
       }
     ],
     something: 'Some content',
+    somethingTrue: true,
+    somethingFalse: false,
     dynamicValue: 'Some content',
     somethingMore: 'More content',
     somethingElse: true,

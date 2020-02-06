@@ -244,6 +244,11 @@ describe('Misc', function () {
     done()
   })
 
+  it('should render variables that resolve to true or false boolean literals as strings (misc/printBooleanLiteral.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('misc/printBooleanLiteral.html', model), '<p>true</p><p>false</p>')
+    done()
+  })
+
   it('should execute render callback function for errors and non errors', function (done) {
     teddy.setMaxPasses(100)
     teddy.setVerbosity(3)
