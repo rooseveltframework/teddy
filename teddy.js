@@ -464,7 +464,13 @@
             } else { // Replace teddy {variable} with its value in the model
               charList = getValueAndReplace(charList, model, escapeOverride)
             }
-            break
+
+            // continue through the parsing switch if the "beginning" of the charList is a teddy noparse "{~ ~}". Otherwise break
+            if (charList[charList.length - 1] === '{' && charList[charList.length - 2] === '~') {
+              continue
+            } else {
+              break
+            }
           case '<': // Teddy/HTML tag
             if (charList[charList.length - 2] === '/') { // Closing template tag
             } else {
@@ -1504,7 +1510,7 @@
           break
         }
 
-        if (varVal[0] === '{') { // Get Teddy variable value within teddy variable value
+        if (varVal[0] === '{' && varVal[1] !== '~') { // Get Teddy variable value within teddy variable value
           if (varVal.indexOf(pName) >= 0) { // Infinitely referencing teddy variables
             break
           } else {
@@ -1661,8 +1667,8 @@
       newValue = newValue.slice(0, teddyVarList[j][0]) + '{~' + newValue.slice(teddyVarList[j][0], teddyVarList[j][1]) + '~}' + newValue.slice(teddyVarList[j][1])
     }
 
-    // Returns modified value
-    return newValue
+    // Wrap entire value with "{~ ~}" and return modified value
+    return `{~${newValue}~}`
   }
 
   // Handles <noteddy>content</noteddy> using this notation internally {~content~}
