@@ -1020,7 +1020,12 @@
               } else if (teddyName === params.key) { // {var} name read is a key
                 teddyString = `${keyVals[i]}`
               } else if (teddyName.indexOf('.') >= 0 && (teddyName.slice(0, teddyName.indexOf('.')) === params.val)) { // {var.next} name read is a val that is an object
-                teddyString = `${vals[i][teddyName.slice(teddyName.indexOf('.') + 1)]}`
+                teddyString = getTeddyVal(teddyName.slice(teddyName.indexOf('.') + 1), vals[i])
+
+                // If getTeddyVal did not resolve to anything in the model, continue on
+                if (teddyString.slice(1, teddyString.length - 1) === teddyName.slice(teddyName.indexOf('.') + 1)) {
+                  teddyString = ''
+                }
               }
               // Replace teddy variable name with actual value
               if (teddyString !== '' && teddyString !== 'undefined') {

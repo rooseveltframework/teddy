@@ -183,4 +183,14 @@ describe('Looping', function () {
     assert.equalIgnoreSpaces(teddy.render('looping/loopIncludesIfUnless.html', model), '<p>a</p><p>Some content</p><p>Hello</p><p>b</p><p>Some content</p><p>Hello</p><p>c</p><p>Some content</p><p>Hello</p>')
     done()
   })
+
+  it('should render deeply nested vars with teddy code (looping/nestedObjectWithTeddyContent.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('looping/nestedObjectWithTeddyContent.html', model), '<p>1</p><p>Something Exists</p><p>2</p><p>Something Exists</p>')
+    done()
+  })
+
+  it('should render deeply nested vars with teddy code and respect noparse flag (looping/nestedObjectWithTeddyContentNoParse.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('looping/nestedObjectWithTeddyContentNoParse.html', model), '<p>1</p><p><if something>Something Exists</if></p><p>2</p><p><if something>Something Exists</if></p>')
+    done()
+  })
 })

@@ -163,6 +163,24 @@ function makeModel () {
           }
         ]
       }
+    ],
+    nestedObjectWithTeddyVars: [
+      {
+        num: 1,
+        children: [
+          {
+            stuff: '<if something>Something Exists</if>'
+          }
+        ]
+      },
+      {
+        num: 2,
+        children: [
+          {
+            stuff: '<if something>Something Exists</if>'
+          }
+        ]
+      }
     ]
   }
 
