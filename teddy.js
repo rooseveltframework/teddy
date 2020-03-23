@@ -983,7 +983,6 @@
     const endOfClosingTag = charList.lastIndexOf('>', eol)
     const endOfStatement = charList.slice(0, endOfClosingTag) // Rest of the template array after the <loop>
     slicedTemplate = charList.slice(eol + 1, sol) // Contents of <loop>
-    const templateCopy = charList.slice(eol + 1, sol) // Keep a copy of <loop> contents
 
     // Get object values/keys
     if (params.through) {
@@ -1020,7 +1019,7 @@
               } else if (teddyName === params.key) { // {var} name read is a key
                 teddyString = `${keyVals[i]}`
               } else if (teddyName.indexOf('.') >= 0 && (teddyName.slice(0, teddyName.indexOf('.')) === params.val)) { // {var.next} name read is a val that is an object
-                teddyString = getTeddyVal(teddyName.slice(teddyName.indexOf('.') + 1), vals[i])
+                teddyString = getTeddyVal(teddyName.slice(teddyName.indexOf('.') + 1), vals[i]).toString()
 
                 // If getTeddyVal did not resolve to anything in the model, continue on
                 if (teddyString.slice(1, teddyString.length - 1) === teddyName.slice(teddyName.indexOf('.') + 1)) {
@@ -1066,7 +1065,7 @@
         }
 
         // Reset template back to a copy
-        slicedTemplate = templateCopy
+        slicedTemplate = Object.assign([], charList.slice(eol + 1, sol))
 
         // Save context if template contains a nested loop
         if (isNested) {
@@ -1430,8 +1429,19 @@
 
   // Returns a list of characters with teddy var names replaced with actual values
   function insertValue (str, val, start, end) {
-    // String after value + new value + String before value
-    return [...str.slice(0, end), ...val, ...str.slice(start)]
+    // Remove the content between the start and end
+    str.splice(end, start - end)
+
+    const chunkLength = 5000
+    const numChunks = Math.ceil(val.length / chunkLength)
+
+    // add the val string in chunks at a time
+    for (let i = 0; i < numChunks; i++) {
+      const chunk = val.slice(i * chunkLength, i * chunkLength + chunkLength)
+
+      str.splice(end + (i * chunkLength), 0, ...chunk)
+    }
+    return str
   }
 
   // Finds correct context for a nested loop
