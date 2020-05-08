@@ -5,7 +5,7 @@ if (typeof process === 'object') {
   var assert = chai.assert
   var chaiString = require('chai-string')
   var makeModel = require('./models/model')
-  var teddy = require('../teddy')
+  var teddy = require('../')
   var model
 
   chai.use(chaiString)
@@ -112,7 +112,8 @@ describe('Misc', function () {
     for (i = 0; i < 100; i++) {
       teddy.render('misc/variable.html', { something: i })
     }
-    assert.equalIgnoreSpaces(teddy.renderedTemplates['misc/variable.html'][0].renderedTemplate, '<p>90</p>')
+    const renderedTemplates = teddy.getRenderedTemplates()
+    assert.equalIgnoreSpaces(renderedTemplates['misc/variable.html'][0].renderedTemplate, '<p>90</p>')
     teddy.setDefaultCaches(1)
     teddy.cacheRenders(false)
     done()
@@ -120,10 +121,11 @@ describe('Misc', function () {
 
   it('should not cache a blacklisted template (misc/variable.html)', function (done) {
     teddy.cacheRenders(true)
-    teddy.renderedTemplates = {}
+    teddy.setRenderedTemplates({})
     teddy.setCacheBlacklist(['misc/variable.html'])
     teddy.render('misc/variable.html', { something: 1 })
-    assert.strictEqual(teddy.renderedTemplates['misc/variable.html'], undefined)
+    const renderedTemplates = teddy.getRenderedTemplates()
+    assert.strictEqual(renderedTemplates['misc/variable.html'], undefined)
     teddy.setCacheBlacklist([])
     teddy.cacheRenders(false)
     done()
@@ -131,12 +133,13 @@ describe('Misc', function () {
 
   it('should only cache whitelisted templates (misc/variable.html)', function (done) {
     teddy.cacheRenders(true)
-    teddy.renderedTemplates = {}
+    teddy.setRenderedTemplates({})
     teddy.setCacheWhitelist({ 'misc/variable.html': 1 })
     teddy.render('misc/plainHTML.html', { something: 1 })
     teddy.render('misc/variable.html', { something: 1 })
-    assert.strictEqual(teddy.renderedTemplates['misc/plainHTML.html'], undefined)
-    assert.equalIgnoreSpaces(teddy.renderedTemplates['misc/variable.html'][0].renderedTemplate, '<p>1</p>')
+    const renderedTemplates = teddy.getRenderedTemplates()
+    assert.strictEqual(renderedTemplates['misc/plainHTML.html'], undefined)
+    assert.equalIgnoreSpaces(renderedTemplates['misc/variable.html'][0].renderedTemplate, '<p>1</p>')
     teddy.setCacheWhitelist({})
     teddy.cacheRenders(false)
     done()
@@ -145,15 +148,16 @@ describe('Misc', function () {
   it('should only cache the whitelisted template the specified number of times (misc/variable.html)', function (done) {
     var i
     teddy.cacheRenders(true)
-    teddy.renderedTemplates = {}
+    teddy.setRenderedTemplates({})
     teddy.setDefaultCaches(10)
     teddy.setCacheWhitelist({ 'misc/variable.html': 10 })
     teddy.render('misc/plainHTML.html', { something: 1 })
     for (i = 0; i < 100; i++) {
       teddy.render('misc/variable.html', { something: i })
     }
-    assert.strictEqual(teddy.renderedTemplates['misc/plainHTML.html'], undefined)
-    assert.equalIgnoreSpaces(teddy.renderedTemplates['misc/variable.html'][0].renderedTemplate, '<p>90</p>')
+    const renderedTemplates = teddy.getRenderedTemplates()
+    assert.strictEqual(renderedTemplates['misc/plainHTML.html'], undefined)
+    assert.equalIgnoreSpaces(renderedTemplates['misc/variable.html'][0].renderedTemplate, '<p>90</p>')
     teddy.setCacheWhitelist({})
     teddy.cacheRenders(false)
     done()

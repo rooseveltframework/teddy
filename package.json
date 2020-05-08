@@ -10,11 +10,12 @@
   ],
   "version": "0.4.28",
   "files": [
-    "teddy.js"
+    "dist/teddy.js",
+    "dist/web.js"
   ],
   "homepage": "https://github.com/rooseveltframework/teddy",
   "license": "CC-BY-4.0",
-  "main": "teddy.js",
+  "main": "dist/teddy.js",
   "readmeFilename": "README.md",
   "engines": {
     "node": ">=10.0.0"
@@ -42,7 +43,9 @@
     "lint-staged": "~9.4.1",
     "mocha": "~6.2.1",
     "nyc": "~14.1.1",
-    "standard": "~14.3.1"
+    "standard": "~14.3.1",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.11"
   },
   "standard": {
     "ignore": [
@@ -72,6 +75,7 @@
     ]
   },
   "scripts": {
+    "build": "webpack",
     "codecov": "./node_modules/.bin/codecov",
     "coverage": "cross-env NODE_ENV=cover nyc mocha --timeout 5000 test && karma start",
     "lint": "standard && eslint ./test",

@@ -5,7 +5,7 @@ if (typeof process === 'object') {
   var assert = chai.assert
   var chaiString = require('chai-string')
   var makeModel = require('./models/model')
-  var teddy = require('../teddy')
+  var teddy = require('../')
   var model
 
   chai.use(chaiString)
@@ -125,7 +125,7 @@ describe('Includes', function () {
   })
 
   it('should get pageContent <arg> contents and correctly parse <if>, <loop>, and <if> tags (includes/includeComplexContent.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('includes/includeComplexContent.html', model), `<section class='content'><article class='thing'><section class='blah'>other_prop_one</section></article><article class='thing'><section class='blah'>other_prop_two</section></article></section>`)
+    assert.equalIgnoreSpaces(teddy.render('includes/includeComplexContent.html', model), "<section class='content'><article class='thing'><section class='blah'>other_prop_one</section></article><article class='thing'><section class='blah'>other_prop_two</section></article></section>")
     done()
   })
 
@@ -142,7 +142,7 @@ describe('Includes', function () {
   it('should escape from infinite loop of includes via setMaxPasses (includes/includeInfiniteLoop.html)', function (done) {
     teddy.setVerbosity(3)
     teddy.setMaxPasses(100)
-    assert.strictEqual(teddy.render('includes/includeInfiniteLoop.html', model), `<!DOCTYPE html><html lang='en'><head><meta charset='utf-8'><title>Could not parse template</title></head><body><h1>Could not parse template</h1><p>The following errors occurred while parsing the template:</p><ul><li>Render aborted due to max number of passes (100) exceeded; there is a possible infinite loop in your template logic.</li></ul></body></html>`)
+    assert.strictEqual(teddy.render('includes/includeInfiniteLoop.html', model), "<!DOCTYPE html><html lang='en'><head><meta charset='utf-8'><title>Could not parse template</title></head><body><h1>Could not parse template</h1><p>The following errors occurred while parsing the template:</p><ul><li>Render aborted due to max number of passes (100) exceeded; there is a possible infinite loop in your template logic.</li></ul></body></html>")
     done()
   })
 
