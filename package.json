@@ -78,6 +78,7 @@
     "codecov": "./node_modules/.bin/codecov",
     "coverage": "cross-env NODE_ENV=cover nyc mocha --timeout 5000 test && karma start",
     "lint": "standard && eslint ./test",
+    "postinstall": "npm run build",
     "test": "cross-env NODE_ENV=test npm run test-server && karma start",
     "test-chrome": "karma start --browsers ChromeHeadless",
     "test-edge": "karma start --browsers Edge",
