@@ -1,12 +1,12 @@
-const params = {}
+const params = {} // default values for parameters sent to teddy
 
 // set params to default values
 setDefaultParams()
 
 module.exports.params = params
 
-const templates = {}
-let renderedTemplates = {}
+const templates = {} // compiled templates are stored as object collections, e.g. { "myTemplate.html": "<p>some markup</p>"}
+let renderedTemplates = {} // cache of fully rendered temmplates, e.g. { "myTemplate.html": "<p>some markup</p>"}
 
 let jsonStringifyCache
 
@@ -79,6 +79,7 @@ function setDefaultParams () {
   params.maxPasses = 25000
 }
 
+// mutator method to set verbosity param. takes human-readable string argument and converts it to an integer for more efficient checks against the setting
 function setVerbosity (v) {
   switch (v) {
     case 'none':
@@ -99,6 +100,7 @@ function setVerbosity (v) {
   params.verbosity = v
 }
 
+// mutator method to set template root param; must be a string
 function setTemplateRoot (v) {
   params.templateRoot = String(v)
 }
@@ -147,18 +149,22 @@ function setMaxPasses (v) {
   params.maxPasses = Number(v)
 }
 
+// access fully rendered templates
 function getRenderedTemplates () {
   return renderedTemplates
 }
 
+// mutator method to set rendered templates
 function setRenderedTemplates (v) {
   renderedTemplates = v
 }
 
+// access compiled templates
 function getTemplates () {
   return templates
 }
 
+// mutator method to cache compiled template
 function setTemplate (file, template) {
   templates[file] = template
 }
