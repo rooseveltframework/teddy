@@ -407,7 +407,7 @@ function render (template, model, callback) {
 if (typeof module !== 'undefined' && module.exports && typeof window) {
   module.exports.__express = render
 
-  if (require) {
+  if (typeof require !== 'undefined' && typeof window === 'undefined') {
     fs = require('fs')
     path = require('path')
   }

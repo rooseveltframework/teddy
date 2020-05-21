@@ -1,30 +1,20 @@
 const path = require('path')
 
-module.exports = [
-  {
-    name: 'node',
-    entry: './index.js',
-    target: 'node',
-    output: {
-      path: path.join(__dirname, 'dist'),
-      filename: 'teddy.js',
-      libraryTarget: 'commonjs2'
-    },
-    node: {
-      __dirname: false
-    }
+module.exports = {
+  name: 'main',
+  entry: './index.js',
+  output: {
+    path: path.join(__dirname, 'dist'),
+    filename: 'teddy.js',
+    library: 'teddy',
+    libraryTarget: 'umd',
+    globalObject: 'this'
   },
-  {
-    name: 'web',
-    entry: './index.js',
-    output: {
-      path: path.join(__dirname, 'dist'),
-      filename: 'web.js',
-      library: 'teddy',
-      libraryTarget: 'window'
-    },
-    node: {
-      fs: 'empty'
-    }
+  externals: {
+    fs: 'commonjs fs',
+    path: 'commonjs path'
+  },
+  node: {
+    __dirname: false
   }
-]
+}

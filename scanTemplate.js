@@ -1,6 +1,6 @@
 const { removeTeddyComment, noParseTeddyVariable, getValueAndReplace, validEndingTag, findTeddyTag, twoArraysEqual, parseNoTeddy } = require('./utils')
 const { primaryTags, tagLengths } = require('./constants')
-const { teddyConsole, params } = require('./')
+const { teddyConsole, params } = require('./index')
 
 module.exports = { scanTemplate }
 

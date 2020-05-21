@@ -1,7 +1,7 @@
 const { primaryTags, tagLengths } = require('./constants')
 const { getTeddyVal, validEndingTag, twoArraysEqual, insertValue } = require('./utils')
 const { scanTemplate } = require('./scanTemplate')
-const { params } = require('./')
+const { params } = require('./index')
 
 // Parse <include src='myTemplate.html'>
 function parseInclude (charList, model, passes, fs, endParse, currentContext, contextModels) {
@@ -61,7 +61,7 @@ function parseInclude (charList, model, passes, fs, endParse, currentContext, co
     src = getTeddyVal(src, model)
   }
 
-  const { compile } = require('./')
+  const { compile } = require('./index')
 
   // Parse <include> src
   includeTemplate = compile(src, fs).split('').reverse()
