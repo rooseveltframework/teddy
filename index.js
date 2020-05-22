@@ -335,7 +335,13 @@ function render (template, model, callback) {
       if (renderStringyModel === stringyModel) {
         // move to last position in the array to mark it as most recently accessed
         renderedTemplates[template].push(renderedTemplates[template].splice(i, 1)[0])
-        return render.renderedTemplate
+
+        if (typeof callback === 'function') {
+          callback(null, render.renderedTemplate)
+          return
+        } else {
+          return render.renderedTemplate
+        }
       }
     }
   }
