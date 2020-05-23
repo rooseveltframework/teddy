@@ -11,16 +11,13 @@ module.exports = function (config) {
   // add Safari if in macOS
   if (os.platform() === 'darwin') {
     testBrowsers.push('Safari')
-  } else if (os.platform() === 'win32') {
-    // add IE if in windows
-    testBrowsers.push('IE')
   }
 
   const configuration = {
     basePath: '',
     frameworks: ['mocha'],
     files: [
-      'teddy.js',
+      'dist/teddy.js',
       'test/models/*.js',
       'node_modules/chai/chai.js',
       'node_modules/chai-string/chai-string.js',
@@ -34,7 +31,7 @@ module.exports = function (config) {
       '/templates/': '/base/test/templates/'
     },
     preprocessors: {
-      'teddy.js': ['coverage'],
+      'dist/teddy.js': ['coverage'],
       'test/templates/**/*': ['html2js']
     },
     html2JsPreprocessor: {
@@ -57,6 +54,7 @@ module.exports = function (config) {
     },
     client: {
       mocha: {
+        timeout: 5000,
         reporter: 'html'
       }
     },

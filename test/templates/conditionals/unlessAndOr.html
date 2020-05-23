@@ -1,0 +1,12 @@
+{!
+  should evaluate <unless something and notDefined or somethingElse> as false
+!}
+
+        {! true !}    {! false !}   {! true !}
+<unless something and notDefined or somethingElse>
+  <p>and + or: false</p>
+</unless>
+<else>
+  <p>should render</p>
+</else>
+

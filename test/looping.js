@@ -5,7 +5,7 @@ if (typeof process === 'object') {
   var assert = chai.assert
   var chaiString = require('chai-string')
   var makeModel = require('./models/model')
-  var teddy = require('../teddy')
+  var teddy = require('../')
   var model
 
   chai.use(chaiString)
@@ -48,6 +48,11 @@ describe('Looping', function () {
 
   it('should parse nested loops correctly (looping/nestedLoops.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('looping/nestedLoops.html', model), '<p>1</p> <ul> <li>0: one</li><li>1: two</li><li>2: three</li> </ul><p>2</p> <ul> <li>0: four</li><li>1: five</li><li>2: six</li> </ul><p>3</p> <ul> <li>0: seven</li><li>1: eight</li><li>2: nine</li> </ul>')
+    done()
+  })
+
+  it('should parse nested nested loops correctly (looping/nestedNestedLoops.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('looping/nestedNestedLoops.html', model), '<p>1</p><ul><li>1</li><ul><li>0: one</li><li>1: two</li><li>2: three</li></ul><li>2</li><ul><li>0: four</li><li>1: five</li><li>2: six</li></ul><li>3</li><ul><li>0: seven</li><li>1: eight</li><li>2: nine</li></ul></ul><p>2</p><ul><li>1</li><ul><li>0: one</li><li>1: two</li><li>2: three</li></ul><li>2</li><ul><li>0: four</li><li>1: five</li><li>2: six</li></ul><li>3</li><ul><li>0: seven</li><li>1: eight</li><li>2: nine</li></ul></ul><p>3</p><ul><li>1</li><ul><li>0: one</li><li>1: two</li><li>2: three</li></ul><li>2</li><ul><li>0: four</li><li>1: five</li><li>2: six</li></ul><li>3</li><ul><li>0: seven</li><li>1: eight</li><li>2: nine</li></ul></ul>')
     done()
   })
 
@@ -171,6 +176,21 @@ describe('Looping', function () {
 
   it('should ignore undefined members of objects and arrays (looping/loopUndefinedMember.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('looping/loopUndefinedMember.html', model), '<p>a</p><p>{letter}</p><p>c</p><p>{item.a}</p><p>{item.b}</p><p>{item.c}</p><p>4</p><p>5</p><p>6</p><p>7</p><p>8</p><p>9</p>')
+    done()
+  })
+
+  it('should evaluate evaluate include, if, and unless statements inside of loop (conditionals/loopIncludesIfUnless.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('looping/loopIncludesIfUnless.html', model), '<p>a</p><p>Some content</p><p>Hello</p><p>b</p><p>Some content</p><p>Hello</p><p>c</p><p>Some content</p><p>Hello</p>')
+    done()
+  })
+
+  it('should render deeply nested vars with teddy code (looping/nestedObjectWithTeddyContent.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('looping/nestedObjectWithTeddyContent.html', model), '<p>1</p><p>Something Exists</p><p>2</p><p>Something Exists</p>')
+    done()
+  })
+
+  it('should render deeply nested vars with teddy code and respect noparse flag (looping/nestedObjectWithTeddyContentNoParse.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('looping/nestedObjectWithTeddyContentNoParse.html', model), '<p>1</p><p><if something>Something Exists</if></p><p>2</p><p><if something>Something Exists</if></p>')
     done()
   })
 })

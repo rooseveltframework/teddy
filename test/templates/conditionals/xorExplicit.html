@@ -1,0 +1,83 @@
+{!
+  should evaluate different cases of xor correctly
+!}
+
+    {! false !}           {! false !}
+<if something='hello' xor something='goodbye'>
+  <p>should not render</p>
+</if>
+<else>
+  <p>xor: false</p>
+</else>
+
+    {! false !}                {! false !}
+<if something='No content' xor doesntexist>
+  <p>should not render</p>
+</if>
+<else>
+  <p>xor: false</p>
+</else>
+
+    {! false !}     {! false !}
+<if doesntexist xor something='No content'>
+  <p>should not render</p>
+</if>
+<else>
+  <p>xor: false</p>
+</else>
+
+    {! true !}                   {! true !}
+<if something='Some content' xor somethingMore='More content'>
+  <p>should render</p>
+</if>
+<else>
+  <p>xor: false</p>
+</else>
+
+    {! true !}                   {! false !}
+<if something='Some content' xor something='No content'>
+  <p>should render</p>
+</if>
+<else>
+  <p>xor: false</p>
+</else>
+
+    {! false !}          {! true !}
+<if something='nope' xor something='Some content'>
+  <p>should render</p>
+</if>
+<else>
+  <p>xor: false</p>
+</else>
+
+    {! true !}    {! false !}
+<if something xor something='No content'>
+  <p>should render</p>
+</if>
+<else>
+  <p>xor: false</p>
+</else>
+
+    {! false !}                {! true !}
+<if something='No content' xor something>
+  <p>should render</p>
+</if>
+<else>
+  <p>xor: false</p>
+</else>
+
+    {! false !}                  {! true !}
+<if something='Some content' xor doesntexist>
+  <p>should render</p>
+</if>
+<else>
+  <p>xor: false</p>
+</else>
+
+    {! false !}   {! true !}
+<if doesntexist xor something='Some content'>
+  <p>should render</p>
+</if>
+<else>
+  <p>xor: false</p>
+</else>

@@ -416,7 +416,9 @@ API documentation
 ===
 
 - `teddy.compile(template)`: Compile a template by supplying either source code or a file name (in Node.js).
-  - Populates `teddy.templates` with the new template in the format of `teddy.templates[path]: compiledSource`.
+  - Populates internal `templates` cache with the new template in the format of `templates[path]: compiledSource`.
+  - Can be accessed from `teddy.getTemplates()`
+- `teddy.getTemplates()`: Get the internal cache of templates
 - `teddy.render(template, model)`: Render a template by supplying either source code or a file name (in Node.js).
   - Returns fully rendered HTML.
   - Removes `{! teddy comments !}`
@@ -455,6 +457,4 @@ API documentation
 Client-side browser support
 ===
 
-Teddy is supported on all modern browsers.
-
-Teddy is also supported in Internet Explorer 9+. Teddy may work in earlier versions of IE too but that isn't easy to test because the mocha/chai unit tests do not work in IE8 and below.
+Teddy is supported on all modern browsers (Chrome, Firefox, Microsoft Edge (v79+)).

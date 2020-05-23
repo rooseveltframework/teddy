@@ -5,8 +5,12 @@ function makeModel () {
   var model = {
     letters: ['a', 'b', 'c'],
     circular: {},
+    foo: '{bar}',
+    bar: '{foo}',
+    pageContent: '<body>hello</body>',
     undefinedVar: undefined,
-    definedParent: { undefinedMember: undefined },
+    emptyString: '',
+    definedParent: { undefinedMember: undefined, emptyMember: '' },
     camelLetters: ['a', 'b', 'c'],
     missingLetter: ['a', undefined, 'c'],
     names: { jack: 'guy', jill: 'girl', hill: 'landscape' },
@@ -40,6 +44,9 @@ function makeModel () {
       }
     ],
     something: 'Some content',
+    somethingTrue: true,
+    somethingFalse: false,
+    dynamicValue: 'Some content',
     somethingMore: 'More content',
     somethingElse: true,
     varWithVarInside: 'Variable with a variable inside: {subVar}',
@@ -53,7 +60,128 @@ function makeModel () {
     number: 10,
     nameReference: 'jack',
     4: 'STRING!',
-    largeDataSet: []
+    largeDataSet: [],
+    teddyObject: {
+      name: 'test'
+    },
+    teddyNull: null,
+    obj: {
+      one: {
+        prop: 'prop_one',
+        other_prop: 'other_prop_one'
+      },
+      two: {
+        prop: 'prop_two',
+        other_prop: 'other_prop_two'
+      }
+    },
+    moreNestedObjects: [
+      {
+        num: 1,
+        children: [
+          {
+            num: 1,
+            children: [
+              'one',
+              'two',
+              'three'
+            ]
+          },
+          {
+            num: 2,
+            children: [
+              'four',
+              'five',
+              'six'
+            ]
+          },
+          {
+            num: 3,
+            children: [
+              'seven',
+              'eight',
+              'nine'
+            ]
+          }
+        ]
+      },
+      {
+        num: 2,
+        children: [
+          {
+            num: 1,
+            children: [
+              'one',
+              'two',
+              'three'
+            ]
+          },
+          {
+            num: 2,
+            children: [
+              'four',
+              'five',
+              'six'
+            ]
+          },
+          {
+            num: 3,
+            children: [
+              'seven',
+              'eight',
+              'nine'
+            ]
+          }
+        ]
+      },
+      {
+        num: 3,
+        children: [
+          {
+            num: 1,
+            children: [
+              'one',
+              'two',
+              'three'
+            ]
+          },
+          {
+            num: 2,
+            children: [
+              'four',
+              'five',
+              'six'
+            ]
+          },
+          {
+            num: 3,
+            children: [
+              'seven',
+              'eight',
+              'nine'
+            ]
+          }
+        ]
+      }
+    ],
+    nestedObjectWithTeddyVars: [
+      {
+        num: 1,
+        children: [
+          {
+            stuff: '<if something>Something Exists</if>'
+          }
+        ]
+      },
+      {
+        num: 2,
+        children: [
+          {
+            stuff: '<if something>Something Exists</if>'
+          }
+        ]
+      }
+    ]
   }
 
   model.circular.circular = model.circular

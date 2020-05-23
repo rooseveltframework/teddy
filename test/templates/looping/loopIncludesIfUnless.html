@@ -1,0 +1,13 @@
+{!
+    should loop through {letters} correctly and evaluate other teddy tags
+  !}
+  <loop through='letters' val='letter'>
+    <p>{letter}</p> {! outputs a, b, c !}
+    <include src='misc/variable'></include>
+    <if something>
+      <unless doesntexist>
+        <p>Hello</p>
+      </unless>
+    </if>
+  </loop>
+  

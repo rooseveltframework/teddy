@@ -5,7 +5,7 @@ if (typeof process === 'object') {
   var assert = chai.assert
   var chaiString = require('chai-string')
   var makeModel = require('./models/model')
-  var teddy = require('../teddy')
+  var teddy = require('../')
   var model
 
   chai.use(chaiString)
@@ -112,7 +112,8 @@ describe('Misc', function () {
     for (i = 0; i < 100; i++) {
       teddy.render('misc/variable.html', { something: i })
     }
-    assert.equalIgnoreSpaces(teddy.renderedTemplates['misc/variable.html'][0].renderedTemplate, '<p>90</p>')
+    const renderedTemplates = teddy.getRenderedTemplates()
+    assert.equalIgnoreSpaces(renderedTemplates['misc/variable.html'][0].renderedTemplate, '<p>90</p>')
     teddy.setDefaultCaches(1)
     teddy.cacheRenders(false)
     done()
@@ -120,10 +121,11 @@ describe('Misc', function () {
 
   it('should not cache a blacklisted template (misc/variable.html)', function (done) {
     teddy.cacheRenders(true)
-    teddy.renderedTemplates = {}
+    teddy.setRenderedTemplates({})
     teddy.setCacheBlacklist(['misc/variable.html'])
     teddy.render('misc/variable.html', { something: 1 })
-    assert.strictEqual(teddy.renderedTemplates['misc/variable.html'], undefined)
+    const renderedTemplates = teddy.getRenderedTemplates()
+    assert.strictEqual(renderedTemplates['misc/variable.html'], undefined)
     teddy.setCacheBlacklist([])
     teddy.cacheRenders(false)
     done()
@@ -131,12 +133,13 @@ describe('Misc', function () {
 
   it('should only cache whitelisted templates (misc/variable.html)', function (done) {
     teddy.cacheRenders(true)
-    teddy.renderedTemplates = {}
+    teddy.setRenderedTemplates({})
     teddy.setCacheWhitelist({ 'misc/variable.html': 1 })
     teddy.render('misc/plainHTML.html', { something: 1 })
     teddy.render('misc/variable.html', { something: 1 })
-    assert.strictEqual(teddy.renderedTemplates['misc/plainHTML.html'], undefined)
-    assert.equalIgnoreSpaces(teddy.renderedTemplates['misc/variable.html'][0].renderedTemplate, '<p>1</p>')
+    const renderedTemplates = teddy.getRenderedTemplates()
+    assert.strictEqual(renderedTemplates['misc/plainHTML.html'], undefined)
+    assert.equalIgnoreSpaces(renderedTemplates['misc/variable.html'][0].renderedTemplate, '<p>1</p>')
     teddy.setCacheWhitelist({})
     teddy.cacheRenders(false)
     done()
@@ -145,15 +148,16 @@ describe('Misc', function () {
   it('should only cache the whitelisted template the specified number of times (misc/variable.html)', function (done) {
     var i
     teddy.cacheRenders(true)
-    teddy.renderedTemplates = {}
+    teddy.setRenderedTemplates({})
     teddy.setDefaultCaches(10)
     teddy.setCacheWhitelist({ 'misc/variable.html': 10 })
     teddy.render('misc/plainHTML.html', { something: 1 })
     for (i = 0; i < 100; i++) {
       teddy.render('misc/variable.html', { something: i })
     }
-    assert.strictEqual(teddy.renderedTemplates['misc/plainHTML.html'], undefined)
-    assert.equalIgnoreSpaces(teddy.renderedTemplates['misc/variable.html'][0].renderedTemplate, '<p>90</p>')
+    const renderedTemplates = teddy.getRenderedTemplates()
+    assert.strictEqual(renderedTemplates['misc/plainHTML.html'], undefined)
+    assert.equalIgnoreSpaces(renderedTemplates['misc/variable.html'][0].renderedTemplate, '<p>90</p>')
     teddy.setCacheWhitelist({})
     teddy.cacheRenders(false)
     done()
@@ -213,7 +217,7 @@ describe('Misc', function () {
   it('should minify template with internal minifier (misc/templateToMinify.html)', function (done) {
     teddy.compileAtEveryRender(true)
     teddy.minify(true)
-    assert.strictEqual(teddy.render('misc/templateToMinify.html', model), '<!DOCTYPE html><html lang=\'en\'> <head> <meta charset=\'utf-8\'> <meta name=\'viewport\' content=\'width=device-width,initial-scale=1\'> <meta name=\'format-detection\' content=\'telephone=no\'> <title>Plain HTML</title> </head> <body> <main> <p>This template contains no teddy tags. Just HTML.</p> </main> </body></html>')
+    assert.equalIgnoreSpaces(teddy.render('misc/templateToMinify.html', model), '<!DOCTYPE html><html lang=\'en\'> <head> <meta charset=\'utf-8\'> <meta name=\'viewport\' content=\'width=device-width,initial-scale=1\'> <meta name=\'format-detection\' content=\'telephone=no\'> <title>Plain HTML</title> </head> <body> <main> <p>This template contains no teddy tags. Just HTML.</p> </main> </body></html>')
     teddy.minify(false)
     teddy.compileAtEveryRender(false)
     done()
@@ -227,5 +231,40 @@ describe('Misc', function () {
   it('should render undefined variables as text (misc/undefinedVar.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('misc/undefinedVar.html', model), '<p>{undefinedVar}</p><p>{definedParent.undefinedMember}</p>')
     done()
+  })
+
+  it('should prevent infinitely referencing variables (misc/varRefVar.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('misc/varRefVar.html', model), '{bar}')
+    done()
+  })
+
+  it('should render empty strings as is for variables that are empty strings (misc/emptyStringVariable.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('misc/emptyStringVariable.html', model), '<p></p><p></p>')
+    done()
+  })
+
+  it('should render template with extraneous whitespace properly (misc/extraneousWhitespace.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('misc/extraneousWhitespace.html', model), '<p>a</p><p>Something exists</p><p>b</p><p>Something exists</p><p>c</p><p>Something exists</p>')
+    done()
+  })
+
+  it('should render variables that resolve to true or false boolean literals as strings (misc/printBooleanLiteral.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('misc/printBooleanLiteral.html', model), '<p>true</p><p>false</p>')
+    done()
+  })
+
+  it('should execute render callback function for errors and non errors', function (done) {
+    teddy.setMaxPasses(100)
+    teddy.setVerbosity(3)
+    teddy.render('includes/includeInfiniteLoop.html', model, function (err, html) {
+      assert.equalIgnoreSpaces(err, '<li>Render aborted due to max number of passes (100) exceeded; there is a possible infinite loop in your template logic.</li>')
+      teddy.render('misc/variable.html', model, function (err, html) {
+        if (err) {
+          assert.fail(err)
+        }
+        assert.equalIgnoreSpaces(html, '<p>Some content</p>')
+        done()
+      })
+    })
   })
 })

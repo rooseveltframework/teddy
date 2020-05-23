@@ -7,6 +7,11 @@
   <p>or: true true</p>
 </if>
 
+    {! true !}     {! false !}
+<if teddyObject or teddyNull>
+  <p>or: true false</p>
+</if>
+
     {! true !}                  {! false !}
 <if something='Some content' or somethingMore='Nope'>
   <p>or: true false</p>
@@ -19,5 +24,47 @@
 
     {! false !}                  {! false !}
 <if something='Nope' or somethingMore='Nope'>
-  <p>or: false false</p>
+  <p>should not render</p>
 </if>
+<else>
+  <p>or: false false</p>
+</else>
+
+    {! false !}         {! true !}
+<if something='Nope' or somethingMore>
+  <p>or: false true</p>
+</if>
+
+    {! true !}       {! false !}
+<if somethingMore or something='Nope'>
+  <p>or: true false</p>
+</if>
+
+    {! true !}   {! true !}
+<if something or somethingMore>
+  <p>or: true true</p>
+</if>
+
+    {! false !}    {! false !}
+<if doesntexist or alsodoesntexist>
+  <p>should not render</p>
+</if>
+<else>
+  <p>or: false false</p>
+</else>
+
+    {! false !}    {! false !}
+<if doesntexist or alsodoesntexist='what'>
+  <p>should not render</p>
+</if>
+<else>
+  <p>or: false false</p>
+</else>
+
+    {! false !}          {! false !}
+<if doesntexist='huh' or alsodoesntexist>
+  <p>should not render</p>
+</if>
+<else>
+  <p>or: false false</p>
+</else>
