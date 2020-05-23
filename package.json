@@ -8,7 +8,7 @@
       "url": "https://github.com/rooseveltframework/teddy/graphs/contributors"
     }
   ],
-  "version": "0.5.0",
+  "version": "0.5.1",
   "files": [
     "dist/teddy.js"
   ],
@@ -70,7 +70,6 @@
     "codecov": "./node_modules/.bin/codecov",
     "coverage": "cross-env NODE_ENV=cover c8 --reporter=text --reporter=lcov mocha --timeout 60000 test/*.js && karma start",
     "lint": "standard && eslint ./test",
-    "postinstall": "npm run build",
     "test": "cross-env NODE_ENV=test npm run test-server && karma start",
     "test-chrome": "karma start --browsers ChromeHeadless",
     "test-edge": "karma start --browsers Edge",
