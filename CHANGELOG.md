@@ -4,6 +4,10 @@
 
 - Put your changes here...
 
+## 0.5.2
+
+- Undo accidental removal of package-lock.json.
+
 ## 0.5.1
 
 - Removed postinstall script since it created a problematic prompt to install webpack-cli during npm installs.
