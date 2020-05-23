@@ -2,7 +2,8 @@
 Teddy templating engine
 ===
 
-[![Travis build status](https://travis-ci.org/rooseveltframework/teddy.svg?branch=master)](https://travis-ci.org/rooseveltframework/teddy) [![Appveyor build status](https://ci.appveyor.com/api/projects/status/r4va2t4hkni8vx8x?svg=true)](https://ci.appveyor.com/project/kethinov/teddy-uct05) [![codecov](https://codecov.io/gh/rooseveltframework/teddy/branch/master/graph/badge.svg)](https://codecov.io/gh/rooseveltframework/teddy) [![npm](https://img.shields.io/npm/v/teddy.svg)](https://www.npmjs.com/package/teddy)
+[![Build Status](https://github.com/rooseveltframework/teddy/workflows/CI/badge.svg
+)](https://github.com/rooseveltframework/teddy/actions?query=workflow%3ACI) [![codecov](https://codecov.io/gh/rooseveltframework/teddy/branch/master/graph/badge.svg)](https://codecov.io/gh/rooseveltframework/teddy) [![npm](https://img.shields.io/npm/v/teddy.svg)](https://www.npmjs.com/package/teddy)
 
 Teddy is the most readable and easy to learn templating language there is!
 
@@ -31,8 +32,6 @@ Table of contents
 - [Using Teddy in Node.js](https://github.com/rooseveltframework/teddy#using-teddy-in-nodejs)
 - [Using Teddy with client-side JS](https://github.com/rooseveltframework/teddy#using-teddy-with-client-side-js)
 - [API documentation](https://github.com/rooseveltframework/teddy#api-documentation)
-- [Client-side browser support](https://github.com/rooseveltframework/teddy#client-side-browser-support)
-- [How to run the unit tests](https://github.com/rooseveltframework/teddy#how-to-run-the-unit-tests)
 
 
 
@@ -395,11 +394,13 @@ We could perform many complex operations simultaneously. For instance, we could 
 Using Teddy in Node.js
 ===
 
-Teddy is designed for use with [Express](http://expressjs.com) in [Node.js](http://nodejs.org).
+Install Teddy with npm: `npm i teddy`. Then require or import the module to gain access to its API. See [API documentation](https://github.com/rooseveltframework/teddy#api-documentation).
 
-- First require the node modules `express`, and `teddy`.
-- Then initialize express and configure it to your liking.
-- In your express config, make sure to include this line: `app.engine('html', teddy.__express)`.
+Teddy is also designed for use with [Express](http://expressjs.com).
+
+- First require or import `express` and `teddy`.
+- Then initialize Express and configure it to your liking.
+- In your Express config, make sure to include this line: `app.engine('html', teddy.__express)`.
 
 If you're looking for a more fully-featured web framework to build web apps with using Teddy templates, then try out Teddy's companion, [Roosevelt](https://github.com/rooseveltframework/roosevelt).
 
@@ -409,7 +410,14 @@ If you're interested in using Teddy with the [gulp.js](http://gulpjs.com) build 
 Using Teddy with client-side JS
 ===
 
-On the client-side, pass source code to Teddy's render method, like so:  `teddy.render(sourceCode, yourModel)`. The render method will return a fully rendered template.
+- Use Teddy in a script tag without a module bundler: Install Teddy with npm. You can then load the `node_modules/teddy/dist/teddy.js` file into a script tag which will create a global `teddy` variable you can use to gain access to its API.
+- Use Teddy with a module bundler: Install Teddy with npm. You can then import the module from `node_modules/teddy/dist/teddy.js` to a module bundler like Browserify, Webpack, etc to gain access to its API. 
+
+You can then pass source code to Teddy's render method, like so:  `teddy.render(sourceCode, yourModel)`. The render method will return a fully rendered template. See [API documentation](https://github.com/rooseveltframework/teddy#api-documentation) for more information about the Teddy API.
+
+Teddy is supported on all modern browsers (Chrome, Firefox, Microsoft Edge [v79+], Safari). Support for Internet Explorer was dropped with Teddy 0.5.0.
+
+To install without npm, you can clone this repo and build teddy manually by running `npm run build`.
 
 
 API documentation
@@ -451,10 +459,3 @@ API documentation
   - Default is false. *(Not recommended to enable in production for performance reasons.)*
 - `teddy.minify(true/false)`: When this setting is enabled, Teddy will minify templates using its own internal minifier during the compile step.
   - Default is false. *(Not recommended. Usually best to use a third party tool like [html-minifier](https://www.npmjs.com/package/html-minifier) instead.)*
-
-
-
-Client-side browser support
-===
-
-Teddy is supported on all modern browsers (Chrome, Firefox, Microsoft Edge (v79+)).
