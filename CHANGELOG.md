@@ -4,6 +4,10 @@
 
 - Put your changes here...
 
+## 0.5.1
+
+- Removed postinstall script since it created a problematic prompt to install webpack-cli during npm installs.
+
 ## 0.5.0
 
 - Variables with spaces in them will now be parsed.
