@@ -8,7 +8,7 @@
       "url": "https://github.com/rooseveltframework/teddy/graphs/contributors"
     }
   ],
-  "version": "0.4.28",
+  "version": "0.5.0",
   "files": [
     "dist/teddy.js"
   ],
@@ -22,11 +22,12 @@
   "engineStrict": true,
   "dependencies": {},
   "devDependencies": {
+    "c8": "~7.1.2",
     "chai": "~4.2.0",
     "chai-string": "~1.5.0",
     "codecov": "~3.7.0",
     "cross-env": "~7.0.2",
-    "eslint": "~7.0.0",
+    "eslint": "~7.1.0",
     "eslint-plugin-mocha": "~7.0.0",
     "husky": "~4.2.5",
     "karma": "~5.0.9",
@@ -40,8 +41,7 @@
     "karma-safari-launcher": "~1.0.0",
     "karma-spec-reporter": "~0.0.32",
     "lint-staged": "~10.2.4",
-    "mocha": "~7.1.2",
-    "nyc": "~15.0.1",
+    "mocha": "~7.2.0",
     "standard": "~14.3.4",
     "webpack": "^4.43.0",
     "webpack-cli": "^3.3.11"
@@ -65,30 +65,21 @@
       "es6": true
     }
   },
-  "nyc": {
-    "report-dir": "./coverage/server",
-    "reporter": [
-      "html",
-      "text",
-      "lcov"
-    ]
-  },
   "scripts": {
     "build": "webpack",
     "codecov": "./node_modules/.bin/codecov",
-    "coverage": "cross-env NODE_ENV=cover nyc mocha --timeout 5000 test && karma start",
+    "coverage": "cross-env NODE_ENV=cover c8 --reporter=text --reporter=lcov mocha --timeout 60000 test/*.js && karma start",
     "lint": "standard && eslint ./test",
     "postinstall": "npm run build",
     "test": "cross-env NODE_ENV=test npm run test-server && karma start",
     "test-chrome": "karma start --browsers ChromeHeadless",
     "test-edge": "karma start --browsers Edge",
     "test-firefox": "karma start --browsers Firefox",
-    "test-ie": "karma start --browsers IE",
     "test-safari": "karma start --browsers Safari",
     "test-server": "cross-env NODE_ENV=test mocha test"
   },
   "lint-staged": {
-    "*.js": "standard && && eslint ./test"
+    "*.js": "standard && eslint ./test"
   },
   "repository": {
     "type": "git",
@@ -107,5 +98,9 @@
     "hooks": {
       "pre-commit": "lint-staged && eslint ./test"
     }
+  },
+  "funding": {
+    "type": "individual",
+    "url": "https://github.com/sponsors/kethinov"
   }
 }
