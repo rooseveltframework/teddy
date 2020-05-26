@@ -1,17 +1,10 @@
 // Karma configuration
-const os = require('os')
-
 module.exports = function (config) {
   // default browsers to test on
   const testBrowsers = [
     'ChromeHeadless',
     'FirefoxHeadless'
   ]
-
-  // add Safari if in macOS
-  if (os.platform() === 'darwin') {
-    testBrowsers.push('Safari')
-  }
 
   const configuration = {
     basePath: '',
