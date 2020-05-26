@@ -4,6 +4,12 @@
 
 - Put your changes here...
 
+## 0.5.3
+
+- Fixed some Windows-exclusive bugs related to how newlines are parsed in Windows vs. other operating systems.
+- Various dependencies bumped.
+- CI improvements.
+
 ## 0.5.2
 
 - Undo accidental removal of package-lock.json.
