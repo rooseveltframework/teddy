@@ -26,7 +26,7 @@ function scanTemplate (charList, model, escapeOverride, passes, fs, endParse, cu
             charList = removeTeddyComment(charList)
           } else if (charList[charList.length - 2] === '~') { // Internal notation for a noteddy block of text
             [charList, renderedTemplate] = noParseTeddyVariable(charList, renderedTemplate)
-          } else if (charList[charList.length - 2] === ' ' || charList[charList.length - 2] === '\n') { // Plain text curly bracket
+          } else if (charList[charList.length - 2] === ' ' || charList[charList.length - 2] === '\n' || charList[charList.length - 2] === '\r') { // Plain text curly bracket
           } else { // Replace teddy {variable} with its value in the model
             charList = getValueAndReplace(charList, model, escapeOverride)
           }
@@ -106,7 +106,7 @@ function scanTemplate (charList, model, escapeOverride, passes, fs, endParse, cu
         renderedTemplate += charList[charList.length - 1]
 
         // add an extra space for js within html template
-        if ((charList[charList.length - 1] === '{' || charList[charList.length - 1] === ';') && charList[charList.length - 2] === '\n') {
+        if ((charList[charList.length - 1] === '{' || charList[charList.length - 1] === ';') && (charList[charList.length - 2] === '\n' || charList[charList.length - 2] === '\r')) {
           renderedTemplate += ' '
         }
         charList.pop()

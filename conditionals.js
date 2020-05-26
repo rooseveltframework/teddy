@@ -237,7 +237,7 @@ function parseOneLineIf (charList, model) {
     // Get teddy var name
     if (readingName) {
       // Done with name and onto true/false values next
-      if (currentChar === ' ' || currentChar === '\n') {
+      if (currentChar === ' ' || currentChar === '\n' || currentChar === '\r') {
         readingConditions = true
         readingName = false
         condition.varName = conditionVarName.slice(3)
@@ -250,7 +250,7 @@ function parseOneLineIf (charList, model) {
       }
     } else if (readingLiteral) { // Get expected literal value if it exists
       // We are done reading expected literal value
-      if ((currentChar === ' ' || currentChar === '\n') && (conditionLiteral[conditionLiteral.length - 1] === '"' || conditionLiteral[conditionLiteral.length - 1] === "'" || conditionLiteral[conditionLiteral.length - 1] === '}')) {
+      if ((currentChar === ' ' || currentChar === '\n' || currentChar === '\r') && (conditionLiteral[conditionLiteral.length - 1] === '"' || conditionLiteral[conditionLiteral.length - 1] === "'" || conditionLiteral[conditionLiteral.length - 1] === '}')) {
         readingConditions = true
         readingLiteral = false
 
@@ -264,7 +264,7 @@ function parseOneLineIf (charList, model) {
         conditionLiteral += currentChar
       }
     } else if (readingConditions) { // Get True/False conditions in the oneline-if
-      if ((currentChar === ' ' || currentChar === '\n') && (charList[i + 1] === currentQuote || charList[i + 1] === ' ' || charList[i + 1] === '\n')) {
+      if ((currentChar === ' ' || currentChar === '\n' || currentChar === '\r') && (charList[i + 1] === currentQuote || charList[i + 1] === ' ' || charList[i + 1] === '\n' || charList[i + 1] === '\r')) {
         if (conditionText.slice(0, 4) === 'true') {
           condition.true = conditionText.slice(6, -1)
         } else if (conditionText.slice(0, 5) === 'false') {
@@ -296,7 +296,7 @@ function parseOneLineIf (charList, model) {
         }
         conditionText += currentChar
       }
-    } else if ((currentChar === ' ' || currentChar === '\n') && twoArraysEqual(charList.slice(i - 3, i), primaryTags.olif)) { // Possible beginning for oneline-if
+    } else if ((currentChar === ' ' || currentChar === '\n' || currentChar === '\r') && twoArraysEqual(charList.slice(i - 3, i), primaryTags.olif)) { // Possible beginning for oneline-if
       readingName = true
       startIndex = i
     }

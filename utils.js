@@ -219,7 +219,7 @@ function findTeddyTag (charList, tags) {
     currentChar = charList[i]
     if (currentChar === '>' || currentChar === '<') { // stop checking if we see an open bracket '<' for a tag
       break
-    } else if (currentChar === ' ' || currentChar === '\n') { // possible oneline-if
+    } else if (currentChar === ' ' || currentChar === '\n' || currentChar === '\r') { // possible oneline-if
       if (twoArraysEqual(charList.slice(i - 3, i), primaryTags.olif)) { // definite oneline-if
         return 'one-line-if'
       }
