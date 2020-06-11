@@ -22,7 +22,7 @@
   "engineStrict": true,
   "dependencies": {},
   "devDependencies": {
-    "c8": "~7.1.2",
+    "c8": "~7.2.0",
     "chai": "~4.2.0",
     "chai-string": "~1.5.0",
     "codecov": "~3.7.0",
