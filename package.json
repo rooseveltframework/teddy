@@ -42,7 +42,7 @@
     "lint-staged": "~10.2.9",
     "mocha": "~8.0.0",
     "standard": "~14.3.4",
-    "webpack": "~4.43.0",
+    "webpack": "~4.44.0",
     "webpack-cli": "~3.3.11"
   },
   "standard": {
