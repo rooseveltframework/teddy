@@ -1,0 +1,10 @@
+{!
+  should correctly print the JSON string as unmodified text
+!}
+
+<if complexJSONString>
+  <pre>{complexJSONString|p|s}</pre>
+</if>
+<else>
+  <p>Should not render.</p>
+</else>

@@ -1,0 +1,11 @@
+{!
+  should loop through {arrays} correctly
+!}
+
+<loop through='arrays' key='i' val='item'>
+  <p>{i}</p>
+  <p>{item}</p>
+  <loop through='item' val='member'>
+    <p>{member}</p>
+  </loop>
+</loop>

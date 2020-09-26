@@ -353,4 +353,24 @@ describe('Conditionals', function () {
     assert.equalIgnoreSpaces(teddy.render('conditionals/ifMultipleCommentsElse.html', model), '<!-- HTML comment --><!-- MOAR HTML comments --><p>The variable \'doesntexist\' is not present</p>')
     done()
   })
+
+  it('should render the nested <else> condition (conditionals/nestedConditionalInElse.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/nestedConditionalInElse.html', model), '<p>The variable \'something\' and \'somethingElse\' are both present</p>')
+    done()
+  })
+
+  it('should evaluate the <unless> condition as true and not render the other conditions (conditionals/ifWithSiblingIfWithNestedIfElse.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/ifWithSiblingIfWithNestedIfElse.html', model), '<p>Should render.</p>')
+    done()
+  })
+
+  it('should print the letters behind both <if> statements nested in the <loop> (conditionals/ifLoopDoubleIf.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/ifLoopDoubleIf.html', model), '<p>a</p><p>b</p><p>a</p><p>b</p><p>a</p><p>b</p>')
+    done()
+  })
+
+  it('should correctly print the JSON string as unmodified text (conditionals/ifJSONStringPrintJSONString.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/ifJSONStringPrintJSONString.html', model), '<pre>{"content":{"appTitle":"Some App","pageTitle":"{content.appTitle}"},"currentYear":1858,"mainDomain":"localhost:43711","NODE_ENV":"development"}</pre>')
+    done()
+  })
 })
