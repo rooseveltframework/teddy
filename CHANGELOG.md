@@ -4,6 +4,15 @@
 
 - Put your changes here...
 
+## 0.5.4
+
+- Closed https://github.com/rooseveltframework/teddy/issues/412
+- Closed https://github.com/rooseveltframework/teddy/pull/418
+- Closed many unreported bugs.
+- Wrote a test for https://github.com/rooseveltframework/teddy/issues/404
+- Wrote a test for https://github.com/rooseveltframework/teddy/issues/357 but upon further investigation now consider it a wontfix.
+- Various dependencies bumped.
+
 ## 0.5.3
 
 - Fixed some Windows-exclusive bugs related to how newlines are parsed in Windows vs. other operating systems.
