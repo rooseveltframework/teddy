@@ -234,7 +234,7 @@ describe('Misc', function () {
   })
 
   it('should prevent infinitely referencing variables (misc/varRefVar.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('misc/varRefVar.html', model), '{bar}')
+    assert.equalIgnoreSpaces(teddy.render('misc/varRefVar.html', model), '{foo}')
     done()
   })
 
@@ -250,6 +250,12 @@ describe('Misc', function () {
 
   it('should render variables that resolve to true or false boolean literals as strings (misc/printBooleanLiteral.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('misc/printBooleanLiteral.html', model), '<p>true</p><p>false</p>')
+    done()
+  })
+
+  // wontfix: https://github.com/rooseveltframework/teddy/issues/357
+  it.skip('should not render excessive whitespace in a <textarea> as a result of teddy tag indententation / formatting (misc/excessiveWhitespace.html)', function (done) {
+    assert.equal(teddy.render('misc/excessiveWhitespace.html', model), '<textarea>Some text here</textarea>')
     done()
   })
 

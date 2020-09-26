@@ -411,7 +411,7 @@ Using Teddy with client-side JS
 ===
 
 - Use Teddy in a script tag without a module bundler: Install Teddy with npm. You can then load the `node_modules/teddy/dist/teddy.js` file into a script tag which will create a global `teddy` variable you can use to gain access to its API.
-- Use Teddy with a module bundler: Install Teddy with npm. You can then import the module from `node_modules/teddy/dist/teddy.js` to a module bundler like Browserify, Webpack, etc to gain access to its API. 
+- Use Teddy with a module bundler: Install Teddy with npm. You can then import the module from `node_modules/teddy/dist/teddy.js` to a module bundler like Browserify, Webpack, etc to gain access to its API.
 
 You can then pass source code to Teddy's render method, like so:  `teddy.render(sourceCode, yourModel)`. The render method will return a fully rendered template. See [API documentation](https://github.com/rooseveltframework/teddy#api-documentation) for more information about the Teddy API.
 
@@ -426,7 +426,8 @@ API documentation
 - `teddy.compile(template)`: Compile a template by supplying either source code or a file name (in Node.js).
   - Populates internal `templates` cache with the new template in the format of `templates[path]: compiledSource`.
   - Can be accessed from `teddy.getTemplates()`
-- `teddy.getTemplates()`: Get the internal cache of templates
+- `teddy.getTemplates()`: Get the internal cache of templates.
+- `teddy.setTemplate(name, template)`: Add a new template to the template cache.
 - `teddy.render(template, model)`: Render a template by supplying either source code or a file name (in Node.js).
   - Returns fully rendered HTML.
   - Removes `{! teddy comments !}`

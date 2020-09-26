@@ -50,7 +50,7 @@ function getTeddyVal (name, model, escapeOverride) {
     } else {
       tempName += name[i]
 
-      if (i === l - 1) { // Reached the end of our teddy variablee reference
+      if (i === l - 1) { // Reached the end of our teddy variable reference
         if (tempValue) {
           tempValue = tempValue[tempName]
         } else {
@@ -71,6 +71,14 @@ function getTeddyVal (name, model, escapeOverride) {
       if (escapeOverride) {
         return tempValue
       } else {
+        if (tempValue[0] === '{') {
+          if ('{' + tempName + '}' === model[tempValue.replace('{', '').replace('}', '')]) {
+            return '{' + tempName + '}' // short-circuit infinitely-referencing variables
+          }
+          if (getTeddyVal(tempValue, model, false) === '{' + tempValue + '}') {
+            return true // it looks like a teddy variable, but it doesn't resolve to one, so just return true
+          }
+        }
         return escapeEntities(tempValue)
       }
     }
@@ -116,33 +124,81 @@ function escapeEntities (value) {
   return newValue
 }
 
+/* matchRecursive
+  * accepts a string to search and a format (start and end tokens separated by "...").
+  * returns an array of matches, allowing nested instances of format.
+  *
+  * examples:
+  *   matchRecursive("test",          "(...)")   -> []
+  *   matchRecursive("(t(e)s)()t",    "(...)")   -> ["t(e)s", ""]
+  *   matchRecursive("t<e>>st",       "<...>")   -> ["e"]
+  *   matchRecursive("t<<e>st",       "<...>")   -> ["e"]
+  *   matchRecursive("t<<e>>st",      "<...>")   -> ["<e>"]
+  *   matchRecursive("<|t<e<|s|>t|>", "<|...|>") -> ["t<e<|s|>t"]
+  *
+  * (c) 2007 Steven Levithan <stevenlevithan.com>
+  * MIT License
+  *
+  * altered for use within teddy
+  */
+function matchRecursive () {
+  const formatParts = /^([\S\s]+?)\.\.\.([\S\s]+)/
+  const metaChar = /[-[\]{}()*+?.\\^$|,]/g
+
+  function escape (str) {
+    return str.replace(metaChar, '\\$&')
+  }
+
+  return function (str, format) {
+    const p = formatParts.exec(format)
+    const results = []
+    const opener = p[1]
+    const closer = p[2]
+    let matchStartIndex
+    let openTokens
+
+    // use an optimized regex when opener and closer are one character each
+    const iterator = new RegExp(format.length === 5 ? '[' + escape(opener + closer) + ']' : escape(opener) + '|' + escape(closer), 'g')
+
+    do {
+      openTokens = 0
+      let match
+      while (match = iterator.exec(str)) { // eslint-disable-line
+        if (match[0] === opener) {
+          if (!openTokens) {
+            matchStartIndex = iterator.lastIndex
+          }
+          openTokens++
+        } else if (openTokens) {
+          openTokens--
+          if (!openTokens) {
+            results.push(str.slice(matchStartIndex, match.index))
+          }
+        }
+      }
+    }
+    while (openTokens && (iterator.lastIndex = matchStartIndex))
+
+    return results
+  }
+}
+
+function replaceNonRegex (str, find, replace) {
+  if (typeof str === 'string') {
+    return str.split(find).join(replace)
+  } else {
+    console.error('teddy: replaceNonRegex passed invalid arguments.')
+  }
+}
+
 // Applies noparse logic to a teddy var value (ex: {varName|p})
 function noParseFlag (value) {
-  const teddyVarList = [] // keep track of all teddy vars
-  let noTeddyParse = [] // [start, end] indices for brackets of a teddy var
-  let newValue = value
-  let i
-  let j
-  const l = value.length
-
-  // Loop through block of teddy content to find all teddy variables to apply noparse logic to
-  for (i = 0; i < l; i++) {
-    if (value[i] === '{' && noTeddyParse.length < 1) { // Start of teddy variable
-      noTeddyParse.push(i)
-    } else if (value[i] === '}' && value[i + 1] !== '}') { // End of teddy variable
-      noTeddyParse.push(i + 1)
-      teddyVarList.push(noTeddyParse)
-      noTeddyParse = []
-    }
+  const vars = matchRecursive(value, '{...}')
+  const varsLength = vars.length
+  for (let i = 0; i < varsLength; i++) {
+    value = replaceNonRegex(value, '{' + vars[i] + '}', '{~' + vars[i] + '~}')
   }
-
-  for (j = teddyVarList.length - 1; j >= 0; j--) {
-    // Replace {varName} with {~varName~} to imply noparse internally
-    newValue = newValue.slice(0, teddyVarList[j][0]) + '{~' + newValue.slice(teddyVarList[j][0], teddyVarList[j][1]) + '~}' + newValue.slice(teddyVarList[j][1])
-  }
-
-  // Wrap entire value with "{~ ~}" and return modified value
-  return `{~${newValue}~}`
+  return `{~${value}~}`
 }
 
 // Handles <noteddy>content</noteddy> using this notation internally {~content~}
@@ -358,6 +414,8 @@ function cleanNoParseContent (rt) {
 module.exports = {
   escapeEntities,
   getTeddyVal,
+  matchRecursive,
+  replaceNonRegex,
   noParseFlag,
   noParseTeddyVariable,
   findTeddyTag,

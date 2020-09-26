@@ -150,4 +150,9 @@ describe('Includes', function () {
     assert.equalIgnoreSpaces(teddy.render('includes/nestedOneliner', model), '<p class="Some content">One line if.</p>')
     done()
   })
+
+  it('should populate <include> <arg> in the child template (includes/includeArgCheckedByOneLineIfWrapper.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('includes/includeArgCheckedByOneLineIfWrapper', model), '<p class="populated">Is it populated? populated</p>')
+    done()
+  })
 })

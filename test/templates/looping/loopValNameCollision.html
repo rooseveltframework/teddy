@@ -1,0 +1,8 @@
+{!
+  should not crash if attempting to set a <loop> val that matches the name of something else in the model
+!}
+
+{! objectOfObjects and names are both things that are in the model !}
+<loop through='objectOfObjects' val='names'>
+  <p>{names.b}</p> {! should print 2, 5, 8 !}
+</loop>

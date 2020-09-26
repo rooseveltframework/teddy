@@ -1,6 +1,7 @@
 {!
   Should render deeply nested vars with teddy
 !}
+
 <loop through='nestedObjectWithTeddyVars' val='thing'>
   <p>{thing.num}</p>
   <loop through='thing.children' val='blah'>
