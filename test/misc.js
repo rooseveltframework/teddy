@@ -253,6 +253,11 @@ describe('Misc', function () {
     done()
   })
 
+  it('should render {zero} as 0 (misc/zero.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('misc/zero.html', model), '<p>0</p>')
+    done()
+  })
+
   // wontfix: https://github.com/rooseveltframework/teddy/issues/357
   it.skip('should not render excessive whitespace in a <textarea> as a result of teddy tag indententation / formatting (misc/excessiveWhitespace.html)', function (done) {
     assert.equal(teddy.render('misc/excessiveWhitespace.html', model), '<textarea>Some text here</textarea>')

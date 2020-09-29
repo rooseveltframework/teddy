@@ -60,7 +60,7 @@ function getTeddyVal (name, model, escapeOverride) {
     }
   }
 
-  if (tempValue || tempValue === '' || tempValue === false) {
+  if (tempValue || tempValue === 0 || tempValue === '' || tempValue === false) {
     if (noParse && noSuppress) { // something|p|s
       return noParseFlag(tempValue)
     } else if (noSuppress) { // something|s

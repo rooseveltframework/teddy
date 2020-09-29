@@ -4,6 +4,10 @@
 
 - Put your changes here...
 
+## 0.5.5
+
+- Closed https://github.com/rooseveltframework/teddy/issues/421
+
 ## 0.5.4
 
 - Closed https://github.com/rooseveltframework/teddy/issues/412
