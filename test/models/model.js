@@ -10,6 +10,7 @@ function makeModel () {
     pageContent: '<body>hello</body>',
     undefinedVar: undefined,
     emptyString: '',
+    zero: 0,
     definedParent: { undefinedMember: undefined, emptyMember: '' },
     camelLetters: ['a', 'b', 'c'],
     missingLetter: ['a', undefined, 'c'],
