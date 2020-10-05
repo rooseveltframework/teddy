@@ -36,6 +36,12 @@ describe('Looping', function () {
     done()
   })
 
+  // TODO: https://github.com/rooseveltframework/teddy/issues/404
+  it.skip('should loop through {arrays} correctly (looping/loopArrayOfArrays.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('looping/loopArrayOfArrays.html', model), '<p>0</p><p>a</p><p>b</p><p>c</p><p>1</p><p>d</p><p>e</p><p>f</p><p>2</p><p>g</p><p>h</p><p>i</p>')
+    done()
+  })
+
   it('should loop through {objects} correctly (looping/loopArrayOfObjects.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('looping/loopArrayOfObjects.html', model), '<p>0</p> <p>1</p> <p>2</p> <p>3</p><p>1</p> <p>4</p> <p>5</p> <p>6</p><p>2</p> <p>7</p> <p>8</p> <p>9</p>')
     done()
@@ -191,6 +197,16 @@ describe('Looping', function () {
 
   it('should render deeply nested vars with teddy code and respect noparse flag (looping/nestedObjectWithTeddyContentNoParse.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('looping/nestedObjectWithTeddyContentNoParse.html', model), '<p>1</p><p><if something>Something Exists</if></p><p>2</p><p><if something>Something Exists</if></p>')
+    done()
+  })
+
+  it('should not crash if attempting to set a <loop> val that matches the name of something else in the model (looping/loopValNameCollision.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('looping/loopValNameCollision.html', model), '<p>2</p><p>5</p><p>8</p>')
+    done()
+  })
+
+  it('should print an empty string for array member set to an empty string (looping/loopValEmptyString.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('looping/loopValEmptyString.html', model), '<p>one</p><p>two</p><p></p><p>three</p>')
     done()
   })
 })

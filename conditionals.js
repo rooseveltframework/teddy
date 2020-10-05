@@ -12,6 +12,7 @@ function parseConditional (charList, type, model) {
   var readMode = false // Start parsing literal equality condition (ex: <if something='here'>)
   var outsideTags = false // Flag telling us we are inbetween condition tags
   var isNested = false // Extra check for whether or not the nested condition also has an <else>
+  var sawOpeningElseFirst = false // Tracks if an <else> tag gets opened and prevents the closing tag from being skipped by nesting logic
   var nested = 0 // Keeps track of how many nested conditionals are present
   var teddyVarName = '' // Teddy conditional argument name or operator used (i.e: or, and, xor, not)
   var teddyVarExpected = '' // Literal value for a conditional teddy argument (i.e: <if something='some content'>)
@@ -111,10 +112,9 @@ function parseConditional (charList, type, model) {
         commentIndices.push(i)
       } else if (twoArraysEqual(charList.slice(i - tagLengths.if + 1, i + 1), primaryTags.if) || twoArraysEqual(charList.slice(i - tagLengths.unless + 1, i + 1), primaryTags.unless)) { // nested <if> or <unless>
         nested++
-      } else if (validEndingTag(charList, i) && (twoArraysEqual(charList.slice(i - tagLengths.cif + 1, i + 1), primaryTags.cif) || twoArraysEqual(charList.slice(i - tagLengths.cunless + 1, i + 1), primaryTags.cunless) || (twoArraysEqual(charList.slice(i - tagLengths.celse + 1, i + 1), secondaryTags.celse) && nested > 0))) { // Closing <if> tag
+      } else if (validEndingTag(charList, i) && (twoArraysEqual(charList.slice(i - tagLengths.cif + 1, i + 1), primaryTags.cif) || twoArraysEqual(charList.slice(i - tagLengths.cunless + 1, i + 1), primaryTags.cunless))) { // Closing <if> tag
         if (nested > 0) { // Outside one level of nested conditional (only looks for <if> or <unless>)
           nested--
-
           if (nested === 0) { // In case the nested conditional has an else tag
             isNested = true
           }
@@ -127,7 +127,6 @@ function parseConditional (charList, type, model) {
         if (!isNested) {
           // Set the condition type to be either if or unless dependent on the tag being currently read
           condition.type = charList[i - 5] === 'i' ? 'if' : 'unless'
-
           readingConditional = true
           tagStart = i
           i = charList.lastIndexOf(' ', i)
@@ -140,13 +139,15 @@ function parseConditional (charList, type, model) {
       } else if (twoArraysEqual(charList.slice(i - tagLengths.else + 1, i + 1), secondaryTags.else) && nested < 1) { // <else> tag
         if (!isNested) { // Push [start, end] indices of <else> to list
           boc.push([i, i - tagLengths.else])
+          sawOpeningElseFirst = true // Forces the </else> to render regardless of nested conditional tags within
         }
       } else if (validEndingTag(charList, i) && twoArraysEqual(charList.slice(i - tagLengths.celse + 1, i + 1), secondaryTags.celse) && nested < 1) { // </else> tag
-        if (isNested) { // skip </else> tag for a nested condition
+        if (isNested && !sawOpeningElseFirst) { // skip </else> tag for a nested condition
           isNested = false
         } else { // Push [start, end] indices of </else> to list
           const endOfClosingTag = charList.lastIndexOf('>', i)
           eoc.push([i, endOfClosingTag])
+          sawOpeningElseFirst = false
           break
         }
       }

@@ -123,6 +123,19 @@ function parseLoop (charList, model, passes, endParse, fs, contextModels, curren
           if (currentChar === '}') { // Closing curly bracket means we are done reading variable name
             if (teddyName === params.val) { // {var} name read is a val
               teddyString = `${vals[i]}`
+              if (teddyString === '') {
+                teddyString = ' ' // Temporary workaround; we don't want it to print the variable name
+              }
+              // TODO: handle when typeof vals[i] is an object or an array
+              // if the val is an object or an array, it needs to be possible to loop through it
+              // https://github.com/rooseveltframework/teddy/issues/404
+              // if (typeof vals[i] === 'string') {
+              // // teddyString = `${vals[i]}`
+              // if (teddyString === '') {
+              // // teddyString = ' ' // Temporary workaround; we don't want it to print the variable name
+              // } else {
+              // // handle it here
+              // }
             } else if (teddyName === params.key) { // {var} name read is a key
               teddyString = `${keyVals[i]}`
             } else if (teddyName.indexOf('.') >= 0 && (teddyName.slice(0, teddyName.indexOf('.')) === params.val)) { // {var.next} name read is a val that is an object
@@ -135,6 +148,9 @@ function parseLoop (charList, model, passes, endParse, fs, contextModels, curren
             }
             // Replace teddy variable name with actual value
             if (teddyString !== '' && teddyString !== 'undefined') {
+              if (teddyString === ' ') {
+                teddyString = '' // Undoing temporary workaround set above
+              }
               slicedTemplate = insertValue(slicedTemplate, teddyString.split('').reverse().join(''), sov, j)
 
               // Recalibrate iterator based on length of inserted value (if necessary)

@@ -10,11 +10,19 @@ function makeModel () {
     pageContent: '<body>hello</body>',
     undefinedVar: undefined,
     emptyString: '',
+    zero: 0,
     definedParent: { undefinedMember: undefined, emptyMember: '' },
     camelLetters: ['a', 'b', 'c'],
     missingLetter: ['a', undefined, 'c'],
+    coolArray: [
+      'one',
+      'two',
+      '',
+      'three'
+    ],
     names: { jack: 'guy', jill: 'girl', hill: 'landscape' },
     objects: [{ a: 1, b: 2, c: 3 }, { a: 4, b: 5, c: 6 }, { a: 7, b: 8, c: 9 }],
+    arrays: [['a', 'b', 'c'], ['d', 'e', 'f'], ['g', 'h', 'i']],
     missingNumbers: [{ a: undefined, b: undefined, c: undefined }, { a: 4, b: 5, c: 6 }, { a: 7, b: 8, c: 9 }],
     objectOfObjects: { one: { a: 1, b: 2, c: 3 }, two: { a: 4, b: 5, c: 6 }, three: { a: 7, b: 8, c: 9 } },
     nestedObjects: [
@@ -65,6 +73,7 @@ function makeModel () {
       name: 'test'
     },
     teddyNull: null,
+    complexJSONString: '{"content":{"appTitle":"Some App","pageTitle":"{content.appTitle}"},"currentYear":1858,"mainDomain":"localhost:43711","NODE_ENV":"development"}',
     obj: {
       one: {
         prop: 'prop_one',
