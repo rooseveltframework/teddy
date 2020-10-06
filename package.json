@@ -8,7 +8,7 @@
       "url": "https://github.com/rooseveltframework/teddy/graphs/contributors"
     }
   ],
-  "version": "0.5.5",
+  "version": "0.5.6",
   "files": [
     "dist/teddy.js"
   ],
@@ -25,7 +25,7 @@
     "c8": "~7.3.1",
     "chai": "~4.2.0",
     "chai-string": "~1.5.0",
-    "codecov": "~3.7.2",
+    "codecov": "~3.8.0",
     "cross-env": "~7.0.2",
     "eslint": "~7.10.0",
     "eslint-plugin-mocha": "~8.0.0",
