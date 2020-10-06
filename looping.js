@@ -94,7 +94,15 @@ function parseLoop (charList, model, passes, endParse, fs, contextModels, curren
 
     // <loop through='list' key='index' val='value'>
     if (periodIndex < 0) { // Loop through value is not an object
-      through = model[params.through]
+      if (model[params.through]) { // Loop through non-object value requires context
+        through = model[params.through]
+      } else { // Loop through non-object value does not require context
+        const contextResult = findContext(params.through, { contextModels, currentContext })
+        context = contextResult.context
+        contextModels = contextResult.contextModels
+        currentContext = contextResult.currentContext
+        through = getContext(model, context, params.through)
+      }
     } else { // Loop through value is an object
       if (model[params.through.slice(0, periodIndex)] === undefined) { // Loop through object value requires context
         const contextResult = findContext(params.through, { contextModels, currentContext })
@@ -236,31 +244,39 @@ function getContext (model, str, thru) {
   let tempIndex = ''
   let getIndex = false
 
-  for (let i = 0; i < str.length; i++) { // Found index
-    if (getIndex) { // Get numerical index to select from
-      if (str[i] === ']') {
-        currentValue = currentValue[tempIndex]
-        getIndex = false
-        tempIndex = ''
-      } else {
-        tempIndex += str[i]
+  if (str) { // Looking for context
+    for (let i = 0; i < str.length; i++) { // Found index
+      if (getIndex) { // Get numerical index to select from
+        if (str[i] === ']') {
+          currentValue = currentValue[tempIndex]
+          getIndex = false
+          tempIndex = ''
+        } else {
+          tempIndex += str[i]
+        }
+      } else if (str[i] === '[') { // Found index
+        if (currentValue) {
+          currentValue = currentValue[tempStr] // Fetch value from current spot in nested object
+        } else {
+          currentValue = model[tempStr] // Fetch value from model
+        }
+        getIndex = true
+        tempStr = ''
+      } else if (str[i] === '.') { // Do nothing
+      } else { // Get attribute name from model
+        tempStr += str[i]
       }
-    } else if (str[i] === '[') { // Found index
-      if (currentValue) {
-        currentValue = currentValue[tempStr] // Fetch value from current spot in nested object
-      } else {
-        currentValue = model[tempStr] // Fetch value from model
-      }
-      getIndex = true
-      tempStr = ''
-    } else if (str[i] === '.') { // Do nothing
-    } else { // Get attribute name from model
-      tempStr += str[i]
     }
+  } else { // Return undefined in case there is no context (should ignore loop with invalid through attribute)
+    return undefined
   }
 
   // Contains contextual value to loop through
-  return currentValue[thru]
+  if (currentValue[thru]) {
+    return currentValue[thru]
+  } else { // Contextual value came from an array of arrays
+    return currentValue
+  }
 }
 
 module.exports = { parseLoop }

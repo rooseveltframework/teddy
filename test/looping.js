@@ -36,8 +36,7 @@ describe('Looping', function () {
     done()
   })
 
-  // TODO: https://github.com/rooseveltframework/teddy/issues/404
-  it.skip('should loop through {arrays} correctly (looping/loopArrayOfArrays.html)', function (done) {
+  it('should loop through {arrays} correctly (looping/loopArrayOfArrays.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('looping/loopArrayOfArrays.html', model), '<p>0</p><p>a</p><p>b</p><p>c</p><p>1</p><p>d</p><p>e</p><p>f</p><p>2</p><p>g</p><p>h</p><p>i</p>')
     done()
   })
