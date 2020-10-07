@@ -1,0 +1,14 @@
+{!
+  should not render Teddy code in server-side comments in loops
+!}
+
+<div>
+  <loop through='names' key='name' val='description'>
+    <p>test</p>
+    {!
+      should not render this loop
+      <loop through='objects' key='k' val='v'>
+    !}
+    <p>test</p>
+  </loop>
+</div>

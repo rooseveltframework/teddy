@@ -264,6 +264,11 @@ describe('Misc', function () {
     done()
   })
 
+  it.skip('should not render Teddy code in server-side comments in loops (misc/serverSideCommentsWithTeddyCode.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('misc/serverSideCommentsWithTeddyCode.html', model), '<div><p>test</p><p>test</p><p>test</p><p>test</p><p>test</p><p>test</p></div>')
+    done()
+  })
+
   it('should execute render callback function for errors and non errors', function (done) {
     teddy.setMaxPasses(100)
     teddy.setVerbosity(3)
