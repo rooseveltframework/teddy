@@ -187,6 +187,12 @@ describe('Conditionals', function () {
     done()
   })
 
+  // https://github.com/rooseveltframework/teddy/issues/431
+  it.skip('should evaluate one line ifs in loops examining the object member\'s value correctly (conditionals/oneLineInLoop.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineInLoop.html', model), '<p class=\'something-is-present\'>guy</p><p class=\'something-is-present\'>girl</p><p class=\'something-is-present\'>landscape</p><p class=\'something-is-not-present\'>guy</p><p class=\'something-is-present\'>girl</p><p class=\'something-is-not-present\'>landscape</p>')
+    done()
+  })
+
   it('should evaluate one line if "if-something" as true when attributes are split across multiple lines (conditionals/oneLineNewLine.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineNewLine.html', model), '<p class=\'something-is-present\'>One line if.</p>')
     done()

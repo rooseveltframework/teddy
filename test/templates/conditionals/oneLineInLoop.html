@@ -1,0 +1,10 @@
+{!
+  should evaluate one line ifs in loops examining the object member's value correctly
+!}
+
+<loop through='names' val='name'>
+  <p if-name true="class='something-is-present'" false="class='something-is-not-present'">{name}</p>
+</loop>
+<loop through='names' val='name'>
+  <p if-name='girl' true="class='something-is-present'" false="class='something-is-not-present'">{name}</p>
+</loop>
