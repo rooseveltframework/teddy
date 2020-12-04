@@ -67,6 +67,12 @@ describe('Looping', function () {
     done()
   })
 
+  // #446
+  it.skip('should loop through a nested object correctly (looping/nestedObjects.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('looping/nestedObjects.html', model), '<p>Thing With Name 1</p><p>Thing With Name 1: Subthing With Name 1</p><p>Thing With Name 1: Subthing With Name 2</p><p>Thing With Name 1: Subthing With Name 3</p><p>Thing With Name 2</p><p>Thing With Name 2: Subthing With Name 4</p><p>Thing With Name 2: Subthing With Name 5</p><p>Thing With Name 2: Subthing With Name 6</p><p>Thing With Name 3</p><p>Thing With Name 3: Subthing With Name 7</p><p>Thing With Name 3: Subthing With Name 8</p><p>Thing With Name 3: Subthing With Name 9</p>')
+    done()
+  })
+
   it('should loop through an array of 5000 elements in < 5000ms (looping/largeDataSet.html)', function (done) {
     teddy.cacheRenders(true)
     var start, end, time

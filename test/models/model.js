@@ -84,6 +84,41 @@ function makeModel () {
         other_prop: 'other_prop_two'
       }
     },
+    nestedObj: {
+      'Thing With Name 1': {
+        'Subthing With Name 1': [
+          'a', 'b', 'c'
+        ],
+        'Subthing With Name 2': [
+          'd', 'e', 'f'
+        ],
+        'Subthing With Name 3': [
+          'g', 'h', 'i'
+        ]
+      },
+      'Thing With Name 2': {
+        'Subthing With Name 4': [
+          'j', 'k', 'l'
+        ],
+        'Subthing With Name 5': [
+          'm', 'n', 'o'
+        ],
+        'Subthing With Name 6': [
+          'p', 'q', 'r'
+        ]
+      },
+      'Thing With Name 3': {
+        'Subthing With Name 7': [
+          's', 't', 'u'
+        ],
+        'Subthing With Name 8': [
+          'v', 'w', 'x'
+        ],
+        'Subthing With Name 9': [
+          'y', 'z', '.'
+        ]
+      }
+    },
     moreNestedObjects: [
       {
         num: 1,
