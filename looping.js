@@ -26,6 +26,7 @@ function parseLoop (charList, model, passes, endParse, fs, contextModels, curren
   let containsTag = false // <loop> contains other teddy tags
   let containsComment = false // <loop> contains teddy comments
   let parsedTags = false // <loop> variable has been parsed more than once due to additional teddy tags
+  let inComment = false // boolean to determine whether loop in assessing a teddy comment
   let i
   let j
   const l = charList.length
@@ -42,7 +43,7 @@ function parseLoop (charList, model, passes, endParse, fs, contextModels, curren
         params.through = teddyName.slice(9, teddyName.length - 1)
       }
       teddyName = ''
-    } else if (currentChar === '>' && (teddyName.length > 6 || typeof sol === 'undefined')) { // End of opening <loop>
+    } else if (currentChar === '>' && (teddyName.length > 6 && typeof sol === 'undefined')) { // End of opening <loop>
       if (teddyName.slice(0, 3) === 'key') { // params.key
         params.key = teddyName.slice(5, teddyName.length - 1)
       } else if (teddyName.slice(0, 3) === 'val') { // params.val
@@ -51,7 +52,7 @@ function parseLoop (charList, model, passes, endParse, fs, contextModels, curren
       sol = i // Save index location of '>' of <loop> tag
       teddyName = ''
     } else if (currentChar === '<') { // Found either an HTML tag or teddy tag
-      if (twoArraysEqual(charList.slice(i - tagLengths.loop + 1, i + 1), primaryTags.loop)) { // Found a nested <loop>
+      if (twoArraysEqual(charList.slice(i - tagLengths.loop + 1, i + 1), primaryTags.loop) && !inComment) { // Found a nested <loop>
         isNested = true
         nested++
       } else if (validEndingTag(charList, i) && twoArraysEqual(charList.slice(i - tagLengths.cloop + 1, i + 1), primaryTags.cloop)) { // Found </loop>
@@ -73,12 +74,16 @@ function parseLoop (charList, model, passes, endParse, fs, contextModels, curren
         containsTag = true
         const nextTag = charList.lastIndexOf('>', i - 1)
         i = nextTag + 1
-      } else if (charList.slice(i - 23, i).join('').includes(' if-')) { // Found one line if
+      } else if (charList.slice(i - 23, i).join('').includes('-fi ')) { // Found one line if
         containsTag = true
       }
+    } else if (currentChar === '{' && charList[i - 1] === '!') { // Found start of teddy server side comment
+      inComment = true
+    } else if (currentChar === '!' && charList[i - 1] === '}') { // Found end of teddy server side comment
+      inComment = false
     } else { // Get all <loop> attributes and their declared values
       if (currentChar.match(/\s/)) continue // skip whitespace
-      if (Object.keys(params).length < 3 && !Object.keys(params).includes('val')) { // Make sure we end up with params.through, params.val, params.key (optional)
+      if (!sol && Object.keys(params).length < 3 && (!Object.keys(params).includes('val') || !Object.keys(params).includes('key'))) { // Make sure we end up with params.through, params.val (optional), params.key (optional)
         teddyName += currentChar
       }
     }
@@ -187,7 +192,6 @@ function parseLoop (charList, model, passes, endParse, fs, contextModels, curren
       // Join parsed templates together
       if (containsTag) { // If loop contents contain a teddy tag, parse template again until no extra teddy tags remain
         modifiedModel[params.val] = vals[i]
-
         const result = scanTemplate(slicedTemplate, modifiedModel, false, passes, fs, false, currentContext, contextModels)
         slicedTemplate = result.template.split('').reverse().join('')
         passes = result.passes
@@ -248,7 +252,11 @@ function getContext (model, str, thru) {
     for (let i = 0; i < str.length; i++) { // Found index
       if (getIndex) { // Get numerical index to select from
         if (str[i] === ']') {
-          currentValue = currentValue[tempIndex]
+          if (currentValue[tempIndex]) { // We can get value from the index
+            currentValue = currentValue[tempIndex]
+          } else { // Need to convert object values into list to get current value from index
+            currentValue = Object.values(currentValue)[tempIndex]
+          }
           getIndex = false
           tempIndex = ''
         } else {

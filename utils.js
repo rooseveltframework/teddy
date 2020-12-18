@@ -326,9 +326,9 @@ function insertValue (str, val, start, end) {
 function removeTeddyComment (charList) {
   let nested = 0
   let i
-  const l = charList.length
+  const l = charList.length - 2 // Loop at start of comment content
 
-  for (i = l - 2; i > 0; i--) {
+  for (i = l; i > 0; i--) {
     if (charList[i] === '{' && charList[i - 1] === '!') { // Teddy comment within teddy comment
       nested++
     } else if (charList[i] === '!' && charList[i - 1] === '}') { // End of teddy comment
