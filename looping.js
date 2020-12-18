@@ -192,7 +192,7 @@ function parseLoop (charList, model, passes, endParse, fs, contextModels, curren
       // Join parsed templates together
       if (containsTag) { // If loop contents contain a teddy tag, parse template again until no extra teddy tags remain
         modifiedModel[params.val] = vals[i]
-        
+
         const result = scanTemplate(slicedTemplate, modifiedModel, false, passes, fs, false, currentContext, contextModels)
         slicedTemplate = result.template.split('').reverse().join('')
         passes = result.passes
