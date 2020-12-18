@@ -26,7 +26,7 @@ function parseLoop (charList, model, passes, endParse, fs, contextModels, curren
   let containsTag = false // <loop> contains other teddy tags
   let containsComment = false // <loop> contains teddy comments
   let parsedTags = false // <loop> variable has been parsed more than once due to additional teddy tags
-  let inComment = false // boolean to determine whether loop in assessing a teddy comment
+  let inComment = false // boolean to determine whether for loop is assessing a teddy comment
   let i
   let j
   const l = charList.length
@@ -192,6 +192,7 @@ function parseLoop (charList, model, passes, endParse, fs, contextModels, curren
       // Join parsed templates together
       if (containsTag) { // If loop contents contain a teddy tag, parse template again until no extra teddy tags remain
         modifiedModel[params.val] = vals[i]
+        
         const result = scanTemplate(slicedTemplate, modifiedModel, false, passes, fs, false, currentContext, contextModels)
         slicedTemplate = result.template.split('').reverse().join('')
         passes = result.passes
