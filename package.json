@@ -27,7 +27,7 @@
     "chai-string": "~1.5.0",
     "codecov": "~3.8.1",
     "cross-env": "~7.0.3",
-    "eslint": "~7.15.0",
+    "eslint": "~7.16.0",
     "eslint-plugin-mocha": "~8.0.0",
     "husky": "~4.3.5",
     "karma": "~5.2.3",
