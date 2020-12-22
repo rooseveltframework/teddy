@@ -17,7 +17,7 @@
   "main": "dist/teddy.js",
   "readmeFilename": "README.md",
   "engines": {
-    "node": ">=12.0.0"
+    "node": ">=14.0.0"
   },
   "engineStrict": true,
   "dependencies": {},

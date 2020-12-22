@@ -11,6 +11,7 @@
   - https://github.com/rooseveltframework/teddy/issues/431
   - https://github.com/rooseveltframework/teddy/issues/449
   - https://github.com/rooseveltframework/teddy/issues/426
+- Dropped Node 12 support.
 - Various dependencies bumped.
 
 ## 0.5.6
