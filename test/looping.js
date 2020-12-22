@@ -67,8 +67,7 @@ describe('Looping', function () {
     done()
   })
 
-  // #446
-  it.skip('should loop through a nested object correctly (looping/nestedObjects.html)', function (done) {
+  it('should loop through a nested object correctly (looping/nestedObjects.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('looping/nestedObjects.html', model), '<p>Thing With Name 1</p><p>Thing With Name 1: Subthing With Name 1</p><p>Thing With Name 1: Subthing With Name 2</p><p>Thing With Name 1: Subthing With Name 3</p><p>Thing With Name 2</p><p>Thing With Name 2: Subthing With Name 4</p><p>Thing With Name 2: Subthing With Name 5</p><p>Thing With Name 2: Subthing With Name 6</p><p>Thing With Name 3</p><p>Thing With Name 3: Subthing With Name 7</p><p>Thing With Name 3: Subthing With Name 8</p><p>Thing With Name 3: Subthing With Name 9</p>')
     done()
   })
@@ -177,6 +176,11 @@ describe('Looping', function () {
 
   it('should loop through {letters} correctly with camelCase val (looping/camelCaseLoopVal.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('looping/camelCaseLoopVal.html', model), '<p>a</p><p>b</p><p>c</p>')
+    done()
+  })
+
+  it('should loop through {letters} keys correctly with no val attribute (looping/loopNoVal.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('looping/loopNoVal.html', model), '<p>0</p><p>1</p><p>2</p>')
     done()
   })
 
