@@ -4,6 +4,15 @@
 
 - Put your changes here...
 
+## 0.5.7
+
+- Closed:
+  - https://github.com/rooseveltframework/teddy/issues/446
+  - https://github.com/rooseveltframework/teddy/issues/431
+  - https://github.com/rooseveltframework/teddy/issues/449
+  - https://github.com/rooseveltframework/teddy/issues/426
+- Various dependencies bumped.
+
 ## 0.5.6
 
 - Closed https://github.com/rooseveltframework/teddy/issues/404
