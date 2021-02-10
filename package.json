@@ -22,15 +22,14 @@
   "engineStrict": true,
   "dependencies": {},
   "devDependencies": {
-    "c8": "~7.3.5",
-    "chai": "~4.2.0",
+    "c8": "~7.5.0",
+    "chai": "~4.3.0",
     "chai-string": "~1.5.0",
     "codecov": "~3.8.1",
     "cross-env": "~7.0.3",
-    "eslint": "~7.16.0",
+    "eslint": "~7.19.0",
     "eslint-plugin-mocha": "~8.0.0",
-    "husky": "~4.3.6",
-    "karma": "~5.2.3",
+    "karma": "~6.1.0",
     "karma-chrome-launcher": "~3.1.0",
     "karma-cli": "~2.0.0",
     "karma-coverage": "~2.0.3",
@@ -39,11 +38,11 @@
     "karma-html2js-preprocessor": "~1.1.0",
     "karma-mocha": "~2.0.1",
     "karma-spec-reporter": "~0.0.32",
-    "lint-staged": "~10.5.3",
+    "lint-staged": "~10.5.4",
     "mocha": "~8.2.1",
     "standard": "~16.0.3",
-    "webpack": "~5.11.0",
-    "webpack-cli": "~4.2.0"
+    "webpack": "~5.21.2",
+    "webpack-cli": "~4.5.0"
   },
   "standard": {
     "ignore": [
@@ -92,11 +91,6 @@
   ],
   "_from": "teddy@*",
   "gitHead": "1dbbc4c73d7c8878cbe7fc0ba527c91018b4cea7",
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged && eslint ./test"
-    }
-  },
   "funding": {
     "type": "individual",
     "url": "https://github.com/sponsors/kethinov"
