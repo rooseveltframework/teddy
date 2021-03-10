@@ -7,6 +7,8 @@ if (typeof process === 'object') {
   var makeModel = require('./models/model')
   var teddy = require('../')
   var model
+  var playwright = require('playwright')
+  var path = require('path')
 
   chai.use(chaiString)
 }
@@ -283,4 +285,44 @@ describe('Misc', function () {
       })
     })
   })
+
+  if (typeof process === 'object') {
+    ['chromium', 'firefox'].forEach(function (browserType) {
+      describe(`playwright- ${browserType}`, function () {
+        let page, browser, context
+        beforeEach(async function () {
+          this.timeout(0) // browsers (specifically firefox) needed a little extra time to launch
+          browser = await playwright[browserType].launch()
+          context = await browser.newContext()
+          page = await context.newPage()
+          await page.goto(`file:${path.join(__dirname, '..', 'playground.html')}`)
+        })
+        afterEach(async function () {
+          await browser.close()
+        })
+
+        it('should render example template', async function () {
+          await page.click('#render')
+          const renderedFrame = await page.$('#renderedframe')
+          const text = await page.evaluate(el => {
+            const iframedocument = el.contentDocument || el.contentWindow.document
+            return iframedocument.body.innerHTML
+          }, renderedFrame)
+          assert.equalIgnoreSpaces(text, '<p>hello world!</p><p>no blah!</p>')
+        })
+
+        it('should render the provided input', async function () {
+          await page.fill('#src', '<p>This is an inputted template. The model will fill in {input}.</p>')
+          await page.fill('#json', '{"input":"this"}')
+          await page.click('#render')
+          const renderedFrame = await page.$('#renderedframe')
+          const text = await page.evaluate(el => {
+            const iframedocument = el.contentDocument || el.contentWindow.document
+            return iframedocument.body.innerHTML
+          }, renderedFrame)
+          assert.equalIgnoreSpaces(text, '<p>This is an inputted template. The model will fill in this.</p>')
+        })
+      })
+    })
+  }
 })
