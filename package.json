@@ -20,7 +20,6 @@
     "node": ">=14.0.0"
   },
   "engineStrict": true,
-  "dependencies": {},
   "devDependencies": {
     "c8": "~7.6.0",
     "chai": "~4.3.0",
@@ -28,7 +27,7 @@
     "codecov": "~3.8.1",
     "cross-env": "~7.0.3",
     "eslint": "~7.21.0",
-    "eslint-plugin-mocha": "~8.0.0",
+    "eslint-plugin-mocha": "~8.1.0",
     "karma": "~6.1.1",
     "karma-chrome-launcher": "~3.1.0",
     "karma-cli": "~2.0.0",
@@ -39,6 +38,7 @@
     "karma-mocha": "~2.0.1",
     "karma-spec-reporter": "~0.0.32",
     "mocha": "~8.3.0",
+    "playwright": "~1.9.1",
     "standard": "~16.0.3",
     "webpack": "~5.24.2",
     "webpack-cli": "~4.5.0"
