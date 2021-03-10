@@ -1,0 +1,139 @@
+{
+  "version": 1.1,
+  "tags": [
+    {
+      "name": "include",
+      "description": "Includes another template, at the path specified by the src attribute",
+      "attributes":[
+        {
+          "name": "src",
+          "description": "Contains the location of the template to include."
+        },
+        {
+          "name": "noparse",
+          "description": "Do not render the contents of the included template."
+        },
+        {
+          "name": "noteddy",
+          "description": "Do not render the contents of the included template."
+        }
+      ]
+    },
+    {
+      "name": "arg",
+      "description": "The arg tag represents an argument that is passed to a template. When placed inside an include tag, the arg's inner HTML is passed to the included template, accessible via the arg's attribute name."
+    },
+    {
+      "name": "if",
+      "description": "Conditional tag for Teddy templates. HTML inside an if tag will be included if the specified condition evaluates to true. <if varName> will check for the existance of varName. <if varName='x'> will check if varName is equal to x",
+      "attributes": [
+        {
+          "name": "and"
+        },
+        {
+          "name": "or"
+        },
+        {
+          "name": "xor"
+        },
+        {
+          "name":"not:"
+        }
+      ]
+    },
+    {
+      "name": "unless",
+      "description": "Conditional tag for teddy templates. Checks for non-presence of the given variable. HTML inside an unless tag will be included if the specified variable is not present.",
+      "attributes": [
+        {
+          "name": "and"
+        },
+        {
+          "name": "or"
+        },
+        {
+          "name": "xor"
+        },
+        {
+          "name":"not:"
+        }
+      ]
+    },
+    {
+      "name": "elseif",
+      "description": "Conditional tag for teddy templates. Evaluated if the preceding if fails.",
+      "attributes": [
+        {
+          "name": "and"
+        },
+        {
+          "name": "or"
+        },
+        {
+          "name": "xor"
+        },
+        {
+          "name":"not:"
+        }
+      ]
+    },
+    {
+      "name": "elseunless",
+      "description": "Conditional tag for teddy templates. Evaluated if the preceding unless fails.",
+      "attributes": [
+        {
+          "name": "and"
+        },
+        {
+          "name": "or"
+        },
+        {
+          "name": "xor"
+        },
+        {
+          "name":"not:"
+        }
+      ]
+    },
+    {
+      "name": "else",
+      "description": "Conditional tag for teddy templates. HTML inside an else tag will be included if the preceding conditionals fail.",
+      "attributes": [
+        {
+          "name": "and"
+        },
+        {
+          "name": "or"
+        },
+        {
+          "name": "xor"
+        },
+        {
+          "name":"not:"
+        }
+      ]
+    },
+    {
+      "name": "loop",
+      "description": "Creates a loop, used in Teddy templates. The variable to iterate over is defined by through, and a local variable is defined by val.",
+      "attributes": [
+        {
+          "name": "through",
+          "description": "Specifies the variable in the model to iterate over."
+        },
+        {
+          "name": "val",
+          "description": "Specifies the name of a local variable to use within a loop, containing the current value."
+        },
+        {
+          "name": "key",
+          "description": "Specifies the name of a local variable to use within a loop, containing the current key."
+        }
+      ]
+    },
+    {
+      "name": "noteddy",
+      "description": "HTML within a noteddy tag will not be parsed by teddy."
+    }
+  ]
+}
