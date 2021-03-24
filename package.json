@@ -38,7 +38,7 @@
     "karma-mocha": "~2.0.1",
     "karma-spec-reporter": "~0.0.32",
     "mocha": "~8.3.0",
-    "playwright": "~1.9.1",
+    "playwright": "~1.10.0",
     "standard": "~16.0.3",
     "webpack": "~5.24.2",
     "webpack-cli": "~4.5.0"
