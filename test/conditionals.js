@@ -369,6 +369,11 @@ describe('Conditionals', function () {
     done()
   })
 
+  it.skip('should evaluate <if doesntexist> as false and trigger <else> condition with embedded HTML comments in conditional statements (conditionals/ifCommentsEmbedded.html.html.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/ifCommentsEmbedded.html', model), '<!-- HTML comment --><!-- MOAR HTML comments --><p>The variable \'doesntexist\' is not present</p>')
+    done()
+  })
+
   it('should render the nested <else> condition (conditionals/nestedConditionalInElse.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('conditionals/nestedConditionalInElse.html', model), '<p>The variable \'something\' and \'somethingElse\' are both present</p>')
     done()
