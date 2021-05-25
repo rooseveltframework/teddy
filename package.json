@@ -27,7 +27,7 @@
     "codecov": "~3.8.2",
     "cross-env": "~7.0.3",
     "eslint": "~7.26.0",
-    "eslint-plugin-mocha": "~8.1.0",
+    "eslint-plugin-mocha": "~8.2.0",
     "karma": "~6.3.2",
     "karma-chrome-launcher": "~3.1.0",
     "karma-cli": "~2.0.0",
