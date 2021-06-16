@@ -242,13 +242,13 @@ function compile (template, fs) {
     return ''
   }
 
-  // append extension if not present
-  if (template.slice(-5) !== '.html') {
-    template += '.html'
-  }
-
   // get contents of file if template is a file
   if (template.indexOf('<') === -1 && fs !== undefined && fs.readFileSync !== undefined) {
+    // append extension if not present
+    if (template.slice(-5) !== '.html') {
+      template += '.html'
+    }
+
     register = true
     try {
       template = fs.readFileSync(template, 'utf8')
