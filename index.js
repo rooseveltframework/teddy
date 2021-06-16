@@ -268,6 +268,15 @@ function compile (template, fs) {
     if (templates[template]) {
       template = templates[template]
       register = true
+    } else {
+      // append extension if not present
+      if (template.slice(-5) !== '.html') {
+        template += '.html'
+      }
+      if (templates[template]) {
+        template = templates[template]
+        register = true
+      }
     }
   }
 
