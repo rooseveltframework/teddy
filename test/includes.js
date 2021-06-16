@@ -1,12 +1,12 @@
 /* eslint-env mocha */
 
 if (typeof process === 'object') {
-  var chai = require('chai')
-  var assert = chai.assert
-  var chaiString = require('chai-string')
-  var makeModel = require('./models/model')
-  var teddy = require('../')
-  var model
+  const chai = require('chai')
+  var assert = chai.assert // eslint-disable-line
+  const chaiString = require('chai-string')
+  var makeModel = require('./models/model') // eslint-disable-line
+  var teddy = require('../') // eslint-disable-line
+  var model // eslint-disable-line
 
   chai.use(chaiString)
 }

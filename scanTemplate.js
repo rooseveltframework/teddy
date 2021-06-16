@@ -6,9 +6,9 @@ module.exports = { scanTemplate }
 
 // Scan template file and return a usable HTML document
 function scanTemplate (charList, model, escapeOverride, passes, fs, endParse, currentContext, contextModels) {
-  var maxPasses = params.maxPasses
-  var maxPassesError = 'Render aborted due to max number of passes (' + maxPasses + ') exceeded; there is a possible infinite loop in your template logic.'
-  var renderedTemplate = ''
+  const maxPasses = params.maxPasses
+  const maxPassesError = 'Render aborted due to max number of passes (' + maxPasses + ') exceeded; there is a possible infinite loop in your template logic.'
+  let renderedTemplate = ''
 
   while (charList[0]) {
     if (!endParse) {

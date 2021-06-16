@@ -1,12 +1,12 @@
 /* eslint-env mocha */
 
 if (typeof process === 'object') {
-  var chai = require('chai')
-  var assert = chai.assert
-  var chaiString = require('chai-string')
-  var makeModel = require('./models/model')
-  var teddy = require('../')
-  var model
+  const chai = require('chai')
+  var assert = chai.assert // eslint-disable-line
+  const chaiString = require('chai-string')
+  var makeModel = require('./models/model') // eslint-disable-line
+  var teddy = require('../') // eslint-disable-line
+  var model // eslint-disable-line
 
   chai.use(chaiString)
 }
@@ -74,80 +74,74 @@ describe('Looping', function () {
 
   it('should loop through an array of 5000 elements in < 5000ms (looping/largeDataSet.html)', function (done) {
     teddy.cacheRenders(true)
-    var start, end, time
-    start = new Date().getTime()
+    const start = new Date().getTime()
 
     teddy.render('looping/largeDataSet.html', model)
 
-    end = new Date().getTime()
-    time = end - start
+    const end = new Date().getTime()
+    const time = end - start
 
     assert.isAtMost(time, 5000)
     done()
   })
 
   it('should loop through same array of 5000 elements in < 1200ms during second attempt due to caching (looping/largeDataSet.html)', function (done) {
-    var start, end, time
-    start = new Date().getTime()
+    const start = new Date().getTime()
 
     teddy.render('looping/largeDataSet.html', model)
 
-    end = new Date().getTime()
-    time = end - start
+    const end = new Date().getTime()
+    const time = end - start
 
     assert.isAtMost(time, 1200)
     done()
   })
 
   it('should loop through an array of 5000 elements in < 5000ms doing a fresh render via partial cache invalidation (looping/largeDataSet.html)', function (done) {
-    var start, end, time
-    start = new Date().getTime()
+    const start = new Date().getTime()
 
     teddy.flushCache('looping/largeDataSet.html', model)
     teddy.render('looping/largeDataSet.html', model)
 
-    end = new Date().getTime()
-    time = end - start
+    const end = new Date().getTime()
+    const time = end - start
 
     assert.isAtMost(time, 5000)
     done()
   })
 
   it('should loop through same array of 5000 elements in < 1200ms during second attempt due to caching (looping/largeDataSet.html)', function (done) {
-    var start, end, time
-    start = new Date().getTime()
+    const start = new Date().getTime()
 
     teddy.render('looping/largeDataSet.html', model)
 
-    end = new Date().getTime()
-    time = end - start
+    const end = new Date().getTime()
+    const time = end - start
 
     assert.isAtMost(time, 1200)
     done()
   })
 
   it('should loop through an array of 5000 elements in < 5000ms doing a fresh render via full cache invalidation (looping/largeDataSet.html)', function (done) {
-    var start, end, time
-    start = new Date().getTime()
+    const start = new Date().getTime()
 
     teddy.flushCache('looping/largeDataSet.html')
     teddy.render('looping/largeDataSet.html', model)
 
-    end = new Date().getTime()
-    time = end - start
+    const end = new Date().getTime()
+    const time = end - start
 
     assert.isAtMost(time, 5000)
     done()
   })
 
   it('should loop through same array of 5000 elements in < 1200ms during second attempt due to caching (looping/largeDataSet.html)', function (done) {
-    var start, end, time
-    start = new Date().getTime()
+    const start = new Date().getTime()
 
     teddy.render('looping/largeDataSet.html', model)
 
-    end = new Date().getTime()
-    time = end - start
+    const end = new Date().getTime()
+    const time = end - start
 
     teddy.cacheRenders(false)
     assert.isAtMost(time, 1200)

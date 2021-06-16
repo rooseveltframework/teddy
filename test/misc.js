@@ -1,14 +1,14 @@
 /* eslint-env mocha */
 
 if (typeof process === 'object') {
-  var chai = require('chai')
-  var assert = chai.assert
-  var chaiString = require('chai-string')
-  var makeModel = require('./models/model')
-  var teddy = require('../')
-  var model
-  var playwright = require('playwright')
-  var path = require('path')
+  const chai = require('chai')
+  var assert = chai.assert // eslint-disable-line
+  const chaiString = require('chai-string')
+  var makeModel = require('./models/model') // eslint-disable-line
+  var teddy = require('../') // eslint-disable-line
+  var model // eslint-disable-line
+  var playwright = require('playwright') // eslint-disable-line
+  var path = require('path') // eslint-disable-line
 
   chai.use(chaiString)
 }
@@ -108,7 +108,7 @@ describe('Misc', function () {
   })
 
   it('should trigger caching rollover given one template with 100 unique models (misc/variable.html)', function (done) {
-    var i
+    let i
     teddy.cacheRenders(true)
     teddy.setDefaultCaches(10)
     for (i = 0; i < 100; i++) {
@@ -148,7 +148,7 @@ describe('Misc', function () {
   })
 
   it('should only cache the whitelisted template the specified number of times (misc/variable.html)', function (done) {
-    var i
+    let i
     teddy.cacheRenders(true)
     teddy.setRenderedTemplates({})
     teddy.setDefaultCaches(10)
@@ -186,7 +186,7 @@ describe('Misc', function () {
   })
 
   it('should set each verbosity level', function (done) {
-    var verbosity = ''
+    let verbosity = ''
     teddy.setVerbosity()
     verbosity += teddy.params.verbosity + ', '
     teddy.setVerbosity('none')

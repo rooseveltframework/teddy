@@ -4,6 +4,12 @@
 
 - Put your changes here...
 
+## 0.5.8
+
+- Fixed bug in client-side support where file extensions would be inappropriately appended to template names in some cases.
+- Dropped Node 15 support. Added Node 16 support.
+- Various dependencies bumped.
+
 ## 0.5.7
 
 - Closed:
