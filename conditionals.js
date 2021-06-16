@@ -2,33 +2,33 @@ const { primaryTags, secondaryTags, tagLengths } = require('./constants')
 const { getTeddyVal, twoArraysEqual, validEndingTag, isValue, insertValue } = require('./utils')
 
 function parseConditional (charList, type, model) {
-  var i // Template index
-  var j // Comment index
-  var l = charList.length // Length of template array
+  let i // Template index
+  let j // Comment index
+  const l = charList.length // Length of template array
 
-  var currentChar // Current character in our template array
-  var tagStart = l - 1 // Index of '<' for the beginning of our conditional
-  var readingConditional = true // Start parsing contents of <if> <elseif> <unless> <elseunless> tags
-  var readMode = false // Start parsing literal equality condition (ex: <if something='here'>)
-  var outsideTags = false // Flag telling us we are inbetween condition tags
-  var isNested = false // Extra check for whether or not the nested condition also has an <else>
-  var sawOpeningElseFirst = false // Tracks if an <else> tag gets opened and prevents the closing tag from being skipped by nesting logic
-  var nested = 0 // Keeps track of how many nested conditionals are present
-  var teddyVarName = '' // Teddy conditional argument name or operator used (i.e: or, and, xor, not)
-  var teddyVarExpected = '' // Literal value for a conditional teddy argument (i.e: <if something='some content'>)
-  var condition = {
+  let currentChar // Current character in our template array
+  let tagStart = l - 1 // Index of '<' for the beginning of our conditional
+  let readingConditional = true // Start parsing contents of <if> <elseif> <unless> <elseunless> tags
+  let readMode = false // Start parsing literal equality condition (ex: <if something='here'>)
+  let outsideTags = false // Flag telling us we are inbetween condition tags
+  let isNested = false // Extra check for whether or not the nested condition also has an <else>
+  let sawOpeningElseFirst = false // Tracks if an <else> tag gets opened and prevents the closing tag from being skipped by nesting logic
+  let nested = 0 // Keeps track of how many nested conditionals are present
+  let teddyVarName = '' // Teddy conditional argument name or operator used (i.e: or, and, xor, not)
+  let teddyVarExpected = '' // Literal value for a conditional teddy argument (i.e: <if something='some content'>)
+  let condition = {
     type: type // <if> <unless>
   }
 
-  var boc = [] // Array of 2-length lists that contain the relevant indices for an open conditional tag [<, >]
-  var eoc = [] // Array of 2-length lists that contain the relevant indices for a closing conditionaltag [<, >]
-  var conditions = [] // List of objects containing all operators, variables and type of conditional (if or unless)
-  var varList = [] // List of objects containing relevant information about our conditions arguments
-  var operators = [] // List of operators used in a single conditional statement
-  var commentList = [] // Array of 2-length lists that contain the start/end indices for template comments inbetween conditionals
-  var commentIndices = [] // 2-length list containing start/end indices for template comments inbetween conditionals
+  const boc = [] // Array of 2-length lists that contain the relevant indices for an open conditional tag [<, >]
+  const eoc = [] // Array of 2-length lists that contain the relevant indices for a closing conditionaltag [<, >]
+  const conditions = [] // List of objects containing all operators, variables and type of conditional (if or unless)
+  let varList = [] // List of objects containing relevant information about our conditions arguments
+  let operators = [] // List of operators used in a single conditional statement
+  const commentList = [] // Array of 2-length lists that contain the start/end indices for template comments inbetween conditionals
+  let commentIndices = [] // 2-length list containing start/end indices for template comments inbetween conditionals
 
-  var currentOpenTag = primaryTags[type] // <if> <unless> <elseif> <elseunless>
+  const currentOpenTag = primaryTags[type] // <if> <unless> <elseif> <elseunless>
 
   // Look for begin/end of conditionals
   for (i = l - currentOpenTag.length - 1; i >= 0; i--) {
@@ -324,8 +324,8 @@ function parseOneLineIf (charList, model) {
 
 // Parse logic within our teddy tag and return true or false
 function evalCondition (condition) {
-  var isIf = (condition.type === 'if') // Determines if the returning value should be negated in the case of an <unless>
-  var partialCondition
+  const isIf = (condition.type === 'if') // Determines if the returning value should be negated in the case of an <unless>
+  let partialCondition
 
   if (condition.operators.length > 1) { // More than 2 values to check in if statement (i.e. <if something or somethingElse and somethingMore>)
     partialCondition = evalPartial(condition)
@@ -345,9 +345,9 @@ function evalCondition (condition) {
 
 // Evaluates conditional tag logic two values at a time in the case that there are more than two values to check
 function evalPartial (condition, pVal) {
-  var operator = condition.operators.shift() // Next operator in conditional tag
-  var var1 = condition.variables.shift() // Next teddy argument in conditional tag
-  var var2 // Second value to compare against
+  const operator = condition.operators.shift() // Next operator in conditional tag
+  const var1 = condition.variables.shift() // Next teddy argument in conditional tag
+  let var2 // Second value to compare against
 
   if (pVal) { // If this function ran once already we have a value to use again
     var2 = pVal

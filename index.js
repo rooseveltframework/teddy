@@ -122,7 +122,7 @@ function setMaxCaches (template, v) {
 
 // mutator method to set a whitelist of templates to cache, e.g. { "myTemplate.html": maxCaches} where maxCaches is an integer
 function setCacheWhitelist (o) {
-  var i
+  let i
   params.cacheWhitelist = o
   for (i in o) {
     setMaxCaches(i, o[i])
@@ -190,12 +190,11 @@ function flushCache (template, model) {
   }
 
   if (model) {
-    var renders = renderedTemplates[template]
-    var i
-    var l
-    var render
-    var stringyModel
-    var renderStringyModel
+    const renders = renderedTemplates[template]
+    let i
+    let l
+    let render
+    let renderStringyModel
 
     if (renders) {
       l = renders.length
@@ -204,7 +203,7 @@ function flushCache (template, model) {
     }
 
     jsonStringifyCache = []
-    stringyModel = JSON.stringify(model, jsonStringifyRemoveCircularReferences)
+    const stringyModel = JSON.stringify(model, jsonStringifyRemoveCircularReferences)
     for (i = 0; i < l; i++) {
       render = renders[i]
       jsonStringifyCache = []
@@ -231,8 +230,8 @@ function jsonStringifyRemoveCircularReferences (key, value) {
 
 // compiles a template
 function compile (template, fs) {
-  var name = template
-  var register = false
+  const name = template
+  let register = false
 
   // it's assumed that the argument is already a template string if we're not server-side
   if (typeof template !== 'string') {
@@ -302,14 +301,14 @@ function render (template, model, callback) {
   }
 
   // declare vars
-  var renderedTemplate
-  var i
-  var l
-  var renders
-  var render
-  var stringyModel
-  var renderStringyModel
-  var errorMessage
+  let renderedTemplate
+  let i
+  let l
+  let renders
+  let render
+  let stringyModel
+  let renderStringyModel
+  let errorMessage
 
   // overload console logs
   consoleWarnings = ''

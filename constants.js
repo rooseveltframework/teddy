@@ -1,5 +1,5 @@
 // List of all primary teddy tags
-var primaryTags = {
+const primaryTags = {
   include: [' ', 'e', 'd', 'u', 'l', 'c', 'n', 'i', '<'],
   arg: [' ', 'g', 'r', 'a', '<'],
   if: [' ', 'f', 'i', '<'],
@@ -21,7 +21,7 @@ var primaryTags = {
 }
 
 // List of all secondary tags for teddy conditionals
-var secondaryTags = {
+const secondaryTags = {
   elseif: [' ', 'f', 'i', 'e', 's', 'l', 'e', '<'],
   else: ['>', 'e', 's', 'l', 'e', '<'],
   elseunless: [' ', 's', 's', 'e', 'l', 'n', 'u', 'e', 's', 'l', 'e', '<'],
@@ -30,7 +30,7 @@ var secondaryTags = {
   celseunless: ['s', 's', 'e', 'l', 'n', 'u', 'e', 's', 'l', 'e', '/', '<']
 }
 
-var tagLengths = {
+const tagLengths = {
   if: 4,
   cif: 4,
   elseif: 8,
@@ -52,7 +52,7 @@ var tagLengths = {
 }
 
 // HTML entities to escape
-var escapeHtmlEntities = {
+const escapeHtmlEntities = {
   '&': '&amp;',
   '<': '&lt;',
   '>': '&gt;',

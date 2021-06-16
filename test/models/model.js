@@ -1,8 +1,8 @@
 function makeModel () {
-  var i
-  var charList = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-  var cl = charList.length
-  var model = {
+  let i
+  const charList = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+  const cl = charList.length
+  const model = {
     letters: ['a', 'b', 'c'],
     circular: {},
     foo: '{bar}',
@@ -231,8 +231,8 @@ function makeModel () {
   model.circular.circular = model.circular
 
   function randChars (n) {
-    var i
-    var s = ''
+    let i
+    let s = ''
     for (i = 0; i < n; i++) {
       s += charList.charAt(Math.floor(Math.random() * cl))
     }
@@ -253,5 +253,5 @@ function makeModel () {
 if (typeof module !== 'undefined') {
   module.exports = makeModel
 } else {
-  var model = makeModel() // eslint-disable-line no-unused-vars
+  const model = makeModel() // eslint-disable-line no-unused-vars
 }

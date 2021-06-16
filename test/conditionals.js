@@ -1,12 +1,12 @@
 /* eslint-env mocha */
 
 if (typeof process === 'object') {
-  var chai = require('chai')
-  var assert = chai.assert
-  var chaiString = require('chai-string')
-  var makeModel = require('./models/model')
-  var teddy = require('../')
-  var model
+  const chai = require('chai')
+  var assert = chai.assert // eslint-disable-line
+  const chaiString = require('chai-string')
+  var makeModel = require('./models/model') // eslint-disable-line
+  var teddy = require('../') // eslint-disable-line
+  var model // eslint-disable-line
 
   chai.use(chaiString)
 }
@@ -341,13 +341,12 @@ describe('Conditionals', function () {
   })
 
   it('should evaluate 5000 one line ifs in under 5000ms (conditionals/oneLinePerformance.html)', function (done) {
-    var start, end, time
-    start = new Date().getTime()
+    const start = new Date().getTime()
 
     teddy.render('conditionals/oneLinePerformance.html', model)
 
-    end = new Date().getTime()
-    time = end - start
+    const end = new Date().getTime()
+    const time = end - start
 
     assert.isAtMost(time, 5000)
 
