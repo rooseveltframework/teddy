@@ -96,8 +96,15 @@ function escapeEntities (value) {
   let i
   let j
 
-  if (value === undefined || typeof value === 'boolean' || typeof value === 'object') { // Cannot escape on these values
-    return value
+  if (typeof value === 'object') { // Cannot escape on this value
+    if (Array.isArray(value) && value.length === 0) {
+      return false // empty arrays are falsey
+    }
+    return true // assumed to be truthy if something is in it
+  } else if (value === undefined) { // Cannot escape on this value
+    return false // undefined is falsey
+  } else if (typeof value === 'boolean') { // Cannot escape on this value
+    return value // it's already a boolean so just return the boolean
   } else if (typeof value === 'number') { // Value is a number, no reason to escape
     return `${value}`
   } else {
