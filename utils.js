@@ -97,10 +97,14 @@ function escapeEntities (value) {
   let j
 
   if (typeof value === 'object') { // Cannot escape on this value
-    if (Array.isArray(value) && value.length === 0) {
-      return false // empty arrays are falsey
+    if (Array.isArray(value)) {
+      if (value.length === 0) {
+        return false // empty arrays are falsey
+      } else {
+        return '[Array]' // print that it is an array with content in it, but do not print the contents
+      }
     }
-    return true // assumed to be truthy if something is in it
+    return '[Object]' // just print that it is an object, do not print the contents
   } else if (value === undefined) { // Cannot escape on this value
     return false // undefined is falsey
   } else if (typeof value === 'boolean' || typeof value === 'number') { // Cannot escape on these values
