@@ -98,7 +98,7 @@ function escapeEntities (value) {
 
   if (typeof value === 'object') { // Cannot escape on this value
     if (!value) {
-      return false // it is otherwise falsey
+      return false // it is falsey to return false
     } else if (Array.isArray(value)) {
       if (value.length === 0) {
         return false // empty arrays are falsey
