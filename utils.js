@@ -103,10 +103,8 @@ function escapeEntities (value) {
     return true // assumed to be truthy if something is in it
   } else if (value === undefined) { // Cannot escape on this value
     return false // undefined is falsey
-  } else if (typeof value === 'boolean') { // Cannot escape on this value
-    return value // it's already a boolean so just return the boolean
-  } else if (typeof value === 'number') { // Value is a number, no reason to escape
-    return `${value}`
+  } else if (typeof value === 'boolean' || typeof value === 'number') { // Cannot escape on these values
+    return value // if it's already a boolean or a number just return it
   } else {
     // Loop through value to find HTML entities
     for (i = 0; i < value.length; i++) {
