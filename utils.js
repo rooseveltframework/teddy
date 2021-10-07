@@ -96,10 +96,21 @@ function escapeEntities (value) {
   let i
   let j
 
-  if (value === undefined || typeof value === 'boolean' || typeof value === 'object') { // Cannot escape on these values
-    return value
-  } else if (typeof value === 'number') { // Value is a number, no reason to escape
-    return `${value}`
+  if (typeof value === 'object') { // Cannot escape on this value
+    if (!value) {
+      return false // it is falsey to return false
+    } else if (Array.isArray(value)) {
+      if (value.length === 0) {
+        return false // empty arrays are falsey
+      } else {
+        return '[Array]' // print that it is an array with content in it, but do not print the contents
+      }
+    }
+    return '[Object]' // just print that it is an object, do not print the contents
+  } else if (value === undefined) { // Cannot escape on this value
+    return false // undefined is falsey
+  } else if (typeof value === 'boolean' || typeof value === 'number') { // Cannot escape on these values
+    return value // if it's already a boolean or a number just return it
   } else {
     // Loop through value to find HTML entities
     for (i = 0; i < value.length; i++) {
