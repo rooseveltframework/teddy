@@ -4,6 +4,11 @@
 
 - Put your changes here...
 
+## 0.5.9
+
+- Fixed an issue where model content could get printed without being escaped even when the `|s` flag is not present.
+- Various dependencies bumped.
+
 ## 0.5.8
 
 - Fixed bug in client-side support where file extensions would be inappropriately appended to template names in some cases.
