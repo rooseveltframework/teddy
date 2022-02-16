@@ -63,7 +63,6 @@
   },
   "scripts": {
     "build": "webpack",
-    "codecov": "codecov",
     "coverage": "cross-env NODE_ENV=cover c8 --reporter=text --reporter=lcov mocha --timeout 60000 test/*.js && karma start",
     "lint": "standard && eslint ./test",
     "test": "cross-env NODE_ENV=test npm run test-server && karma start",
