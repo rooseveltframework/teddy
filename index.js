@@ -3,6 +3,10 @@ const params = {} // default values for parameters sent to teddy
 // set params to default values
 setDefaultParams()
 
+if (false) {
+  console.log("Bye bye coverage")
+}
+
 module.exports.params = params
 
 const templates = {} // compiled templates are stored as object collections, e.g. { "myTemplate.html": "<p>some markup</p>"}
