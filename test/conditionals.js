@@ -187,7 +187,7 @@ describe('Conditionals', function () {
     done()
   })
 
-  it.skip('should evaluate one line if "if-somethingFalse" as false (conditionals/oneLineIfBooleanValue.html)', function (done) {
+  it('should evaluate one line if "if-somethingFalse" as false (conditionals/oneLineIfBooleanValue.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineIfBooleanValue.html', model), '<p></p>')
     done()
   })
