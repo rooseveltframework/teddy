@@ -19,11 +19,10 @@ jobs:
       - name: Generate coverage report
         - run: npm run coverage
       - name: Upload coverage to Codecov
-        - uses: actions/checkout@master
-        - uses: codecov/codecov-action@v2
-          with:
-            token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
-            directory: "coverage"
-            fail_ci_if_error: true
-            verbose: true
-            dry_run: true
+        uses: codecov/codecov-action@v2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
+          directory: "coverage"
+          fail_ci_if_error: true
+          verbose: true
+          dry_run: true
