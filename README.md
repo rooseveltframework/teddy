@@ -260,19 +260,19 @@ One line ifs
 If you need a more concise conditional to control which attributes are applied to a given element, then use this syntax:
 
 ```html
-<p if-something true="class='present'" false="class='not-present'">One line if.</p>
+<p if-something true="class='shown'" false="class='hidden'">One line if.</p>
 ```
 
-In that structure, the attribute `if-something` checks to see if the variable `something` is present. If so, the class delcared in the `true` attribute is written to the element, resulting in the following output:
+In that structure, the attribute `if-something` checks to see if the variable `something` is truthy. This means it will check for either variable presence in the model or the boolean value `true`. If so, the class delcared in the `true` attribute is written to the element, resulting in the following output:
 
 ```html
-<p class='present'>One line if.</p>
+<p class='shown'>One line if.</p>
 ```
 
-If not, the class declared in the `false` attribute is written to the element, resulting in the following output:
+If not, this will check for non-presence in the model or the boolean value `false`. If so, the class declared in the `false` attribute is written to the element, resulting in the following output:
 
 ```html
-<p class='not-present'>One line if.</p>
+<p class='hidden'>One line if.</p>
 ```
 
 Like the `<if>` tag you can check for both the presence of a variable as well as its value. To check the value of a variable, use this syntax:

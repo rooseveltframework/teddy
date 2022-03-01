@@ -314,7 +314,10 @@ function parseOneLineIf (charList, model) {
       return insertValue(charList, condition.false.split('').reverse().join(''), startIndex, endIndex)
     }
   } else { // There is no value to compare against
-    if (varVal && varVal[0] === '{' && varVal[varVal.length - 1] === '}') {
+    // Cases for when there isn't a condition.varLiteral value
+    // case 1: `false` literal or variable not present in model (resolving to var name within brackets, ex: {notInModel}) -> insert false condition
+    // case 2: non-empty string present in model or `true` literal -> insert true condition
+    if (varVal === false || (varVal[0] === '{' && varVal[varVal.length - 1] === '}')) {
       return insertValue(charList, condition.false.split('').reverse().join(''), startIndex, endIndex)
     } else {
       return insertValue(charList, condition.true.split('').reverse().join(''), startIndex, endIndex)
