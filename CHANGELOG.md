@@ -4,6 +4,11 @@
 
 - Put your changes here...
 
+## 0.5.10
+
+- Fixed bug with one-line-ifs. See https://github.com/rooseveltframework/teddy/pull/540
+- Various dependencies bumped
+
 ## 0.5.9
 
 - Fixed an issue where model content could get printed without being escaped even when the `|s` flag is not present.
