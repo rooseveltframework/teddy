@@ -1,0 +1,11 @@
+{!
+  should parse nested loops correctly
+!}
+
+<loop through="objectWithArrayInIt.memberArray" val="arrayMemberObject">
+  <tr>
+    <loop through="arrayMemberObject" val="localObjectMember">
+      <p>{localObjectMember}</p>
+    </loop>
+  </tr>
+</loop>

@@ -225,7 +225,19 @@ function makeModel () {
           }
         ]
       }
-    ]
+    ],
+    objectWithArrayInIt: {
+      memberArray: [
+        {
+          foo: "value1",
+          bar: "value2",
+        },
+        {
+          baz: "value3",
+          zar: "value4",
+        },
+      ]
+    }
   }
 
   model.circular.circular = model.circular
