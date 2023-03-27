@@ -229,13 +229,13 @@ function makeModel () {
     objectWithArrayInIt: {
       memberArray: [
         {
-          foo: "value1",
-          bar: "value2",
+          foo: 'value1',
+          bar: 'value2'
         },
         {
-          baz: "value3",
-          zar: "value4",
-        },
+          baz: 'value3',
+          zar: 'value4'
+        }
       ]
     }
   }
