@@ -17,7 +17,7 @@ function parseConditional (charList, type, model) {
   let teddyVarName = '' // Teddy conditional argument name or operator used (i.e: or, and, xor, not)
   let teddyVarExpected = '' // Literal value for a conditional teddy argument (i.e: <if something='some content'>)
   let condition = {
-    type: type // <if> <unless>
+    type // <if> <unless>
   }
 
   const boc = [] // Array of 2-length lists that contain the relevant indices for an open conditional tag [<, >]
@@ -71,7 +71,7 @@ function parseConditional (charList, type, model) {
         teddyVarName = ''
         teddyVarExpected = ''
         condition = {
-          type: type
+          type
         }
         readMode = false
         readingConditional = false
