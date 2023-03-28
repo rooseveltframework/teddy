@@ -14,6 +14,7 @@ module.exports = {
     fs: 'commonjs fs',
     path: 'commonjs path'
   },
+  mode: 'development',
   node: {
     __dirname: false
   }
