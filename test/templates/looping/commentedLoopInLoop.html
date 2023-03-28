@@ -1,0 +1,13 @@
+{!
+  should not render the loop
+!}
+
+<p>
+  <loop through="names" val="name">
+    {!
+      <loop through="hfjkds" val="lkfdjs">
+        <p>{lkfdjs}</p>
+      </loop>
+    !}
+  </loop>
+</p>
