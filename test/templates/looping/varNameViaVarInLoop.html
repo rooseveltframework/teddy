@@ -1,0 +1,9 @@
+{!
+  should render {variables}
+!}
+
+<loop through="objOfNames" val="nameList">
+  <loop through="nameList" val="name">
+    <p>{nameList.{name}}</p>
+  </loop>
+</loop>

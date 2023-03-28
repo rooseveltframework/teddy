@@ -21,6 +21,14 @@ function makeModel () {
       'three'
     ],
     names: { jack: 'guy', jill: 'girl', hill: 'landscape' },
+    nameList: [
+      'jack',
+      'jill',
+      'hill'
+    ],
+    objOfNames: {
+      nameList: { jack: 'guy', jill: 'girl', hill: 'landscape' }
+    },
     objects: [{ a: 1, b: 2, c: 3 }, { a: 4, b: 5, c: 6 }, { a: 7, b: 8, c: 9 }],
     arrays: [['a', 'b', 'c'], ['d', 'e', 'f'], ['g', 'h', 'i']],
     missingNumbers: [{ a: undefined, b: undefined, c: undefined }, { a: 4, b: 5, c: 6 }, { a: 7, b: 8, c: 9 }],
