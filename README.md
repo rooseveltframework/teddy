@@ -16,7 +16,7 @@ It uses HTML-like `<tags>` for rudimentary templating logic and Teddy Roosevelt'
 
 Table of contents
 ===
-
+- [Installing Teddy](https://github.com/rooseveltframework/teddy#Installation)
 - [Why yet another templating engine?](https://github.com/rooseveltframework/teddy#why-yet-another-templating-engine)
   - [Other popular templating engines are too cryptic](https://github.com/rooseveltframework/teddy#other-popular-templating-engines-are-too-cryptic)
 - [Teddy, symbol-buster extraordinaire](https://github.com/rooseveltframework/teddy#teddy-symbol-buster-extraordinaire)
@@ -32,9 +32,38 @@ Table of contents
 - [Using Teddy in Node.js](https://github.com/rooseveltframework/teddy#using-teddy-in-nodejs)
 - [Using Teddy with client-side JS](https://github.com/rooseveltframework/teddy#using-teddy-with-client-side-js)
 - [API documentation](https://github.com/rooseveltframework/teddy#api-documentation)
+- [Testing documentation](https://github.com/rooseveltframework/teddy#Testing documentation
+-documentation)
 
+Installation
+===
 
+- Open Terminal.
+- Navigate to your desired location to download the contents of this repository.
+- Copy and paste the following code into the Terminal :
+   ```bash
+   $ git clone https://github.com/rooseveltframework/teddy.git
+   ```
+- Install the needed dependencies 
+    ```bash
+    $ npm install
+    ```
+- run
+    ```bash
+    npm run build
+    ``` 
+    to bundle scripts with **_webpack_** a static module bundler for modern JavaScript applications
 
+- Note: 
+  - For any changes made to the code, one should run 
+    ```bash
+      npm run build
+    ```
+  - If any changes made to the dependencies,  one should run 
+       ```bash
+      npm ci
+      npm run build
+    ```
 Why yet another templating engine?
 ===
 
@@ -460,3 +489,17 @@ API documentation
   - Default is false. *(Not recommended to enable in production for performance reasons.)*
 - `teddy.minify(true/false)`: When this setting is enabled, Teddy will minify templates using its own internal minifier during the compile step.
   - Default is false. *(Not recommended. Usually best to use a third party tool like [html-minifier](https://www.npmjs.com/package/html-minifier) instead.)*
+
+Testing documentation
+===
+
+- To run a test 
+  - Open Terminal.
+  - Navigate to the repository location
+  - In the terminal run `npm t'
+
+- If you receive Error regarding playwright- chromium or playwright- firefox
+  - Make sure that  mode: has been set to 'development' in the webpack.config.js file
+    ```bash
+      mode: 'development',
+    ```
