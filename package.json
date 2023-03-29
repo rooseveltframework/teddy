@@ -89,8 +89,5 @@
   "funding": {
     "type": "individual",
     "url": "https://github.com/sponsors/kethinov"
-  },
-  "dependencies": {
-    "teddy": "^0.5.10"
   }
 }
