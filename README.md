@@ -16,7 +16,6 @@ It uses HTML-like `<tags>` for rudimentary templating logic and Teddy Roosevelt'
 
 Table of contents
 ===
-
 - [Why yet another templating engine?](https://github.com/rooseveltframework/teddy#why-yet-another-templating-engine)
   - [Other popular templating engines are too cryptic](https://github.com/rooseveltframework/teddy#other-popular-templating-engines-are-too-cryptic)
 - [Teddy, symbol-buster extraordinaire](https://github.com/rooseveltframework/teddy#teddy-symbol-buster-extraordinaire)
@@ -32,8 +31,7 @@ Table of contents
 - [Using Teddy in Node.js](https://github.com/rooseveltframework/teddy#using-teddy-in-nodejs)
 - [Using Teddy with client-side JS](https://github.com/rooseveltframework/teddy#using-teddy-with-client-side-js)
 - [API documentation](https://github.com/rooseveltframework/teddy#api-documentation)
-
-
+- [Hacking the code](https://github.com/rooseveltframework/teddy#hacking-the-code)
 
 Why yet another templating engine?
 ===
@@ -460,3 +458,13 @@ API documentation
   - Default is false. *(Not recommended to enable in production for performance reasons.)*
 - `teddy.minify(true/false)`: When this setting is enabled, Teddy will minify templates using its own internal minifier during the compile step.
   - Default is false. *(Not recommended. Usually best to use a third party tool like [html-minifier](https://www.npmjs.com/package/html-minifier) instead.)*
+
+Hacking the code
+===
+
+If you want to write code for this project, here's how to set up a development environment:
+
+- Fork/clone this repo.
+- Install dependencies: `npm ci`
+- Do a build: `npm run build` — builds are needed after every code change.
+- Run the tests: `npm t`
