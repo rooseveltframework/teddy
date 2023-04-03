@@ -102,11 +102,13 @@ function parseLoop (charList, model, passes, endParse, fs, contextModels, curren
       if (model[params.through]) { // Loop through non-object value requires context
         through = model[params.through]
       } else { // Loop through non-object value does not require context
+
         const contextResult = findContext(params.through, { contextModels, currentContext })
         context = contextResult.context
         contextModels = contextResult.contextModels
         currentContext = contextResult.currentContext
         through = getContext(model, context, params.through)
+
       }
     } else { // Loop through value is an object
       if (model[params.through.slice(0, periodIndex)] === undefined) { // Loop through object value requires context
@@ -231,7 +233,7 @@ function parseLoop (charList, model, passes, endParse, fs, contextModels, curren
 }
 
 // Finds correct context for a nested loop
-function findContext (str, { contextModels, currentContext }) {
+function findContext(str, { contextModels, currentContext }) {
   for (let i = 0; i < contextModels.length; i++) {
     if (str.indexOf(contextModels[i][0]) > -1) {
       currentContext = contextModels[i] // save required context from list
@@ -243,7 +245,7 @@ function findContext (str, { contextModels, currentContext }) {
 }
 
 // Gets contextual value from model
-function getContext (model, str, thru) {
+function getContext(model, str, thru) {
   let currentValue
   let tempStr = ''
   let tempIndex = ''
@@ -263,15 +265,31 @@ function getContext (model, str, thru) {
         } else {
           tempIndex += str[i]
         }
-      } else if (str[i] === '[') { // Found index
+      } else if (str[i] === '[') { // Found index       
         if (currentValue) {
           currentValue = currentValue[tempStr] // Fetch value from current spot in nested object
         } else {
-          currentValue = model[tempStr] // Fetch value from model
+          if (tempStr.includes(".")) {
+            let objStr = tempStr.split('.')[0];
+            let arrStr = tempStr.split('.')[1];
+
+            currentValue = model[objStr][arrStr]
+
+          } else {
+            currentValue = model[tempStr] // Fetch value from model
+          }
+
         }
+
         getIndex = true
         tempStr = ''
-      } else if (str[i] === '.') { // Do nothing
+      } else if (str[i] === '.') {
+        let strIdx = str.indexOf(".")
+        if (str[strIdx - 1] === "]") {
+          // Do nothing
+        } else {
+          tempStr += str[i]
+        }
       } else { // Get attribute name from model
         tempStr += str[i]
       }
