@@ -251,8 +251,9 @@ function getContext (model, str, thru) {
 
   if (str) { // Looking for context
     for (let i = 0; i < str.length; i++) { // Found index
+      const char = str[i]
       if (getIndex) { // Get numerical index to select from
-        if (str[i] === ']') {
+        if (char === ']') {
           if (currentValue[tempIndex]) { // We can get value from the index
             currentValue = currentValue[tempIndex]
           } else { // Need to convert object values into list to get current value from index
@@ -261,19 +262,34 @@ function getContext (model, str, thru) {
           getIndex = false
           tempIndex = ''
         } else {
-          tempIndex += str[i]
+          tempIndex += char
         }
-      } else if (str[i] === '[') { // Found index
+      } else if (char === '[') { // Found index
         if (currentValue) {
           currentValue = currentValue[tempStr] // Fetch value from current spot in nested object
         } else {
-          currentValue = model[tempStr] // Fetch value from model
+          if (tempStr.includes('.')) {
+            const tempStrSplit = tempStr.split('.')
+            const objStr = tempStrSplit[0]
+            const arrStr = tempStrSplit[1]
+
+            currentValue = model[objStr][arrStr]
+          } else {
+            currentValue = model[tempStr] // Fetch value from model
+          }
         }
+
         getIndex = true
         tempStr = ''
-      } else if (str[i] === '.') { // Do nothing
+      } else if (char === '.') {
+        const strIdx = str.indexOf('.')
+        if (str[strIdx - 1] === ']') {
+          // Do nothing
+        } else {
+          tempStr += char
+        }
       } else { // Get attribute name from model
-        tempStr += str[i]
+        tempStr += char
       }
     }
   } else { // Return undefined in case there is no context (should ignore loop with invalid through attribute)
