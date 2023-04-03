@@ -66,12 +66,12 @@
     "codecov": "./node_modules/.bin/codecov",
     "coverage": "cross-env NODE_ENV=cover c8 --reporter=text --reporter=lcov mocha --timeout 60000 test/*.js && karma start",
     "lint": "standard && eslint ./test",
-    "test": "cross-env NODE_ENV=test npm run test-server && karma start",
-    "test-chrome": "karma start --browsers ChromeHeadless",
-    "test-edge": "karma start --browsers Edge",
-    "test-firefox": "karma start --browsers Firefox",
-    "test-safari": "karma start --browsers Safari",
-    "test-server": "cross-env NODE_ENV=test mocha test"
+    "test": "npm run build && cross-env NODE_ENV=test mocha test && karma start",
+    "test-chrome": "npm run build && karma start --browsers ChromeHeadless",
+    "test-edge": "npm run build && karma start --browsers Edge",
+    "test-firefox": "npm run build && karma start --browsers Firefox",
+    "test-safari": "npm run build && karma start --browsers Safari",
+    "test-server": "npm run build && cross-env NODE_ENV=test mocha test"
   },
   "repository": {
     "type": "git",
