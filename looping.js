@@ -30,7 +30,6 @@ function parseLoop (charList, model, passes, endParse, fs, contextModels, curren
   let i
   let j
   const l = charList.length
-
   // Read <loop> inner contents
   for (i = l - tagLengths.loop; i >= 0; i--) {
     currentChar = charList[i]
@@ -169,6 +168,47 @@ function parseLoop (charList, model, passes, endParse, fs, contextModels, curren
               // Recalibrate iterator based on length of inserted value (if necessary)
               if (teddyString.length < teddyName.length) {
                 j += (teddyName.length - teddyString.length)
+              }
+            } if (teddyString === '') {
+              const teddyStrSplit = teddyName.split('.')
+              const objStr01 = teddyStrSplit[0]
+
+              if (objStr01 === params.through) {
+                const objArr = []
+                let objMain
+
+                for (const k in contextModels) {
+                  const row = contextModels[k]
+                  for (const id of row) {
+                    objArr.push(id)
+                  }
+                }
+                const objSec = objArr[0]
+                if (objArr[1].includes('[')) {
+                  const objMainGrouping = objArr[1].split('[', 2)
+                  objMain = objMainGrouping[0]
+                }
+
+                const teddyNameArr = []
+
+                if (teddyNameArr.includes(vals[i])) {
+                  // Do nothing
+                } else {
+                  teddyNameArr.push(vals[i])
+                  teddyString = model[objMain][objSec][vals[i]]
+                  slicedTemplate = insertValue(slicedTemplate, teddyString.split('').reverse().join(''), sov, j)
+                }
+
+                const index = slicedTemplate.indexOf('}')
+
+                if (index > -1) { // only splice array when item is found
+                  slicedTemplate.splice(index, 1) // 2nd parameter means remove one item only
+                }
+
+                // Recalibrate iterator based on length of inserted value (if necessary)
+                if (teddyString.length < teddyName.length) {
+                  j += (teddyName.length - teddyString.length)
+                }
               }
             }
 
