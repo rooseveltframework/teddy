@@ -61,6 +61,11 @@ describe('Looping', function () {
     done()
   })
 
+  it.skip('should render {variables} (looping/varNameViaVarInLoopWithIndependentVars.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('looping/varNameViaVarInLoopWithIndependentVars.html', model), '<p>guy</p><p>girl</p><p>landscape</p>')
+    done()
+  })
+
   it.skip('should render {variables} (looping/commentedLoopInLoop.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('looping/commentedLoopInLoop.html', model), '<p></p>')
     done()
