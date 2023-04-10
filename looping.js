@@ -3,7 +3,7 @@ const { tagLengths, primaryTags } = require('./constants')
 const { scanTemplate } = require('./scanTemplate')
 
 // Parse looping teddy tags (i.e <loop through='list' val='item'>)
-function parseLoop(charList, model, passes, endParse, fs, contextModels, currentContext) {
+function parseLoop (charList, model, passes, endParse, fs, contextModels, currentContext) {
   let nested = 0 // Nested counter
   const params = {} // Save all loop parameters in this object
   const modifiedModel = Object.assign({}, model) // Used when we need to scan inner loop contents
@@ -30,7 +30,6 @@ function parseLoop(charList, model, passes, endParse, fs, contextModels, current
   let i
   let j
   const l = charList.length
-  let teddyListArr = []
   // Read <loop> inner contents
   for (i = l - tagLengths.loop; i >= 0; i--) {
     currentChar = charList[i]
@@ -171,53 +170,47 @@ function parseLoop(charList, model, passes, endParse, fs, contextModels, current
                 j += (teddyName.length - teddyString.length)
               }
             } if (teddyString === '') {
-
               const teddyStrSplit = teddyName.split('.')
               const objStr01 = teddyStrSplit[0]
 
               if (objStr01 === params.through) {
-
-                let objArr = []
+                const objArr = []
                 let objMain
-                let objSec
 
-                for (let k in contextModels) {
-                  let row = contextModels[k]
-                  for (let id of row) {
+                for (const k in contextModels) {
+                  const row = contextModels[k]
+                  for (const id of row) {
                     objArr.push(id)
                   }
                 }
-                objSec = objArr[0]
+                const objSec = objArr[0]
                 if (objArr[1].includes('[')) {
-                  objMainGrouping = objArr[1].split('[', 2);
+                  const objMainGrouping = objArr[1].split('[', 2)
                   objMain = objMainGrouping[0]
                 }
 
-                let teddyNameArr = []
+                const teddyNameArr = []
 
                 if (teddyNameArr.includes(vals[i])) {
-                  //Do nothing
+                  // Do nothing
                 } else {
                   teddyNameArr.push(vals[i])
                   teddyString = model[objMain][objSec][vals[i]]
                   slicedTemplate = insertValue(slicedTemplate, teddyString.split('').reverse().join(''), sov, j)
                 }
 
-                const index = slicedTemplate.indexOf('}');
+                const index = slicedTemplate.indexOf('}')
 
                 if (index > -1) { // only splice array when item is found
-                  slicedTemplate.splice(index, 1); // 2nd parameter means remove one item only
+                  slicedTemplate.splice(index, 1) // 2nd parameter means remove one item only
                 }
-                
+
                 // Recalibrate iterator based on length of inserted value (if necessary)
                 if (teddyString.length < teddyName.length) {
                   j += (teddyName.length - teddyString.length)
                 }
-
               }
-
             }
-
 
             // Reset reading variables
             readingVar = false
@@ -278,7 +271,7 @@ function parseLoop(charList, model, passes, endParse, fs, contextModels, current
 }
 
 // Finds correct context for a nested loop
-function findContext(str, { contextModels, currentContext }) {
+function findContext (str, { contextModels, currentContext }) {
   for (let i = 0; i < contextModels.length; i++) {
     if (str.indexOf(contextModels[i][0]) > -1) {
       currentContext = contextModels[i] // save required context from list
@@ -290,7 +283,7 @@ function findContext(str, { contextModels, currentContext }) {
 }
 
 // Gets contextual value from model
-function getContext(model, str, thru) {
+function getContext (model, str, thru) {
   let currentValue
   let tempStr = ''
   let tempIndex = ''
