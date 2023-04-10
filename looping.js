@@ -3,7 +3,7 @@ const { tagLengths, primaryTags } = require('./constants')
 const { scanTemplate } = require('./scanTemplate')
 
 // Parse looping teddy tags (i.e <loop through='list' val='item'>)
-function parseLoop(charList, model, passes, endParse, fs, contextModels, currentContext) {
+function parseLoop (charList, model, passes, endParse, fs, contextModels, currentContext) {
   let nested = 0 // Nested counter
   const params = {} // Save all loop parameters in this object
   const modifiedModel = Object.assign({}, model) // Used when we need to scan inner loop contents
@@ -176,19 +176,14 @@ function parseLoop(charList, model, passes, endParse, fs, contextModels, current
               let objMain
               const teddyNameArr = []
 
-                for (const k in contextModels) {
-                  const row = contextModels[k]
-                  for (const id of row) {
-                    objArr.push(id)
-                  }
+              for (const k in contextModels) {
+                const row = contextModels[k]
+                for (const id of row) {
+                  objArr.push(id)
                 }
-
-            
-
-              console.log(objMain)
+              }
 
               if (objStr01 === params.through) {
-  
                 const objSec = objArr[0]
                 if (objArr[1].includes('[')) {
                   const objMainGrouping = objArr[1].split('[', 2)
@@ -196,7 +191,7 @@ function parseLoop(charList, model, passes, endParse, fs, contextModels, current
                 }
 
                 // If TeddyNameArr includes value of val[i] do nothing
-                // Else push value of val[i] into TeddyNameArr 
+                // Else push value of val[i] into TeddyNameArr
                 // And set teddyString to equal val[i] and insert value to slicedTemplate
                 if (teddyNameArr.includes(vals[i])) {
                   // Do nothing
@@ -216,19 +211,18 @@ function parseLoop(charList, model, passes, endParse, fs, contextModels, current
                 if (teddyString.length < teddyName.length) {
                   j += (teddyName.length - teddyString.length)
                 }
-              }else if (objStr01 === objArr[0] ) {
+              } else if (objStr01 === objArr[0]) {
                 if (objArr[1].includes('[')) {
                   const objMainGrouping = objArr[1].split('[', 2)
                   objMain = objMainGrouping[0]
                 }
 
                 // If TeddyNameArr includes value of val[i] do nothing
-                // Else push value of val[i] into TeddyNameArr 
+                // Else push value of val[i] into TeddyNameArr
                 // And set teddyString to equal val[i] and insert value to slicedTemplate
                 if (teddyNameArr.includes(vals[i])) {
                   // Do nothing
                 } else {
-                  console.log(model[objMain][params.through][vals[i]])
                   teddyNameArr.push(vals[i])
                   teddyString = model[objMain][params.through][vals[i]]
                   slicedTemplate = insertValue(slicedTemplate, teddyString.split('').reverse().join(''), sov, j)
@@ -245,7 +239,7 @@ function parseLoop(charList, model, passes, endParse, fs, contextModels, current
                   j += (teddyName.length - teddyString.length)
                 }
               }
-            } 
+            }
 
             // Reset reading variables
             readingVar = false
@@ -306,7 +300,7 @@ function parseLoop(charList, model, passes, endParse, fs, contextModels, current
 }
 
 // Finds correct context for a nested loop
-function findContext(str, { contextModels, currentContext }) {
+function findContext (str, { contextModels, currentContext }) {
   for (let i = 0; i < contextModels.length; i++) {
     if (str.indexOf(contextModels[i][0]) > -1) {
       currentContext = contextModels[i] // save required context from list
@@ -318,7 +312,7 @@ function findContext(str, { contextModels, currentContext }) {
 }
 
 // Gets contextual value from model
-function getContext(model, str, thru) {
+function getContext (model, str, thru) {
   let currentValue
   let tempStr = ''
   let tempIndex = ''
