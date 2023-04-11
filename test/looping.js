@@ -56,17 +56,22 @@ describe('Looping', function () {
     done()
   })
 
-  it('should render {variables} (looping/varNameViaVarInLoop.html)', function (done) {
+  it('should render {variables} defined as {varname.{othervar}} (looping/varNameViaVarInLoop.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('looping/varNameViaVarInLoop.html', model), '<p>guy</p><p>girl</p><p>landscape</p>')
     done()
   })
 
-  it('should render {variables} (looping/varNameViaVarInLoopWithIndependentVars.html)', function (done) {
+  it('should render {variables} defined as {varname.{othervar}} under slightly different condittions (looping/varNameViaVarInLoopWithIndependentVars.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('looping/varNameViaVarInLoopWithIndependentVars.html', model), '<p>guy</p><p>girl</p><p>landscape</p>')
     done()
   })
 
-  it.skip('should render {variables} (looping/commentedLoopInLoop.html)', function (done) {
+  it.skip('should render {variables} in loop that repeats twice (looping/varNameViaVarInLoopWithIndependentVarsDoubled.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('looping/varNameViaVarInLoopWithIndependentVarsDoubled.html', model), '<p>guy</p><p>girl</p><p>landscape</p>')
+    done()
+  })
+
+  it.skip('should render {variables} parsing comments correctly (looping/commentedLoopInLoop.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('looping/commentedLoopInLoop.html', model), '<p></p>')
     done()
   })
@@ -76,7 +81,7 @@ describe('Looping', function () {
     done()
   })
 
-  it('should parse nested nested loops correctly (looping/nestedNestedLoops.html)', function (done) {
+  it('should parse complex nested nested loops correctly (looping/nestedNestedLoops.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('looping/nestedNestedLoops.html', model), '<p>1</p><ul><li>1</li><ul><li>0: one</li><li>1: two</li><li>2: three</li></ul><li>2</li><ul><li>0: four</li><li>1: five</li><li>2: six</li></ul><li>3</li><ul><li>0: seven</li><li>1: eight</li><li>2: nine</li></ul></ul><p>2</p><ul><li>1</li><ul><li>0: one</li><li>1: two</li><li>2: three</li></ul><li>2</li><ul><li>0: four</li><li>1: five</li><li>2: six</li></ul><li>3</li><ul><li>0: seven</li><li>1: eight</li><li>2: nine</li></ul></ul><p>3</p><ul><li>1</li><ul><li>0: one</li><li>1: two</li><li>2: three</li></ul><li>2</li><ul><li>0: four</li><li>1: five</li><li>2: six</li></ul><li>3</li><ul><li>0: seven</li><li>1: eight</li><li>2: nine</li></ul></ul>')
     done()
   })
