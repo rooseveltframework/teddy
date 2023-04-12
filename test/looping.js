@@ -61,13 +61,18 @@ describe('Looping', function () {
     done()
   })
 
-  it('should render {variables} defined as {varname.{othervar}} under slightly different condittions (looping/varNameViaVarInLoopWithIndependentVars.html)', function (done) {
+  it('should render {variables} defined as {varname.{othervar}} under slightly different conditions (looping/varNameViaVarInLoopWithIndependentVars.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('looping/varNameViaVarInLoopWithIndependentVars.html', model), '<p>guy</p><p>girl</p><p>landscape</p>')
     done()
   })
 
   it('should render {variables} in loop that repeats twice (looping/varNameViaVarInLoopWithIndependentVarsDoubled.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('looping/varNameViaVarInLoopWithIndependentVarsDoubled.html', model), '<p>guy</p><p>girl</p><p>landscape</p><p>guy</p><p>girl</p><p>landscape</p>')
+    done()
+  })
+
+  it.skip('should render {variables} in loop that repeats twice (looping/varNameViaVarInLoopWithIndependentVarsViaArray.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('looping/varNameViaVarInLoopWithIndependentVarsViaArray .html', model), '<p>guy</p><p>girl</p><p>landscape</p><p>guy</p><p>girl</p><p>landscape</p>')
     done()
   })
 
