@@ -1,0 +1,9 @@
+{!
+  should render {variables}
+!}
+
+<loop through="arrayOfNames" val="names">
+  <loop through="nameList" val="name">
+    <p>{names.{name}}</p>
+  </loop>
+</loop>
