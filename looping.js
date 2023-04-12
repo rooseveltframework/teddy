@@ -1,7 +1,7 @@
 const { twoArraysEqual, validEndingTag, getTeddyVal, insertValue } = require('./utils')
 const { tagLengths, primaryTags } = require('./constants')
 const { scanTemplate } = require('./scanTemplate')
-
+console.log(scanTemplate)
 // Parse looping teddy tags (i.e <loop through='list' val='item'>)
 function parseLoop (charList, model, passes, endParse, fs, contextModels, currentContext) {
   let nested = 0 // Nested counter
@@ -130,6 +130,7 @@ function parseLoop (charList, model, passes, endParse, fs, contextModels, curren
       vals = Object.values(through)
     }
   }
+  
 
   // If we have values to loop through, continue
   if (vals) {
