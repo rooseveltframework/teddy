@@ -1,7 +1,6 @@
 const { twoArraysEqual, validEndingTag, getTeddyVal, insertValue } = require('./utils')
 const { tagLengths, primaryTags } = require('./constants')
 const { scanTemplate } = require('./scanTemplate')
-
 // Parse looping teddy tags (i.e <loop through='list' val='item'>)
 function parseLoop (charList, model, passes, endParse, fs, contextModels, currentContext) {
   let nested = 0 // Nested counter
@@ -228,23 +227,39 @@ function parseLoop (charList, model, passes, endParse, fs, contextModels, curren
                   // If TeddyNameArr includes value of val[i] do nothing
                   // Else push value of val[i] into TeddyNameArr
                   // And set teddyString to equal val[i] and insert value to slicedTemplate
-                  if (teddyNameArr.includes(vals[i])) {
-                    // Do nothing
-                  } else {
+                  if (typeof model[objMain][0] === 'object') {
                     teddyNameArr.push(vals[i])
-                    teddyString = model[objMain][params.through][vals[i]]
+                    teddyString = model[objMain][0][vals[i]]
                     slicedTemplate = insertValue(slicedTemplate, teddyString.split('').reverse().join(''), sov, j)
-                  }
 
-                  const index = slicedTemplate.indexOf('}')
+                    const index = slicedTemplate.indexOf('}')
 
-                  if (index > -1) { // only splice array when item is found
-                    slicedTemplate.splice(index, 1) // 2nd parameter means remove one item only
-                  }
+                    if (index > -1) { // only splice array when item is found
+                      slicedTemplate.splice(index, 1) // 2nd parameter means remove one item only
+                    }
 
-                  // Recalibrate iterator based on length of inserted value (if necessary)
-                  if (teddyString.length < teddyName.length) {
-                    j += (teddyName.length - teddyString.length)
+                    if (teddyString.length < teddyName.length) {
+                      j += (teddyName.length - teddyString.length)
+                    }
+                  } else {
+                    if (teddyNameArr.includes(vals[i])) {
+                      // Do nothing
+                    } else {
+                      teddyNameArr.push(vals[i])
+                      teddyString = model[objMain][params.through][vals[i]]
+                      slicedTemplate = insertValue(slicedTemplate, teddyString.split('').reverse().join(''), sov, j)
+                    }
+
+                    const index = slicedTemplate.indexOf('}')
+
+                    if (index > -1) { // only splice array when item is found
+                      slicedTemplate.splice(index, 1) // 2nd parameter means remove one item only
+                    }
+
+                    // Recalibrate iterator based on length of inserted value (if necessary)
+                    if (teddyString.length < teddyName.length) {
+                      j += (teddyName.length - teddyString.length)
+                    }
                   }
                 }
               }
