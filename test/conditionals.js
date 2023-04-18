@@ -233,12 +233,12 @@ describe('Conditionals', function () {
     done()
   })
 
-  it.skip('should evaluate one line if of <option> elements with the middle one selected (conditionals/oneLineValueVarsLooped.html)', function (done) {
+  it.skip('should evaluate <option> elements with the middle one selected (conditionals/oneLineValueVarsLooped.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineValueVarsLooped.html', model), '<option value=\'1\'>1</option><option value=\'2\' selected>2</option><option value=\'3\'>3</option>')
     done()
   })
 
-  it.skip('should evaluate one line if of <option> elements with the middle one selected (conditionals/conditionalValueVarsLooped.html)', function (done) {
+  it.skip('should evaluate <option> elements with the middle one selected (conditionals/conditionalValueVarsLooped.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('conditionals/conditionalValueVarsLooped.html', model), '<option value=\'1\'>1</option><option value=\'2\' selected>2</option><option value=\'3\'>3</option>')
     done()
   })
