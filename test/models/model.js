@@ -38,6 +38,9 @@ function makeModel () {
     arrays: [['a', 'b', 'c'], ['d', 'e', 'f'], ['g', 'h', 'i']],
     missingNumbers: [{ a: undefined, b: undefined, c: undefined }, { a: 4, b: 5, c: 6 }, { a: 7, b: 8, c: 9 }],
     objectOfObjects: { one: { a: 1, b: 2, c: 3 }, two: { a: 4, b: 5, c: 6 }, three: { a: 7, b: 8, c: 9 } },
+    special: {
+      number: 2
+    },
     nestedObjects: [
       {
         num: 1,
