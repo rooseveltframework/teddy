@@ -1,0 +1,7 @@
+{!
+  should evaluate one line if of <option> elements with the middle one selected
+!}
+
+<loop through='nestedObjects' val='obj'>
+  <option value='{obj.num}' if-obj.num='{special.number}' true='selected'>{obj.num}</option>
+</loop>
