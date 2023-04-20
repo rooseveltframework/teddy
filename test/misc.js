@@ -107,6 +107,11 @@ describe('Misc', function () {
     done()
   })
 
+  it.skip('should render emojis correctly (misc/emojis.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('misc/emojis.html', model), '<p>🎉🥳🎈🎊</p>')
+    done()
+  })
+
   it('should trigger caching rollover given one template with 100 unique models (misc/variable.html)', function (done) {
     let i
     teddy.cacheRenders(true)
