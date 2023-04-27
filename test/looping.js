@@ -76,6 +76,11 @@ describe('Looping', function () {
     done()
   })
 
+  it.skip('should render {variables} in loop that repeats twice (looping/varNameViaVarInLoopWithIndependentVarsViaArrayTwice.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('looping/varNameViaVarInLoopWithIndependentVarsViaArrayTwice.html', model), '<p>guy</p><p>girl</p><p>landscape</p><p>man</p><p>woman</p><p>scenary</p>')
+    done()
+  })
+
   it.skip('should render {variables} parsing comments correctly (looping/commentedLoopInLoop.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('looping/commentedLoopInLoop.html', model), '<p></p>')
     done()
