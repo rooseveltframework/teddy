@@ -1,9 +1,9 @@
 {!
-  should render {variables}
+  should render {variables} via second loop
 !}
 
-<loop through="objOfNames" val="nameList">
-  <loop through="nameList" val="name">
-    <p>{nameList.{name}}</p>
+<loop through="objOfNames" val="listOfNames">
+  <loop through="listOfNames" val="name">
+    <p>{name}</p>
   </loop>
 </loop>

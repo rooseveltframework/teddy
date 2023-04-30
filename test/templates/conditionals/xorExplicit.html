@@ -1,14 +1,6 @@
 {!
-  should evaluate different cases of xor correctly
+  should evaluate xor correctly using explicit values
 !}
-
-    {! false !}           {! false !}
-<if something='hello' xor something='goodbye'>
-  <p>should not render</p>
-</if>
-<else>
-  <p>xor: false</p>
-</else>
 
     {! false !}                {! false !}
 <if something='No content' xor doesntexist>
@@ -28,38 +20,6 @@
 
     {! true !}                   {! true !}
 <if something='Some content' xor somethingMore='More content'>
-  <p>should render</p>
-</if>
-<else>
-  <p>xor: false</p>
-</else>
-
-    {! true !}                   {! false !}
-<if something='Some content' xor something='No content'>
-  <p>should render</p>
-</if>
-<else>
-  <p>xor: false</p>
-</else>
-
-    {! false !}          {! true !}
-<if something='nope' xor something='Some content'>
-  <p>should render</p>
-</if>
-<else>
-  <p>xor: false</p>
-</else>
-
-    {! true !}    {! false !}
-<if something xor something='No content'>
-  <p>should render</p>
-</if>
-<else>
-  <p>xor: false</p>
-</else>
-
-    {! false !}                {! true !}
-<if something='No content' xor something>
   <p>should render</p>
 </if>
 <else>

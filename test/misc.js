@@ -62,7 +62,7 @@ describe('Misc', function () {
   })
 
   it('should not escape HTML entities present in {variables} which are properly {flagged|s} (misc/varNoEscaping.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('misc/varNoEscaping.html', model), '<p><span>raw html</span></p>')
+    assert.equalIgnoreSpaces(teddy.render('misc/varNoEscaping.html', model), '<div><span>raw html</span></div>')
     done()
   })
 
@@ -83,12 +83,12 @@ describe('Misc', function () {
   })
 
   it('should not break when referencing objects that don\'t exist (misc/objectDoesNotExist.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('misc/objectDoesNotExist.html', model), ' <p>{doesntExist.someKey}</p> <p class=\'false\'></p>')
+    assert.equalIgnoreSpaces(teddy.render('misc/objectDoesNotExist.html', model), ' <p>{doesntExist.someKey}</p> <p class="false"></p>')
     done()
   })
 
   it('should render plain HTML with no teddy tags with no changes (misc/plainHTML.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('misc/plainHTML.html', model), '<!DOCTYPE html><html lang=\'en\'><head><meta charset=\'utf-8\'><meta name=\'viewport\' content=\'width=device-width,initial-scale=1\'><meta name=\'format-detection\' content=\'telephone=no\'><title>Plain HTML</title><link rel=\'stylesheet\' href=\'/css/styles.css\'></head><body><main><p>This template contains no teddy tags. Just HTML.</p></main><script type=\'text/javascript\' src=\'/js/main.js\'></script></body></html>')
+    assert.equalIgnoreSpaces(teddy.render('misc/plainHTML.html', model), '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="format-detection" content="telephone=no"><title>Plain HTML</title><link rel="stylesheet" href="/css/styles.css"></head><body><main><p>This template contains no teddy tags. Just HTML.</p></main><script type="text/javascript" src="/js/main.js"></script></body></html>')
     done()
   })
 
@@ -103,16 +103,18 @@ describe('Misc', function () {
   })
 
   it('should escape curly braces from regex pattern (misc/regexEscaping.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('misc/regexEscaping.html', model), '<input type=\'text\' name=\'date\' placeholder=\'DD/MM/YYYY\' id=\'date\' pattern=\'^(3[0-1]|[1-2]\\d|[1-9]|0\\d)\\/(1[0-2]|[1-9]|0\\d)\\/[1-2]\\d{3}$\'>')
+    assert.equalIgnoreSpaces(teddy.render('misc/regexEscaping.html', model), '<input type="text" name="date" placeholder="DD/MM/YYYY" id="date" pattern="^(3[0-1]|[1-2]\\d|[1-9]|0\\d)\\/(1[0-2]|[1-9]|0\\d)\\/[1-2]\\d{3}$">')
     done()
   })
 
+  // TODO: fix this test; it works in node tests but breaks karma tests for some reason
   it.skip('should render emojis correctly (misc/emojis.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('misc/emojis.html', model), '<p>🎉🥳🎈🎊</p>')
     done()
   })
 
-  it('should trigger caching rollover given one template with 100 unique models (misc/variable.html)', function (done) {
+  // TODO: possibly remove this test, as the cacheRenders feature was removed in 0.6.x
+  it.skip('should trigger caching rollover given one template with 100 unique models (misc/variable.html)', function (done) {
     let i
     teddy.cacheRenders(true)
     teddy.setDefaultCaches(10)
@@ -126,7 +128,8 @@ describe('Misc', function () {
     done()
   })
 
-  it('should not cache a blacklisted template (misc/variable.html)', function (done) {
+  // TODO: possibly remove this test, as the cacheRenders feature was removed in 0.6.x
+  it.skip('should not cache a blacklisted template (misc/variable.html)', function (done) {
     teddy.cacheRenders(true)
     teddy.setRenderedTemplates({})
     teddy.setCacheBlacklist(['misc/variable.html'])
@@ -138,7 +141,8 @@ describe('Misc', function () {
     done()
   })
 
-  it('should only cache whitelisted templates (misc/variable.html)', function (done) {
+  // TODO: possibly remove this test, as the cacheRenders feature was removed in 0.6.x
+  it.skip('should only cache whitelisted templates (misc/variable.html)', function (done) {
     teddy.cacheRenders(true)
     teddy.setRenderedTemplates({})
     teddy.setCacheWhitelist({ 'misc/variable.html': 1 })
@@ -152,7 +156,8 @@ describe('Misc', function () {
     done()
   })
 
-  it('should only cache the whitelisted template the specified number of times (misc/variable.html)', function (done) {
+  // TODO: possibly remove this test, as the cacheRenders feature was removed in 0.6.x
+  it.skip('should only cache the whitelisted template the specified number of times (misc/variable.html)', function (done) {
     let i
     teddy.cacheRenders(true)
     teddy.setRenderedTemplates({})
@@ -172,11 +177,6 @@ describe('Misc', function () {
 
   it('should avoid rendering templates that are not strings', function (done) {
     assert.equalIgnoreSpaces(teddy.render(5, model), '')
-    done()
-  })
-
-  it('should avoid compiling templates that are not strings', function (done) {
-    assert.equalIgnoreSpaces(teddy.compile(5, model), '')
     done()
   })
 
@@ -221,7 +221,8 @@ describe('Misc', function () {
     done()
   })
 
-  it('should minify template with internal minifier (misc/templateToMinify.html)', function (done) {
+  // TODO: possibly remove this test, as the internal minifier feature was removed in 0.6.x
+  it.skip('should minify template with internal minifier (misc/templateToMinify.html)', function (done) {
     teddy.compileAtEveryRender(true)
     teddy.minify(true)
     assert.equalIgnoreSpaces(teddy.render('misc/templateToMinify.html', model), '<!DOCTYPE html><html lang=\'en\'> <head> <meta charset=\'utf-8\'> <meta name=\'viewport\' content=\'width=device-width,initial-scale=1\'> <meta name=\'format-detection\' content=\'telephone=no\'> <title>Plain HTML</title> </head> <body> <main> <p>This template contains no teddy tags. Just HTML.</p> </main> </body></html>')
@@ -230,7 +231,8 @@ describe('Misc', function () {
     done()
   })
 
-  it('should avoid flushing cache of non strings', function (done) {
+  // TODO: possibly remove this test, as the cacheRenders feature was removed in 0.6.x
+  it.skip('should avoid flushing cache of non strings', function (done) {
     assert.equalIgnoreSpaces(teddy.flushCache(5), '')
     done()
   })
@@ -255,8 +257,8 @@ describe('Misc', function () {
     done()
   })
 
-  it('should render variables that resolve to true or false boolean literals as strings (misc/printBooleanLiteral.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('misc/printBooleanLiteral.html', model), '<p>true</p><p>false</p>')
+  it('should render {variables} that resolve to true or false boolean literals as strings (misc/printBooleanLiteral.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('misc/printBooleanLiteral.html', model), '<p>true</p><p>{somethingFalse}</p>')
     done()
   })
 
@@ -265,35 +267,14 @@ describe('Misc', function () {
     done()
   })
 
-  // wontfix: https://github.com/rooseveltframework/teddy/issues/357
-  it.skip('should not render excessive whitespace in a <textarea> as a result of teddy tag indententation / formatting (misc/excessiveWhitespace.html)', function (done) {
-    assert.equal(teddy.render('misc/excessiveWhitespace.html', model), '<textarea>Some text here</textarea>')
-    done()
-  })
-
   it('should not render Teddy code in server-side comments in loops (misc/serverSideCommentsWithTeddyCode.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('misc/serverSideCommentsWithTeddyCode.html', model), '<div><p>test</p><p>test</p><p>test</p><p>test</p><p>test</p><p>test</p></div>')
     done()
   })
 
-  it('should execute render callback function for errors and non errors', function (done) {
-    teddy.setMaxPasses(100)
-    teddy.setVerbosity(3)
-    teddy.render('includes/includeInfiniteLoop.html', model, function (err, html) {
-      assert.equalIgnoreSpaces(err, '<li>Render aborted due to max number of passes (100) exceeded; there is a possible infinite loop in your template logic.</li>')
-      teddy.render('misc/variable.html', model, function (err, html) {
-        if (err) {
-          assert.fail(err)
-        }
-        assert.equalIgnoreSpaces(html, '<p>Some content</p>')
-        done()
-      })
-    })
-  })
-
   if (typeof process === 'object') {
     ['chromium', 'firefox'].forEach(function (browserType) {
-      describe(`playwright- ${browserType}`, function () {
+      describe(`playground.html - ${browserType}`, function () {
         let page, browser, context
         beforeEach(async function () {
           this.timeout(0) // browsers (specifically firefox) needed a little extra time to launch

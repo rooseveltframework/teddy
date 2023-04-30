@@ -8,6 +8,6 @@ if (typeof process !== 'object') {
   teddy.setVerbosity(0)
 
   for (i in templates) {
-    teddy.setTemplate(i, teddy.compile(templates[i]))
+    teddy.setTemplate(i, templates[i])
   }
 }

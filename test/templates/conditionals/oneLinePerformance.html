@@ -1,7 +1,7 @@
 {!
-  should loop through a large data set containing oneline ifs performantly (< 5000ms)
+  should evaluate 5000 one line ifs in under 5000ms
 !}
 
 <loop through='largeDataSet' key='i' val='item'>
-  <p> gif-jpg-png {i} <p if-something true="class='something-is-present'" false="class='something-is-not-present'"> {item.one} </p> </p>
+  <p> gif-jpg-png {i} <span if-something true="class='something-is-present'" false="class='something-is-not-present'"> {item.one} </span> </p>
 </loop>

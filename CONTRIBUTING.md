@@ -1,4 +1,4 @@
-# How to contribute to Teddy
+# How to contribute
 
 ## Before opening a pull request
 

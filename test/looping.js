@@ -56,7 +56,7 @@ describe('Looping', function () {
     done()
   })
 
-  it('should render {variables} defined as {varname.{othervar}} (looping/varNameViaVarInLoop.html)', function (done) {
+  it('should render {variables} via second loop (looping/varNameViaVarInLoop.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('looping/varNameViaVarInLoop.html', model), '<p>guy</p><p>girl</p><p>landscape</p>')
     done()
   })
@@ -66,22 +66,22 @@ describe('Looping', function () {
     done()
   })
 
-  it('should render {variables} in loop that repeats twice (looping/varNameViaVarInLoopWithIndependentVarsDoubled.html)', function (done) {
+  it('should render {variable.{otherVar}} in loop that repeats twice doubled (looping/varNameViaVarInLoopWithIndependentVarsDoubled.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('looping/varNameViaVarInLoopWithIndependentVarsDoubled.html', model), '<p>guy</p><p>girl</p><p>landscape</p><p>guy</p><p>girl</p><p>landscape</p>')
     done()
   })
 
-  it('should render {variables} in loop that repeats twice (looping/varNameViaVarInLoopWithIndependentVarsViaArray.html)', function (done) {
+  it('should render {variable.{otherVar}} in nested loop variant 1 (looping/varNameViaVarInLoopWithIndependentVarsViaArray.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('looping/varNameViaVarInLoopWithIndependentVarsViaArray.html', model), '<p>guy</p><p>girl</p><p>landscape</p>')
     done()
   })
 
-  it.skip('should render {variables} in loop that repeats twice (looping/varNameViaVarInLoopWithIndependentVarsViaArrayTwice.html)', function (done) {
+  it('should render {variable.{otherVar}} in nested loop variant 2 (looping/varNameViaVarInLoopWithIndependentVarsViaArrayTwice.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('looping/varNameViaVarInLoopWithIndependentVarsViaArrayTwice.html', model), '<p>guy</p><p>girl</p><p>landscape</p><p>man</p><p>woman</p><p>scenary</p>')
     done()
   })
 
-  it.skip('should render {variables} parsing comments correctly (looping/commentedLoopInLoop.html)', function (done) {
+  it('should not render the loop (looping/commentedLoopInLoop.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('looping/commentedLoopInLoop.html', model), '<p></p>')
     done()
   })
@@ -97,17 +97,18 @@ describe('Looping', function () {
   })
 
   // #47 and #39
-  it('should loop through a nested arrays correctly (looping/nestedArrays.html)', function (done) {
+  it('should loop through nested arrays correctly (looping/nestedArrays.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('looping/nestedArrays.html', model), '<p>one</p><p>two</p><p>three</p><p>four</p><p>five</p><p>six</p><p>seven</p><p>eight</p><p>nine</p>')
     done()
   })
 
-  it('should loop through a nested object correctly (looping/nestedObjects.html)', function (done) {
+  it('should loop through nested objects correctly (looping/nestedObjects.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('looping/nestedObjects.html', model), '<p>Thing With Name 1</p><p>Thing With Name 1: Subthing With Name 1</p><p>Thing With Name 1: Subthing With Name 2</p><p>Thing With Name 1: Subthing With Name 3</p><p>Thing With Name 2</p><p>Thing With Name 2: Subthing With Name 4</p><p>Thing With Name 2: Subthing With Name 5</p><p>Thing With Name 2: Subthing With Name 6</p><p>Thing With Name 3</p><p>Thing With Name 3: Subthing With Name 7</p><p>Thing With Name 3: Subthing With Name 8</p><p>Thing With Name 3: Subthing With Name 9</p>')
     done()
   })
 
-  it('should loop through an array of 5000 elements in < 5000ms (looping/largeDataSet.html)', function (done) {
+  // TODO: possibly remove this test, as the cacheRenders feature was removed in 0.6.x
+  it.skip('should loop through an array of 5000 elements in < 5000ms (looping/largeDataSet.html)', function (done) {
     teddy.cacheRenders(true)
     const start = new Date().getTime()
 
@@ -120,7 +121,8 @@ describe('Looping', function () {
     done()
   })
 
-  it('should loop through same array of 5000 elements in < 1200ms during second attempt due to caching (looping/largeDataSet.html)', function (done) {
+  // TODO: possibly remove this test, as the cacheRenders feature was removed in 0.6.x
+  it.skip('should loop through same array of 5000 elements in < 1200ms during second attempt due to caching (looping/largeDataSet.html)', function (done) {
     const start = new Date().getTime()
 
     teddy.render('looping/largeDataSet.html', model)
@@ -132,7 +134,8 @@ describe('Looping', function () {
     done()
   })
 
-  it('should loop through an array of 5000 elements in < 5000ms doing a fresh render via partial cache invalidation (looping/largeDataSet.html)', function (done) {
+  // TODO: possibly remove this test, as the cacheRenders feature was removed in 0.6.x
+  it.skip('should loop through an array of 5000 elements in < 5000ms doing a fresh render via partial cache invalidation (looping/largeDataSet.html)', function (done) {
     const start = new Date().getTime()
 
     teddy.flushCache('looping/largeDataSet.html', model)
@@ -145,7 +148,8 @@ describe('Looping', function () {
     done()
   })
 
-  it('should loop through same array of 5000 elements in < 1200ms during second attempt due to caching (looping/largeDataSet.html)', function (done) {
+  // TODO: possibly remove this test, as the cacheRenders feature was removed in 0.6.x
+  it.skip('should loop through same array of 5000 elements in < 1200ms during second attempt due to caching (looping/largeDataSet.html)', function (done) {
     const start = new Date().getTime()
 
     teddy.render('looping/largeDataSet.html', model)
@@ -157,7 +161,8 @@ describe('Looping', function () {
     done()
   })
 
-  it('should loop through an array of 5000 elements in < 5000ms doing a fresh render via full cache invalidation (looping/largeDataSet.html)', function (done) {
+  // TODO: possibly remove this test, as the cacheRenders feature was removed in 0.6.x
+  it.skip('should loop through an array of 5000 elements in < 5000ms doing a fresh render via full cache invalidation (looping/largeDataSet.html)', function (done) {
     const start = new Date().getTime()
 
     teddy.flushCache('looping/largeDataSet.html')
@@ -170,7 +175,8 @@ describe('Looping', function () {
     done()
   })
 
-  it('should loop through same array of 5000 elements in < 1200ms during second attempt due to caching (looping/largeDataSet.html)', function (done) {
+  // TODO: possibly remove this test, as the cacheRenders feature was removed in 0.6.x
+  it.skip('should loop through same array of 5000 elements in < 1200ms during second attempt due to caching (looping/largeDataSet.html)', function (done) {
     const start = new Date().getTime()
 
     teddy.render('looping/largeDataSet.html', model)
@@ -223,7 +229,7 @@ describe('Looping', function () {
     done()
   })
 
-  it('should evaluate evaluate include, if, and unless statements inside of loop (conditionals/loopIncludesIfUnless.html)', function (done) {
+  it('should loop through {letters} correctly and evaluate other teddy tags (conditionals/loopIncludesIfUnless.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('looping/loopIncludesIfUnless.html', model), '<p>a</p><p>Some content</p><p>Hello</p><p>b</p><p>Some content</p><p>Hello</p><p>c</p><p>Some content</p><p>Hello</p>')
     done()
   })
