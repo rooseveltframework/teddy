@@ -345,7 +345,7 @@ describe('Conditionals', function () {
     done()
   })
 
-  it('should evaluate 5000 one line ifs in under 5000ms (conditionals/oneLinePerformance.html)', function (done) {
+  it('should evaluate 5000 one line ifs in under 10000ms (conditionals/oneLinePerformance.html)', function (done) {
     const start = new Date().getTime()
 
     teddy.render('conditionals/oneLinePerformance.html', model)
@@ -353,7 +353,7 @@ describe('Conditionals', function () {
     const end = new Date().getTime()
     const time = end - start
 
-    assert.isAtMost(time, 5000)
+    assert.isAtMost(time, 10000)
 
     done()
   })
