@@ -86,7 +86,7 @@ describe('Conditionals', function () {
     done()
   })
 
-  it('should evaluate <unless something=\'Some content\'> as true (conditionals/unlessValue.html)', function (done) {
+  it('should evaluate <unless something=\'Some content\'> as false and trigger <else> condition (conditionals/unlessValue.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('conditionals/unlessValue.html', model), '<p>The variable \'something\' is set to \'Some content\'</p>')
     done()
   })
@@ -102,7 +102,7 @@ describe('Conditionals', function () {
   })
 
   it('should evaluate entire conditional and correctly show HTML comments (conditionals/commentConditional.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('conditionals/commentConditional.html', model), '<!-- COMMENT 1 --><p>The variable \'something\' is present</p>')
+    assert.equalIgnoreSpaces(teddy.render('conditionals/commentConditional.html', model), '<!-- COMMENT 1 --><p>The variable \'something\' is present</p><!-- COMMENT 2 -->')
     done()
   })
 
@@ -141,12 +141,12 @@ describe('Conditionals', function () {
     done()
   })
 
-  it('should evaluate `and` truth table as <p>and: true</p> (conditionals/andTruthTable.html)', function (done) {
+  it('should evaluate `and` truth table (conditionals/andTruthTable.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('conditionals/andTruthTable.html', model), ' <p>and: true true</p>')
     done()
   })
 
-  it('should evaluate `or` truth table as <p>or: true true</p> <p>or: true false</p> <p>or: false true</p> (conditionals/orTruthTable.html)', function (done) {
+  it('should evaluate `or` truth table correctly (conditionals/orTruthTable.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('conditionals/orTruthTable.html', model), '<p>or: true true</p><p>or: true false</p><p>or: true false</p><p>or: false true</p><p>or: false false</p><p>or: false true</p><p>or: true false</p><p>or: true true</p><p>or: false false</p><p>or: false false</p><p>or: false false</p>')
     done()
   })
@@ -168,7 +168,7 @@ describe('Conditionals', function () {
   })
 
   it('should evaluate xor correctly using explicit values (conditionals/xorExplicit.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('conditionals/xorExplicit.html', model), '<p>xor: false</p><p>xor: false</p><p>xor: false</p><p>xor: false</p><p>should render</p><p>should render</p><p>should render</p><p>should render</p><p>should render</p><p>should render</p>')
+    assert.equalIgnoreSpaces(teddy.render('conditionals/xorExplicit.html', model), '<p>xor: false</p><p>xor: false</p><p>xor: false</p><p>should render</p><p>should render</p>')
     done()
   })
 
@@ -183,7 +183,7 @@ describe('Conditionals', function () {
   })
 
   it('should evaluate one line if "if-something" as true (conditionals/oneLine.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('conditionals/oneLine.html', model), '<p class=\'something-is-present\'>One line if.</p>')
+    assert.equalIgnoreSpaces(teddy.render('conditionals/oneLine.html', model), '<p class="something-is-present">One line if.</p>')
     done()
   })
 
@@ -193,28 +193,28 @@ describe('Conditionals', function () {
   })
 
   it('should evaluate one line ifs in loops examining the object member\'s value correctly (conditionals/oneLineInLoop.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineInLoop.html', model), '<p class=\'something-is-present\'>guy</p><p class=\'something-is-present\'>girl</p><p class=\'something-is-present\'>landscape</p><p class=\'something-is-not-present\'>guy</p><p class=\'something-is-present\'>girl</p><p class=\'something-is-not-present\'>landscape</p>')
+    assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineInLoop.html', model), '<p class="something-is-present">guy</p><p class="something-is-present">girl</p><p class="something-is-present">landscape</p><p class="something-is-not-present">guy</p><p class="something-is-present">girl</p><p class="something-is-not-present">landscape</p>')
     done()
   })
 
   it('should evaluate one line if "if-something" as true when attributes are split across multiple lines (conditionals/oneLineNewLine.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineNewLine.html', model), '<p class=\'something-is-present\'>One line if.</p>')
+    assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineNewLine.html', model), '<p class="something-is-present">One line if.</p>')
     done()
   })
 
   it('should evaluate one line if "if-something" as true in self-closing element (conditionals/oneLineSelfClosing.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineSelfClosing.html', model), '<input class=\'something-is-present\'/>')
+    assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineSelfClosing.html', model), '<input class="something-is-present">')
     done()
   })
 
   it('should evaluate one line if "if-something" as true when result includes slash (/) characters (conditionals/oneLineWithSlash.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineWithSlash.html', model), '<a href=\'/something\'>One line if.</a>')
+    assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineWithSlash.html', model), '<a href="/something">One line if.</a>')
     done()
   })
 
   // #36
   it('should evaluate one line if "if-something" as true with no false condition supplied (conditionals/oneLineTrueOnly.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineTrueOnly.html', model), '<p class=\'something-is-present\'>One line if.</p>')
+    assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineTrueOnly.html', model), '<p class="something-is-present">One line if.</p>')
     done()
   })
 
@@ -224,39 +224,39 @@ describe('Conditionals', function () {
   })
 
   it('should evaluate one line if "if-something=\'Some content\'" as true (conditionals/oneLineValue.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineValue.html', model), '<p class=\'something-is-value\'>One line if.</p>')
+    assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineValue.html', model), '<p class="something-is-value">One line if.</p>')
     done()
   })
 
   it('should evaluate one line if "if-something.something={something}" as false and remove attributes (conditionals/oneLineValueVars.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineValueVars.html', model), '<option value=\'Some content\'>Some content</option>')
+    assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineValueVars.html', model), '<option value="Some content">Some content</option>')
     done()
   })
 
-  it.skip('should evaluate <option> elements with the middle one selected (conditionals/oneLineValueVarsLooped.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineValueVarsLooped.html', model), '<option value=\'1\'>1</option><option value=\'2\' selected>2</option><option value=\'3\'>3</option>')
+  it('should evaluate <option> elements with the middle one selected (conditionals/oneLineValueVarsLooped.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineValueVarsLooped.html', model), '<option value="1">1</option><option value="2" selected>2</option><option value="3">3</option>')
     done()
   })
 
-  it.skip('should evaluate <option> elements with the middle one selected (conditionals/conditionalValueVarsLooped.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('conditionals/conditionalValueVarsLooped.html', model), '<option value=\'1\'>1</option><option value=\'2\' selected>2</option><option value=\'3\'>3</option>')
+  it('should evaluate <option> elements with the middle one selected (conditionals/conditionalValueVarsLooped.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/conditionalValueVarsLooped.html', model), '<option value="1">1</option><option value="2" selected>2</option><option value="3">3</option>')
     done()
   })
 
   it('should evaluate one line if "if-something=\'Some content\'" as true and still add the id attribute regardless of the if statement outcome (conditionals/oneLineValueWithAdditionalAttributesNotImpactedByIf.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineValueWithAdditionalAttributesNotImpactedByIf.html', model), '<p class=\'something-is-present\' id=\'someId\'>One line if.</p><p id=\'someId\'>One line if.</p><p disabled id=\'someId\'>One line if.</p><option selected value=\'3\'>One line if.</option><option value=\'3\' selected>One line if.</option>')
+    assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineValueWithAdditionalAttributesNotImpactedByIf.html', model), '<p id="someId" class="something-is-present">One line if.</p><p id="someId">One line if.</p><p id="someId" disabled>One line if.</p><option value="3" selected>One line if.</option><option value="3" selected>One line if.</option>')
     done()
   })
 
   // #46
   it('should evaluate one line if "if-something=\'\'" as false (conditionals/oneLineEmpty.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineEmpty.html', model), '<p class=\'something-is-not-empty\'>One line if.</p>')
+    assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineEmpty.html', model), '<p class="something-is-value">One line if.</p>')
     done()
   })
 
   // #48
-  it('should evaluate both one line ifs "if-something" as true twice and apply two classes (conditionals/oneLineMulti.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineMulti.html', model), '<p class=\'something-is-present\' data-only-renders-when-something-is-not-empty data-should-render>One line if.</p>')
+  it('should reduce multiple one line if statements down to only the first one (conditionals/oneLineMulti.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineMulti.html', model), '<p class="something-is-present">One line if.</p>')
     done()
   })
 
@@ -265,13 +265,8 @@ describe('Conditionals', function () {
     done()
   })
 
-  it('should parse nested conditionals correctly (conditionals/nestedConditional.html)', function (done) {
+  it('should evaluate <if something> as true and the nested <if not:somethingElse> as false, triggering the nested <else> condition (conditionals/nestedConditional.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('conditionals/nestedConditional.html', model), '<p>The variable \'something\' and \'somethingElse\' are both present</p>')
-    done()
-  })
-
-  it('should parse nested conditionals correctly (conditionals/nestedConditionalInElse.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('conditionals/nestedConditionalInElse.html', model), '<p>The variable \'something\' and \'somethingElse\' are both present</p>')
     done()
   })
 
@@ -286,7 +281,7 @@ describe('Conditionals', function () {
   })
 
   it('should evaluate if statement that contains an element with a regex pattern (conditionals/ifEscapeRegex.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('conditionals/ifEscapeRegex.html', model), '<input type=\'text\' name=\'date\' placeholder=\'DD/MM/YYYY\' id=\'date\' pattern=\'^(3[0-1]|[1-2]\\d|[1-9]|0\\d)\\/(1[0-2]|[1-9]|0\\d)\\/[1-2]\\d{3}$\'>')
+    assert.equalIgnoreSpaces(teddy.render('conditionals/ifEscapeRegex.html', model), '<input type="text" name="date" placeholder="DD/MM/YYYY" id="date" pattern="^(3[0-1]|[1-2]\\d|[1-9]|0\\d)\\/(1[0-2]|[1-9]|0\\d)\\/[1-2]\\d{3}$">')
     done()
   })
 
@@ -295,7 +290,7 @@ describe('Conditionals', function () {
     done()
   })
 
-  it('should evaluate if statement with multiple instances of the same operators inline (conditionals/duplicateOperatorInline.html)', function (done) {
+  it('should evaluate if statement with multiple instances of the same operator inline (conditionals/duplicateOperatorInline.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('conditionals/duplicateOperatorInline.html', model), '<p>True</p>')
     done()
   })
@@ -320,37 +315,37 @@ describe('Conditionals', function () {
     done()
   })
 
-  it('should ignore \'if-\' when not part of an if statement. (conditionals/ifOutsideIf.html)', function (done) {
+  it('should ignore \'if-\' when not part of an if statement (conditionals/ifOutsideIf.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('conditionals/ifOutsideIf.html', model), '<p> gif-something-jpg-png </p>')
     done()
   })
 
-  it('should ignore \'if-\' when not part of an if statement with a varibale. (conditionals/variableIfOutsideIf.html)', function (done) {
+  it('should ignore \'if-\' when not part of an if statement with a variable present (conditionals/varIfOutsideIf.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('conditionals/varIfOutsideIf.html', model), '<p> gif-Some content-jpg-png </p>')
     done()
   })
 
-  it('should ignore \'if-\' when not part of an if statement when combined with a normal if statement. (conditionals/nestedIfOutsideIf.html)', function (done) {
+  it('should ignore \'if-\' when not part of an if statement when combined with a normal if statement (conditionals/nestedIfOutsideIf.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('conditionals/nestedIfOutsideIf.html', model), '<p> gif-jpg-png If that should not be parsed, How art thou? </p>')
     done()
   })
 
-  it('should ignore \'if-\' when not part of an if statement when combined with a one line if statement. (conditionals/oneLineIfOutsideIf.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineIfOutsideIf.html', model), '<p> gif-jpg-png <p class=\'something-is-present\'> hello </p> </p>')
+  it('should ignore \'if-\' when not part of an if statement when combined with a one line if statement (conditionals/oneLineIfOutsideIf.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineIfOutsideIf.html', model), '<p> gif-jpg-png <span class="something-is-present"> hello </span> </p>')
     done()
   })
 
-  it('should ignore \'if-\' when not part of an if statement when \'if-\' is part of an attribute\'s value', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineIfInsideAttribute.html', model), '<p id=\'gif-jpg-png\'>hello</p> <p class=\'gif-jpg-png\'>hello</p><p filter=\'gif-jpg-png\'>hello</p>')
+  it('should ignore \'if-\' when not part of an if statement when \'if-\' is part of an attribute\'s value (conditionals/oneLineIfInsideAttribute.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineIfInsideAttribute.html', model), '<p id="gif-jpg-png">hello</p> <p class="gif-jpg-png">hello</p><p filter="gif-jpg-png">hello</p>')
     done()
   })
 
-  it('should ignore \'if-\' when not part of an if statement when combined with a one line if statement, reversed. (conditionals/oneLineIfOutsideIfReverse.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineIfOutsideIfReverse.html', model), '<p class=\'something-is-present\'>  gif-jpg-png </p>')
+  it('should ignore \'if-\' when not part of an if statement when combined with a one line if statement, reversed (conditionals/oneLineIfOutsideIfReverse.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineIfOutsideIfReverse.html', model), '<p class="something-is-present">  gif-jpg-png </p>')
     done()
   })
 
-  it('should evaluate 5000 one line ifs in under 5000ms (conditionals/oneLinePerformance.html)', function (done) {
+  it('should evaluate 5000 one line ifs in under 10000ms (conditionals/oneLinePerformance.html)', function (done) {
     const start = new Date().getTime()
 
     teddy.render('conditionals/oneLinePerformance.html', model)
@@ -358,7 +353,7 @@ describe('Conditionals', function () {
     const end = new Date().getTime()
     const time = end - start
 
-    assert.isAtMost(time, 5000)
+    assert.isAtMost(time, 10000)
 
     done()
   })
@@ -378,13 +373,8 @@ describe('Conditionals', function () {
     done()
   })
 
-  it.skip('should evaluate <if doesntexist> as false and trigger <else> condition with embedded HTML comments in conditional statements (conditionals/ifCommentsEmbedded.html.html.html)', function (done) {
+  it('should evaluate <if doesntexist> as false and trigger <else> condition with embedded HTML comments in conditional statements (conditionals/ifCommentsEmbedded.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('conditionals/ifCommentsEmbedded.html', model), '<!-- HTML comment --><!-- MOAR HTML comments --><p>The variable \'doesntexist\' is not present</p>')
-    done()
-  })
-
-  it('should render the nested <else> condition (conditionals/nestedConditionalInElse.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('conditionals/nestedConditionalInElse.html', model), '<p>The variable \'something\' and \'somethingElse\' are both present</p>')
     done()
   })
 

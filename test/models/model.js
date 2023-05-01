@@ -7,7 +7,7 @@ function makeModel () {
     circular: {},
     foo: '{bar}',
     bar: '{foo}',
-    pageContent: '<body>hello</body>',
+    pageContent: '<p>hello</p>',
     undefinedVar: undefined,
     emptyString: '',
     zero: 0,
@@ -263,8 +263,6 @@ function makeModel () {
       ]
     }
   }
-
-  model.circular.circular = model.circular
 
   function randChars (n) {
     let i

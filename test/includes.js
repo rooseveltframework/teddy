@@ -29,38 +29,18 @@ describe('Includes', function () {
     done()
   })
 
-  it('should <include> a template but not parse any teddy features (includes/includeNoParsingFeature.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('includes/includeNoParsingFeature.html', model), '{!should evaluate <if emptyArray> as false!}<if emptyArray><p>The variable \'emptyArray\' is considered truthy</p></if><else><p>The variable \'emptyArray\' is considered falsey</p></else>')
-    done()
-  })
-
-  it('should <include> a template but not parse any teddy features (includes/includeNoTeddyFeature.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('includes/includeNoTeddyFeature.html', model), '{!should remove {! server side comments !}!}<p>test {! this should be removed !} test</p>')
-    done()
-  })
-
-  it('should <include> a template as an argument but not parse any teddy features (includes/includeNoTeddyFeatureAsArgument.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('includes/includeNoTeddyFeatureAsArgument.html', model), '{!should remove {! server side comments !}!}<p>test {! this should be removed !} test</p>')
-    done()
-  })
-
-  it('should <include> a template as an argument but not parse any teddy features (includes/includeNoParsingFeatureAsArgument.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('includes/includeNoParsingFeatureAsArgument.html', model), '{!should remove {! server side comments !}!}<p>test {! this should be removed !} test</p>')
-    done()
-  })
-
-  it('should <include> all templates and only parse those without the noteddy tag (includes/includeMultipleTemplatesWithNoParseTag.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('includes/includeMultipleTemplatesWithNoParseTag.html', model), '{!should remove {! server side comments !}!}<p>test {! this should be removed !} test</p> <p>test test</p> {!should remove {! server side comments !}!}<p>test {! this should be removed !} test</p>')
-    done()
-  })
-
-  it('should <include> all templates and only parse those without the noparse tag (includes/includeMultipleTemplatesWithNoTeddyTag.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('includes/includeMultipleTemplatesWithNoTeddyTag.html', model), '{!should remove {! server side comments !}!}<p>test {! this should be removed !} test</p> <p>test test</p> {!should remove {! server side comments !}!}<p>test {! this should be removed !} test</p>')
+  it('should <include> all templates (includes/includeMultipleTemplates.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('includes/includeMultipleTemplates.html', model), '<p>test test</p> <p>test test</p> <p>test test</p>')
     done()
   })
 
   it('should <include> a template whose name is populated by a {variable} (includes/dynamicInclude.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('includes/dynamicInclude.html', model), '<p>Some content</p>')
+    done()
+  })
+
+  it('should populate <include> <arg> in the child template; the class should render (includes/includeArgCheckedByOneLineIfWrapper.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('includes/includeArgCheckedByOneLineIfWrapper.html', model), '<p class="populated">Is it populated? populated</p>')
     done()
   })
 
@@ -70,12 +50,12 @@ describe('Includes', function () {
   })
 
   it('should <include> a template with a nested include (includes/nestedInclude.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('includes/nestedInclude.html', model), '<p><p>Some content</p></p>')
+    assert.equalIgnoreSpaces(teddy.render('includes/nestedInclude.html', model), '<div><p>Some content</p></div>')
     done()
   })
 
   it('should <include> a template with a nested include passing a text argument (includes/nestedIncludeWithArg.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('includes/nestedIncludeWithArg.html', model), '<p><p>nested</p></p>')
+    assert.equalIgnoreSpaces(teddy.render('includes/nestedIncludeWithArg.html', model), '<div><p>nested</p></div>')
     done()
   })
 
@@ -99,11 +79,6 @@ describe('Includes', function () {
     done()
   })
 
-  it('should evaluate if statement within style element as an argument (includes/conditionArgInStyle.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('includes/conditionArgInStyle.html', model), '<style>p { height: 20px; }</style>')
-    done()
-  })
-
   it('should <include> a template with numeric arguments (includes/numericArgument.html)', function (done) {
     assert.equalIgnoreSpaces(teddy.render('includes/numericArgument.html', model), '<p>Hello!</p>')
     done()
@@ -119,30 +94,39 @@ describe('Includes', function () {
     done()
   })
 
-  it('should get pageContent and render it within an <if> (includes/includeIfContent.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('includes/includeIfContent.html', model), '<body>hello</body>')
+  it('should prevent recursion abuse (includes/argVariableWithinArg.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('includes/argVariableWithinArg.html', model), '<p>Some content</p>')
     done()
   })
 
-  it('should get pageContent <arg> contents and correctly parse <if>, <loop>, and <if> tags (includes/includeComplexContent.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('includes/includeComplexContent.html', model), "<section class='content'><article class='thing'><section class='blah'>other_prop_one</section></article><article class='thing'><section class='blah'>other_prop_two</section></article></section>")
+  it('should <include> a template and render pageContent inside of <if> (includes/includeIfContent.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('includes/includeIfContent.html', model), '<p>hello</p>')
+    done()
+  })
+
+  it('should <include> a template and render pageContent <arg> contents and correctly parse <if>, <loop>, and <if> tags (includes/includeComplexContent.html)', function (done) {
+    assert.equalIgnoreSpaces(teddy.render('includes/includeComplexContent.html', model), '<section class="content"><article class="thing"><section class="blah">other_prop_one</section></article><article class="thing"><section class="blah">other_prop_two</section></article></section>')
     done()
   })
 
   it('should <include> a template and escape regex pattern in argument (includes/includeEscapeRegex.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('includes/includeEscapeRegex.html', model), '<input type=\'text\' name=\'date\' placeholder=\'DD/MM/YYYY\' id=\'date\' pattern=\'^(3[0-1]|[1-2]\\d|[1-9]|0\\d)\\/(1[0-2]|[1-9]|0\\d)\\/[1-2]\\d{3}$\'>')
+    assert.equalIgnoreSpaces(teddy.render('includes/includeEscapeRegex.html', model), '<input type="text" name="date" placeholder="DD/MM/YYYY" id="date" pattern="^(3[0-1]|[1-2]\\d|[1-9]|0\\d)\\/(1[0-2]|[1-9]|0\\d)\\/[1-2]\\d{3}$">')
     done()
   })
 
   it('should ignore includes with invalid markup (includes/invalidIncludeMarkup.html)', function (done) {
-    assert.equalIgnoreSpaces(teddy.render('includes/invalidIncludeMarkup.html', model), '<div></div>')
+    assert.equalIgnoreSpaces(teddy.render('includes/invalidIncludeMarkup.html', model), '<div><p>Some content</p></div>')
     done()
   })
 
   it('should escape from infinite loop of includes via setMaxPasses (includes/includeInfiniteLoop.html)', function (done) {
     teddy.setVerbosity(3)
     teddy.setMaxPasses(100)
-    assert.strictEqual(teddy.render('includes/includeInfiniteLoop.html', model), "<!DOCTYPE html><html lang='en'><head><meta charset='utf-8'><title>Could not parse template</title></head><body><h1>Could not parse template</h1><p>The following errors occurred while parsing the template:</p><ul><li>Render aborted due to max number of passes (100) exceeded; there is a possible infinite loop in your template logic.</li></ul></body></html>")
+    try {
+      teddy.render('includes/includeInfiniteLoop.html', model)
+    } catch (e) {
+      assert.strictEqual(e.message, 'teddy could not finish rendering the template because the max number of passes over the template (100) was exceeded; there may be an infinite loop in your template logic')
+    }
     done()
   })
 

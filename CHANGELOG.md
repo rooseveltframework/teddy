@@ -4,10 +4,30 @@
 
 - Put your changes here...
 
+## 0.6.0
+
+- Breaking: `<include>` elements will no longer automatically disable escaping content of `<arg>` variables. Use `{var|s}` to disable escaping yourself.
+- Breaking: One-line if statements like `if-something=''` will now evaluate as true if `something` is present in the model.
+- Breaking: You can no longer apply more than one one-line if statement to the same element.
+- Breaking: Boolean logic will no longer allow you to query the same variable twice in the same if statement or use the same boolean logic operator twice in the same if statement.
+- Breaking: You can no longer use Teddy tags in elements that interpret child text as plain text, e.g. `<style>`, `<script>`, `<textarea>`, etc.
+- Breaking: Removed the `noparse` and `noteddy` attribute feature from `<include>` tags.
+- Breaking: Removed Teddy's internal minifier since third party HTML minifiers are better.
+- Breaking: Removed caching feature. A better-designed one may arrive in the future.
+- Breaking: Server-side comments will now always be removed, even if they are contained in a no-parse block. To preserve them for display, you must manually escape them with HTML entities.
+- Breaking: `teddy.compile` was removed as a public method. To set a new template, you must now call `teddy.setTemplate` to create it. Accordingly the `teddy.compileAtEveryRender` method has been removed as well.
+- Breaking: The `|p` flag will now also apply the same logic as `|s` as well. If you have any `{variables}` written like `{variable|s|p}`, you can now optionally write it as `{variable|p}` instead to get identical functionality.
+- Breaking: The `in` attribute as a synonym for `through` in `<loop>` has been removed.
+- Significant stability improvements; lots of bugs fixed.
+- Some performance improvements, some performance downgrades (notably looping through large datasets is slightly slower now).
+- Simplified API.
+- `maxPasses` default changed from 25000 to 1000.
+- Various dependencies bumped.
+
 ## 0.5.10
 
 - Fixed bug with one-line-ifs. See https://github.com/rooseveltframework/teddy/pull/540
-- Various dependencies bumped
+- Various dependencies bumped.
 
 ## 0.5.9
 

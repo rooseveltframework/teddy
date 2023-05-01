@@ -59,8 +59,8 @@
         }
 
         try {
-          //teddy.compile(document.getElementById('src').value, 'playground');
-          rendered = teddy.render(document.getElementById('src').value, json);
+          teddy.setTemplate('playground.html', document.getElementById('src').value)
+          rendered = teddy.render('playground.html', json);
         }
         catch (e) {
           console.log(e);
