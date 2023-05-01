@@ -4,6 +4,11 @@
 
 - Put your changes here...
 
+## 0.6.1
+
+- Fixed memory leak related to the no parse block feature.
+- Various dependencies bumped.
+
 ## 0.6.0
 
 - Breaking: `<include>` elements will no longer automatically disable escaping content of `<arg>` variables. Use `{var|s}` to disable escaping yourself.
