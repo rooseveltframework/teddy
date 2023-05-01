@@ -15,7 +15,6 @@ const XRegExp = require('xregexp') // needed for matchRecursive
 const params = {} // teddy parameters
 setDefaultParams() // set params to the defaults
 const templates = {} // loaded templates are stored as object collections, e.g. { "myTemplate.html": "<p>some markup</p>"}
-const noTeddyBlocks = [] // will store code blocks exempt from teddy parsing
 
 // private methods
 
@@ -158,7 +157,7 @@ function tagNoParseBlocks (dom, model) {
     const tags = dom('noteddy:not([id]), noparse:not([id])')
     if (tags.length > 0) {
       for (const el of tags) {
-        const id = noTeddyBlocks.push(dom(el).html()) - 1
+        const id = model._noTeddyBlocks.push(dom(el).html()) - 1
         dom(el).replaceWith(`<noteddy id="${id}"></noteddy>`)
         parsedTags++
       }
@@ -695,7 +694,7 @@ function parseVars (templateString, model) {
       match = match.substring(0, match.length - (lastFourChars.split('|').length - 1 > 1 ? 4 : 2)) // remove last 2-4 char
       const parsed = getOrSetObjectByDotNotation(model, match)
       if (parsed) {
-        const id = noTeddyBlocks.push(parsed) - 1
+        const id = model._noTeddyBlocks.push(parsed) - 1
         try {
           templateString = templateString.replace(new RegExp(`{${originalMatch}}`.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&').replace(/-/g, '\\x2d'), 'i'), `<noteddy id="${id}"></noteddy>`)
         } catch (e) {
@@ -845,6 +844,7 @@ function render (template, model, callback) {
   // declare vars
   let dom
   let renderedTemplate
+  model._noTeddyBlocks = [] // will store code blocks exempt from teddy parsing
 
   // express.js support
   if (model.settings && model.settings.views && path) {
@@ -904,8 +904,8 @@ function render (template, model, callback) {
   }
 
   // replace <noteddy> blocks with the hidden code
-  for (const blockId in noTeddyBlocks) {
-    renderedTemplate = renderedTemplate.replace(`<noteddy id="${blockId}"></noteddy>`, noTeddyBlocks[blockId])
+  for (const blockId in model._noTeddyBlocks) {
+    renderedTemplate = renderedTemplate.replace(`<noteddy id="${blockId}"></noteddy>`, model._noTeddyBlocks[blockId])
   }
 
   // execute callback if present, otherwise simply return the rendered template string
