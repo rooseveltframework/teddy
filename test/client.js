@@ -1,4 +1,3 @@
-// Initialization of assert and teddy templates for karma client tests
 
 if (typeof process !== 'object') {
   var assert = chai.assert

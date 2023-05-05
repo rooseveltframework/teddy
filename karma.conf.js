@@ -1,4 +1,3 @@
-// Karma configuration
 module.exports = function (config) {
   // default browsers to test on
   const testBrowsers = [

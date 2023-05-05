@@ -17,7 +17,6 @@ setDefaultParams() // set params to the defaults
 const templates = {} // loaded templates are stored as object collections, e.g. { "myTemplate.html": "<p>some markup</p>"}
 
 // private methods
-
 // escapes sensitive characters to prevent xss
 const escapeHtmlEntities = {
   '&': '&amp;',
@@ -26,8 +25,10 @@ const escapeHtmlEntities = {
   '"': '&#34;',
   "'": '&#39;'
 }
+
 const entityKeys = Object.keys(escapeHtmlEntities)
 const ekl = entityKeys.length
+
 function escapeEntities (value) {
   let escapedEntity = false
   let newValue = ''
