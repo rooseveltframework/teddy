@@ -1,4 +1,5 @@
 /* eslint-env mocha */
+
 if (typeof process === 'object') {
   const chai = require('chai')
   var assert = chai.assert // eslint-disable-line

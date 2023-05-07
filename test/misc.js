@@ -2,13 +2,13 @@
 
 if (typeof process === 'object') {
   const chai = require('chai')
-    var assert = chai.assert // eslint-disable-line
+  var assert = chai.assert // eslint-disable-line
   const chaiString = require('chai-string')
-    var makeModel = require('./models/model') // eslint-disable-line
-    var teddy = require('../') // eslint-disable-line
-    var model // eslint-disable-line
-    var playwright = require('playwright') // eslint-disable-line
-    var path = require('path') // eslint-disable-line
+  var makeModel = require('./models/model') // eslint-disable-line
+  var teddy = require('../') // eslint-disable-line
+  var model // eslint-disable-line
+  var playwright = require('playwright') // eslint-disable-line
+  var path = require('path') // eslint-disable-line
 
   chai.use(chaiString)
 }
