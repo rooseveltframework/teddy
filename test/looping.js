@@ -46,6 +46,10 @@ describe('Looping', function () {
     assert.equalIgnoreSpaces(teddy.render('looping/nestedObjectLoop.html', model), '<p>a: 4</p><p>b: 5</p><p>c: 6</p>')
   })
 
+  it('should parse loop through nested object correctly (looping/nestedObjectLoopLookup.html)', function () {
+    assert.equalIgnoreSpaces(teddy.render('looping/nestedObjectLoopLookup.html', model), '<p>1</p><input type="text" checked><p>2</p><input type="text"><p>3</p><input type="text" checked>')
+  })
+
   it('should parse nested loops correctly (looping/nestedLoopsObjectWithArrayOfObjects.html)', function () {
     assert.equalIgnoreSpaces(teddy.render('looping/nestedLoopsObjectWithArrayOfObjects.html', model), '<p>value1</p><p>value2</p><p>value3</p><p>value4</p>')
   })

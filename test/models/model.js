@@ -232,6 +232,38 @@ function makeModel () {
         ]
       }
     ],
+    moreNestedObjectsWithoutArray: {
+      num: 1,
+      children: [
+        {
+          num: 1,
+          bool: true,
+          children: [
+            'one',
+            'two',
+            'three'
+          ]
+        },
+        {
+          num: 2,
+          bool: false,
+          children: [
+            'four',
+            'five',
+            'six'
+          ]
+        },
+        {
+          num: 3,
+          bool: true,
+          children: [
+            'seven',
+            'eight',
+            'nine'
+          ]
+        }
+      ]
+    },
     nestedObjectWithTeddyVars: [
       {
         num: 1,
