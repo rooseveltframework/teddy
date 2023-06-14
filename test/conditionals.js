@@ -282,7 +282,7 @@ describe('Conditionals', function () {
     assert.equalIgnoreSpaces(teddy.render('conditionals/oneLineIfOutsideIfReverse.html', model), '<p class="something-is-present">  gif-jpg-png </p>')
   })
 
-  it('should evaluate 5000 one line ifs in under 10000ms (conditionals/oneLinePerformance.html)', function () {
+  it('should evaluate 5000 one line ifs in under 10000ms (conditionals/oneLinePerformance.html)', function (done) {
     const start = new Date().getTime()
 
     teddy.render('conditionals/oneLinePerformance.html', model)
@@ -291,6 +291,7 @@ describe('Conditionals', function () {
     const time = end - start
 
     assert.isAtMost(time, 10000)
+    done()
   })
 
   it('should evaluate <if doesntexist> as false and trigger <else> condition containing very few characters (conditionals/ifElseLowChars.html)', function () {
