@@ -24,8 +24,6 @@ describe('Looping', function () {
     }
   })
 
-  this.timeout(5000)
-
   it('should loop through {letters} correctly (looping/loopVal.html)', function () {
     assert.equalIgnoreSpaces(teddy.render('looping/loopVal.html', model), '<p>a</p><p>b</p><p>c</p>')
   })
@@ -95,80 +93,19 @@ describe('Looping', function () {
     assert.equalIgnoreSpaces(teddy.render('looping/nestedObjects.html', model), '<p>Thing With Name 1</p><p>Thing With Name 1: Subthing With Name 1</p><p>Thing With Name 1: Subthing With Name 2</p><p>Thing With Name 1: Subthing With Name 3</p><p>Thing With Name 2</p><p>Thing With Name 2: Subthing With Name 4</p><p>Thing With Name 2: Subthing With Name 5</p><p>Thing With Name 2: Subthing With Name 6</p><p>Thing With Name 3</p><p>Thing With Name 3: Subthing With Name 7</p><p>Thing With Name 3: Subthing With Name 8</p><p>Thing With Name 3: Subthing With Name 9</p>')
   })
 
-  // TODO: possibly remove this test, as the cacheRenders feature was removed in 0.6.x
-  it.skip('should loop through an array of 5000 elements in < 5000ms (looping/largeDataSet.html)', function () {
-    teddy.cacheRenders(true)
+  it('should loop through an array of 5000 elements caching the first pass with a <cache> element so the second pass is faster (looping/largeDataSet.html)', function () {
     const start = new Date().getTime()
-
     teddy.render('looping/largeDataSet.html', model)
-
     const end = new Date().getTime()
     const time = end - start
-
-    assert.isAtMost(time, 5000)
-  })
-
-  // TODO: possibly remove this test, as the cacheRenders feature was removed in 0.6.x
-  it.skip('should loop through same array of 5000 elements in < 1200ms during second attempt due to caching (looping/largeDataSet.html)', function () {
-    const start = new Date().getTime()
-
+    console.log('    → Non-cached time to parse: ', time)
+    const start2 = new Date().getTime()
     teddy.render('looping/largeDataSet.html', model)
-
-    const end = new Date().getTime()
-    const time = end - start
-
-    assert.isAtMost(time, 1200)
-  })
-
-  // TODO: possibly remove this test, as the cacheRenders feature was removed in 0.6.x
-  it.skip('should loop through an array of 5000 elements in < 5000ms doing a fresh render via partial cache invalidation (looping/largeDataSet.html)', function () {
-    const start = new Date().getTime()
-
-    teddy.flushCache('looping/largeDataSet.html', model)
-    teddy.render('looping/largeDataSet.html', model)
-
-    const end = new Date().getTime()
-    const time = end - start
-
-    assert.isAtMost(time, 5000)
-  })
-
-  // TODO: possibly remove this test, as the cacheRenders feature was removed in 0.6.x
-  it.skip('should loop through same array of 5000 elements in < 1200ms during second attempt due to caching (looping/largeDataSet.html)', function () {
-    const start = new Date().getTime()
-
-    teddy.render('looping/largeDataSet.html', model)
-
-    const end = new Date().getTime()
-    const time = end - start
-
-    assert.isAtMost(time, 1200)
-  })
-
-  // TODO: possibly remove this test, as the cacheRenders feature was removed in 0.6.x
-  it.skip('should loop through an array of 5000 elements in < 5000ms doing a fresh render via full cache invalidation (looping/largeDataSet.html)', function () {
-    const start = new Date().getTime()
-
-    teddy.flushCache('looping/largeDataSet.html')
-    teddy.render('looping/largeDataSet.html', model)
-
-    const end = new Date().getTime()
-    const time = end - start
-
-    assert.isAtMost(time, 5000)
-  })
-
-  // TODO: possibly remove this test, as the cacheRenders feature was removed in 0.6.x
-  it.skip('should loop through same array of 5000 elements in < 1200ms during second attempt due to caching (looping/largeDataSet.html)', function () {
-    const start = new Date().getTime()
-
-    teddy.render('looping/largeDataSet.html', model)
-
-    const end = new Date().getTime()
-    const time = end - start
-
-    teddy.cacheRenders(false)
-    assert.isAtMost(time, 1200)
+    const end2 = new Date().getTime()
+    const time2 = end2 - start2
+    console.log('    → Cached time to parse:     ', time2)
+    const lessThan = time2 < time
+    assert.isTrue(lessThan)
   })
 
   it('should ignore loop with invalid through attribute (looping/undefinedObjectLoop.html)', function () {

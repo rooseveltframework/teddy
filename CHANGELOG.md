@@ -4,6 +4,12 @@
 
 - Put your changes here...
 
+## 0.6.2
+
+- Significant performance improvements.
+- Added a new `<cache>` element that can be used to improve template parsing performance further.
+- Various dependencies bumped.
+
 ## 0.6.1
 
 - Fixed memory leak related to the no parse block feature.

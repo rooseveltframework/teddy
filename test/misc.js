@@ -96,62 +96,169 @@ describe('Misc', function () {
     assert.equalIgnoreSpaces(teddy.render('misc/emojis.html', model), '<p>🎉🥳🎈🎊</p>')
   })
 
-  // TODO: possibly remove this test, as the cacheRenders feature was removed in 0.6.x
-  it.skip('should trigger caching rollover given one template with 100 unique models (misc/variable.html)', function () {
-    let i
-    teddy.cacheRenders(true)
-    teddy.setDefaultCaches(10)
-    for (i = 0; i < 100; i++) {
-      teddy.render('misc/variable.html', { something: i })
+  it('should cache the contents of the cache element but not anything outside of it (misc/cacheElement.html)', async function () {
+    function timeout (ms) {
+      return new Promise(resolve => setTimeout(resolve, ms))
     }
-    const renderedTemplates = teddy.getRenderedTemplates()
-    assert.equalIgnoreSpaces(renderedTemplates['misc/variable.html'][0].renderedTemplate, '<p>90</p>')
-    teddy.setDefaultCaches(1)
-    teddy.cacheRenders(false)
+
+    // these will be cached
+    const render1 = teddy.render('misc/cacheElement.html', { user: 'Joe', city: 'NY', value: 30 })
+    assert.equalIgnoreSpaces(render1, '<p>Dynamic: Welcome Joe!</p><p>Cached: High temperature today in NY is 30.</p>')
+    assert.equalIgnoreSpaces(teddy.caches.weather.entries.NY.markup, '<p>Cached: High temperature today in NY is 30.</p>')
+    await timeout(1)
+
+    const render2 = teddy.render('misc/cacheElement.html', { user: 'Bob', city: 'SF', value: 60 })
+    assert.equalIgnoreSpaces(render2, '<p>Dynamic: Welcome Bob!</p><p>Cached: High temperature today in SF is 60.</p>')
+    assert.equalIgnoreSpaces(teddy.caches.weather.entries.SF.markup, '<p>Cached: High temperature today in SF is 60.</p>')
+    await timeout(1)
+
+    const render3 = teddy.render('misc/cacheElement.html', { user: 'Moe', city: 'LA', value: 80 })
+    assert.equalIgnoreSpaces(render3, '<p>Dynamic: Welcome Moe!</p><p>Cached: High temperature today in LA is 80.</p>')
+    assert.equalIgnoreSpaces(teddy.caches.weather.entries.LA.markup, '<p>Cached: High temperature today in LA is 80.</p>')
+    await timeout(1)
+
+    // will display from cache
+    const render4 = teddy.render('misc/cacheElement.html', { user: 'Sue', city: 'NY', value: 300 }) // new temperature value should not print because old value is cached
+    assert.equalIgnoreSpaces(render4, '<p>Dynamic: Welcome Sue!</p><p>Cached: High temperature today in NY is 30.</p>')
+    assert.equalIgnoreSpaces(teddy.caches.weather.entries.NY.markup, '<p>Cached: High temperature today in NY is 30.</p>')
+    await timeout(1)
+
+    const render5 = teddy.render('misc/cacheElement.html', { user: 'Jay', city: 'SF', value: 600 }) // new temperature value should not print because old value is cached
+    assert.equalIgnoreSpaces(render5, '<p>Dynamic: Welcome Jay!</p><p>Cached: High temperature today in SF is 60.</p>')
+    assert.equalIgnoreSpaces(teddy.caches.weather.entries.SF.markup, '<p>Cached: High temperature today in SF is 60.</p>')
+    await timeout(1)
+
+    const render6 = teddy.render('misc/cacheElement.html', { user: 'Mae', city: 'LA', value: 800 }) // new temperature value should not print because old value is cached
+    assert.equalIgnoreSpaces(render6, '<p>Dynamic: Welcome Mae!</p><p>Cached: High temperature today in LA is 80.</p>')
+    assert.equalIgnoreSpaces(teddy.caches.weather.entries.LA.markup, '<p>Cached: High temperature today in LA is 80.</p>')
+    await timeout(1)
+
+    // should drop NY and replace it with NOLA due to max caches being 3 and NY being the least recently accessed
+    const render7 = teddy.render('misc/cacheElement.html', { name: 'weather', user: 'Liz', city: 'NOLA', value: 90 })
+    assert.equalIgnoreSpaces(render7, '<p>Dynamic: Welcome Liz!</p><p>Cached: High temperature today in NOLA is 90.</p>')
+    assert.equalIgnoreSpaces(teddy.caches.weather.entries.NOLA.markup, '<p>Cached: High temperature today in NOLA is 90.</p>')
+    const missingNY = !teddy.caches.weather.entries.NY
+    assert.equal(missingNY, true)
+
+    // see if deleting SF from the city cache works
+    teddy.clearCache('weather', 'SF')
+    const missingSF = !teddy.caches.weather.entries.SF
+    assert.equal(missingSF, true)
+
+    // see if deleting entire city cache works
+    teddy.clearCache('weather')
+    const missingAll = !teddy.caches.weather
+    assert.equal(missingAll, true)
   })
 
-  // TODO: possibly remove this test, as the cacheRenders feature was removed in 0.6.x
-  it.skip('should not cache a blacklisted template (misc/variable.html)', function () {
-    teddy.cacheRenders(true)
-    teddy.setRenderedTemplates({})
-    teddy.setCacheBlacklist(['misc/variable.html'])
-    teddy.render('misc/variable.html', { something: 1 })
-    const renderedTemplates = teddy.getRenderedTemplates()
-    assert.strictEqual(renderedTemplates['misc/variable.html'], undefined)
-    teddy.setCacheBlacklist([])
-    teddy.cacheRenders(false)
-  })
-
-  // TODO: possibly remove this test, as the cacheRenders feature was removed in 0.6.x
-  it.skip('should only cache whitelisted templates (misc/variable.html)', function () {
-    teddy.cacheRenders(true)
-    teddy.setRenderedTemplates({})
-    teddy.setCacheWhitelist({ 'misc/variable.html': 1 })
-    teddy.render('misc/plainHTML.html', { something: 1 })
-    teddy.render('misc/variable.html', { something: 1 })
-    const renderedTemplates = teddy.getRenderedTemplates()
-    assert.strictEqual(renderedTemplates['misc/plainHTML.html'], undefined)
-    assert.equalIgnoreSpaces(renderedTemplates['misc/variable.html'][0].renderedTemplate, '<p>1</p>')
-    teddy.setCacheWhitelist({})
-    teddy.cacheRenders(false)
-  })
-
-  // TODO: possibly remove this test, as the cacheRenders feature was removed in 0.6.x
-  it.skip('should only cache the whitelisted template the specified number of times (misc/variable.html)', function () {
-    let i
-    teddy.cacheRenders(true)
-    teddy.setRenderedTemplates({})
-    teddy.setDefaultCaches(10)
-    teddy.setCacheWhitelist({ 'misc/variable.html': 10 })
-    teddy.render('misc/plainHTML.html', { something: 1 })
-    for (i = 0; i < 100; i++) {
-      teddy.render('misc/variable.html', { something: i })
+  it('should render cache element correctly with dynamic attributes (misc/cacheElementDynamicAttrs.html)', async function () {
+    function timeout (ms) {
+      return new Promise(resolve => setTimeout(resolve, ms))
     }
-    const renderedTemplates = teddy.getRenderedTemplates()
-    assert.strictEqual(renderedTemplates['misc/plainHTML.html'], undefined)
-    assert.equalIgnoreSpaces(renderedTemplates['misc/variable.html'][0].renderedTemplate, '<p>90</p>')
-    teddy.setCacheWhitelist({})
-    teddy.cacheRenders(false)
+
+    // these will be cached
+    const render1 = teddy.render('misc/cacheElementDynamicAttrs.html', { name: 'weather', key: 'city', user: 'Joe', city: 'NY', value: 30 })
+    assert.equalIgnoreSpaces(render1, '<p>Dynamic: Welcome Joe!</p><p>Cached: High temperature today in NY is 30.</p>')
+    assert.equalIgnoreSpaces(teddy.caches.weather.entries.NY.markup, '<p>Cached: High temperature today in NY is 30.</p>')
+    await timeout(1)
+
+    const render2 = teddy.render('misc/cacheElementDynamicAttrs.html', { name: 'weather', key: 'city', user: 'Bob', city: 'SF', value: 60 })
+    assert.equalIgnoreSpaces(render2, '<p>Dynamic: Welcome Bob!</p><p>Cached: High temperature today in SF is 60.</p>')
+    assert.equalIgnoreSpaces(teddy.caches.weather.entries.SF.markup, '<p>Cached: High temperature today in SF is 60.</p>')
+    await timeout(1)
+
+    const render3 = teddy.render('misc/cacheElementDynamicAttrs.html', { name: 'weather', key: 'city', user: 'Moe', city: 'LA', value: 80 })
+    assert.equalIgnoreSpaces(render3, '<p>Dynamic: Welcome Moe!</p><p>Cached: High temperature today in LA is 80.</p>')
+    assert.equalIgnoreSpaces(teddy.caches.weather.entries.LA.markup, '<p>Cached: High temperature today in LA is 80.</p>')
+    await timeout(1)
+
+    // will display from cache
+    const render4 = teddy.render('misc/cacheElementDynamicAttrs.html', { name: 'weather', key: 'city', user: 'Sue', city: 'NY', value: 300 }) // new temperature value should not print because old value is cached
+    assert.equalIgnoreSpaces(render4, '<p>Dynamic: Welcome Sue!</p><p>Cached: High temperature today in NY is 30.</p>')
+    assert.equalIgnoreSpaces(teddy.caches.weather.entries.NY.markup, '<p>Cached: High temperature today in NY is 30.</p>')
+    await timeout(1)
+
+    const render5 = teddy.render('misc/cacheElementDynamicAttrs.html', { name: 'weather', key: 'city', user: 'Jay', city: 'SF', value: 600 }) // new temperature value should not print because old value is cached
+    assert.equalIgnoreSpaces(render5, '<p>Dynamic: Welcome Jay!</p><p>Cached: High temperature today in SF is 60.</p>')
+    assert.equalIgnoreSpaces(teddy.caches.weather.entries.SF.markup, '<p>Cached: High temperature today in SF is 60.</p>')
+    await timeout(1)
+
+    const render6 = teddy.render('misc/cacheElementDynamicAttrs.html', { name: 'weather', key: 'city', user: 'Mae', city: 'LA', value: 800 }) // new temperature value should not print because old value is cached
+    assert.equalIgnoreSpaces(render6, '<p>Dynamic: Welcome Mae!</p><p>Cached: High temperature today in LA is 80.</p>')
+    assert.equalIgnoreSpaces(teddy.caches.weather.entries.LA.markup, '<p>Cached: High temperature today in LA is 80.</p>')
+    await timeout(1)
+
+    // should drop NY and replace it with NOLA due to max caches being 3 and NY being the least recently accessed
+    const render7 = teddy.render('misc/cacheElementDynamicAttrs.html', { name: 'weather', key: 'city', user: 'Liz', city: 'NOLA', value: 90 })
+    assert.equalIgnoreSpaces(render7, '<p>Dynamic: Welcome Liz!</p><p>Cached: High temperature today in NOLA is 90.</p>')
+    assert.equalIgnoreSpaces(teddy.caches.weather.entries.NOLA.markup, '<p>Cached: High temperature today in NOLA is 90.</p>')
+    const missingNY = !teddy.caches.weather.entries.NY
+    assert.equal(missingNY, true)
+
+    // see if deleting SF from the city cache works
+    teddy.clearCache('weather', 'SF')
+    const missingSF = !teddy.caches.weather.entries.SF
+    assert.equal(missingSF, true)
+
+    // see if deleting entire city cache works
+    teddy.clearCache('weather')
+    const missingAll = !teddy.caches.weather
+    assert.equal(missingAll, true)
+  })
+
+  it('should render cache element correctly with dynamic attributes (misc/cacheElementDynamicAttrsNested.html)', async function () {
+    function timeout (ms) {
+      return new Promise(resolve => setTimeout(resolve, ms))
+    }
+
+    // these will be cached
+    const render1 = teddy.render('misc/cacheElementDynamicAttrsNested.html', { name: 'weather', key: 'city.acronym', user: 'Joe', city: { acronym: 'NY' }, value: 30 })
+    assert.equalIgnoreSpaces(render1, '<p>Dynamic: Welcome Joe!</p><p>Cached: High temperature today in NY is 30.</p>')
+    assert.equalIgnoreSpaces(teddy.caches.weather.entries.NY.markup, '<p>Cached: High temperature today in NY is 30.</p>')
+    await timeout(1)
+
+    const render2 = teddy.render('misc/cacheElementDynamicAttrsNested.html', { name: 'weather', key: 'city.acronym', user: 'Bob', city: { acronym: 'SF' }, value: 60 })
+    assert.equalIgnoreSpaces(render2, '<p>Dynamic: Welcome Bob!</p><p>Cached: High temperature today in SF is 60.</p>')
+    assert.equalIgnoreSpaces(teddy.caches.weather.entries.SF.markup, '<p>Cached: High temperature today in SF is 60.</p>')
+    await timeout(1)
+
+    const render3 = teddy.render('misc/cacheElementDynamicAttrsNested.html', { name: 'weather', key: 'city.acronym', user: 'Moe', city: { acronym: 'LA' }, value: 80 })
+    assert.equalIgnoreSpaces(render3, '<p>Dynamic: Welcome Moe!</p><p>Cached: High temperature today in LA is 80.</p>')
+    assert.equalIgnoreSpaces(teddy.caches.weather.entries.LA.markup, '<p>Cached: High temperature today in LA is 80.</p>')
+    await timeout(1)
+
+    // will display from cache
+    const render4 = teddy.render('misc/cacheElementDynamicAttrsNested.html', { name: 'weather', key: 'city.acronym', user: 'Sue', city: { acronym: 'NY' }, value: 300 }) // new temperature value should not print because old value is cached
+    assert.equalIgnoreSpaces(render4, '<p>Dynamic: Welcome Sue!</p><p>Cached: High temperature today in NY is 30.</p>')
+    assert.equalIgnoreSpaces(teddy.caches.weather.entries.NY.markup, '<p>Cached: High temperature today in NY is 30.</p>')
+    await timeout(1)
+
+    const render5 = teddy.render('misc/cacheElementDynamicAttrsNested.html', { name: 'weather', key: 'city.acronym', user: 'Jay', city: { acronym: 'SF' }, value: 600 }) // new temperature value should not print because old value is cached
+    assert.equalIgnoreSpaces(render5, '<p>Dynamic: Welcome Jay!</p><p>Cached: High temperature today in SF is 60.</p>')
+    assert.equalIgnoreSpaces(teddy.caches.weather.entries.SF.markup, '<p>Cached: High temperature today in SF is 60.</p>')
+    await timeout(1)
+
+    const render6 = teddy.render('misc/cacheElementDynamicAttrsNested.html', { name: 'weather', key: 'city.acronym', user: 'Mae', city: { acronym: 'LA' }, value: 800 }) // new temperature value should not print because old value is cached
+    assert.equalIgnoreSpaces(render6, '<p>Dynamic: Welcome Mae!</p><p>Cached: High temperature today in LA is 80.</p>')
+    assert.equalIgnoreSpaces(teddy.caches.weather.entries.LA.markup, '<p>Cached: High temperature today in LA is 80.</p>')
+    await timeout(1)
+
+    // should drop NY and replace it with NOLA due to max caches being 3 and NY being the least recently accessed
+    const render7 = teddy.render('misc/cacheElementDynamicAttrsNested.html', { name: 'weather', key: 'city.acronym', user: 'Liz', city: { acronym: 'NOLA' }, value: 90 })
+    assert.equalIgnoreSpaces(render7, '<p>Dynamic: Welcome Liz!</p><p>Cached: High temperature today in NOLA is 90.</p>')
+    assert.equalIgnoreSpaces(teddy.caches.weather.entries.NOLA.markup, '<p>Cached: High temperature today in NOLA is 90.</p>')
+    const missingNY = !teddy.caches.weather.entries.NY
+    assert.equal(missingNY, true)
+
+    // see if deleting SF from the city cache works
+    teddy.clearCache('weather', 'SF')
+    const missingSF = !teddy.caches.weather.entries.SF
+    assert.equal(missingSF, true)
+
+    // see if deleting entire city cache works
+    teddy.clearCache('weather')
+    const missingAll = !teddy.caches.weather
+    assert.equal(missingAll, true)
   })
 
   it('should avoid rendering templates that are not strings', function () {
@@ -194,20 +301,6 @@ describe('Misc', function () {
     } else {
       teddy.setVerbosity(0)
     }
-  })
-
-  // TODO: possibly remove this test, as the internal minifier feature was removed in 0.6.x
-  it.skip('should minify template with internal minifier (misc/templateToMinify.html)', function () {
-    teddy.compileAtEveryRender(true)
-    teddy.minify(true)
-    assert.equalIgnoreSpaces(teddy.render('misc/templateToMinify.html', model), '<!DOCTYPE html><html lang=\'en\'> <head> <meta charset=\'utf-8\'> <meta name=\'viewport\' content=\'width=device-width,initial-scale=1\'> <meta name=\'format-detection\' content=\'telephone=no\'> <title>Plain HTML</title> </head> <body> <main> <p>This template contains no teddy tags. Just HTML.</p> </main> </body></html>')
-    teddy.minify(false)
-    teddy.compileAtEveryRender(false)
-  })
-
-  // TODO: possibly remove this test, as the cacheRenders feature was removed in 0.6.x
-  it.skip('should avoid flushing cache of non strings', function () {
-    assert.equalIgnoreSpaces(teddy.flushCache(5), '')
   })
 
   it('should render undefined variables as text (misc/undefinedVar.html)', function () {

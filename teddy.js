@@ -15,6 +15,7 @@ const XRegExp = require('xregexp') // needed for matchRecursive
 const params = {} // teddy parameters
 setDefaultParams() // set params to the defaults
 const templates = {} // loaded templates are stored as object collections, e.g. { "myTemplate.html": "<p>some markup</p>"}
+const caches = {} // a place to store cached templates
 
 // private methods
 
@@ -147,6 +148,42 @@ function removeTeddyComments (renderedTemplate) {
     }
   } while (oldTemplate !== renderedTemplate)
   return renderedTemplate
+}
+
+// find all cache elements and replace them with the rendered contents of their cache, then remove the cache element
+function replaceCacheElements (dom, model) {
+  let parsedTags
+  do {
+    parsedTags = 0
+    const tags = dom('cache:not([defer])')
+    if (tags.length > 0) {
+      for (const el of tags) {
+        const name = el.attribs.name
+        if (name.includes('{')) {
+          continue
+        }
+        const key = el.attribs.key || 'none'
+        if (key.includes('{')) {
+          continue
+        }
+        const cache = caches[name]
+        if (cache && cache.entries) {
+          const keyVal = el.attribs.key ? getOrSetObjectByDotNotation(model, key) : 'none'
+          if (cache.entries[keyVal]) {
+            const cacheContent = cache.entries[keyVal].markup
+            cache.entries[keyVal].timestamp = Date.now()
+            dom(el).replaceWith(cacheContent)
+          } else {
+            dom(el).attr('defer', 'true')
+          }
+        } else {
+          dom(el).attr('defer', 'true')
+        }
+        parsedTags++
+      }
+    }
+  } while (parsedTags)
+  return dom
 }
 
 // add an id to all <noteddy> or <noparse> tags, then remove their content temporarily until the template is fully parsed
@@ -731,15 +768,51 @@ function parseVars (templateString, model) {
   return templateString
 }
 
+// once the template is fully rendered, find all cache elements that still exist and cache their contents
+function defineNewCaches (dom, model) {
+  let parsedTags
+  do {
+    parsedTags = 0
+    const tags = dom('cache[defer]')
+    if (tags.length > 0) {
+      for (const el of tags) {
+        const name = el.attribs.name
+        const key = el.attribs.key || 'none'
+        const maxCaches = parseInt(el.attribs.maxCaches) || 10
+        const timestamp = Date.now()
+        const markup = dom(el).html()
+        if (!caches[name]) {
+          caches[name] = {
+            key,
+            maxCaches,
+            entries: {}
+          }
+        }
+        caches[name].entries[el.attribs.key ? getOrSetObjectByDotNotation(model, key) : 'none'] = {
+          timestamp,
+          markup
+        }
+        if (Object.keys(caches[name].entries).length > maxCaches) {
+          const lowestKeyVal = Object.keys(caches[name].entries).reduce((a, b) => caches[name].entries[a].timestamp < caches[name].entries[b].timestamp ? a : b)
+          delete caches[name].entries[lowestKeyVal]
+        }
+        dom(el).replaceWith(markup)
+        parsedTags++
+      }
+    }
+  } while (parsedTags)
+  return dom
+}
+
 // removes any remaining teddy tags from the dom before returning the parsed html to the user
 function cleanupStrayTeddyTags (dom) {
   let parsedTags
   do {
     parsedTags = 0
-    const tags = dom('[teddy_deferred_one_line_conditional], include, arg, if, unless, elseif, elseunless, else, loop')
+    const tags = dom('[teddy_deferred_one_line_conditional], include, arg, if, unless, elseif, elseunless, else, loop, cache')
     if (tags.length > 0) {
       for (const el of tags) {
-        if (el.name === 'include' || el.name === 'arg' || el.name === 'if' || el.name === 'unless' || el.name === 'elseif' || el.name === 'elseunless' || el.name === 'else' || el.name === 'loop') {
+        if (el.name === 'include' || el.name === 'arg' || el.name === 'if' || el.name === 'unless' || el.name === 'elseif' || el.name === 'elseunless' || el.name === 'else' || el.name === 'loop' || el.name === 'cache') {
           dom(el).remove()
         }
         for (const attr in el.attribs) {
@@ -831,6 +904,17 @@ function setTemplate (file, template) {
   templates[file] = template
 }
 
+// delete one or more cached templates
+// 1 argument deletes the whole cache at that name
+// 2 arguments deletes just the value at that keyVal
+function clearCache (name, keyVal) {
+  if (!keyVal) {
+    delete caches[name]
+  } else {
+    delete caches[name].entries[keyVal]
+  }
+}
+
 // parses a template
 function render (template, model, callback) {
   // ensure template is a string
@@ -872,6 +956,15 @@ function render (template, model, callback) {
       }
       break
     }
+    const hasCache = renderedTemplate.includes('</cache>')
+    const hasNoteddy = renderedTemplate.includes('</noteddy>')
+    const hasNoparse = renderedTemplate.includes('</noparse>')
+    const hasIf = renderedTemplate.includes('</if>')
+    const hasUnless = renderedTemplate.includes('</unless>')
+    const hasTrue = renderedTemplate.includes(' true=')
+    const hasFalse = renderedTemplate.includes(' false=')
+    const hasInclude = renderedTemplate.includes('</include>')
+    const hasLoop = renderedTemplate.includes('</loop>')
     oldTemplate = renderedTemplate || ''
     if (passes > 1) {
       dom = cheerio.load(renderedTemplate || '', cheerioOptions)
@@ -879,11 +972,13 @@ function render (template, model, callback) {
         dom = parseIncludes(dom, model, true)
       }
     }
-    dom = tagNoParseBlocks(dom, model)
-    dom = parseConditionals(dom, model)
-    dom = parseOneLineConditionals(dom, model)
-    dom = parseIncludes(dom, model)
-    dom = parseLoops(dom, model)
+    if (hasCache) dom = replaceCacheElements(dom, model)
+    if (hasNoteddy || hasNoparse) dom = tagNoParseBlocks(dom, model)
+    if (hasIf || hasUnless) dom = parseConditionals(dom, model)
+    if (hasTrue || hasFalse) dom = parseOneLineConditionals(dom, model)
+    if (hasInclude) dom = parseIncludes(dom, model)
+    if (hasLoop) dom = parseLoops(dom, model)
+    const cachesStillPresent = renderedTemplate.includes('</cache>')
     renderedTemplate = dom.html()
     renderedTemplate = parseVars(renderedTemplate, model)
     if (parseDynamicIncludes) {
@@ -894,10 +989,15 @@ function render (template, model, callback) {
       oldTemplate = '' // reset old template to force another pass
       parseDynamicIncludes = true
     }
+    if (oldTemplate === renderedTemplate && cachesStillPresent) {
+      dom = cheerio.load(renderedTemplate || '', cheerioOptions)
+      dom = defineNewCaches(dom, model)
+      renderedTemplate = dom.html()
+    }
   } while (oldTemplate !== renderedTemplate)
 
   // remove stray teddy tags if any exist
-  if (renderedTemplate.includes('teddy_deferred_one_line_conditional="true"') || renderedTemplate.includes('<include') || renderedTemplate.includes('<arg') || renderedTemplate.includes('<if') || renderedTemplate.includes('<unless') || renderedTemplate.includes('<elseif') || renderedTemplate.includes('<elseunless') || renderedTemplate.includes('<else') || renderedTemplate.includes('<loop')) {
+  if (renderedTemplate.includes('teddy_deferred_one_line_conditional="true"') || renderedTemplate.includes('</include>') || renderedTemplate.includes('</arg>') || renderedTemplate.includes('</if>') || renderedTemplate.includes('</unless>') || renderedTemplate.includes('</elseif>') || renderedTemplate.includes('</elseunless>') || renderedTemplate.includes('</else>') || renderedTemplate.includes('</loop>') || renderedTemplate.includes('</cache>')) {
     dom = cheerio.load(renderedTemplate || '', cheerioOptions)
     dom = cleanupStrayTeddyTags(dom)
     renderedTemplate = dom.html()
@@ -921,6 +1021,7 @@ function render (template, model, callback) {
 module.exports = {
   // state
   params,
+  caches,
 
   // functions
   setDefaultParams,
@@ -929,6 +1030,7 @@ module.exports = {
   setMaxPasses,
   getTemplates,
   setTemplate,
+  clearCache,
   render
 }
 

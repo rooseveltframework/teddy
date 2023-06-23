@@ -27,6 +27,7 @@ Table of contents
   - [One-line ifs](https://github.com/rooseveltframework/teddy#one-line-ifs)
   - [Loops](https://github.com/rooseveltframework/teddy#loops)
   - [Non-parsed-blocks](https://github.com/rooseveltframework/teddy#non-parsed-blocks)
+  - [Caching blocks](https://github.com/rooseveltframework/teddy#caching-blocks)
   - [A complex example combining many tags](https://github.com/rooseveltframework/teddy#a-complex-example-combining-many-tags)
 - [Using Teddy in Node.js](https://github.com/rooseveltframework/teddy#using-teddy-in-nodejs)
 - [Using Teddy with client-side JS](https://github.com/rooseveltframework/teddy#using-teddy-with-client-side-js)
@@ -341,7 +342,7 @@ For the above array of objects, we can combine the techniques illustrated above 
 
 ## Non-parsed blocks
 
-To skip teddy parsing a block of code, use a `<noteddy>` tag:
+To skip teddy parsing a block of code, use a `<noteddy>` or `<noparse>` tag:
 
 ```html
 <p><noteddy>{this_var_will_not_be_parsed}</noteddy></p>
@@ -354,6 +355,32 @@ You can also instruct the contents of a variable to not be parsed after that var
 ```
 
 Note: Teddy tags will also not be parsed if they appear inside of elements that interpret child text as plain text, e.g. `<style>`, `<script>`, `<textarea>`, etc.
+
+Caching blocks
+---
+
+You can use a `<cache>` element to prevent Teddy from having to continuously re-render blocks of template code that frequently resolve to the same markup in order to improve template parsing performance.
+
+Here's an example:
+
+```html
+<p>Dynamic: Welcome {user}!</p>
+<cache name="weather" key="city" maxCaches="3">
+  <p>Cached: High temperature today in {city} is {value}.</p>
+</cache>
+```
+
+In the above example, assume that there are a large number of values that `{user}` could resolve to, but there are a limited number of values that `{city}` and `{value}` could resolve to. In that case, we can cache the block of code that doesn't need re-rendering as often by enclosing it in a `<cache>` element to improve the performance of template parsing while still allowing other parts of the template to be parsed dynamically at each render.
+
+Here's what the attributes mean:
+
+- `name`: What you want to name your cache. The name is necessary so you can manually clear the cache from JavaScript later if you like via `teddy.clearCache(name, keyVal)`.
+  - `teddy.clearCache(name)` will delete the whole cache at that name, e.g. all values for `{city}`.
+  - `teddy.clearCache(name, keyVal)` will delete just the value at that keyVal, e.g. just the cache for when `{city}` resolves to NY if you set keyVal to NY.
+- `key`: The model value to use to index new caches.
+  - Example: Suppose `city` in the above example could resolve to three possible values: NY, SF, and LA. In that case, the caching feature will create 3 caches using the `city` key: one for each of the three possible values.
+- `maxCaches`: The maximum number of caches that Teddy will be allowed to create for a given `<cache>` element. If the maximum is reached, Teddy will remove the oldest cache in the stack, where oldest is defined as the least recently created *or* accessed.
+  - Default: 10.
 
 A complex example combining many tags
 ---
@@ -430,6 +457,8 @@ API documentation
 - `teddy.setDefaultParams()`: Reset all params to default.
 - `teddy.maxPasses(n)`: Sets the maximum number of passes the parser can execute over your template. If this maximum is exceeded, Teddy will stop attempting to render the template. The limit exists to prevent the possibility of teddy producing infinite loops due to improperly coded templates.
   - Default: 1000.
+- `teddy.clearCache(name)`: Deletes the whole cache at that name.
+- `teddy.clearCache(name, keyVal)`: Deletes just the value at that keyVal.
 
 Hacking the code
 ===
