@@ -1,0 +1,8 @@
+{!
+  should cache the contents of the cache element but not anything outside of it
+!}
+
+<p>Dynamic: Welcome {user}!</p>
+<cache name="weather" key="city" maxCaches="3">
+  <p>Cached: High temperature today in {city} is {value}.</p>
+</cache>

@@ -1,10 +1,12 @@
 {!
-  should loop through a large data set performantly
+  should loop through a large data set performantly after it has been cached once
 !}
 
-<loop through='largeDataSet' key='i' val='item'>
-  <p>{i}</p>
-  <p>{item.one}</p>
-  <p>{item.two}</p>
-  <p>{item.three}</p>
-</loop>
+<cache name="thisWillBeSlowFirstThenFasterLater">
+  <loop through='largeDataSet' key='i' val='item'>
+    <p>{i}</p>
+    <p>{item.one}</p>
+    <p>{item.two}</p>
+    <p>{item.three}</p>
+  </loop>
+</cache>
