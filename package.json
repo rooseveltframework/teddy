@@ -76,7 +76,8 @@
     "test-edge": "npm run build && karma start --browsers Edge",
     "test-firefox": "npm run build && karma start --browsers Firefox",
     "test-safari": "npm run build && karma start --browsers Safari",
-    "test-server": "npm run build && cross-env NODE_ENV=test mocha test"
+    "test-server": "npm run build && cross-env NODE_ENV=test mocha test",
+    "prepack": "npm run build"
   },
   "repository": {
     "type": "git",
