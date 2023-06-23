@@ -105,33 +105,33 @@ describe('Misc', function () {
     const render1 = teddy.render('misc/cacheElement.html', { user: 'Joe', city: 'NY', value: 30 })
     assert.equalIgnoreSpaces(render1, '<p>Dynamic: Welcome Joe!</p><p>Cached: High temperature today in NY is 30.</p>')
     assert.equalIgnoreSpaces(teddy.caches.weather.entries.NY.markup, '<p>Cached: High temperature today in NY is 30.</p>')
-    await timeout(1)
+    await timeout(100)
 
     const render2 = teddy.render('misc/cacheElement.html', { user: 'Bob', city: 'SF', value: 60 })
     assert.equalIgnoreSpaces(render2, '<p>Dynamic: Welcome Bob!</p><p>Cached: High temperature today in SF is 60.</p>')
     assert.equalIgnoreSpaces(teddy.caches.weather.entries.SF.markup, '<p>Cached: High temperature today in SF is 60.</p>')
-    await timeout(1)
+    await timeout(100)
 
     const render3 = teddy.render('misc/cacheElement.html', { user: 'Moe', city: 'LA', value: 80 })
     assert.equalIgnoreSpaces(render3, '<p>Dynamic: Welcome Moe!</p><p>Cached: High temperature today in LA is 80.</p>')
     assert.equalIgnoreSpaces(teddy.caches.weather.entries.LA.markup, '<p>Cached: High temperature today in LA is 80.</p>')
-    await timeout(1)
+    await timeout(100)
 
     // will display from cache
     const render4 = teddy.render('misc/cacheElement.html', { user: 'Sue', city: 'NY', value: 300 }) // new temperature value should not print because old value is cached
     assert.equalIgnoreSpaces(render4, '<p>Dynamic: Welcome Sue!</p><p>Cached: High temperature today in NY is 30.</p>')
     assert.equalIgnoreSpaces(teddy.caches.weather.entries.NY.markup, '<p>Cached: High temperature today in NY is 30.</p>')
-    await timeout(1)
+    await timeout(100)
 
     const render5 = teddy.render('misc/cacheElement.html', { user: 'Jay', city: 'SF', value: 600 }) // new temperature value should not print because old value is cached
     assert.equalIgnoreSpaces(render5, '<p>Dynamic: Welcome Jay!</p><p>Cached: High temperature today in SF is 60.</p>')
     assert.equalIgnoreSpaces(teddy.caches.weather.entries.SF.markup, '<p>Cached: High temperature today in SF is 60.</p>')
-    await timeout(1)
+    await timeout(100)
 
     const render6 = teddy.render('misc/cacheElement.html', { user: 'Mae', city: 'LA', value: 800 }) // new temperature value should not print because old value is cached
     assert.equalIgnoreSpaces(render6, '<p>Dynamic: Welcome Mae!</p><p>Cached: High temperature today in LA is 80.</p>')
     assert.equalIgnoreSpaces(teddy.caches.weather.entries.LA.markup, '<p>Cached: High temperature today in LA is 80.</p>')
-    await timeout(1)
+    await timeout(100)
 
     // should drop NY and replace it with NOLA due to max caches being 3 and NY being the least recently accessed
     const render7 = teddy.render('misc/cacheElement.html', { name: 'weather', user: 'Liz', city: 'NOLA', value: 90 })
@@ -160,33 +160,33 @@ describe('Misc', function () {
     const render1 = teddy.render('misc/cacheElementDynamicAttrs.html', { name: 'weather', key: 'city', user: 'Joe', city: 'NY', value: 30 })
     assert.equalIgnoreSpaces(render1, '<p>Dynamic: Welcome Joe!</p><p>Cached: High temperature today in NY is 30.</p>')
     assert.equalIgnoreSpaces(teddy.caches.weather.entries.NY.markup, '<p>Cached: High temperature today in NY is 30.</p>')
-    await timeout(1)
+    await timeout(100)
 
     const render2 = teddy.render('misc/cacheElementDynamicAttrs.html', { name: 'weather', key: 'city', user: 'Bob', city: 'SF', value: 60 })
     assert.equalIgnoreSpaces(render2, '<p>Dynamic: Welcome Bob!</p><p>Cached: High temperature today in SF is 60.</p>')
     assert.equalIgnoreSpaces(teddy.caches.weather.entries.SF.markup, '<p>Cached: High temperature today in SF is 60.</p>')
-    await timeout(1)
+    await timeout(100)
 
     const render3 = teddy.render('misc/cacheElementDynamicAttrs.html', { name: 'weather', key: 'city', user: 'Moe', city: 'LA', value: 80 })
     assert.equalIgnoreSpaces(render3, '<p>Dynamic: Welcome Moe!</p><p>Cached: High temperature today in LA is 80.</p>')
     assert.equalIgnoreSpaces(teddy.caches.weather.entries.LA.markup, '<p>Cached: High temperature today in LA is 80.</p>')
-    await timeout(1)
+    await timeout(100)
 
     // will display from cache
     const render4 = teddy.render('misc/cacheElementDynamicAttrs.html', { name: 'weather', key: 'city', user: 'Sue', city: 'NY', value: 300 }) // new temperature value should not print because old value is cached
     assert.equalIgnoreSpaces(render4, '<p>Dynamic: Welcome Sue!</p><p>Cached: High temperature today in NY is 30.</p>')
     assert.equalIgnoreSpaces(teddy.caches.weather.entries.NY.markup, '<p>Cached: High temperature today in NY is 30.</p>')
-    await timeout(1)
+    await timeout(100)
 
     const render5 = teddy.render('misc/cacheElementDynamicAttrs.html', { name: 'weather', key: 'city', user: 'Jay', city: 'SF', value: 600 }) // new temperature value should not print because old value is cached
     assert.equalIgnoreSpaces(render5, '<p>Dynamic: Welcome Jay!</p><p>Cached: High temperature today in SF is 60.</p>')
     assert.equalIgnoreSpaces(teddy.caches.weather.entries.SF.markup, '<p>Cached: High temperature today in SF is 60.</p>')
-    await timeout(1)
+    await timeout(100)
 
     const render6 = teddy.render('misc/cacheElementDynamicAttrs.html', { name: 'weather', key: 'city', user: 'Mae', city: 'LA', value: 800 }) // new temperature value should not print because old value is cached
     assert.equalIgnoreSpaces(render6, '<p>Dynamic: Welcome Mae!</p><p>Cached: High temperature today in LA is 80.</p>')
     assert.equalIgnoreSpaces(teddy.caches.weather.entries.LA.markup, '<p>Cached: High temperature today in LA is 80.</p>')
-    await timeout(1)
+    await timeout(100)
 
     // should drop NY and replace it with NOLA due to max caches being 3 and NY being the least recently accessed
     const render7 = teddy.render('misc/cacheElementDynamicAttrs.html', { name: 'weather', key: 'city', user: 'Liz', city: 'NOLA', value: 90 })
@@ -215,33 +215,33 @@ describe('Misc', function () {
     const render1 = teddy.render('misc/cacheElementDynamicAttrsNested.html', { name: 'weather', key: 'city.acronym', user: 'Joe', city: { acronym: 'NY' }, value: 30 })
     assert.equalIgnoreSpaces(render1, '<p>Dynamic: Welcome Joe!</p><p>Cached: High temperature today in NY is 30.</p>')
     assert.equalIgnoreSpaces(teddy.caches.weather.entries.NY.markup, '<p>Cached: High temperature today in NY is 30.</p>')
-    await timeout(1)
+    await timeout(100)
 
     const render2 = teddy.render('misc/cacheElementDynamicAttrsNested.html', { name: 'weather', key: 'city.acronym', user: 'Bob', city: { acronym: 'SF' }, value: 60 })
     assert.equalIgnoreSpaces(render2, '<p>Dynamic: Welcome Bob!</p><p>Cached: High temperature today in SF is 60.</p>')
     assert.equalIgnoreSpaces(teddy.caches.weather.entries.SF.markup, '<p>Cached: High temperature today in SF is 60.</p>')
-    await timeout(1)
+    await timeout(100)
 
     const render3 = teddy.render('misc/cacheElementDynamicAttrsNested.html', { name: 'weather', key: 'city.acronym', user: 'Moe', city: { acronym: 'LA' }, value: 80 })
     assert.equalIgnoreSpaces(render3, '<p>Dynamic: Welcome Moe!</p><p>Cached: High temperature today in LA is 80.</p>')
     assert.equalIgnoreSpaces(teddy.caches.weather.entries.LA.markup, '<p>Cached: High temperature today in LA is 80.</p>')
-    await timeout(1)
+    await timeout(100)
 
     // will display from cache
     const render4 = teddy.render('misc/cacheElementDynamicAttrsNested.html', { name: 'weather', key: 'city.acronym', user: 'Sue', city: { acronym: 'NY' }, value: 300 }) // new temperature value should not print because old value is cached
     assert.equalIgnoreSpaces(render4, '<p>Dynamic: Welcome Sue!</p><p>Cached: High temperature today in NY is 30.</p>')
     assert.equalIgnoreSpaces(teddy.caches.weather.entries.NY.markup, '<p>Cached: High temperature today in NY is 30.</p>')
-    await timeout(1)
+    await timeout(100)
 
     const render5 = teddy.render('misc/cacheElementDynamicAttrsNested.html', { name: 'weather', key: 'city.acronym', user: 'Jay', city: { acronym: 'SF' }, value: 600 }) // new temperature value should not print because old value is cached
     assert.equalIgnoreSpaces(render5, '<p>Dynamic: Welcome Jay!</p><p>Cached: High temperature today in SF is 60.</p>')
     assert.equalIgnoreSpaces(teddy.caches.weather.entries.SF.markup, '<p>Cached: High temperature today in SF is 60.</p>')
-    await timeout(1)
+    await timeout(100)
 
     const render6 = teddy.render('misc/cacheElementDynamicAttrsNested.html', { name: 'weather', key: 'city.acronym', user: 'Mae', city: { acronym: 'LA' }, value: 800 }) // new temperature value should not print because old value is cached
     assert.equalIgnoreSpaces(render6, '<p>Dynamic: Welcome Mae!</p><p>Cached: High temperature today in LA is 80.</p>')
     assert.equalIgnoreSpaces(teddy.caches.weather.entries.LA.markup, '<p>Cached: High temperature today in LA is 80.</p>')
-    await timeout(1)
+    await timeout(100)
 
     // should drop NY and replace it with NOLA due to max caches being 3 and NY being the least recently accessed
     const render7 = teddy.render('misc/cacheElementDynamicAttrsNested.html', { name: 'weather', key: 'city.acronym', user: 'Liz', city: { acronym: 'NOLA' }, value: 90 })
