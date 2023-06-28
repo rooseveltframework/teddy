@@ -15,7 +15,8 @@ const XRegExp = require('xregexp') // needed for matchRecursive
 const params = {} // teddy parameters
 setDefaultParams() // set params to the defaults
 const templates = {} // loaded templates are stored as object collections, e.g. { "myTemplate.html": "<p>some markup</p>"}
-const caches = {} // a place to store cached templates
+const caches = {} // a place to store cached portions of templates
+const templateCaches = {} // a place to store cached full templates
 
 // private methods
 
@@ -170,14 +171,23 @@ function replaceCacheElements (dom, model) {
         if (cache && cache.entries) {
           const keyVal = el.attribs.key ? getOrSetObjectByDotNotation(model, key) : 'none'
           if (cache.entries[keyVal]) {
-            const cacheContent = cache.entries[keyVal].markup
-            cache.entries[keyVal].timestamp = Date.now()
-            dom(el).replaceWith(cacheContent)
+            const now = Date.now()
+            // if max age is not set, then there is no max age and the cache content is still valid
+            // or if last accessed + max age > now then the cache is not stale and the cache is still valid
+            if (!cache.maxAge || cache.entries[keyVal].lastAccessed + cache.maxAge > now) {
+              const cacheContent = cache.entries[keyVal].markup
+              cache.entries[keyVal].lastAccessed = now
+              dom(el).replaceWith(cacheContent)
+            } else {
+              // if last accessed + max age <= now then the cache is stale and the cache is no longer valid
+              delete caches[name].entries[keyVal]
+              dom(el).attr('defer', 'true') // create a new cache
+            }
           } else {
-            dom(el).attr('defer', 'true')
+            dom(el).attr('defer', 'true') // no cache exists for this yet; create after the template renders
           }
         } else {
-          dom(el).attr('defer', 'true')
+          dom(el).attr('defer', 'true') // no cache exists for this yet; create after the template renders
         }
         parsedTags++
       }
@@ -778,22 +788,26 @@ function defineNewCaches (dom, model) {
       for (const el of tags) {
         const name = el.attribs.name
         const key = el.attribs.key || 'none'
-        const maxCaches = parseInt(el.attribs.maxCaches) || 10
+        const maxAge = parseInt(el.attribs.maxAge) || 0
+        const maxCaches = parseInt(el.attribs.maxCaches) || 1000
         const timestamp = Date.now()
         const markup = dom(el).html()
         if (!caches[name]) {
           caches[name] = {
             key,
+            maxAge,
             maxCaches,
             entries: {}
           }
         }
         caches[name].entries[el.attribs.key ? getOrSetObjectByDotNotation(model, key) : 'none'] = {
-          timestamp,
+          lastAccessed: timestamp,
+          created: timestamp,
           markup
         }
+        // invalidate oldest cache if we've reached max caches limit
         if (Object.keys(caches[name].entries).length > maxCaches) {
-          const lowestKeyVal = Object.keys(caches[name].entries).reduce((a, b) => caches[name].entries[a].timestamp < caches[name].entries[b].timestamp ? a : b)
+          const lowestKeyVal = Object.keys(caches[name].entries).reduce((a, b) => caches[name].entries[a].lastAccessed < caches[name].entries[b].lastAccessed ? a : b)
           delete caches[name].entries[lowestKeyVal]
         }
         dom(el).replaceWith(markup)
@@ -854,12 +868,6 @@ function getOrSetObjectByDotNotation (obj, dotNotation, value) {
 function setDefaultParams () {
   params.verbosity = 1
   params.templateRoot = './'
-  params.cacheRenders = false
-  params.defaultCaches = 1
-  params.templateMaxCaches = {}
-  params.cacheWhitelist = false
-  params.cacheBlacklist = []
-  params.minify = false
   params.maxPasses = 1000
 }
 
@@ -899,19 +907,57 @@ function getTemplates () {
   return templates
 }
 
+// takes in a template string and outputs a function which when given data will render out html
+function compile (templateString) {
+  return function (model) {
+    return render(templateString, model)
+  }
+}
+
 // mutator method to cache template
 function setTemplate (file, template) {
   templates[file] = template
 }
 
-// delete one or more cached templates
-// 1 argument deletes the whole cache at that name
-// 2 arguments deletes just the value at that keyVal
-function clearCache (name, keyVal) {
-  if (!keyVal) {
-    delete caches[name]
+function setCache (params) {
+  if (!templateCaches[params.template]) {
+    templateCaches[params.template] = {}
+  }
+  if (params.key) {
+    templateCaches[params.template][params.key] = {
+      maxAge: params.maxAge,
+      maxCaches: params.maxCaches || 1000,
+      entries: {}
+    }
   } else {
-    delete caches[name].entries[keyVal]
+    templateCaches[params.template].none = {
+      maxAge: params.maxAge,
+      markup: null,
+      created: null
+    }
+  }
+}
+
+// delete one or more cached templates
+// 1 string argument deletes the whole cache at that name for template partial caches
+// 2 arguments deletes just the value at that keyVal for template partial caches
+// 1 object argument assumes we're clearing whole template level cache
+function clearCache (name, keyVal) {
+  if (typeof name === 'string') {
+    if (keyVal) {
+      delete caches[name].entries[keyVal]
+    } else {
+      delete caches[name]
+    }
+  } else if (typeof name === 'object') {
+    const params = name
+    if (params.key) {
+      delete templateCaches[params.template][params.key]
+    } else {
+      delete templateCaches[params.template]
+    }
+  } else {
+    console.error('teddy: invalid params passed to clearCache')
   }
 }
 
@@ -940,9 +986,62 @@ function render (template, model, callback) {
     template = template.replace(params.templateRoot, '')
   }
 
+  // whole template caching
+  const templateCache = templateCaches[template]
+  let cacheKey = null
+  let cacheKeyModelVal = null
+  if (templateCache) {
+    const singletonCache = templateCache.none
+    if (singletonCache) {
+      // check if the timestamp exceeds max age
+      if (!singletonCache.created) {
+        cacheKey = 'none'
+      } else if (!singletonCache.maxAge) {
+        // if no max age is set, then this cache doesn't expire
+        return singletonCache.markup
+      } else if (singletonCache.created + singletonCache.maxAge < Date.now()) {
+        // if yes re-render the template and cache it again
+        cacheKey = 'none'
+      } else {
+        // if no return the cached markup and skip the template render
+        return singletonCache.markup
+      }
+    } else {
+      // loop through its keys
+      for (const key in templateCache) {
+        // if there's a model value for that key name
+        cacheKeyModelVal = getOrSetObjectByDotNotation(model, key)
+        if (cacheKeyModelVal) {
+          // loop through its entries
+          const templateCacheAtThisKey = templateCache[key]
+          for (const entryKey in templateCacheAtThisKey.entries) {
+            // if any entry keys match the model value for that key name
+            if (entryKey === cacheKeyModelVal) {
+              // check if the timestamp exceeds max age
+              const entry = templateCacheAtThisKey.entries[entryKey]
+              if (!templateCacheAtThisKey.maxAge) {
+                // if no max age is set, then this cache doesn't expire
+                return entry.markup
+              } else if (entry.created + templateCacheAtThisKey.maxAge < Date.now()) {
+                // if yes re-render the template and cache it again
+                cacheKey = key
+                break
+              } else {
+                // if no return the cached markup and skip the template render
+                return entry.markup
+              }
+            }
+          }
+          // this is a new model value so it needs a new entry
+          cacheKey = key
+          break
+        }
+      }
+    }
+  }
+
   // start the render
   renderedTemplate = loadTemplate(template)
-  renderedTemplate = removeTeddyComments(renderedTemplate)
   dom = cheerio.load(renderedTemplate || '', cheerioOptions)
   let oldTemplate
   let passes = 0
@@ -1008,6 +1107,23 @@ function render (template, model, callback) {
     renderedTemplate = renderedTemplate.replace(`<noteddy id="${blockId}"></noteddy>`, model._noTeddyBlocks[blockId])
   }
 
+  // cache the template
+  if (cacheKey === 'none') {
+    templateCaches[template].none.markup = renderedTemplate
+    templateCaches[template].none.created = Date.now()
+  } else if (cacheKey) {
+    if (!templateCaches[template][cacheKey].entries[cacheKeyModelVal]) {
+      templateCaches[template][cacheKey].entries[cacheKeyModelVal] = {}
+    }
+    templateCaches[template][cacheKey].entries[cacheKeyModelVal].markup = renderedTemplate
+    templateCaches[template][cacheKey].entries[cacheKeyModelVal].created = Date.now()
+    // invalidate oldest cache if we've reached max caches limit
+    if (Object.keys(templateCaches[template][cacheKey].entries).length > templateCaches[template][cacheKey].maxCaches) {
+      const lowestKeyVal = Object.keys(templateCaches[template][cacheKey].entries).reduce((a, b) => templateCaches[template][cacheKey].entries[a].created < templateCaches[template][cacheKey].entries[b].created ? a : b)
+      delete templateCaches[template][cacheKey].entries[lowestKeyVal]
+    }
+  }
+
   // execute callback if present, otherwise simply return the rendered template string
   if (typeof callback === 'function') {
     callback(null, renderedTemplate)
@@ -1022,14 +1138,17 @@ module.exports = {
   // state
   params,
   caches,
+  templateCaches,
 
   // functions
+  compile,
   setDefaultParams,
   setVerbosity,
   setTemplateRoot,
   setMaxPasses,
   getTemplates,
   setTemplate,
+  setCache,
   clearCache,
   render
 }

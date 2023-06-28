@@ -4,6 +4,13 @@
 
 - Put your changes here...
 
+## 0.6.3
+
+- Restored template-level caching feature with an improved API.
+- Restored compile method but now with an API similar to other templating systems. It will now take a template string and return a function which when given model data will render HTML from the template and model data.
+- Now hosting the Teddy playground on [https://rooseveltframework.github.io/teddy/playground.html](https://rooseveltframework.github.io/teddy/playground.html). Thanks to [jsDelivr](https://www.jsdelivr.com/package/npm/teddy?tab=files) for CDN hosting.
+- Various dependencies bumped.
+
 ## 0.6.2
 
 - Significant performance improvements.

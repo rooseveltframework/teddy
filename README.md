@@ -9,9 +9,11 @@ Teddy is the most readable and easy to learn templating language there is!
 
 Or put a more technical way, Teddy is an easy to read, HTML-inspired, mostly logic-less DOM templating engine with support for both server-side and client-side templating.
 
-It uses HTML-like `<tags>` for rudimentary templating logic and Teddy Roosevelt's facial hair for `{variables}`.
+It uses HTML-like `<tags>` for rudimentary templating logic and Teddy Roosevelt's facial hair for `{variables}`. 
 
-![Teddy Roosevelt's facial hair is a curly brace.](https://github.com/rooseveltframework/generator-roosevelt/blob/master/generators/app/templates/statics/images/teddy.jpg "Teddy Roosevelt's facial hair is a curly brace.")
+[Check out this live demo](https://rooseveltframework.github.io/teddy/playground.html) or see below for documentation on how to write Teddy templates.
+
+![Teddy Roosevelt's facial hair is a curly brace.](https://github.com/rooseveltframework/generator-roosevelt/blob/main/generators/app/templates/statics/images/teddy.jpg "Teddy Roosevelt's facial hair is a curly brace.")
 
 
 Table of contents
@@ -379,8 +381,13 @@ Here's what the attributes mean:
   - `teddy.clearCache(name, keyVal)` will delete just the value at that keyVal, e.g. just the cache for when `{city}` resolves to NY if you set keyVal to NY.
 - `key`: The model value to use to index new caches.
   - Example: Suppose `city` in the above example could resolve to three possible values: NY, SF, and LA. In that case, the caching feature will create 3 caches using the `city` key: one for each of the three possible values.
+- `maxAge`: How old the cache can be in milliseconds before it is invalidated and will be re-rendered.
+  - Default: 0 (no limit).
+
 - `maxCaches`: The maximum number of caches that Teddy will be allowed to create for a given `<cache>` element. If the maximum is reached, Teddy will remove the oldest cache in the stack, where oldest is defined as the least recently created *or* accessed.
-  - Default: 10.
+  - Default: 1000.
+
+You can also cache whole templates. For more details about that, see the API docs below. 
 
 A complex example combining many tags
 ---
@@ -443,22 +450,73 @@ API documentation
 ===
 
 - `teddy.getTemplates()`: Get the internal cache of templates.
+
 - `teddy.setTemplate(name, template)`: Add a new template to the template cache.
+
 - `teddy.render(template, model)`: Render a template by supplying either source code or a file name (in Node.js).
+
   - Returns fully rendered HTML.
   - Removes `{! teddy comments !}`
+
 - `teddy.setTemplateRoot(path)`: Set the location of your templates directory.
+
   - Default is the current directory.
+
+- `teddy.compile(templateString)`: Takes a template string and returns a function which when given model data will render HTML from the template and model data.
+
+  - e.g.
+
+    - ```javascript
+      const templateFunction = teddy.compile('<p>{hello}</p>')
+      templateFunction({ hello: 'world' }) // returns "<p>world</p>"
+
 - `teddy.setVerbosity(n)`: Sets the level of verbosity in Teddy's console logs. Call `teddy.setVerbosity(n)` where `n` equals one of the below values to change the default:
+
   - `0`: No logging.
   - `1`: The default. Concise logging. Will usually only log serious errors.
   - `2`: Verbose logging. Logs even minor errors.
   - `3`: Debug mode. Very verbose.
+
 - `teddy.setDefaultParams()`: Reset all params to default.
+
 - `teddy.maxPasses(n)`: Sets the maximum number of passes the parser can execute over your template. If this maximum is exceeded, Teddy will stop attempting to render the template. The limit exists to prevent the possibility of teddy producing infinite loops due to improperly coded templates.
   - Default: 1000.
-- `teddy.clearCache(name)`: Deletes the whole cache at that name.
-- `teddy.clearCache(name, keyVal)`: Deletes just the value at that keyVal.
+
+- `teddy.setCache(params)`: Declare a template-level cache.
+
+  - Params:
+
+    - `template`: Name of the template to cache.
+    - `key`: Model variable to cache it by.
+      - Set to `none` to cache the first render for all model values.
+
+    - `maxAge`: How old the cache can be in milliseconds before it is invalidated and will be re-rendered.
+      - Default: 0 (no limit).
+
+    - `maxCaches`: The maximum number of caches that Teddy will be allowed to create for a given template/key combination. If the maximum is reached, Teddy will remove the oldest cache in the stack, where oldest is defined as the least recently created *or* accessed.
+      - Default: 1000.
+      - Note: does not apply to caches where `key` is not also set.
+
+  - Example:
+
+    - ```javascript
+      teddy.setCache({
+        template: 'someTemplate.html',
+        key: 'city',
+        maxAge: 1000
+      })
+
+- `teddy.clearCache(name)`: If `name` is a string, it will delete the whole cache at that name.
+
+- `teddy.clearCache(name, keyVal)`: Deletes just the value at that keyVal. Assumes `name` will be a string.
+
+- `teddy.clearCache(params)`: If `params` is an object, it will delete a whole template-level cache.
+
+  - Params:
+    - `template`: Name of the template to delete the cache of.
+    - `key`: Model variable cache index to delete it by.
+      - If `key` is not provided, it will delete all caches of that template.
+
 
 Hacking the code
 ===
