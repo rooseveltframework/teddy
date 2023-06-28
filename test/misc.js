@@ -13,6 +13,10 @@ if (typeof process === 'object') {
   chai.use(chaiString)
 }
 
+function timeout (ms) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
 describe('Misc', function () {
   before(function () {
     teddy.setTemplateRoot('test/templates')
@@ -24,6 +28,11 @@ describe('Misc', function () {
         teddy.setVerbosity(3)
       }
     }
+  })
+
+  it('should compile a template and return a function which when given data will render HTML', function () {
+    const templateFunction = teddy.compile('<p>{hello}</p>')
+    assert.equalIgnoreSpaces(templateFunction({ hello: 'world' }), '<p>world</p>')
   })
 
   it('should not escape HTML entities present in {variables} which are properly {flagged|p|s} (misc/barPandSTest.html)', function () {
@@ -97,10 +106,6 @@ describe('Misc', function () {
   })
 
   it('should cache the contents of the cache element but not anything outside of it (misc/cacheElement.html)', async function () {
-    function timeout (ms) {
-      return new Promise(resolve => setTimeout(resolve, ms))
-    }
-
     // these will be cached
     const render1 = teddy.render('misc/cacheElement.html', { user: 'Joe', city: 'NY', value: 30 })
     assert.equalIgnoreSpaces(render1, '<p>Dynamic: Welcome Joe!</p><p>Cached: High temperature today in NY is 30.</p>')
@@ -151,10 +156,27 @@ describe('Misc', function () {
     assert.equal(missingAll, true)
   })
 
+  it('should cache the contents of the cache element but not anything outside of it (misc/cacheElementMaxAge.html)', async function () {
+    // these will be cached
+    const render1 = teddy.render('misc/cacheElementMaxAge.html', { user: 'Joe', city: 'NY', value: 30 })
+    assert.equalIgnoreSpaces(render1, '<p>Dynamic: Welcome Joe!</p><p>Cached: High temperature today in NY is 30.</p>')
+    assert.equalIgnoreSpaces(teddy.caches.weather.entries.NY.markup, '<p>Cached: High temperature today in NY is 30.</p>')
+    await timeout(100)
+
+    // will display from cache
+    const render4 = teddy.render('misc/cacheElementMaxAge.html', { user: 'Sue', city: 'NY', value: 300 }) // new temperature value should not print because old value is cached
+    assert.equalIgnoreSpaces(render4, '<p>Dynamic: Welcome Sue!</p><p>Cached: High temperature today in NY is 30.</p>')
+    assert.equalIgnoreSpaces(teddy.caches.weather.entries.NY.markup, '<p>Cached: High temperature today in NY is 30.</p>')
+    await timeout(1100)
+
+    // will not be cached
+    const render5 = teddy.render('misc/cacheElementMaxAge.html', { user: 'Moe', city: 'NY', value: 60 })
+    assert.equalIgnoreSpaces(render5, '<p>Dynamic: Welcome Moe!</p><p>Cached: High temperature today in NY is 60.</p>')
+    assert.equalIgnoreSpaces(teddy.caches.weather.entries.NY.markup, '<p>Cached: High temperature today in NY is 60.</p>')
+  })
+
   it('should render cache element correctly with dynamic attributes (misc/cacheElementDynamicAttrs.html)', async function () {
-    function timeout (ms) {
-      return new Promise(resolve => setTimeout(resolve, ms))
-    }
+    teddy.clearCache('weather')
 
     // these will be cached
     const render1 = teddy.render('misc/cacheElementDynamicAttrs.html', { name: 'weather', key: 'city', user: 'Joe', city: 'NY', value: 30 })
@@ -207,9 +229,7 @@ describe('Misc', function () {
   })
 
   it('should render cache element correctly with dynamic attributes (misc/cacheElementDynamicAttrsNested.html)', async function () {
-    function timeout (ms) {
-      return new Promise(resolve => setTimeout(resolve, ms))
-    }
+    teddy.clearCache('weather')
 
     // these will be cached
     const render1 = teddy.render('misc/cacheElementDynamicAttrsNested.html', { name: 'weather', key: 'city.acronym', user: 'Joe', city: { acronym: 'NY' }, value: 30 })
@@ -259,6 +279,256 @@ describe('Misc', function () {
     teddy.clearCache('weather')
     const missingAll = !teddy.caches.weather
     assert.equal(missingAll, true)
+  })
+
+  it('should render template, then render cached template, then render the template again when the cache expires (misc/cacheWholeTemplate.html)', async function () {
+    teddy.setCache({
+      template: 'misc/cacheWholeTemplate.html',
+      key: null,
+      maxAge: 1000
+    })
+    const start1 = new Date().getTime()
+    teddy.render('misc/cacheWholeTemplate.html', model)
+    const end1 = new Date().getTime()
+    const time1 = end1 - start1
+    console.log('    → Non-cached time to parse: ', time1)
+
+    const start2 = new Date().getTime()
+    teddy.render('misc/cacheWholeTemplate.html', model)
+    const end2 = new Date().getTime()
+    const time2 = end2 - start2
+    console.log('    → Cached time to parse:     ', time2)
+
+    await timeout(1100)
+    const start3 = new Date().getTime()
+    teddy.render('misc/cacheWholeTemplate.html', model)
+    const end3 = new Date().getTime()
+    const time3 = end3 - start3
+    console.log('    → Non-cached time to parse after clearing cache: ', time3)
+    const fasterSlower = time2 < 100 && time3 > 100
+    assert.isTrue(fasterSlower)
+  })
+
+  it('should render template, then render cached template, then render the template again when the cache is explicitly cleared (misc/cacheWholeTemplate.html)', async function () {
+    teddy.setCache({
+      template: 'misc/cacheWholeTemplate.html',
+      key: null,
+      maxAge: 1000
+    })
+    const start1 = new Date().getTime()
+    teddy.render('misc/cacheWholeTemplate.html', model)
+    const end1 = new Date().getTime()
+    const time1 = end1 - start1
+    console.log('    → Non-cached time to parse: ', time1)
+
+    const start2 = new Date().getTime()
+    teddy.render('misc/cacheWholeTemplate.html', model)
+    const end2 = new Date().getTime()
+    const time2 = end2 - start2
+    console.log('    → Cached time to parse:     ', time2)
+    teddy.clearCache({
+      template: 'misc/cacheWholeTemplate.html',
+      key: null
+    })
+
+    const start3 = new Date().getTime()
+    teddy.render('misc/cacheWholeTemplate.html', model)
+    const end3 = new Date().getTime()
+    const time3 = end3 - start3
+    console.log('    → Non-cached time to parse after clearing cache: ', time3)
+    const fasterSlower = time2 < 100 && time3 > 100
+    assert.isTrue(fasterSlower)
+  })
+
+  it('should render template, then render cached template, then render the template again when the cache expires via keyed values (misc/cacheWholeTemplate.html)', async function () {
+    const modelNY = Object.assign({ city: 'NY' }, model)
+    const modelSF = Object.assign({ city: 'SF' }, model)
+    teddy.setCache({
+      template: 'misc/cacheWholeTemplate.html',
+      key: 'city',
+      maxAge: 1000
+    })
+    const start1 = new Date().getTime()
+    teddy.render('misc/cacheWholeTemplate.html', modelNY)
+    const end1 = new Date().getTime()
+    const time1 = end1 - start1
+    console.log('    → Non-cached time to parse (NY): ', time1)
+
+    const start3 = new Date().getTime()
+    teddy.render('misc/cacheWholeTemplate.html', modelNY)
+    const end3 = new Date().getTime()
+    const time3 = end3 - start3
+    console.log('    → Cached time to parse (NY):     ', time3)
+
+    const start2 = new Date().getTime()
+    teddy.render('misc/cacheWholeTemplate.html', modelSF)
+    const end2 = new Date().getTime()
+    const time2 = end2 - start2
+    console.log('    → Non-cached time to parse (SF): ', time2)
+
+    await timeout(1100)
+    const start4 = new Date().getTime()
+    teddy.render('misc/cacheWholeTemplate.html', modelSF)
+    const end4 = new Date().getTime()
+    const time4 = end4 - start4
+    console.log('    → Non-cached time to parse after clearing cache (SF): ', time4)
+    const fasterSlower = time3 < 100 && time4 > 100
+    assert.isTrue(fasterSlower)
+  })
+
+  it('should render template, then render cached template, then render the template again when the cache expires via keyed values when the cache is explicitly cleared (misc/cacheWholeTemplate.html)', async function () {
+    const modelNY = Object.assign({ city: 'NY' }, model)
+    const modelSF = Object.assign({ city: 'SF' }, model)
+    teddy.setCache({
+      template: 'misc/cacheWholeTemplate.html',
+      key: 'city',
+      maxAge: 1000
+    })
+    const start1 = new Date().getTime()
+    teddy.render('misc/cacheWholeTemplate.html', modelNY)
+    const end1 = new Date().getTime()
+    const time1 = end1 - start1
+    console.log('    → Non-cached time to parse (NY): ', time1)
+
+    const start3 = new Date().getTime()
+    teddy.render('misc/cacheWholeTemplate.html', modelNY)
+    const end3 = new Date().getTime()
+    const time3 = end3 - start3
+    console.log('    → Cached time to parse (NY):     ', time3)
+
+    const start2 = new Date().getTime()
+    teddy.render('misc/cacheWholeTemplate.html', modelSF)
+    const end2 = new Date().getTime()
+    const time2 = end2 - start2
+    console.log('    → Non-cached time to parse (SF): ', time2)
+    teddy.clearCache({
+      template: 'misc/cacheWholeTemplate.html',
+      key: 'city'
+    })
+
+    const start4 = new Date().getTime()
+    teddy.render('misc/cacheWholeTemplate.html', modelSF)
+    const end4 = new Date().getTime()
+    const time4 = end4 - start4
+    console.log('    → Non-cached time to parse after clearing cache (SF): ', time4)
+    const fasterSlower = time3 < 100 && time4 > 100
+    assert.isTrue(fasterSlower)
+  })
+
+  it('should render template, then render cached template, then render the template again when the cache expires via keyed values with nesting (misc/cacheWholeTemplate.html)', async function () {
+    const modelNY = Object.assign({ city: { acronym: 'NY' } }, model)
+    const modelSF = Object.assign({ city: { acronym: 'SF' } }, model)
+    teddy.setCache({
+      template: 'misc/cacheWholeTemplate.html',
+      key: 'city.acronym',
+      maxAge: 1000
+    })
+    const start1 = new Date().getTime()
+    teddy.render('misc/cacheWholeTemplate.html', modelNY)
+    const end1 = new Date().getTime()
+    const time1 = end1 - start1
+    console.log('    → Non-cached time to parse (NY): ', time1)
+
+    const start3 = new Date().getTime()
+    teddy.render('misc/cacheWholeTemplate.html', modelNY)
+    const end3 = new Date().getTime()
+    const time3 = end3 - start3
+    console.log('    → Cached time to parse (NY):     ', time3)
+
+    const start2 = new Date().getTime()
+    teddy.render('misc/cacheWholeTemplate.html', modelSF)
+    const end2 = new Date().getTime()
+    const time2 = end2 - start2
+    console.log('    → Non-cached time to parse (SF): ', time2)
+
+    await timeout(1100)
+    const start4 = new Date().getTime()
+    teddy.render('misc/cacheWholeTemplate.html', modelSF)
+    const end4 = new Date().getTime()
+    const time4 = end4 - start4
+    console.log('    → Non-cached time to parse after clearing cache (SF): ', time4)
+    const fasterSlower = time3 < 100 && time4 > 100
+    assert.isTrue(fasterSlower)
+  })
+
+  it('should render template, then render cached template, then render the template again when the cache expires via keyed values with nesting when the cache is explicitly cleared (misc/cacheWholeTemplate.html)', async function () {
+    const modelNY = Object.assign({ city: { acronym: 'NY' } }, model)
+    const modelSF = Object.assign({ city: { acronym: 'SF' } }, model)
+    teddy.setCache({
+      template: 'misc/cacheWholeTemplate.html',
+      key: 'city.acronym',
+      maxAge: 1000
+    })
+    const start1 = new Date().getTime()
+    teddy.render('misc/cacheWholeTemplate.html', modelNY)
+    const end1 = new Date().getTime()
+    const time1 = end1 - start1
+    console.log('    → Non-cached time to parse (NY): ', time1)
+
+    const start3 = new Date().getTime()
+    teddy.render('misc/cacheWholeTemplate.html', modelNY)
+    const end3 = new Date().getTime()
+    const time3 = end3 - start3
+    console.log('    → Cached time to parse (NY):     ', time3)
+
+    const start2 = new Date().getTime()
+    teddy.render('misc/cacheWholeTemplate.html', modelSF)
+    const end2 = new Date().getTime()
+    const time2 = end2 - start2
+    console.log('    → Non-cached time to parse (SF): ', time2)
+    teddy.clearCache({
+      template: 'misc/cacheWholeTemplate.html',
+      key: 'city.acronym'
+    })
+
+    const start4 = new Date().getTime()
+    teddy.render('misc/cacheWholeTemplate.html', modelSF)
+    const end4 = new Date().getTime()
+    const time4 = end4 - start4
+    console.log('    → Non-cached time to parse after clearing cache (SF): ', time4)
+    const fasterSlower = time3 < 100 && time4 > 100
+    assert.isTrue(fasterSlower)
+  })
+
+  it('should drop caches which have expired due to maximum being reached (misc/cacheWholeTemplate.html)', async function () {
+    const modelNY = Object.assign({ city: { acronym: 'NY' } }, model)
+    const modelSF = Object.assign({ city: { acronym: 'SF' } }, model)
+    const modelLA = Object.assign({ city: { acronym: 'LA' } }, model)
+    let present
+    teddy.setCache({
+      template: 'misc/cacheWholeTemplate.html',
+      key: 'city.acronym',
+      maxAge: 1000,
+      maxCaches: 2
+    })
+    const start1 = new Date().getTime()
+    teddy.render('misc/cacheWholeTemplate.html', modelNY)
+    const end1 = new Date().getTime()
+    const time1 = end1 - start1
+    console.log('    → Non-cached time to parse (NY): ', time1)
+    present = typeof teddy.templateCaches['misc/cacheWholeTemplate.html']['city.acronym'].entries.NY === 'object'
+    assert.isTrue(present)
+    await timeout(100)
+
+    const start2 = new Date().getTime()
+    teddy.render('misc/cacheWholeTemplate.html', modelSF)
+    const end2 = new Date().getTime()
+    const time2 = end2 - start2
+    console.log('    → Non-cached time to parse (SF): ', time2)
+    present = typeof teddy.templateCaches['misc/cacheWholeTemplate.html']['city.acronym'].entries.SF === 'object'
+    assert.isTrue(present)
+    await timeout(100)
+
+    const start3 = new Date().getTime()
+    teddy.render('misc/cacheWholeTemplate.html', modelLA)
+    const end3 = new Date().getTime()
+    const time3 = end3 - start3
+    console.log('    → Non-cached time to parse (LA): ', time3)
+    present = typeof teddy.templateCaches['misc/cacheWholeTemplate.html']['city.acronym'].entries.LA === 'object'
+    assert.isTrue(present)
+
+    present = typeof teddy.templateCaches['misc/cacheWholeTemplate.html']['city.acronym'].entries.NY !== 'object'
+    assert.isTrue(present)
   })
 
   it('should avoid rendering templates that are not strings', function () {
