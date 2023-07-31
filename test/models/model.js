@@ -108,6 +108,13 @@ function makeModel () {
         other_prop: 'other_prop_two'
       }
     },
+    topArr: [
+      {
+        subSubObj: {
+          subArr: []
+        }
+      }
+    ],
     nestedObj: {
       'Thing With Name 1': {
         'Subthing With Name 1': [

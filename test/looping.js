@@ -93,6 +93,10 @@ describe('Looping', function () {
     assert.equalIgnoreSpaces(teddy.render('looping/nestedObjects.html', model), '<p>Thing With Name 1</p><p>Thing With Name 1: Subthing With Name 1</p><p>Thing With Name 1: Subthing With Name 2</p><p>Thing With Name 1: Subthing With Name 3</p><p>Thing With Name 2</p><p>Thing With Name 2: Subthing With Name 4</p><p>Thing With Name 2: Subthing With Name 5</p><p>Thing With Name 2: Subthing With Name 6</p><p>Thing With Name 3</p><p>Thing With Name 3: Subthing With Name 7</p><p>Thing With Name 3: Subthing With Name 8</p><p>Thing With Name 3: Subthing With Name 9</p>')
   })
 
+  it('should loop through a quad-nested structure correctly (looping/quadNested.html)', function () {
+    assert.equalIgnoreSpaces(teddy.render('looping/quadNested.html', model), '')
+  })
+
   it('should loop through an array of 5000 elements caching the first pass with a <cache> element so the second pass is faster (looping/largeDataSet.html)', function () {
     const start = new Date().getTime()
     teddy.render('looping/largeDataSet.html', model)

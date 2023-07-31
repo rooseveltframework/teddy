@@ -842,6 +842,9 @@ function cleanupStrayTeddyTags (dom) {
 
 // gets or sets an object by dot notation, e.g. thing.nestedThing.furtherNestedThing: two arguments gets, three arguments sets
 function getOrSetObjectByDotNotation (obj, dotNotation, value) {
+  if (!obj) {
+    return false
+  }
   if (!dotNotation || typeof dotNotation === 'boolean' || typeof dotNotation === 'number') {
     return dotNotation
   }
