@@ -4,6 +4,11 @@
 
 - Put your changes here...
 
+## 0.6.4
+
+- Fixed crash that could occur in an unusual edge case.
+- Various dependencies bumped.
+
 ## 0.6.3
 
 - Restored template-level caching feature with an improved API.
