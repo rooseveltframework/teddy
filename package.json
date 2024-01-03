@@ -11,7 +11,7 @@
   "version": "0.6.5",
   "files": [
     "dist/teddy.js",
-    "dist/cheerio.client.js"
+    "dist/teddy.min.js"
   ],
   "homepage": "https://github.com/rooseveltframework/teddy",
   "license": "CC-BY-4.0",
