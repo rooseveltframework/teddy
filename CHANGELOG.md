@@ -4,6 +4,15 @@
 
 - Put your changes here...
 
+## 0.6.5
+
+- Fixed scenario where one-line if with only a false condition could crash if it's fed by arguments from an include element.
+- Fixed crash associated with embedding JSON strings in script tags.
+- Fixed bug causing "{}" to be inappropriately stripped from templates.
+- Reduced unminified bundle size from 2.4mb to 1.5mb and added a minified bundle that reduces it further to 449kb.
+- Improved logging and refactored the code a bit.
+- Updated various dependencies.
+
 ## 0.6.4
 
 - Fixed crash that could occur in an unusual edge case.

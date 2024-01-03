@@ -118,4 +118,9 @@ describe('Includes', function () {
   it('should populate <include> <arg> in the child template (includes/includeArgCheckedByOneLineIfWrapper.html)', function () {
     assert.equalIgnoreSpaces(teddy.render('includes/includeArgCheckedByOneLineIfWrapper', model), '<p class="populated">Is it populated? populated</p>')
   })
+
+  // https://github.com/rooseveltframework/teddy/issues/626
+  it('should <include> a template with a one-line if statement that renders correctly (includes/includeOneLineOnlyFalse.html)', function () {
+    assert.equalIgnoreSpaces(teddy.render('includes/includeOneLineOnlyFalse', model), '<p></p>')
+  })
 })

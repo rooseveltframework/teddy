@@ -601,6 +601,15 @@ describe('Misc', function () {
     assert.equalIgnoreSpaces(teddy.render('misc/serverSideCommentsWithTeddyCode.html', model), '<div><p>test</p><p>test</p><p>test</p><p>test</p><p>test</p><p>test</p></div>')
   })
 
+  // https://github.com/rooseveltframework/teddy/issues/623
+  it('should parse embedded script tag correctly (misc/scriptWithEmptyObject.html)', function () {
+    assert.equalIgnoreSpaces(teddy.render('misc/scriptWithEmptyObject.html', model), '<script>const something = {}</script>')
+  })
+
+  it('should parse a script tag with a JSON string correctly (misc/scriptWithJson.html)', function () {
+    assert.equalIgnoreSpaces(teddy.render('misc/scriptWithJson.html', model), '<script>const thing = {"jhgfd":"{\\"id\\":1,\\"lkjhgfd\\":\\"sadfghj\\"}","lkjhgfds":"[]","asdfghj":"[{\\"kjhgfds\\":\\"asdfghj\\",\\"lkjhgfds\\":\\"asdfghjkl\\",\\"lkjhgfdsa\\":\\"asdfghjk\\",\\",ivtrew\\":\\"wesdfghj/l;kjhgrfds/ewrtyu\\",\\"hgbfvdsq\\":{\\"wertyukil\\":true},\\".,kjmhgfds\\":\\"/qwertyuikl/kjhgfds/k,jhgrefdsaz.css\\",\\"sdfhgjkl\\":\\"/,kjmhngefdsz/esrtyu/sdxfcgbhunjm-BorGorph.hfjsdknl\\"}]"}</script>')
+  })
+
   if (typeof process === 'object') {
     ['chromium', 'firefox'].forEach(function (browserType) {
       describe(`playground.html - ${browserType}`, function () {

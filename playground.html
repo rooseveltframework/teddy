@@ -45,37 +45,35 @@
     <!-- <script src='dist/teddy.js'></script> -->
 
     <script>
-    (function() {
-      var i = document.createElement('iframe');
-      i.id = 'renderedframe';
-      document.getElementById('rendered').appendChild(i);
+    (function () {
+      const i = document.createElement('iframe')
+      i.id = 'renderedframe'
+      document.getElementById('rendered').appendChild(i)
 
-      document.getElementById('render').onclick = function() {
-        var json, rendered, idoc;
-
-        try {
-          json = JSON.parse(document.getElementById('json').value);
-        }
-        catch (e) {
-          console.log(e);
-          alert('Teddy could not parse your JSON! Check console log for the error.');
-        }
+      document.getElementById('render').onclick = function () {
+        let json, rendered
 
         try {
-          teddy.setTemplate('playground.html', document.getElementById('src').value)
-          rendered = teddy.render('playground.html', json);
-        }
-        catch (e) {
-          console.log(e);
-          alert('Teddy could not compile the template! Check console log for the error.');
+          json = JSON.parse(document.getElementById('json').value)
+        } catch (e) {
+          console.log(e)
+          window.alert('Teddy could not parse your JSON! Check console log for the error.')
         }
 
-        idoc = document.getElementById('renderedframe').contentWindow.document;
-        idoc.open();
-        idoc.write(rendered);
-        idoc.close();
-      };
-    })();
+        try {
+          teddy.setTemplate('playground.html', document.getElementById('src').value) // eslint-disable-line
+          rendered = teddy.render('playground.html', json) // eslint-disable-line
+        } catch (e) {
+          console.log(e)
+          window.alert('Teddy could not compile the template! Check console log for the error.')
+        }
+
+        const idoc = document.getElementById('renderedframe').contentWindow.document
+        idoc.open()
+        idoc.write(rendered)
+        idoc.close()
+      }
+    })()
     </script>
   </body>
 </html>
