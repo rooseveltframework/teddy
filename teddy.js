@@ -1,24 +1,21 @@
-let cheerio // dom parser
+// #region globals
+
+import * as fs from 'fs' // node filesystem module
+import * as path from 'path' // node path module
+import * as cheerio from 'cheerio' // dom parser
+import * as XRegExp from 'xregexp/lib' // needed for matchRecursive
+import * as matchRecursiveModule from 'xregexp/lib/addons/matchrecursive' // include matchRecursive addon
+matchRecursiveModule(XRegExp) // load matchRecursive addon into XRegExp
 const cheerioOptions = { xml: { xmlMode: false, lowerCaseAttributeNames: false, decodeEntities: false } }
-let fs // node filesystem module
-let path // node path module
-if (typeof require !== 'undefined' && typeof window === 'undefined') {
-  // load node.js modules
-  cheerio = require('cheerio')
-  fs = require('fs')
-  path = require('path')
-} else {
-  // load frontend version of cheerio
-  cheerio = require('./dist/cheerio.client')
-}
-const XRegExp = require('xregexp') // needed for matchRecursive
 const params = {} // teddy parameters
 setDefaultParams() // set params to the defaults
 const templates = {} // loaded templates are stored as object collections, e.g. { "myTemplate.html": "<p>some markup</p>"}
 const caches = {} // a place to store cached portions of templates
 const templateCaches = {} // a place to store cached full templates
 
-// private methods
+// #endregion
+
+// #region private methods
 
 // escapes sensitive characters to prevent xss
 const escapeHtmlEntities = {
@@ -37,21 +34,15 @@ function escapeEntities (value) {
   let j
 
   if (typeof value === 'object') { // cannot escape on this value
-    if (!value) {
-      return false // it is falsey to return false
-    } else if (Array.isArray(value)) {
-      if (value.length === 0) {
-        return false // empty arrays are falsey
-      } else {
-        return '[Array]' // print that it is an array with content in it, but do not print the contents
-      }
+    if (!value) return false // it is falsey to return false
+    else if (Array.isArray(value)) {
+      if (value.length === 0) return false // empty arrays are falsey
+      else return '[Array]' // print that it is an array with content in it, but do not print the contents
     }
     return '[Object]' // just print that it is an object, do not print the contents
-  } else if (value === undefined) { // cannot escape on this value
-    return false // undefined is falsey
-  } else if (typeof value === 'boolean' || typeof value === 'number') { // cannot escape on these values
-    return value // if it's already a boolean or a number just return it
-  } else {
+  } else if (value === undefined) return false // cannot escape on this value; undefined is falsey
+  else if (typeof value === 'boolean' || typeof value === 'number') return value // cannot escape on these values; if it's already a boolean or a number just return it
+  else {
     // loop through value to find html entities
     for (i = 0; i < value.length; i++) {
       escapedEntity = false
@@ -65,9 +56,7 @@ function escapeEntities (value) {
         }
       }
 
-      if (!escapedEntity) {
-        newValue += value[i]
-      }
+      if (!escapedEntity) newValue += value[i]
     }
   }
 
@@ -78,9 +67,7 @@ function escapeEntities (value) {
 function loadTemplate (template) {
   // ensure template is a string
   if (typeof template !== 'string') {
-    if (params.verbosity > 1) {
-      console.warn('teddy.loadTemplate attempted to load a template which is not a string.')
-    }
+    if (params.verbosity > 1) console.warn('teddy.loadTemplate attempted to load a template which is not a string.')
     return ''
   }
   const name = template
@@ -89,9 +76,7 @@ function loadTemplate (template) {
     // template is not found, it is not code, and we're in the node.js context
     register = true
     // append extension if not present
-    if (template.slice(-5) !== '.html') {
-      template += '.html'
-    }
+    if (template.slice(-5) !== '.html') template += '.html'
     try {
       template = fs.readFileSync(template, 'utf8')
     } catch (e) {
@@ -144,9 +129,7 @@ function removeTeddyComments (renderedTemplate) {
       return renderedTemplate // it will match {! comments {! with comments in them !} !} but if there are unbalanced brackets, just return the original text
     }
     const varsLength = vars.length
-    for (let i = 0; i < varsLength; i++) {
-      renderedTemplate = renderedTemplate.replace(`{!${vars[i]}!}`, '')
-    }
+    for (let i = 0; i < varsLength; i++) renderedTemplate = renderedTemplate.replace(`{!${vars[i]}!}`, '')
   } while (oldTemplate !== renderedTemplate)
   return renderedTemplate
 }
@@ -160,13 +143,9 @@ function replaceCacheElements (dom, model) {
     if (tags.length > 0) {
       for (const el of tags) {
         const name = el.attribs.name
-        if (name.includes('{')) {
-          continue
-        }
+        if (name.includes('{')) continue
         const key = el.attribs.key || 'none'
-        if (key.includes('{')) {
-          continue
-        }
+        if (key.includes('{')) continue
         const cache = caches[name]
         if (cache && cache.entries) {
           const keyVal = el.attribs.key ? getOrSetObjectByDotNotation(model, key) : 'none'
@@ -183,12 +162,8 @@ function replaceCacheElements (dom, model) {
               delete caches[name].entries[keyVal]
               dom(el).attr('defer', 'true') // create a new cache
             }
-          } else {
-            dom(el).attr('defer', 'true') // no cache exists for this yet; create after the template renders
-          }
-        } else {
-          dom(el).attr('defer', 'true') // no cache exists for this yet; create after the template renders
-        }
+          } else dom(el).attr('defer', 'true') // no cache exists for this yet; create after the template renders
+        } else dom(el).attr('defer', 'true') // no cache exists for this yet; create after the template renders
         parsedTags++
       }
     }
@@ -219,17 +194,12 @@ function parseIncludes (dom, model, dynamic) {
   let passes = 0
   do {
     passes++
-    if (passes > params.maxPasses) {
-      throw new Error(`teddy could not finish rendering the template because the max number of passes over the template (${params.maxPasses}) was exceeded; there may be an infinite loop in your template logic`)
-    }
+    if (passes > params.maxPasses) throw new Error(`teddy could not finish rendering the template because the max number of passes over the template (${params.maxPasses}) was exceeded; there may be an infinite loop in your template logic.`)
     parsedTags = 0
     let tags
     // dynamic includes are includes like <include src="{sourcedFromVariable}"></include>
-    if (dynamic) {
-      tags = dom('include') // parse all includes
-    } else {
-      tags = dom('include:not([teddy_deferred_dynamic_include])') // parse only includes that aren't dynamic
-    }
+    if (dynamic) tags = dom('include') // parse all includes
+    else tags = dom('include:not([teddy_deferred_dynamic_include])') // parse only includes that aren't dynamic
     if (tags.length > 0) {
       for (const el of tags) {
         // ensure this isn't the child of a no parse block
@@ -238,29 +208,19 @@ function parseIncludes (dom, model, dynamic) {
         let parent = el.parent
         while (!foundBody) {
           let parentName
-          if (!parent) {
-            parentName = 'body'
-          } else {
-            parentName = parent.name
-          }
+          if (!parent) parentName = 'body'
+          else parentName = parent.name
           if (parentName === 'noparse' || parentName === 'noteddy') {
             next = true
             break
-          } else if (parentName === 'body') {
-            foundBody = true
-          } else {
-            parent = parent.parent
-          }
+          } else if (parentName === 'body') foundBody = true
+          else parent = parent.parent
         }
-        if (next) {
-          continue
-        }
+        if (next) continue
         // get attributes
         const src = el.attribs.src
         if (!src) {
-          if (params.verbosity > 1) {
-            console.warn('teddy encountered an include tag with no src attribute.')
-          }
+          if (params.verbosity > 1) console.warn('teddy encountered an include tag with no src attribute.')
           continue
         }
         if (src.includes('{')) {
@@ -303,38 +263,25 @@ function parseConditionals (dom, model) {
         let parent = el.parent
         while (!foundBody) {
           let parentName
-          if (!parent) {
-            parentName = 'body'
-          } else {
-            parentName = parent.name
-          }
+          if (!parent) parentName = 'body'
+          else parentName = parent.name
           if (parentName === 'loop' || parentName === 'noparse' || parentName === 'noteddy') {
             next = true
             break
-          } else if (parentName === 'body') {
-            foundBody = true
-          } else {
-            parent = parent.parent
-          }
+          } else if (parentName === 'body') foundBody = true
+          else parent = parent.parent
         }
-        if (next) {
-          continue
-        }
+        if (next) continue
         // get conditions
         let args = []
         for (const attr in el.attribs) {
           const val = el.attribs[attr]
-          if (val) {
-            args.push(`${attr}=${val}`)
-          } else {
-            args.push(attr)
-          }
+          if (val) args.push(`${attr}=${val}`)
+          else args.push(attr)
         }
         // check if it's an if tag and not an unless tag
         let isIf = true
-        if (el.name === 'unless') {
-          isIf = false
-        }
+        if (el.name === 'unless') isIf = false
         // evaluate conditional
         const condResult = evaluateConditional(args, model)
         if ((isIf && condResult) || ((!isIf && !condResult))) {
@@ -370,11 +317,8 @@ function parseConditionals (dom, model) {
                 args = []
                 for (const attr in nextSibling.attribs) {
                   const val = nextSibling.attribs[attr]
-                  if (val) {
-                    args.push(`${attr}=${val}`)
-                  } else {
-                    args.push(attr)
-                  }
+                  if (val) args.push(`${attr}=${val}`)
+                  else args.push(attr)
                 }
                 if (evaluateConditional(args, model)) {
                   // render the true block and discard the elseif, elseunless, and else blocks
@@ -413,11 +357,8 @@ function parseConditionals (dom, model) {
                 args = []
                 for (const attr in nextSibling.attribs) {
                   const val = nextSibling.attribs[attr]
-                  if (val) {
-                    args.push(`${attr}=${val}`)
-                  } else {
-                    args.push(attr)
-                  }
+                  if (val) args.push(`${attr}=${val}`)
+                  else args.push(attr)
                 }
                 if (!evaluateConditional(args, model)) {
                   // render the true block and discard the elseif, elseunless, and else blocks
@@ -481,20 +422,14 @@ function evaluateConditional (conditions, model) {
   // loop through conditions and reduce them to booleans
   for (let i = 0; i < conditionsLength; i++) {
     const condition = conditions[i]
-    if (typeof condition === 'boolean') {
-      continue // if the condition is already a boolean then we don't need to reduce it to a boolean to evaluate it
-    }
+    if (typeof condition === 'boolean') continue // if the condition is already a boolean then we don't need to reduce it to a boolean to evaluate it
     // reject conditions with invalid formatting
     if (condition.startsWith('=') || condition.endsWith('=')) {
-      if (params.verbosity > 1) {
-        console.warn('teddy encountered a conditional statement with "=" at the beginning or end of a condition.')
-      }
+      if (params.verbosity > 1) console.warn('teddy encountered a conditional statement with "=" at the beginning or end of a condition.')
       return false
     }
     if (condition.includes(':') && !condition.startsWith('not:')) {
-      if (params.verbosity > 1) {
-        console.warn('teddy encountered a conditional statement with a "not:" that isn\'t at the beginning of a condition.')
-      }
+      if (params.verbosity > 1) console.warn('teddy encountered a conditional statement with a "not:" that isn\'t at the beginning of a condition.')
       return false
     }
     // deal with boolean logic
@@ -532,9 +467,7 @@ function evaluateConditional (conditions, model) {
         conditions[i] = true
         conditions[i + 1] = true
       }
-    } else {
-      conditions[i] = evaluateCondition(condition, model)
-    }
+    } else conditions[i] = evaluateCondition(condition, model)
   }
   return conditions.every(item => item === true) || false // if any of the booleans are false, then return false. otherwise return true
 }
@@ -544,34 +477,23 @@ function evaluateCondition (condition, model) {
   let not // stores whether the :not modifier is present
   if (typeof condition === 'string' && condition.includes('=')) { // it's an equality check condition
     not = !!condition.startsWith('not:') // true if "not:" is present
-    if (not) {
-      condition = condition.slice(4) // remove the :not prefix
-    }
+    if (not) condition = condition.slice(4) // remove the :not prefix
     const parts = condition.split('=') // something="Some content"
     const cond = parts[0] // something
     delete parts[0] // remove the something=
     const val = parts.join('') // "Some content" — the path.join method ensures the string gets rebuilt even if it contains another = character
     const lookup = getOrSetObjectByDotNotation(model, cond)
-    if (lookup == val) { // eslint-disable-line
-      // the == is necessary because teddy does type-insensitive equality checks
-      return !not // true
-    } else {
-      return not // false
-    }
+    // the == is necessary because teddy does type-insensitive equality checks
+    if (lookup == val) return !not // eslint-disable-line
+    else return not // false
   } else { // it's a presence check
     not = typeof condition === 'string' ? !!condition.startsWith('not:') : false // true if "not:" is present
-    if (not) {
-      condition = condition.slice(4) // remove the :not prefix
-    }
+    if (not) condition = condition.slice(4) // remove the :not prefix
     const lookup = getOrSetObjectByDotNotation(model, condition)
     if (lookup) {
-      if (typeof lookup === 'object' && Object.keys(lookup).length === 0) {
-        return not // false; empty object or array
-      }
+      if (typeof lookup === 'object' && Object.keys(lookup).length === 0) return not // false; empty object or array
       return !not // true; var is present
-    } else {
-      return not // false; var is not present
-    }
+    } else return not // false; var is not present
   }
 }
 
@@ -602,23 +524,15 @@ function parseOneLineConditionals (dom, model) {
         let parent = el.parent
         while (!foundBody) {
           let parentName
-          if (!parent) {
-            parentName = 'body'
-          } else {
-            parentName = parent.name
-          }
+          if (!parent) parentName = 'body'
+          else parentName = parent.name
           if (parentName === 'loop' || parentName === 'noparse' || parentName === 'noteddy') {
             next = true
             break
-          } else if (parentName === 'body') {
-            foundBody = true
-          } else {
-            parent = parent.parent
-          }
+          } else if (parentName === 'body') foundBody = true
+          else parent = parent.parent
         }
-        if (next) {
-          continue
-        }
+        if (next) continue
         // get conditions
         let cond
         let ifTrue
@@ -627,11 +541,8 @@ function parseOneLineConditionals (dom, model) {
           const val = el.attribs[attr]
           if (attr.startsWith('if-')) {
             const parts = attr.split('if-')
-            if (val) {
-              cond = [`${[parts[1]]}=${val}`] // if-something="Some content"
-            } else {
-              cond = [`${[parts[1]]}`] // if-something
-            }
+            if (val) cond = [`${[parts[1]]}=${val}`] // if-something="Some content"
+            else cond = [`${[parts[1]]}`] // if-something
             dom(el).removeAttr(attr)
           } else if (attr === 'true') {
             ifTrue = val.replaceAll('&quot;', '"') // true="class='blah'"
@@ -643,12 +554,16 @@ function parseOneLineConditionals (dom, model) {
         }
         // evaluate conditional
         if (evaluateConditional(cond, model)) {
-          const parts = ifTrue.split('=')
-          dom(el).attr(parts[0], parts[1] ? parts[1].replace(/["']/g, '') : '')
+          if (ifTrue) {
+            const parts = ifTrue.split('=')
+            dom(el).attr(parts[0], parts[1] ? parts[1].replace(/["']/g, '') : '')
+          }
           parsedTags++
         } else if (ifFalse) {
-          const parts = ifFalse.split('=')
-          dom(el).attr(parts[0], parts[1] ? parts[1].replace(/["']/g, '') : '')
+          if (ifFalse) {
+            const parts = ifFalse.split('=')
+            dom(el).attr(parts[0], parts[1] ? parts[1].replace(/["']/g, '') : '')
+          }
           parsedTags++
         }
       }
@@ -670,26 +585,18 @@ function parseLoops (dom, model) {
         let keyName
         let valName
         for (const attr in el.attribs) {
-          if (attr === 'through') {
-            loopThrough = getOrSetObjectByDotNotation(model, el.attribs[attr])
-          } else if (attr === 'key') {
-            keyName = el.attribs[attr]
-          } else if (attr === 'val') {
-            valName = el.attribs[attr]
-          }
+          if (attr === 'through') loopThrough = getOrSetObjectByDotNotation(model, el.attribs[attr])
+          else if (attr === 'key') keyName = el.attribs[attr]
+          else if (attr === 'val') valName = el.attribs[attr]
         }
         // reject the loop if it has invalid attributes
         if (!loopThrough) {
-          if (params.verbosity > 1) {
-            console.warn('teddy encountered a loop without a through attribute.')
-          }
+          if (params.verbosity > 1) console.warn('teddy encountered a loop without a through attribute.')
           dom(el).replaceWith('')
           continue
         }
         if (!keyName && !valName) {
-          if (params.verbosity > 1) {
-            console.warn('teddy encountered a loop without a key or a val attribute.')
-          }
+          if (params.verbosity > 1) console.warn('teddy encountered a loop without a key or a val attribute.')
           dom(el).replaceWith('')
           continue
         }
@@ -728,11 +635,16 @@ function parseVars (templateString, model) {
   const varsLength = vars.length
   for (let i = 0; i < varsLength; i++) {
     let match = vars[i]
+    if (match === '') continue // empty {}
     if (match.includes('{')) {
       // there's a variable inside the variable name
       const originalMatch = match
       match = parseVars(match, model)
-      templateString = templateString.replace(new RegExp(`{${originalMatch}}`, 'i'), `{${match}}`)
+      try {
+        templateString = templateString.replace(new RegExp(`{${originalMatch}}`, 'i'), `{${match}}`)
+      } catch (e) {
+        if (params.verbosity > 2) console.warn(`teddy.parseVars encountered a {variable} that could not be parsed: {${originalMatch}}`)
+      }
     }
     const lastFourChars = match.slice(-4)
     if (lastFourChars.includes('|p')) {
@@ -743,7 +655,11 @@ function parseVars (templateString, model) {
       if (parsed) {
         const id = model._noTeddyBlocks.push(parsed) - 1
         try {
-          templateString = templateString.replace(new RegExp(`{${originalMatch}}`.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&').replace(/-/g, '\\x2d'), 'i'), `<noteddy id="${id}"></noteddy>`)
+          try {
+            templateString = templateString.replace(new RegExp(`{${originalMatch}}`.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&').replace(/-/g, '\\x2d'), 'i'), `<noteddy id="${id}"></noteddy>`)
+          } catch (e) {
+            if (params.verbosity > 2) console.warn(`teddy.parseVars encountered a {variable} that could not be parsed: {${originalMatch}}`)
+          }
         } catch (e) {
           return templateString
         }
@@ -761,13 +677,9 @@ function parseVars (templateString, model) {
     } else {
       // no flags are set
       let parsed = getOrSetObjectByDotNotation(model, match)
-      if (parsed || parsed === '') {
-        parsed = escapeEntities(parsed)
-      } else if (parsed === 0) {
-        parsed = '0'
-      } else {
-        parsed = `{${match}}`
-      }
+      if (parsed || parsed === '') parsed = escapeEntities(parsed)
+      else if (parsed === 0) parsed = '0'
+      else parsed = `{${match}}`
       try {
         templateString = templateString.replace(new RegExp(`{${match}}`.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&').replace(/-/g, '\\x2d'), 'i'), parsed)
       } catch (e) {
@@ -842,30 +754,22 @@ function cleanupStrayTeddyTags (dom) {
 
 // gets or sets an object by dot notation, e.g. thing.nestedThing.furtherNestedThing: two arguments gets, three arguments sets
 function getOrSetObjectByDotNotation (obj, dotNotation, value) {
-  if (!obj) {
-    return false
-  }
-  if (!dotNotation || typeof dotNotation === 'boolean' || typeof dotNotation === 'number') {
-    return dotNotation
-  }
-  if (typeof dotNotation === 'string') {
-    return getOrSetObjectByDotNotation(obj, dotNotation.split('.'), value)
-  } else if (dotNotation.length === 1 && value !== undefined) {
+  if (!obj) return false
+  if (!dotNotation || typeof dotNotation === 'boolean' || typeof dotNotation === 'number') return dotNotation
+  if (typeof dotNotation === 'string') return getOrSetObjectByDotNotation(obj, dotNotation.split('.'), value)
+  else if (dotNotation.length === 1 && value !== undefined) {
     obj[dotNotation[0]] = value
     return obj[dotNotation[0]]
-  } else if (dotNotation.length === 0) {
-    return obj
-  } else if (dotNotation.length === 1) {
-    if (obj) {
-      return obj[dotNotation[0]]
-    }
+  } else if (dotNotation.length === 0) return obj
+  else if (dotNotation.length === 1) {
+    if (obj) return obj[dotNotation[0]]
     return false
-  } else {
-    return getOrSetObjectByDotNotation(obj[dotNotation[0]], dotNotation.slice(1), value)
-  }
+  } else return getOrSetObjectByDotNotation(obj[dotNotation[0]], dotNotation.slice(1), value)
 }
 
-// public methods
+// #endregion
+
+// #region public methods
 
 // set params to the defaults
 function setDefaultParams () {
@@ -923,9 +827,7 @@ function setTemplate (file, template) {
 }
 
 function setCache (params) {
-  if (!templateCaches[params.template]) {
-    templateCaches[params.template] = {}
-  }
+  if (!templateCaches[params.template]) templateCaches[params.template] = {}
   if (params.key) {
     templateCaches[params.template][params.key] = {
       maxAge: params.maxAge,
@@ -947,31 +849,27 @@ function setCache (params) {
 // 1 object argument assumes we're clearing whole template level cache
 function clearCache (name, keyVal) {
   if (typeof name === 'string') {
-    if (keyVal) {
-      delete caches[name].entries[keyVal]
-    } else {
-      delete caches[name]
-    }
+    if (keyVal) delete caches[name].entries[keyVal]
+    else delete caches[name]
   } else if (typeof name === 'object') {
     const params = name
-    if (params.key) {
-      delete templateCaches[params.template][params.key]
-    } else {
-      delete templateCaches[params.template]
-    }
-  } else {
-    console.error('teddy: invalid params passed to clearCache')
-  }
+    if (params.key) delete templateCaches[params.template][params.key]
+    else delete templateCaches[params.template]
+  } else if (params.verbosity > 0) console.error('teddy: invalid params passed to clearCache.')
 }
 
 // parses a template
 function render (template, model, callback) {
   // ensure template is a string
   if (typeof template !== 'string') {
-    if (params.verbosity > 1) {
-      console.warn('teddy.render attempted to render a template which is not a string.')
-    }
+    if (params.verbosity > 1) console.warn('teddy.render attempted to render a template which is not a string.')
     return ''
+  }
+
+  // ensure model is an object
+  if (typeof model !== 'object') {
+    if (params.verbosity > 1) console.warn('teddy.render was passed an invalid model.')
+    model = {} // allow the template to render if an invalid model is supplied, but it will have an empty model
   }
 
   // declare vars
@@ -980,14 +878,10 @@ function render (template, model, callback) {
   model._noTeddyBlocks = [] // will store code blocks exempt from teddy parsing
 
   // express.js support
-  if (model.settings && model.settings.views && path) {
-    params.templateRoot = path.resolve(model.settings.views)
-  }
+  if (model.settings && model.settings.views && path) params.templateRoot = path.resolve(model.settings.views)
 
   // remove templateRoot from template name if necessary
-  if (template.slice(params.templateRoot.length) === params.templateRoot) {
-    template = template.replace(params.templateRoot, '')
-  }
+  if (template.slice(params.templateRoot.length) === params.templateRoot) template = template.replace(params.templateRoot, '')
 
   // whole template caching
   const templateCache = templateCaches[template]
@@ -997,18 +891,10 @@ function render (template, model, callback) {
     const singletonCache = templateCache.none
     if (singletonCache) {
       // check if the timestamp exceeds max age
-      if (!singletonCache.created) {
-        cacheKey = 'none'
-      } else if (!singletonCache.maxAge) {
-        // if no max age is set, then this cache doesn't expire
-        return singletonCache.markup
-      } else if (singletonCache.created + singletonCache.maxAge < Date.now()) {
-        // if yes re-render the template and cache it again
-        cacheKey = 'none'
-      } else {
-        // if no return the cached markup and skip the template render
-        return singletonCache.markup
-      }
+      if (!singletonCache.created) cacheKey = 'none'
+      else if (!singletonCache.maxAge) return singletonCache.markup // if no max age is set, then this cache doesn't expire
+      else if (singletonCache.created + singletonCache.maxAge < Date.now()) cacheKey = 'none' // if yes re-render the template and cache it again
+      else return singletonCache.markup // if no return the cached markup and skip the template render
     } else {
       // loop through its keys
       for (const key in templateCache) {
@@ -1052,10 +938,7 @@ function render (template, model, callback) {
   do {
     passes++
     if (passes > params.maxPasses) {
-      const err = `teddy could not finish rendering the template because the max number of passes over the template (${params.maxPasses}) was exceeded; there may be an infinite loop in your template logic`
-      if (params.verbosity > 1) {
-        console.error(err)
-      }
+      if (params.verbosity > 0) console.error(`teddy could not finish rendering the template because the max number of passes over the template (${params.maxPasses}) was exceeded; there may be an infinite loop in your template logic.`)
       break
     }
     const hasCache = renderedTemplate.includes('</cache>')
@@ -1070,9 +953,7 @@ function render (template, model, callback) {
     oldTemplate = renderedTemplate || ''
     if (passes > 1) {
       dom = cheerio.load(renderedTemplate || '', cheerioOptions)
-      if (parseDynamicIncludes) {
-        dom = parseIncludes(dom, model, true)
-      }
+      if (parseDynamicIncludes) dom = parseIncludes(dom, model, true)
     }
     if (hasCache) dom = replaceCacheElements(dom, model)
     if (hasNoteddy || hasNoparse) dom = tagNoParseBlocks(dom, model)
@@ -1106,18 +987,14 @@ function render (template, model, callback) {
   }
 
   // replace <noteddy> blocks with the hidden code
-  for (const blockId in model._noTeddyBlocks) {
-    renderedTemplate = renderedTemplate.replace(`<noteddy id="${blockId}"></noteddy>`, model._noTeddyBlocks[blockId])
-  }
+  for (const blockId in model._noTeddyBlocks) renderedTemplate = renderedTemplate.replace(`<noteddy id="${blockId}"></noteddy>`, model._noTeddyBlocks[blockId])
 
   // cache the template
   if (cacheKey === 'none') {
     templateCaches[template].none.markup = renderedTemplate
     templateCaches[template].none.created = Date.now()
   } else if (cacheKey) {
-    if (!templateCaches[template][cacheKey].entries[cacheKeyModelVal]) {
-      templateCaches[template][cacheKey].entries[cacheKeyModelVal] = {}
-    }
+    if (!templateCaches[template][cacheKey].entries[cacheKeyModelVal]) templateCaches[template][cacheKey].entries[cacheKeyModelVal] = {}
     templateCaches[template][cacheKey].entries[cacheKeyModelVal].markup = renderedTemplate
     templateCaches[template][cacheKey].entries[cacheKeyModelVal].created = Date.now()
     // invalidate oldest cache if we've reached max caches limit
@@ -1128,17 +1005,15 @@ function render (template, model, callback) {
   }
 
   // execute callback if present, otherwise simply return the rendered template string
-  if (typeof callback === 'function') {
-    callback(null, renderedTemplate)
-  } else {
-    return renderedTemplate
-  }
+  if (typeof callback === 'function') callback(null, renderedTemplate)
+  else return renderedTemplate
 
   return renderedTemplate
 }
 
-module.exports = {
-  // state
+// #endregion
+
+export default {
   params,
   caches,
   templateCaches,
@@ -1153,10 +1028,6 @@ module.exports = {
   setTemplate,
   setCache,
   clearCache,
-  render
-}
-
-// express.js support
-if (typeof module !== 'undefined' && module.exports && typeof window) {
-  module.exports.__express = render
+  render,
+  __express: render
 }

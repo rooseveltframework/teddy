@@ -1,21 +1,75 @@
 const path = require('path')
+const TerserPlugin = require('terser-webpack-plugin')
 
-module.exports = {
-  name: 'main',
-  entry: './teddy.js',
-  output: {
-    path: path.join(__dirname, 'dist'),
-    filename: 'teddy.js',
-    library: 'teddy',
-    libraryTarget: 'umd',
-    globalObject: 'this'
+module.exports = [
+  {
+    name: 'main',
+    entry: './teddy.js',
+    output: {
+      path: path.join(__dirname, 'dist'),
+      filename: 'teddy.js',
+      library: 'teddy',
+      libraryTarget: 'umd',
+      libraryExport: 'default',
+      globalObject: 'this'
+    },
+    externals: {
+      fs: 'fs',
+      path: 'path'
+    },
+    mode: 'development',
+    optimization: {
+      minimize: true,
+      minimizer: [
+        new TerserPlugin({
+          extractComments: false,
+          terserOptions: {
+            compress: {
+              defaults: false,
+              unused: true
+            },
+            mangle: false,
+            format: {
+              comments: 'all'
+            }
+          }
+        })
+      ]
+    }
   },
-  externals: {
-    fs: 'commonjs fs',
-    path: 'commonjs path'
-  },
-  mode: 'development',
-  node: {
-    __dirname: false
+  {
+    name: 'main',
+    entry: './teddy.js',
+    output: {
+      path: path.join(__dirname, 'dist'),
+      filename: 'teddy.min.js',
+      library: 'teddy',
+      libraryTarget: 'umd',
+      libraryExport: 'default',
+      globalObject: 'this'
+    },
+    externals: {
+      fs: 'fs',
+      path: 'path'
+    },
+    mode: 'production',
+    optimization: {
+      minimize: true,
+      minimizer: [
+        new TerserPlugin({
+          extractComments: false,
+          terserOptions: {
+            compress: {
+              defaults: true,
+              unused: true
+            },
+            mangle: true,
+            format: {
+              comments: false
+            }
+          }
+        })
+      ]
+    }
   }
-}
+]

@@ -8,7 +8,7 @@
       "url": "https://github.com/rooseveltframework/teddy/graphs/contributors"
     }
   ],
-  "version": "0.6.4",
+  "version": "0.6.5",
   "files": [
     "dist/teddy.js",
     "dist/cheerio.client.js"
@@ -25,13 +25,13 @@
     "xregexp": "5.1.1"
   },
   "devDependencies": {
-    "browserify": "17.0.0",
     "c8": "8.0.1",
     "chai": "4.3.10",
     "chai-string": "1.5.0",
     "codecov": "3.8.3",
     "cross-env": "7.0.3",
     "eslint": "8.56.0",
+    "eslint-plugin-html": "7.1.0",
     "eslint-plugin-mocha": "10.2.0",
     "karma": "6.4.2",
     "karma-chrome-launcher": "3.2.0",
@@ -45,6 +45,7 @@
     "mocha": "10.2.0",
     "playwright": "1.40.1",
     "standard": "17.1.0",
+    "terser-webpack-plugin": "5.3.10",
     "webpack": "5.89.0",
     "webpack-cli": "5.1.4"
   },
@@ -54,29 +55,27 @@
     ]
   },
   "eslintConfig": {
+    "extends": [
+      "standard"
+    ],
     "plugins": [
       "mocha"
     ],
     "rules": {
       "mocha/no-exclusive-tests": "error"
-    },
-    "parserOptions": {
-      "ecmaVersion": 2017
-    },
-    "env": {
-      "es6": true
     }
   },
   "scripts": {
-    "build": "browserify node_modules/cheerio/lib/index.js --s module -o dist/cheerio.client.js && webpack",
+    "build": "webpack",
     "coverage": "cross-env NODE_ENV=cover c8 --reporter=text --reporter=lcov mocha --timeout 60000 test/*.js && karma start",
-    "lint": "standard && eslint ./test",
+    "lint": "standard && eslint ./test && standard --plugin html *.html",
+    "lint-fix": "standard --fix && eslint ./test && standard --plugin html *.html --fix",
     "test": "npm run build && cross-env NODE_ENV=test mocha --timeout 60000 test && karma start",
     "test-chrome": "npm run build && karma start --browsers ChromeHeadless",
     "test-edge": "npm run build && karma start --browsers Edge",
     "test-firefox": "npm run build && karma start --browsers Firefox",
     "test-safari": "npm run build && karma start --browsers Safari",
-    "test-server": "npm run build && cross-env NODE_ENV=test mocha test",
+    "test-server": "npm run build && cross-env NODE_ENV=test mocha --timeout 60000 test/*.js",
     "prepack": "npm run build"
   },
   "repository": {
