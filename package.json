@@ -25,25 +25,12 @@
     "xregexp": "5.1.1"
   },
   "devDependencies": {
+    "@playwright/test": "1.40.1",
     "c8": "8.0.1",
-    "chai": "4.3.10",
-    "chai-string": "1.5.0",
     "codecov": "3.8.3",
     "cross-env": "7.0.3",
     "eslint": "8.56.0",
     "eslint-plugin-html": "7.1.0",
-    "eslint-plugin-mocha": "10.2.0",
-    "karma": "6.4.2",
-    "karma-chrome-launcher": "3.2.0",
-    "karma-cli": "2.0.0",
-    "karma-coverage": "2.2.1",
-    "karma-edge-launcher": "0.4.2",
-    "karma-firefox-launcher": "2.1.2",
-    "karma-html2js-preprocessor": "1.1.0",
-    "karma-mocha": "2.0.1",
-    "karma-spec-reporter": "0.0.36",
-    "mocha": "10.2.0",
-    "playwright": "1.40.1",
     "standard": "17.1.0",
     "terser-webpack-plugin": "5.3.10",
     "webpack": "5.89.0",
@@ -57,25 +44,14 @@
   "eslintConfig": {
     "extends": [
       "standard"
-    ],
-    "plugins": [
-      "mocha"
-    ],
-    "rules": {
-      "mocha/no-exclusive-tests": "error"
-    }
+    ]
   },
   "scripts": {
     "build": "webpack",
     "coverage": "cross-env NODE_ENV=cover c8 --reporter=text --reporter=lcov mocha --timeout 60000 test/*.js && karma start",
     "lint": "standard && eslint ./test && standard --plugin html *.html",
     "lint-fix": "standard --fix && eslint ./test && standard --plugin html *.html --fix",
-    "test": "npm run build && cross-env NODE_ENV=test mocha --timeout 60000 test && karma start",
-    "test-chrome": "npm run build && karma start --browsers ChromeHeadless",
-    "test-edge": "npm run build && karma start --browsers Edge",
-    "test-firefox": "npm run build && karma start --browsers Firefox",
-    "test-safari": "npm run build && karma start --browsers Safari",
-    "test-server": "npm run build && cross-env NODE_ENV=test mocha --timeout 60000 test/*.js",
+    "test": "playwright test",
     "prepack": "npm run build"
   },
   "repository": {
