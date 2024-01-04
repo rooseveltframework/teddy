@@ -1,8 +1,8 @@
 const { devices } = require('@playwright/test')
 
 const config = {
-  testDir: './test',
-  testMatch: '*.js',
+  testDir: './test/loaders',
+  testMatch: 'playwright.js',
   testIgnore: ['models/*.js', 'testConditions.js'],
 
   // maximum time a single test can take

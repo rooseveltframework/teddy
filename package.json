@@ -27,10 +27,13 @@
   "devDependencies": {
     "@playwright/test": "1.40.1",
     "c8": "8.0.1",
+    "chai": "4.3.10",
+    "chai-string": "1.5.0",
     "codecov": "3.8.3",
     "cross-env": "7.0.3",
     "eslint": "8.56.0",
     "eslint-plugin-html": "7.1.0",
+    "mocha": "10.2.0",
     "standard": "17.1.0",
     "terser-webpack-plugin": "5.3.10",
     "webpack": "5.89.0",
@@ -51,7 +54,9 @@
     "coverage": "cross-env NODE_ENV=cover c8 --reporter=text --reporter=lcov mocha --timeout 60000 test/*.js && karma start",
     "lint": "standard && eslint ./test && standard --plugin html *.html",
     "lint-fix": "standard --fix && eslint ./test && standard --plugin html *.html --fix",
-    "test": "playwright test",
+    "test": "npm run build && cross-env NODE_ENV=test mocha --timeout 6000 test/loaders/mocha.js && playwright test",
+    "test-playwright": "npm run build && playwright test",
+    "test-mocha": "npm run build && cross-env NODE_ENV=test mocha --timeout 6000 test/loaders/mocha.js",
     "prepack": "npm run build"
   },
   "repository": {
