@@ -9,8 +9,8 @@ const testConditions = require('../testConditions')
 
 chai.use(chaiString)
 
-for (const testCategory of testConditions) {
-  describe(testCategory.describe, () => {
+for (const tc of testConditions) {
+  describe(tc.describe, () => {
     let model
 
     before(() => {
@@ -21,9 +21,9 @@ for (const testCategory of testConditions) {
       }
     })
 
-    for (const test of testCategory.tests) {
-      it(test.message, () => {
-        assert.equalIgnoreSpaces(teddy.render(test.template, model), test.expected)
+    for (const t of tc.tests) {
+      it(t.message, () => {
+        assert.equalIgnoreSpaces(t.test(teddy, t.template, model), t.expected)
       })
     }
   })
