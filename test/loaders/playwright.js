@@ -2,15 +2,9 @@ import { test, expect } from '@playwright/test'
 import teddy from '../../teddy.js'
 import makeModel from '../models/model.js'
 import testConditions from '../testConditions.js'
+import { cleanString } from '../testUtils.js'
 import fs from 'fs'
 import path from 'path'
-
-// const { test, expect } = require('@playwright/test')
-// const teddy = require('../../')
-// const makeModel = require('../models/model')
-// const testConditions = require('../testConditions')
-// const fs = require('fs')
-// const path = require('path')
 
 teddy.setVerbosity(0)
 
@@ -48,8 +42,14 @@ for (const tc of testConditions) {
 
     for (const t of tc.tests) {
       test(t.message, async ({ page }) => {
-        await page.setContent(t.test(teddy, t.template, model))
-        expect(await page.innerHTML('body')).toMatch(t.expected)
+        if (typeof t.expected === 'string') {
+          // must wrap in body tags due to peculiarities in how document.write() works: https://github.com/microsoft/playwright/issues/24503
+          await page.setContent('<body>' + cleanString(t.test(teddy, t.template, model)) + '</body>')
+
+          expect(await page.innerHTML('body')).toMatch(cleanString(t.expected))
+        } else if (typeof t.expected === 'boolean') {
+          expect(t.test(teddy, t.template, model)).toBe(t.expected)
+        }
       })
     }
   })

@@ -4,11 +4,7 @@ import assert from 'assert'
 import makeModel from '../models/model.js'
 import teddy from '../../teddy.js'
 import testConditions from '../testConditions.js'
-
-// const assert = require('assert')
-// const makeModel = require('../models/model')
-// const teddy = require('../../')
-// const testConditions = require('../testConditions')
+import { cleanString } from '../testUtils.js'
 
 for (const tc of testConditions) {
   describe(tc.describe, () => {
@@ -24,7 +20,7 @@ for (const tc of testConditions) {
 
     for (const t of tc.tests) {
       it(t.message, () => {
-        assert.equal(t.test(teddy, t.template, model).trim(), t.expected)
+        assert.equal(t.test(teddy, cleanString(t.test(teddy, t.template, model)), model), cleanString(t.expected))
       })
     }
   })
