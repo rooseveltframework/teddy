@@ -3,6 +3,10 @@
   "description": "Teddy Templating Engine",
   "author": "Roosevelt Framework Team <rooseveltframework@gmail.com>",
   "type": "module",
+  "exports": {
+    "import": "./dist/teddy.js",
+    "require": "./dist/teddy.cjs"
+  },
   "contributors": [
     {
       "name": "Contributors",
