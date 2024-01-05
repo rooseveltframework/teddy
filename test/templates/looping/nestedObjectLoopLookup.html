@@ -1,0 +1,8 @@
+{!
+  should parse loop through nested object correctly
+!}
+
+<loop through="moreNestedObjectsWithoutArray.children" val="child">
+  <p>{child.num}</p>
+  <input type="text" if-child.bool true="checked">
+</loop>

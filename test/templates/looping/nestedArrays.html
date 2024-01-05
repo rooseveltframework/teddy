@@ -1,0 +1,9 @@
+{!
+  should loop through nested arrays correctly
+!}
+
+<loop through='nestedObjects' val='i'>
+  <loop through='i.children' val='c'>
+    <p>{c}</p>
+  </loop>
+</loop>

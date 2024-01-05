@@ -1,0 +1,13 @@
+{!
+  should evaluate <unless something> as false and <elseunless doesntexist> as true
+!}
+
+<unless something>
+  <p>The variable 'something' is not present</p>
+</unless>
+<elseunless doesntexist>
+  <p>The variable 'doesntexist' is not present</p>
+</elseunless>
+<else>
+  <p>The variable 'something' is present and the variable 'doesntexist' is present</p>
+</else>

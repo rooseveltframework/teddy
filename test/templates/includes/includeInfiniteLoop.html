@@ -1,0 +1,11 @@
+{!
+  should escape from infinite loop of includes via setMaxPasses
+!}
+
+{infinity2}
+<include src='misc/infiniteIncludeTemplate.html'>
+  <arg infinity>
+    <p>Recursion</p>
+    <include src='includes/includeInfiniteLoop.html'></include>
+  </arg>
+</include>

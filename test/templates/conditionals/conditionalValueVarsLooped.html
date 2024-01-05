@@ -1,0 +1,12 @@
+{!
+  should evaluate <option> elements with the middle one selected
+!}
+
+<loop through='nestedObjects' val='obj'>
+  <if obj.num="{special.number}">
+    <option value='{obj.num}' selected>{obj.num}</option>
+  </if>
+  <else>
+    <option value='{obj.num}'>{obj.num}</option>
+  </else>
+</loop>

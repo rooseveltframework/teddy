@@ -1,0 +1,14 @@
+{!
+  should print the letters behind both <if> statements nested in the <loop>
+!}
+
+<if something>
+  <loop through='objectOfObjects' val='obj'>
+    <if obj.a>
+      <p>a</p>
+    </if>
+    <if obj.a>
+      <p>b</p>
+    </if>
+  </loop>
+</if>

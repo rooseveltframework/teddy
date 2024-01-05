@@ -1,0 +1,27 @@
+{!
+  should evaluate xor correctly when not using explicit values
+!}
+
+    {! false !}           {! false !}
+<if reallydoesntexist xor doesntexist>
+  <p>should not render</p>
+</if>
+<else>
+  <p>xor: false</p>
+</else>
+
+    {! true !}    {! false !}
+<if something xor doesntexist>
+  <p>should render</p>
+</if>
+<else>
+  <p>xor: false</p>
+</else>
+
+    {! false !}     {! true !}
+<if doesntexist xor something>
+  <p>should render</p>
+</if>
+<else>
+  <p>xor: false</p>
+</else>

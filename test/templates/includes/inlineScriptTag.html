@@ -1,0 +1,17 @@
+{!
+  should escape the contents of a script when included in a template
+!}
+
+<include src='misc/markupArgument'>
+  <arg something>
+    <p>Hello!</p>
+
+    <script>
+      console.log('Hello world');
+
+      for (var i = 0; i < 2; i++) {
+        console.log('Test')
+      }
+    </script>
+  </arg>
+</include>

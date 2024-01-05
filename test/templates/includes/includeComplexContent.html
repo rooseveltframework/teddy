@@ -1,0 +1,21 @@
+{!
+  should <include> a template and render pageContent <arg> contents and correctly parse <if>, <loop>, and <if> tags
+!}
+
+<include src='misc/markupArgument'>
+  <arg something>
+    <section class='content'>
+      <if obj>
+        <loop through='obj' val='thing'>
+          <article class='thing'>
+            <if thing.prop and thing.other_prop>
+              <section class='blah'>
+                {thing.other_prop|s}
+              </section>
+            </if>
+          </article>
+        </loop>
+      </if>
+    </section>
+  </arg>
+</include>

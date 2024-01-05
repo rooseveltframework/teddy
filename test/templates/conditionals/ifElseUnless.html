@@ -1,0 +1,9 @@
+{!
+  should eval <if something='no'> as false and <elseunless something='maybe'> as true
+!}
+<if something='no'>
+  <p>The variable 'something' is set to 'no'</p>
+</if>
+<elseunless something='maybe'>
+  <p>The variable 'something' is not set to 'maybe'</p>
+</elseunless>

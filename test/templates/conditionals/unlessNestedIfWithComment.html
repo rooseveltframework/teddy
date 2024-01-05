@@ -1,0 +1,17 @@
+{!
+  should evaluate nested <unless> tag in the if with a comment in between
+!}
+
+<unless doesntexist>
+  <p>The variable 'doesntexist' is not present</p>
+  <unless something>
+    <p>The variable 'something' is not present</p>
+  </unless>
+  {! A comment !}
+  <else>
+    <p>The variable 'something' is present</p>
+  </else>
+</unless>
+<else>
+  <p>The variable 'doesntexist' is present</p>
+</else>

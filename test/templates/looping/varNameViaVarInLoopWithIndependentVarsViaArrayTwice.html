@@ -1,0 +1,9 @@
+{!
+  should render {variable.{otherVar}} in nested loop variant 2
+!}
+
+<loop through="arrayOfNamesTwoMembers" val="names">
+  <loop through="nameList" val="name">
+    <p>{names.{name}}</p>
+  </loop>
+</loop>

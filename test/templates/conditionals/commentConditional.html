@@ -1,0 +1,14 @@
+{!
+  should evaluate entire conditional and correctly show HTML comments
+!}
+<if doesntexist>
+  <p>The variable 'doesntexist' is not present</p>
+</if>
+<!-- COMMENT 1 -->
+<elseif something>
+  <p>The variable 'something' is present</p>
+</elseif>
+<!-- COMMENT 2 -->
+<else>
+  <p>The variable 'doesntexist' is present</p>
+</else>
