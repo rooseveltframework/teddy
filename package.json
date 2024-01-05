@@ -2,6 +2,7 @@
   "name": "teddy",
   "description": "Teddy Templating Engine",
   "author": "Roosevelt Framework Team <rooseveltframework@gmail.com>",
+  "type": "module",
   "contributors": [
     {
       "name": "Contributors",
@@ -22,18 +23,16 @@
   },
   "dependencies": {
     "cheerio": "1.0.0-rc.12",
+    "mocha": "10.2.0",
     "xregexp": "5.1.1"
   },
   "devDependencies": {
     "@playwright/test": "1.40.1",
-    "c8": "8.0.1",
-    "chai": "4.3.10",
-    "chai-string": "1.5.0",
+    "c8": "9.0.0",
     "codecov": "3.8.3",
     "cross-env": "7.0.3",
     "eslint": "8.56.0",
     "eslint-plugin-html": "7.1.0",
-    "mocha": "10.2.0",
     "standard": "17.1.0",
     "terser-webpack-plugin": "5.3.10",
     "webpack": "5.89.0",

@@ -1,7 +1,13 @@
-const path = require('path')
-const TerserPlugin = require('terser-webpack-plugin')
+import path from 'path'
+import TerserPlugin from 'terser-webpack-plugin'
+import { fileURLToPath } from 'url'
 
-module.exports = [
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+// const path = require('path')
+// const TerserPlugin = require('terser-webpack-plugin')
+
+export default [
   {
     name: 'main',
     entry: './teddy.js',

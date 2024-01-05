@@ -1,13 +1,14 @@
 /* eslint-env mocha */
 
-const chai = require('chai')
-const assert = chai.assert
-const chaiString = require('chai-string')
-const makeModel = require('../models/model')
-const teddy = require('../../')
-const testConditions = require('../testConditions')
+import assert from 'assert'
+import makeModel from '../models/model.js'
+import teddy from '../../teddy.js'
+import testConditions from '../testConditions.js'
 
-chai.use(chaiString)
+// const assert = require('assert')
+// const makeModel = require('../models/model')
+// const teddy = require('../../')
+// const testConditions = require('../testConditions')
 
 for (const tc of testConditions) {
   describe(tc.describe, () => {
@@ -23,7 +24,7 @@ for (const tc of testConditions) {
 
     for (const t of tc.tests) {
       it(t.message, () => {
-        assert.equalIgnoreSpaces(t.test(teddy, t.template, model), t.expected)
+        assert.equal(t.test(teddy, t.template, model).trim(), t.expected)
       })
     }
   })

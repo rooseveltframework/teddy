@@ -3,8 +3,9 @@
 import * as fs from 'fs' // node filesystem module
 import * as path from 'path' // node path module
 import * as cheerio from 'cheerio' // dom parser
-import * as XRegExp from 'xregexp/lib' // needed for matchRecursive
-import * as matchRecursiveModule from 'xregexp/lib/addons/matchrecursive' // include matchRecursive addon
+import XRegExp from 'xregexp/lib/index.js' // needed for matchRecursive
+import matchRecursiveModule from 'xregexp/lib/addons/matchrecursive.js' // include matchRecursive addon
+
 matchRecursiveModule(XRegExp) // load matchRecursive addon into XRegExp
 const cheerioOptions = { xml: { xmlMode: false, lowerCaseAttributeNames: false, decodeEntities: false } }
 const params = {} // teddy parameters

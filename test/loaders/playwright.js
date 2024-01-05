@@ -1,9 +1,16 @@
-const { test, expect } = require('@playwright/test')
-const teddy = require('../../')
-const makeModel = require('../models/model')
-const testConditions = require('../testConditions')
-const fs = require('fs')
-const path = require('path')
+import { test, expect } from '@playwright/test'
+import teddy from '../../teddy.js'
+import makeModel from '../models/model.js'
+import testConditions from '../testConditions.js'
+import fs from 'fs'
+import path from 'path'
+
+// const { test, expect } = require('@playwright/test')
+// const teddy = require('../../')
+// const makeModel = require('../models/model')
+// const testConditions = require('../testConditions')
+// const fs = require('fs')
+// const path = require('path')
 
 teddy.setVerbosity(0)
 
