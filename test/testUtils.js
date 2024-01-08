@@ -6,4 +6,12 @@ function cleanString (string) {
   return string.replace(/(<.*?>)|\s+/g, '')
 }
 
-export { cleanString }
+function ignoreSpaces (str) {
+  if (typeof str !== 'string') {
+    return str
+  }
+
+  return str.replace(/\s/g, '')
+}
+
+export { cleanString, ignoreSpaces }

@@ -4,7 +4,7 @@ import assert from 'assert'
 import makeModel from '../models/model.js'
 import teddy from '../../teddy.js'
 import testConditions from '../testConditions.js'
-import { cleanString } from '../testUtils.js'
+import { ignoreSpaces } from '../testUtils.js'
 
 for (const tc of testConditions) {
   describe(tc.describe, () => {
@@ -19,9 +19,20 @@ for (const tc of testConditions) {
     })
 
     for (const t of tc.tests) {
-      it(t.message, () => {
-        assert.equal(t.test(teddy, cleanString(t.test(teddy, t.template, model)), model), cleanString(t.expected))
-      })
+      if (t.async) {
+        it(t.message, async (done) => {
+          assert.equal(ignoreSpaces(await t.test(teddy, t.template, model)), ignoreSpaces(t.expected))
+          done()
+        })
+      } else {
+        it(t.message, () => {
+          if (typeof t.expected === 'string') {
+            assert.equal(ignoreSpaces(t.test(teddy, t.template, model)), ignoreSpaces(t.expected))
+          } else if (typeof t.expected === 'boolean') {
+            assert.equal(t.test(teddy, t.template, model), t.expected)
+          }
+        })
+      }
     }
   })
 }

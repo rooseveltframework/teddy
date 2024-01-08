@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test'
 import teddy from '../../teddy.js'
 import makeModel from '../models/model.js'
 import testConditions from '../testConditions.js'
-import { cleanString } from '../testUtils.js'
+import { ignoreSpaces } from '../testUtils.js'
 import fs from 'fs'
 import path from 'path'
 
@@ -44,9 +44,8 @@ for (const tc of testConditions) {
       test(t.message, async ({ page }) => {
         if (typeof t.expected === 'string') {
           // must wrap in body tags due to peculiarities in how document.write() works: https://github.com/microsoft/playwright/issues/24503
-          await page.setContent('<body>' + cleanString(t.test(teddy, t.template, model)) + '</body>')
-
-          expect(await page.innerHTML('body')).toMatch(cleanString(t.expected))
+          await page.setContent('<body>' + t.test(teddy, t.template, model) + '</body>')
+          expect(ignoreSpaces(await page.innerHTML('body'))).toStrictEqual(ignoreSpaces(t.expected))
         } else if (typeof t.expected === 'boolean') {
           expect(t.test(teddy, t.template, model)).toBe(t.expected)
         }

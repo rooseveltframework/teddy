@@ -83,7 +83,7 @@ export default function makeModel () {
     somethingElse: true,
     varWithVarInside: 'Variable with a variable inside: {subVar}',
     subVar: 'And another: {something}',
-    dynamicInclude: 'misc/variable',
+    dynamicInclude: 'misc/variable.html',
     escapeTest: '<span>raw html</span>',
     doubleFlagEscapeTest: '<h1>double bars</h1> {something}',
     nullVar: null,

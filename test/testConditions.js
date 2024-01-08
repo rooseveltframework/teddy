@@ -252,19 +252,19 @@ export default [
         message: 'should evaluate <option> elements with the middle one selected (conditionals/oneLineValueVarsLooped.html)',
         template: 'conditionals/oneLineValueVarsLooped.html',
         test: (teddy, template, model) => teddy.render(template, model),
-        expected: '<option value="1">1</option><option value="2" selected>2</option><option value="3">3</option>'
+        expected: '<option value="1">1</option><option value="2" selected="true">2</option><option value="3">3</option>'
       },
       {
         message: 'should evaluate <option> elements with the middle one selected (conditionals/conditionalValueVarsLooped.html)',
         template: 'conditionals/conditionalValueVarsLooped.html',
         test: (teddy, template, model) => teddy.render(template, model),
-        expected: '<option value="1">1</option><option value="2" selected>2</option><option value="3">3</option>'
+        expected: '<option value="1">1</option><option value="2" selected="true">2</option><option value="3">3</option>'
       },
       {
         message: 'should evaluate one line if "if-something=\'Some content\'" as true and still add the id attribute regardless of the if statement outcome (conditionals/oneLineValueWithAdditionalAttributesNotImpactedByIf.html)',
         template: 'conditionals/oneLineValueWithAdditionalAttributesNotImpactedByIf.html',
         test: (teddy, template, model) => teddy.render(template, model),
-        expected: '<p id="someId" class="something-is-present">One line if.</p><p id="someId">One line if.</p><p id="someId" disabled>One line if.</p><option value="3" selected>One line if.</option><option value="3" selected>One line if.</option>'
+        expected: '<p id="someId" class="something-is-present">One line if.</p><p id="someId">One line if.</p><p id="someId" disabled="true">One line if.</p><option value="3" selected="true">One line if.</option><option value="3" selected="true">One line if.</option>'
       },
       {
         message: 'should evaluate one line if "if-something=\'\'" as false (conditionals/oneLineEmpty.html)',
@@ -440,6 +440,160 @@ export default [
         template: 'conditionals/ifJSONStringPrintJSONString.html',
         test: (teddy, template, model) => teddy.render(template, model),
         expected: '<pre>{"content":{"appTitle":"Some App","pageTitle":"{content.appTitle}"},"currentYear":1858,"mainDomain":"localhost:43711","NODE_ENV":"development"}</pre>'
+      }
+    ]
+  },
+  {
+    describe: 'Includes',
+    tests: [
+      {
+        message: 'should <include> a template (includes/include.html)',
+        template: 'includes/include.html',
+        test: (teddy, template, model) => teddy.render(template, model),
+        expected: '<p>Some content</p>'
+      },
+      {
+        message: 'should <include> all templates (includes/includeMultipleTemplates.html)',
+        template: 'includes/includeMultipleTemplates.html',
+        test: (teddy, template, model) => teddy.render(template, model),
+        expected: '<p>test test</p> <p>test test</p> <p>test test</p>'
+      },
+      {
+        message: 'should <include> a template whose name is populated by a {variable} (includes/dynamicInclude.html)',
+        template: 'includes/dynamicInclude.html',
+        test: (teddy, template, model) => teddy.render(template, model),
+        expected: '<p>Some content</p>'
+      },
+      {
+        message: 'should populate <include> <arg> in the child template; the class should render (includes/includeArgCheckedByOneLineIfWrapper.html)',
+        template: 'includes/includeArgCheckedByOneLineIfWrapper.html',
+        test: (teddy, template, model) => teddy.render(template, model),
+        expected: '<p class="populated">Is it populated? populated</p>'
+      },
+      {
+        message: 'should <include> a template with arguments (includes/includeWithArguments.html)',
+        template: 'includes/includeWithArguments.html',
+        test: (teddy, template, model) => teddy.render(template, model),
+        expected: '<p>override</p>'
+      },
+      {
+        message: 'should <include> a template with a nested include (includes/nestedInclude.html)',
+        template: 'includes/nestedInclude.html',
+        test: (teddy, template, model) => teddy.render(template, model),
+        expected: '<div><p>Some content</p></div>'
+      },
+      {
+        message: 'should <include> a template with a nested include passing a text argument (includes/nestedIncludeWithArg.html)',
+        template: 'includes/nestedIncludeWithArg.html',
+        test: (teddy, template, model) => teddy.render(template, model),
+        expected: '<div><p>nested</p></div>'
+      },
+      {
+        message: 'should <include> a template with loop arguments (includes/nestedLoop.html)',
+        template: 'includes/nestedLoop.html',
+        test: (teddy, template, model) => teddy.render(template, model),
+        expected: '<p>a</p><p>b</p><p>c</p>'
+      },
+      {
+        message: 'should ignore and skip rendering orphaned argument (includes/orphanedArgument.html)',
+        template: 'includes/orphanedArgument.html',
+        test: (teddy, template, model) => teddy.render(template, model),
+        expected: '<div></div>'
+      },
+      {
+        message: 'should <include> a template that contains loops and variables with an argument (includes/includeLoopsAndVars.html)',
+        template: 'includes/includeLoopsAndVars.html',
+        test: (teddy, template, model) => teddy.render(template, model),
+        expected: '<p>a</p><p>b</p><p>c</p><p>world</p><p>guy</p>'
+      },
+      {
+        message: 'should <include> a template that contains numerical {variables} (includes/numericVarInArg.html)',
+        template: 'includes/numericVarInArg.html',
+        test: (teddy, template, model) => teddy.render(template, model),
+        expected: '<p>STRING!</p>'
+      },
+      {
+        message: 'should <include> a template with numeric arguments (includes/numericArgument.html)',
+        template: 'includes/numericArgument.html',
+        test: (teddy, template, model) => teddy.render(template, model),
+        expected: '<p>Hello!</p>'
+      },
+      {
+        message: 'should escape the contents of a script when included in a template (includes/inlineScriptTag.html)',
+        template: 'includes/inlineScriptTag.html',
+        test: (teddy, template, model) => teddy.render(template, model),
+        expected: '<p>Hello!</p><script>console.log(\'Hello world\'); for (var i = 0; i < 2; i++) { console.log(\'Test\') } </script>'
+      },
+      {
+        message: 'should evaluate {variable} outside of include as original model value (includes/argRedefineModelVar.html)',
+        template: 'includes/argRedefineModelVar.html',
+        test: (teddy, template, model) => teddy.render(template, model),
+        expected: '<style>p { height: 10px; }</style> <p>Some content</p>'
+      },
+      {
+        message: 'should prevent recursion abuse (includes/argVariableWithinArg.html)',
+        template: 'includes/argVariableWithinArg.html',
+        test: (teddy, template, model) => teddy.render(template, model),
+        expected: '<p>Some content</p>'
+      },
+      {
+        message: 'should <include> a template and render pageContent inside of <if> (includes/includeIfContent.html)',
+        template: 'includes/includeIfContent.html',
+        test: (teddy, template, model) => teddy.render(template, model),
+        expected: '<p>hello</p>'
+      },
+      {
+        message: 'should <include> a template and render pageContent <arg> contents and correctly parse <if>, <loop>, and <if> tags (includes/includeComplexContent.html)',
+        template: 'includes/includeComplexContent.html',
+        test: (teddy, template, model) => teddy.render(template, model),
+        expected: '<section class="content"><article class="thing"><section class="blah">other_prop_one</section></article><article class="thing"><section class="blah">other_prop_two</section></article></section>'
+      },
+      {
+        message: 'should <include> a template and escape regex pattern in argument (includes/includeEscapeRegex.html)',
+        template: 'includes/includeEscapeRegex.html',
+        test: (teddy, template, model) => teddy.render(template, model),
+        expected: '<input type="text" name="date" placeholder="DD/MM/YYYY" id="date" pattern="^(3[0-1]|[1-2]\\d|[1-9]|0\\d)\\/(1[0-2]|[1-9]|0\\d)\\/[1-2]\\d{3}$">'
+      },
+      {
+        message: 'should ignore includes with invalid markup (includes/invalidIncludeMarkup.html)',
+        template: 'includes/invalidIncludeMarkup.html',
+        test: (teddy, template, model) => teddy.render(template, model),
+        expected: '<div><p>Some content</p></div>'
+      },
+      {
+        message: 'should escape from infinite loop of includes via setMaxPasses (includes/includeInfiniteLoop.html)',
+        template: 'includes/includeInfiniteLoop.html',
+        test: (teddy, template, model) => {
+          teddy.setVerbosity(3)
+          teddy.setMaxPasses(100)
+
+          try {
+            teddy.render(template, model)
+            console.log('🌈 made it here')
+          } catch (e) {
+            console.log('❌ inside the error?')
+            return e.message
+          }
+        },
+        expected: 'teddy could not finish rendering the template because the max number of passes over the template (100) was exceeded; there may be an infinite loop in your template logic'
+      },
+      {
+        message: 'should evaluate a nested reverse quotes oneliner with an arg passed to it (includes/nestedOneliner.html)',
+        template: 'includes/nestedOneliner.html',
+        test: (teddy, template, model) => teddy.render(template, model),
+        expected: '<p class="Some content">One line if.</p>'
+      },
+      {
+        message: 'should populate <include> <arg> in the child template (includes/includeArgCheckedByOneLineIfWrapper.html)',
+        template: 'includes/includeArgCheckedByOneLineIfWrapper.html',
+        test: (teddy, template, model) => teddy.render(template, model),
+        expected: '<p class="populated">Is it populated? populated</p>'
+      },
+      {
+        message: 'should <include> a template with a one-line if statement that renders correctly (includes/includeOneLineOnlyFalse.html)',
+        template: 'includes/includeOneLineOnlyFalse.html',
+        test: (teddy, template, model) => teddy.render(template, model),
+        expected: '<p></p>'
       }
     ]
   }
