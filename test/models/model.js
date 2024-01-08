@@ -276,7 +276,7 @@ export default function makeModel () {
         num: 1,
         children: [
           {
-            stuff: '<if something>Something Exists</if>'
+            stuff: '<if something="Some content">Something Exists</if>'
           }
         ]
       },
@@ -284,7 +284,7 @@ export default function makeModel () {
         num: 2,
         children: [
           {
-            stuff: '<if something>Something Exists</if>'
+            stuff: '<if something="Some content">Something Exists</if>'
           }
         ]
       }
