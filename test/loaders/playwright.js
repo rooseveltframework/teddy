@@ -43,15 +43,16 @@ for (const tc of testConditions) {
     for (const t of tc.tests) {
       if (t.skip) continue
 
-      const cb = (result, expected = true) => {
-        if (typeof expected === 'string') {
-          expected = ignoreSpaces(expected)
-        }
-        expect(ignoreSpaces(result)).toBe(expected)
-      }
-
       test(t.message, async ({ page }) => {
-        // todo: refactor this to be much simpler
+        // callback function used on custom and asynchronous tests
+        const cb = (result, expected = true) => {
+          if (typeof expected === 'string') {
+            expected = ignoreSpaces(expected)
+          }
+          expect(ignoreSpaces(result)).toBe(expected)
+        }
+
+        // test asynchronous code
         if (t?.type === 'async') {
           if (!t.expected) {
             await t.test(teddy, t.template, model, cb)
@@ -68,16 +69,24 @@ for (const tc of testConditions) {
           if (typeof t.expected === 'boolean') {
             expect(t.test(teddy, t.template, model, cb)).toBe(t.expected)
           }
-        } else if (t?.type === 'custom') {
+        }
+
+        // test code that is handled within that test (with use of a callback)
+        if (t?.type === 'custom') {
           t.test(teddy, t.template, model, cb)
-        } else {
-          if (typeof t.expected === 'string') {
-            // must wrap in body tags due to peculiarities in how document.write() works: https://github.com/microsoft/playwright/issues/24503
-            await page.setContent('<body>' + t.test(teddy, t.template, model) + '</body>')
-            expect(ignoreSpaces(await page.innerHTML('body'))).toStrictEqual(ignoreSpaces(t.expected))
-          } else if (typeof t.expected === 'boolean') {
-            expect(t.test(teddy, t.template, model)).toBe(t.expected)
-          }
+          return
+        }
+
+        // test code that needs to be appended to the playwright page
+        if (typeof t.expected === 'string') {
+          // must wrap in body tags due to peculiarities in how document.write() works: https://github.com/microsoft/playwright/issues/24503
+          await page.setContent('<body>' + t.test(teddy, t.template, model) + '</body>')
+          expect(ignoreSpaces(await page.innerHTML('body'))).toStrictEqual(ignoreSpaces(t.expected))
+        }
+
+        // test code that is resolved in the test without a callback
+        if (typeof t.expected === 'boolean') {
+          expect(t.test(teddy, t.template, model)).toBe(t.expected)
         }
       })
     }
