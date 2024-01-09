@@ -41,13 +41,43 @@ for (const tc of testConditions) {
     })
 
     for (const t of tc.tests) {
+      if (t.skip) continue
+
+      const cb = (result, expected = true) => {
+        if (typeof expected === 'string') {
+          expected = ignoreSpaces(expected)
+        }
+        expect(ignoreSpaces(result)).toBe(expected)
+      }
+
       test(t.message, async ({ page }) => {
-        if (typeof t.expected === 'string') {
-          // must wrap in body tags due to peculiarities in how document.write() works: https://github.com/microsoft/playwright/issues/24503
-          await page.setContent('<body>' + t.test(teddy, t.template, model) + '</body>')
-          expect(ignoreSpaces(await page.innerHTML('body'))).toStrictEqual(ignoreSpaces(t.expected))
-        } else if (typeof t.expected === 'boolean') {
-          expect(t.test(teddy, t.template, model)).toBe(t.expected)
+        // todo: refactor this to be much simpler
+        if (t?.type === 'async') {
+          if (!t.expected) {
+            await t.test(teddy, t.template, model, cb)
+            return
+          }
+
+          if (typeof t.expected === 'string') {
+            // must wrap in body tags due to peculiarities in how document.write() works: https://github.com/microsoft/playwright/issues/24503
+            await page.setContent('<body>' + await t.test(teddy, t.template, model, cb) + '</body>')
+            expect(ignoreSpaces(await page.innerHTML('body'))).toEqual(ignoreSpaces(t.expected))
+            return
+          }
+
+          if (typeof t.expected === 'boolean') {
+            expect(t.test(teddy, t.template, model, cb)).toBe(t.expected)
+          }
+        } else if (t?.type === 'custom') {
+          t.test(teddy, t.template, model, cb)
+        } else {
+          if (typeof t.expected === 'string') {
+            // must wrap in body tags due to peculiarities in how document.write() works: https://github.com/microsoft/playwright/issues/24503
+            await page.setContent('<body>' + t.test(teddy, t.template, model) + '</body>')
+            expect(ignoreSpaces(await page.innerHTML('body'))).toStrictEqual(ignoreSpaces(t.expected))
+          } else if (typeof t.expected === 'boolean') {
+            expect(t.test(teddy, t.template, model)).toBe(t.expected)
+          }
         }
       })
     }

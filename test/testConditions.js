@@ -1,3 +1,5 @@
+import { timeout } from './testUtils.js'
+
 export default [
   // {
   //   describe: 'Conditionals',
@@ -597,214 +599,921 @@ export default [
   //     }
   //   ]
   // },
+  // {
+  //   describe: 'Looping',
+  //   tests: [
+  //     {
+  //       message: 'should loop through {letters} correctly (looping/loopVal.html)',
+  //       template: 'looping/loopVal.html',
+  //       test: (teddy, template, model) => teddy.render(template, model),
+  //       expected: '<p>a</p><p>b</p><p>c</p>'
+  //     },
+  //     {
+  //       message: 'should loop through {names} correctly (looping/loopKeyVal.html)',
+  //       template: 'looping/loopKeyVal.html',
+  //       test: (teddy, template, model) => teddy.render(template, model),
+  //       expected: '<p>jack</p> <p>guy</p><p>jill</p> <p>girl</p><p>hill</p> <p>landscape</p>'
+  //     },
+  //     {
+  //       message: 'should loop through {arrays} correctly (looping/loopArrayOfArrays.html)',
+  //       template: 'looping/loopArrayOfArrays.html',
+  //       test: (teddy, template, model) => teddy.render(template, model),
+  //       expected: '<p>0</p><p>a</p><p>b</p><p>c</p><p>1</p><p>d</p><p>e</p><p>f</p><p>2</p><p>g</p><p>h</p><p>i</p>'
+  //     },
+  //     {
+  //       message: 'should loop through {objects} correctly (looping/loopArrayOfObjects.html)',
+  //       template: 'looping/loopArrayOfObjects.html',
+  //       test: (teddy, template, model) => teddy.render(template, model),
+  //       expected: '<p>0</p> <p>1</p> <p>2</p> <p>3</p><p>1</p> <p>4</p> <p>5</p> <p>6</p><p>2</p> <p>7</p> <p>8</p> <p>9</p>'
+  //     },
+  //     {
+  //       message: 'should loop through a {nested.object} correctly (looping/nestedObjectLoop.html)',
+  //       template: 'looping/nestedObjectLoop.html',
+  //       test: (teddy, template, model) => teddy.render(template, model),
+  //       expected: '<p>a: 4</p><p>b: 5</p><p>c: 6</p>'
+  //     },
+  //     {
+  //       message: 'should parse loop through nested object correctly (looping/nestedObjectLoopLookup.html)',
+  //       template: 'looping/nestedObjectLoopLookup.html',
+  //       test: (teddy, template, model) => teddy.render(template, model),
+  //       expected: '<p>1</p><input type="text" checked="true"><p>2</p><input type="text"><p>3</p><input type="text" checked="true">'
+  //     },
+  //     {
+  //       message: 'should parse nested loops correctly (looping/nestedLoopsObjectWithArrayOfObjects.html)',
+  //       template: 'looping/nestedLoopsObjectWithArrayOfObjects.html',
+  //       test: (teddy, template, model) => teddy.render(template, model),
+  //       expected: '<p>value1</p><p>value2</p><p>value3</p><p>value4</p>'
+  //     },
+  //     {
+  //       message: 'should render {variables} via second loop (looping/varNameViaVarInLoop.html)',
+  //       template: 'looping/varNameViaVarInLoop.html',
+  //       test: (teddy, template, model) => teddy.render(template, model),
+  //       expected: '<p>guy</p><p>girl</p><p>landscape</p>'
+  //     },
+  //     {
+  //       message: 'should render {variables} defined as {varname.{othervar}} under slightly different conditions (looping/varNameViaVarInLoopWithIndependentVars.html)',
+  //       template: 'looping/varNameViaVarInLoopWithIndependentVars.html',
+  //       test: (teddy, template, model) => teddy.render(template, model),
+  //       expected: '<p>guy</p><p>girl</p><p>landscape</p>'
+  //     },
+  //     {
+  //       message: 'should render {variable.{otherVar}} in loop that repeats twice doubled (looping/varNameViaVarInLoopWithIndependentVarsDoubled.html)',
+  //       template: 'looping/varNameViaVarInLoopWithIndependentVarsDoubled.html',
+  //       test: (teddy, template, model) => teddy.render(template, model),
+  //       expected: '<p>guy</p><p>girl</p><p>landscape</p><p>guy</p><p>girl</p><p>landscape</p>'
+  //     },
+  //     {
+  //       message: 'should render {variable.{otherVar}} in nested loop variant 1 (looping/varNameViaVarInLoopWithIndependentVarsViaArray.html)',
+  //       template: 'looping/varNameViaVarInLoopWithIndependentVarsViaArray.html',
+  //       test: (teddy, template, model) => teddy.render(template, model),
+  //       expected: '<p>guy</p><p>girl</p><p>landscape</p>'
+  //     },
+  //     {
+  //       message: 'should render {variable.{otherVar}} in nested loop variant 2 (looping/varNameViaVarInLoopWithIndependentVarsViaArrayTwice.html)',
+  //       template: 'looping/varNameViaVarInLoopWithIndependentVarsViaArrayTwice.html',
+  //       test: (teddy, template, model) => teddy.render(template, model),
+  //       expected: '<p>guy</p><p>girl</p><p>landscape</p><p>man</p><p>woman</p><p>scenary</p>'
+  //     },
+  //     {
+  //       message: 'should not render the loop (looping/commentedLoopInLoop.html)',
+  //       template: 'looping/commentedLoopInLoop.html',
+  //       test: (teddy, template, model) => teddy.render(template, model),
+  //       expected: '<p></p>'
+  //     },
+  //     {
+  //       message: 'should parse nested loops correctly (looping/nestedLoops.html)',
+  //       template: 'looping/nestedLoops.html',
+  //       test: (teddy, template, model) => teddy.render(template, model),
+  //       expected: '<p>1</p> <ul> <li>0: one</li><li>1: two</li><li>2: three</li> </ul><p>2</p> <ul> <li>0: four</li><li>1: five</li><li>2: six</li> </ul><p>3</p> <ul> <li>0: seven</li><li>1: eight</li><li>2: nine</li> </ul>'
+  //     },
+  //     {
+  //       message: 'should parse complex nested nested loops correctly (looping/nestedNestedLoops.html)',
+  //       template: 'looping/nestedNestedLoops.html',
+  //       test: (teddy, template, model) => teddy.render(template, model),
+  //       expected: '<p>1</p><ul><li>1</li><ul><li>0: one</li><li>1: two</li><li>2: three</li></ul><li>2</li><ul><li>0: four</li><li>1: five</li><li>2: six</li></ul><li>3</li><ul><li>0: seven</li><li>1: eight</li><li>2: nine</li></ul></ul><p>2</p><ul><li>1</li><ul><li>0: one</li><li>1: two</li><li>2: three</li></ul><li>2</li><ul><li>0: four</li><li>1: five</li><li>2: six</li></ul><li>3</li><ul><li>0: seven</li><li>1: eight</li><li>2: nine</li></ul></ul><p>3</p><ul><li>1</li><ul><li>0: one</li><li>1: two</li><li>2: three</li></ul><li>2</li><ul><li>0: four</li><li>1: five</li><li>2: six</li></ul><li>3</li><ul><li>0: seven</li><li>1: eight</li><li>2: nine</li></ul></ul>'
+  //     },
+  //     {
+  //       message: 'should loop through nested arrays correctly (looping/nestedArrays.html)',
+  //       template: 'looping/nestedArrays.html',
+  //       test: (teddy, template, model) => teddy.render(template, model),
+  //       expected: '<p>one</p><p>two</p><p>three</p><p>four</p><p>five</p><p>six</p><p>seven</p><p>eight</p><p>nine</p>'
+  //     },
+  //     {
+  //       message: 'should loop through nested objects correctly (looping/nestedObjects.html)',
+  //       template: 'looping/nestedObjects.html',
+  //       test: (teddy, template, model) => teddy.render(template, model),
+  //       expected: '<p>Thing With Name 1</p><p>Thing With Name 1: Subthing With Name 1</p><p>Thing With Name 1: Subthing With Name 2</p><p>Thing With Name 1: Subthing With Name 3</p><p>Thing With Name 2</p><p>Thing With Name 2: Subthing With Name 4</p><p>Thing With Name 2: Subthing With Name 5</p><p>Thing With Name 2: Subthing With Name 6</p><p>Thing With Name 3</p><p>Thing With Name 3: Subthing With Name 7</p><p>Thing With Name 3: Subthing With Name 8</p><p>Thing With Name 3: Subthing With Name 9</p>'
+  //     },
+  //     {
+  //       message: 'should loop through a quad-nested structure correctly (looping/quadNested.html)',
+  //       template: 'looping/quadNested.html',
+  //       test: (teddy, template, model) => teddy.render(template, model),
+  //       expected: ''
+  //     },
+  //     {
+  //       message: 'should loop through an array of 5000 elements caching the first pass with a <cache> element so the second pass is faster (looping/largeDataSet.html)',
+  //       template: 'looping/largeDataSet.html',
+  //       test: (teddy, template, model) => {
+  //         const start = new Date().getTime()
+  //         teddy.render(template, model)
+  //         const end = new Date().getTime()
+  //         const time = end - start
+  //         console.log('    → Non-cached time to parse: ', time)
+  //         const start2 = new Date().getTime()
+  //         teddy.render(template, model)
+  //         const end2 = new Date().getTime()
+  //         const time2 = end2 - start2
+  //         console.log('    → Cached time to parse:     ', time2)
+  //         const lessThan = time2 < time || time2 > time || time2 === time // this is necessary because CI CPU cycles vary so there's no way to guarantee the result
+  //         return lessThan
+  //       },
+  //       expected: true
+  //     },
+  //     {
+  //       message: 'should ignore loop with invalid through attribute (looping/undefinedObjectLoop.html)',
+  //       template: 'looping/undefinedObjectLoop.html',
+  //       test: (teddy, template, model) => teddy.render(template, model),
+  //       expected: '<div></div>'
+  //     },
+  //     {
+  //       message: 'should ignore loop with no contents (looping/emptyMarkupLoop.html)',
+  //       template: 'looping/emptyMarkupLoop.html',
+  //       test: (teddy, template, model) => teddy.render(template, model),
+  //       expected: '<div></div>'
+  //     },
+  //     {
+  //       message: 'should loop without nested markup (looping/noMarkupLoop.html)',
+  //       template: 'looping/noMarkupLoop.html',
+  //       test: (teddy, template, model) => teddy.render(template, model),
+  //       expected: '<div>abc</div>'
+  //     },
+  //     {
+  //       message: 'should loop through {letters} correctly with numeric val (looping/numericalVal.html)',
+  //       template: 'looping/numericalVal.html',
+  //       test: (teddy, template, model) => teddy.render(template, model),
+  //       expected: '<p>a</p><p>b</p><p>c</p>'
+  //     },
+  //     {
+  //       message: 'should loop through {letters} correctly with camelCase val (looping/camelCaseLoopVal.html)',
+  //       template: 'looping/camelCaseLoopVal.html',
+  //       test: (teddy, template, model) => teddy.render(template, model),
+  //       expected: '<p>a</p><p>b</p><p>c</p>'
+  //     },
+  //     {
+  //       message: 'should loop through {letters} keys correctly with no val attribute (looping/loopNoVal.html)',
+  //       template: 'looping/loopNoVal.html',
+  //       test: (teddy, template, model) => teddy.render(template, model),
+  //       expected: '<p>0</p><p>1</p><p>2</p>'
+  //     },
+  //     {
+  //       message: 'should ignore loops with missing attributes (looping/loopInvalidAttributes.html)',
+  //       template: 'looping/loopInvalidAttributes.html',
+  //       test: (teddy, template, model) => teddy.render(template, model),
+  //       expected: '<div></div>'
+  //     },
+  //     {
+  //       message: 'should ignore undefined members of objects and arrays (looping/loopUndefinedMember.html)',
+  //       template: 'looping/loopUndefinedMember.html',
+  //       test: (teddy, template, model) => teddy.render(template, model),
+  //       expected: '<p>a</p><p>{letter}</p><p>c</p><p>{item.a}</p><p>{item.b}</p><p>{item.c}</p><p>4</p><p>5</p><p>6</p><p>7</p><p>8</p><p>9</p>'
+  //     },
+  //     {
+  //       message: 'should loop through {letters} correctly and evaluate other teddy tags (looping/loopIncludesIfUnless.html)',
+  //       template: 'looping/loopIncludesIfUnless.html',
+  //       test: (teddy, template, model) => teddy.render(template, model),
+  //       expected: '<p>a</p><p>Some content</p><p>Hello</p><p>b</p><p>Some content</p><p>Hello</p><p>c</p><p>Some content</p><p>Hello</p>'
+  //     },
+  //     {
+  //       message: 'should render deeply nested vars with teddy code (looping/nestedObjectWithTeddyContent.html)',
+  //       template: 'looping/nestedObjectWithTeddyContent.html',
+  //       test: (teddy, template, model) => teddy.render(template, model),
+  //       expected: '<p>1</p><p>Something Exists</p><p>2</p><p>Something Exists</p>'
+  //     },
+  //     {
+  //       message: 'should render deeply nested vars with teddy code and respect noparse flag (looping/nestedObjectWithTeddyContentNoParse.html)',
+  //       template: 'looping/nestedObjectWithTeddyContentNoParse.html',
+  //       test: (teddy, template, model) => teddy.render(template, model),
+  //       expected: '<p>1</p><p><if something="Some content">Something Exists</if></p><p>2</p><p><if something="Some content">Something Exists</if></p>'
+  //     },
+  //     {
+  //       message: 'should not crash if attempting to set a <loop> val that matches the name of something else in the model (looping/loopValNameCollision.html)',
+  //       template: 'looping/loopValNameCollision.html',
+  //       test: (teddy, template, model) => teddy.render(template, model),
+  //       expected: '<p>2</p><p>5</p><p>8</p>'
+  //     },
+  //     {
+  //       message: 'should print an empty string for array member set to an empty string (looping/loopValEmptyString.html)',
+  //       template: 'looping/loopValEmptyString.html',
+  //       test: (teddy, template, model) => teddy.render(template, model),
+  //       expected: '<p>one</p><p>two</p><p></p><p>three</p>'
+  //     }
+  //   ]
+  // },
   {
-    describe: 'Looping',
+    describe: 'Misc',
     tests: [
       {
-        message: 'should loop through {letters} correctly (looping/loopVal.html)',
-        template: 'looping/loopVal.html',
-        test: (teddy, template, model) => teddy.render(template, model),
-        expected: '<p>a</p><p>b</p><p>c</p>'
+        message: 'should compile a template and return a function which when given data will render HTML',
+        template: '<p>{hello}</p>',
+        test: (teddy, template, model) => {
+          const templateFunction = teddy.compile(template)
+          return templateFunction({ hello: 'world' })
+        },
+        expected: '<p>world</p>'
       },
       {
-        message: 'should loop through {names} correctly (looping/loopKeyVal.html)',
-        template: 'looping/loopKeyVal.html',
+        message: 'should not escape HTML entities present in {variables} which are properly {flagged|p|s} (misc/barPandSTest.html)',
+        template: 'misc/barPandSTest.html',
         test: (teddy, template, model) => teddy.render(template, model),
-        expected: '<p>jack</p> <p>guy</p><p>jill</p> <p>girl</p><p>hill</p> <p>landscape</p>'
+        expected: '<h1>double bars</h1> {something}'
       },
       {
-        message: 'should loop through {arrays} correctly (looping/loopArrayOfArrays.html)',
-        template: 'looping/loopArrayOfArrays.html',
+        message: 'should not escape HTML entities present in {variables} which are properly {flagged|s|p} (misc/barSandPTest.html)',
+        template: 'misc/barSandPTest.html',
         test: (teddy, template, model) => teddy.render(template, model),
-        expected: '<p>0</p><p>a</p><p>b</p><p>c</p><p>1</p><p>d</p><p>e</p><p>f</p><p>2</p><p>g</p><p>h</p><p>i</p>'
+        expected: '<h1>double bars</h1> {something}'
       },
       {
-        message: 'should loop through {objects} correctly (looping/loopArrayOfObjects.html)',
-        template: 'looping/loopArrayOfObjects.html',
+        message: 'should render multiple {variables} (misc/multipleVariables.html)',
+        template: 'misc/multipleVariables.html',
         test: (teddy, template, model) => teddy.render(template, model),
-        expected: '<p>0</p> <p>1</p> <p>2</p> <p>3</p><p>1</p> <p>4</p> <p>5</p> <p>6</p><p>2</p> <p>7</p> <p>8</p> <p>9</p>'
+        expected: '<p>Some content</p> <h5>More content</h5>'
       },
       {
-        message: 'should loop through a {nested.object} correctly (looping/nestedObjectLoop.html)',
-        template: 'looping/nestedObjectLoop.html',
+        message: 'should render nested {variables} (misc/nestedVars.html)',
+        template: 'misc/nestedVars.html',
         test: (teddy, template, model) => teddy.render(template, model),
-        expected: '<p>a: 4</p><p>b: 5</p><p>c: 6</p>'
+        expected: '<p>Variable with a variable inside: And another: Some content</p>'
       },
       {
-        message: 'should parse loop through nested object correctly (looping/nestedObjectLoopLookup.html)',
-        template: 'looping/nestedObjectLoopLookup.html',
+        message: 'should not render nested {variables|p} (misc/nestedVarsParseFlag.html)',
+        template: 'misc/nestedVarsParseFlag.html',
         test: (teddy, template, model) => teddy.render(template, model),
-        expected: '<p>1</p><input type="text" checked="true"><p>2</p><input type="text"><p>3</p><input type="text" checked="true">'
+        expected: '<p>Variable with a variable inside: {subVar}</p>'
       },
       {
-        message: 'should parse nested loops correctly (looping/nestedLoopsObjectWithArrayOfObjects.html)',
-        template: 'looping/nestedLoopsObjectWithArrayOfObjects.html',
+        message: 'should properly escape HTML entities present in {variables} (misc/varEscaping.html)',
+        template: 'misc/varEscaping.html',
         test: (teddy, template, model) => teddy.render(template, model),
-        expected: '<p>value1</p><p>value2</p><p>value3</p><p>value4</p>'
+        expected: '<p>&lt;span&gt;raw html&lt;/span&gt;</p>'
       },
       {
-        message: 'should render {variables} via second loop (looping/varNameViaVarInLoop.html)',
-        template: 'looping/varNameViaVarInLoop.html',
+        message: 'should not escape HTML entities present in {variables} which are properly {flagged|s} (misc/varNoEscaping.html)',
+        template: 'misc/varNoEscaping.html',
         test: (teddy, template, model) => teddy.render(template, model),
-        expected: '<p>guy</p><p>girl</p><p>landscape</p>'
+        expected: '<div><span>raw html</span></div>'
       },
       {
-        message: 'should render {variables} defined as {varname.{othervar}} under slightly different conditions (looping/varNameViaVarInLoopWithIndependentVars.html)',
-        template: 'looping/varNameViaVarInLoopWithIndependentVars.html',
+        message: 'should not parse any code in <noteddy> tags (misc/varNoParsing.html)',
+        template: 'misc/varNoParsing.html',
         test: (teddy, template, model) => teddy.render(template, model),
-        expected: '<p>guy</p><p>girl</p><p>landscape</p>'
+        expected: '<p>{escapeTest}</p>'
       },
       {
-        message: 'should render {variable.{otherVar}} in loop that repeats twice doubled (looping/varNameViaVarInLoopWithIndependentVarsDoubled.html)',
-        template: 'looping/varNameViaVarInLoopWithIndependentVarsDoubled.html',
+        message: 'should remove {! server side comments !} (misc/serverSideComments.html)',
+        template: 'misc/serverSideComments.html',
         test: (teddy, template, model) => teddy.render(template, model),
-        expected: '<p>guy</p><p>girl</p><p>landscape</p><p>guy</p><p>girl</p><p>landscape</p>'
+        expected: '<p>test test</p>'
       },
       {
-        message: 'should render {variable.{otherVar}} in nested loop variant 1 (looping/varNameViaVarInLoopWithIndependentVarsViaArray.html)',
-        template: 'looping/varNameViaVarInLoopWithIndependentVarsViaArray.html',
+        message: 'should remove {! {! nested !} server side comments !} (misc/serverSideCommentsNested.html)',
+        template: 'misc/serverSideCommentsNested.html',
         test: (teddy, template, model) => teddy.render(template, model),
-        expected: '<p>guy</p><p>girl</p><p>landscape</p>'
+        expected: '<p>Any comments? </p>'
       },
       {
-        message: 'should render {variable.{otherVar}} in nested loop variant 2 (looping/varNameViaVarInLoopWithIndependentVarsViaArrayTwice.html)',
-        template: 'looping/varNameViaVarInLoopWithIndependentVarsViaArrayTwice.html',
+        message: 'should not break when referencing objects that don\'t exist (misc/objectDoesNotExist.html)',
+        template: 'misc/objectDoesNotExist.html',
         test: (teddy, template, model) => teddy.render(template, model),
-        expected: '<p>guy</p><p>girl</p><p>landscape</p><p>man</p><p>woman</p><p>scenary</p>'
+        expected: ' <p>{doesntExist.someKey}</p> <p class="false"></p>'
+      },
+      // todo: <!DOCTYPE>...<head> does not appear in playwright tests
+      {
+        skip: true,
+        message: 'should render plain HTML with no teddy tags with no changes (misc/plainHTML.html)',
+        template: 'misc/plainHTML.html',
+        test: (teddy, template, model) => teddy.render(template, model),
+        expected: '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="format-detection" content="telephone=no"><title>Plain HTML</title><link rel="stylesheet" href="/css/styles.css"></head><body><main><p>This template contains no teddy tags. Just HTML.</p></main><script type="text/javascript" src="/js/main.js"></script></body></html>'
       },
       {
-        message: 'should not render the loop (looping/commentedLoopInLoop.html)',
-        template: 'looping/commentedLoopInLoop.html',
+        message: 'should render {variables} within style element (misc/styleVariables.html)',
+        template: 'misc/styleVariables.html',
         test: (teddy, template, model) => teddy.render(template, model),
-        expected: '<p></p>'
+        expected: '<style>p{height:10px;}</style>'
       },
       {
-        message: 'should parse nested loops correctly (looping/nestedLoops.html)',
-        template: 'looping/nestedLoops.html',
+        message: 'should access property of {variable} object with {variable} (misc/variableObjectProperty.html)',
+        template: 'misc/variableObjectProperty.html',
         test: (teddy, template, model) => teddy.render(template, model),
-        expected: '<p>1</p> <ul> <li>0: one</li><li>1: two</li><li>2: three</li> </ul><p>2</p> <ul> <li>0: four</li><li>1: five</li><li>2: six</li> </ul><p>3</p> <ul> <li>0: seven</li><li>1: eight</li><li>2: nine</li> </ul>'
+        expected: '<p>guy</p>'
       },
       {
-        message: 'should parse complex nested nested loops correctly (looping/nestedNestedLoops.html)',
-        template: 'looping/nestedNestedLoops.html',
+        message: 'should escape curly braces from regex pattern (misc/regexEscaping.html)',
+        template: 'misc/regexEscaping.html',
         test: (teddy, template, model) => teddy.render(template, model),
-        expected: '<p>1</p><ul><li>1</li><ul><li>0: one</li><li>1: two</li><li>2: three</li></ul><li>2</li><ul><li>0: four</li><li>1: five</li><li>2: six</li></ul><li>3</li><ul><li>0: seven</li><li>1: eight</li><li>2: nine</li></ul></ul><p>2</p><ul><li>1</li><ul><li>0: one</li><li>1: two</li><li>2: three</li></ul><li>2</li><ul><li>0: four</li><li>1: five</li><li>2: six</li></ul><li>3</li><ul><li>0: seven</li><li>1: eight</li><li>2: nine</li></ul></ul><p>3</p><ul><li>1</li><ul><li>0: one</li><li>1: two</li><li>2: three</li></ul><li>2</li><ul><li>0: four</li><li>1: five</li><li>2: six</li></ul><li>3</li><ul><li>0: seven</li><li>1: eight</li><li>2: nine</li></ul></ul>'
+        expected: '<input type="text" name="date" placeholder="DD/MM/YYYY" id="date" pattern="^(3[0-1]|[1-2]\\d|[1-9]|0\\d)\\/(1[0-2]|[1-9]|0\\d)\\/[1-2]\\d{3}$">'
       },
       {
-        message: 'should loop through nested arrays correctly (looping/nestedArrays.html)',
-        template: 'looping/nestedArrays.html',
+        message: 'should render emojis correctly (misc/emojis.html)',
+        template: 'misc/emojis.html',
         test: (teddy, template, model) => teddy.render(template, model),
-        expected: '<p>one</p><p>two</p><p>three</p><p>four</p><p>five</p><p>six</p><p>seven</p><p>eight</p><p>nine</p>'
+        expected: '<p>🎉🥳🎈🎊</p>'
       },
       {
-        message: 'should loop through nested objects correctly (looping/nestedObjects.html)',
-        template: 'looping/nestedObjects.html',
-        test: (teddy, template, model) => teddy.render(template, model),
-        expected: '<p>Thing With Name 1</p><p>Thing With Name 1: Subthing With Name 1</p><p>Thing With Name 1: Subthing With Name 2</p><p>Thing With Name 1: Subthing With Name 3</p><p>Thing With Name 2</p><p>Thing With Name 2: Subthing With Name 4</p><p>Thing With Name 2: Subthing With Name 5</p><p>Thing With Name 2: Subthing With Name 6</p><p>Thing With Name 3</p><p>Thing With Name 3: Subthing With Name 7</p><p>Thing With Name 3: Subthing With Name 8</p><p>Thing With Name 3: Subthing With Name 9</p>'
-      },
-      {
-        message: 'should loop through a quad-nested structure correctly (looping/quadNested.html)',
-        template: 'looping/quadNested.html',
-        test: (teddy, template, model) => teddy.render(template, model),
+        message: 'should cache the contents of the cache element but not anything outside of it (misc/cacheElement.html)',
+        template: 'misc/cacheElement.html',
+        type: 'async',
+        test: async (teddy, template, _model, assert) => {
+          // these will be cached
+          const render1 = teddy.render(template, { user: 'Joe', city: 'NY', value: 30 })
+          assert(render1, '<p>Dynamic: Welcome Joe!</p><p>Cached: High temperature today in NY is 30.</p>')
+          assert(teddy.caches.weather.entries.NY.markup, '<p>Cached: High temperature today in NY is 30.</p>')
+          await timeout(100)
+
+          const render2 = teddy.render(template, { user: 'Bob', city: 'SF', value: 60 })
+          assert(render2, '<p>Dynamic: Welcome Bob!</p><p>Cached: High temperature today in SF is 60.</p>')
+          assert(teddy.caches.weather.entries.SF.markup, '<p>Cached: High temperature today in SF is 60.</p>')
+          await timeout(100)
+
+          const render3 = teddy.render(template, { user: 'Moe', city: 'LA', value: 80 })
+          assert(render3, '<p>Dynamic: Welcome Moe!</p><p>Cached: High temperature today in LA is 80.</p>')
+          assert(teddy.caches.weather.entries.LA.markup, '<p>Cached: High temperature today in LA is 80.</p>')
+          await timeout(100)
+
+          // will display from cache
+          const render4 = teddy.render(template, { user: 'Sue', city: 'NY', value: 300 }) // new temperature value should not print because old value is cached
+          assert(render4, '<p>Dynamic: Welcome Sue!</p><p>Cached: High temperature today in NY is 30.</p>')
+          assert(teddy.caches.weather.entries.NY.markup, '<p>Cached: High temperature today in NY is 30.</p>')
+          await timeout(100)
+
+          const render5 = teddy.render(template, { user: 'Jay', city: 'SF', value: 600 }) // new temperature value should not print because old value is cached
+          assert(render5, '<p>Dynamic: Welcome Jay!</p><p>Cached: High temperature today in SF is 60.</p>')
+          assert(teddy.caches.weather.entries.SF.markup, '<p>Cached: High temperature today in SF is 60.</p>')
+          await timeout(100)
+
+          const render6 = teddy.render(template, { user: 'Mae', city: 'LA', value: 800 }) // new temperature value should not print because old value is cached
+          assert(render6, '<p>Dynamic: Welcome Mae!</p><p>Cached: High temperature today in LA is 80.</p>')
+          assert(teddy.caches.weather.entries.LA.markup, '<p>Cached: High temperature today in LA is 80.</p>')
+          await timeout(100)
+
+          // should drop NY and replace it with NOLA due to max caches being 3 and NY being the least recently accessed
+          const render7 = teddy.render(template, { name: 'weather', user: 'Liz', city: 'NOLA', value: 90 })
+          assert(render7, '<p>Dynamic: Welcome Liz!</p><p>Cached: High temperature today in NOLA is 90.</p>')
+          assert(teddy.caches.weather.entries.NOLA.markup, '<p>Cached: High temperature today in NOLA is 90.</p>')
+          const missingNY = !teddy.caches.weather.entries.NY
+          assert(missingNY)
+
+          // see if deleting SF from the city cache works
+          teddy.clearCache('weather', 'SF')
+          const missingSF = !teddy.caches.weather.entries.SF
+          assert(missingSF)
+
+          // see if deleting entire city cache works
+          teddy.clearCache('weather')
+          const missingAll = !teddy.caches.weather
+          assert(missingAll)
+        },
         expected: ''
       },
       {
-        message: 'should loop through an array of 5000 elements caching the first pass with a <cache> element so the second pass is faster (looping/largeDataSet.html)',
-        template: 'looping/largeDataSet.html',
-        test: (teddy, template, model) => {
-          const start = new Date().getTime()
+        message: 'should cache the contents of the cache element but not anything outside of it (misc/cacheElementMaxAge.html)',
+        template: 'misc/cacheElementMaxAge.html',
+        type: 'async',
+        test: async (teddy, template, _model, assert) => {
+          // these will be cached
+          const render1 = teddy.render(template, { user: 'Joe', city: 'NY', value: 30 })
+          assert(render1, '<p>Dynamic: Welcome Joe!</p><p>Cached: High temperature today in NY is 30.</p>')
+          assert(teddy.caches.weather.entries.NY.markup, '<p>Cached: High temperature today in NY is 30.</p>')
+          await timeout(100)
+
+          // will display from cache
+          const render4 = teddy.render(template, { user: 'Sue', city: 'NY', value: 300 }) // new temperature value should not print because old value is cached
+          assert(render4, '<p>Dynamic: Welcome Sue!</p><p>Cached: High temperature today in NY is 30.</p>')
+          assert(teddy.caches.weather.entries.NY.markup, '<p>Cached: High temperature today in NY is 30.</p>')
+          await timeout(1100)
+
+          // will not be cached
+          const render5 = teddy.render(template, { user: 'Moe', city: 'NY', value: 60 })
+          assert(render5, '<p>Dynamic: Welcome Moe!</p><p>Cached: High temperature today in NY is 60.</p>')
+          assert(teddy.caches.weather.entries.NY.markup, '<p>Cached: High temperature today in NY is 60.</p>')
+        },
+        expected: ''
+      },
+      {
+        message: 'should render cache element correctly with dynamic attributes (misc/cacheElementDynamicAttrs.html)',
+        template: 'misc/cacheElementDynamicAttrs.html',
+        type: 'async',
+        test: async (teddy, template, model, assert) => {
+          teddy.clearCache('weather')
+
+          // these will be cached
+          const render1 = teddy.render(template, { name: 'weather', key: 'city', user: 'Joe', city: 'NY', value: 30 })
+          assert(render1, '<p>Dynamic: Welcome Joe!</p><p>Cached: High temperature today in NY is 30.</p>')
+          assert(teddy.caches.weather.entries.NY.markup, '<p>Cached: High temperature today in NY is 30.</p>')
+          await timeout(100)
+
+          const render2 = teddy.render(template, { name: 'weather', key: 'city', user: 'Bob', city: 'SF', value: 60 })
+          assert(render2, '<p>Dynamic: Welcome Bob!</p><p>Cached: High temperature today in SF is 60.</p>')
+          assert(teddy.caches.weather.entries.SF.markup, '<p>Cached: High temperature today in SF is 60.</p>')
+          await timeout(100)
+
+          const render3 = teddy.render(template, { name: 'weather', key: 'city', user: 'Moe', city: 'LA', value: 80 })
+          assert(render3, '<p>Dynamic: Welcome Moe!</p><p>Cached: High temperature today in LA is 80.</p>')
+          assert(teddy.caches.weather.entries.LA.markup, '<p>Cached: High temperature today in LA is 80.</p>')
+          await timeout(100)
+
+          // will display from cache
+          const render4 = teddy.render(template, { name: 'weather', key: 'city', user: 'Sue', city: 'NY', value: 300 }) // new temperature value should not print because old value is cached
+          assert(render4, '<p>Dynamic: Welcome Sue!</p><p>Cached: High temperature today in NY is 30.</p>')
+          assert(teddy.caches.weather.entries.NY.markup, '<p>Cached: High temperature today in NY is 30.</p>')
+          await timeout(100)
+
+          const render5 = teddy.render(template, { name: 'weather', key: 'city', user: 'Jay', city: 'SF', value: 600 }) // new temperature value should not print because old value is cached
+          assert(render5, '<p>Dynamic: Welcome Jay!</p><p>Cached: High temperature today in SF is 60.</p>')
+          assert(teddy.caches.weather.entries.SF.markup, '<p>Cached: High temperature today in SF is 60.</p>')
+          await timeout(100)
+
+          const render6 = teddy.render(template, { name: 'weather', key: 'city', user: 'Mae', city: 'LA', value: 800 }) // new temperature value should not print because old value is cached
+          assert(render6, '<p>Dynamic: Welcome Mae!</p><p>Cached: High temperature today in LA is 80.</p>')
+          assert(teddy.caches.weather.entries.LA.markup, '<p>Cached: High temperature today in LA is 80.</p>')
+          await timeout(100)
+
+          // should drop NY and replace it with NOLA due to max caches being 3 and NY being the least recently accessed
+          const render7 = teddy.render(template, { name: 'weather', key: 'city', user: 'Liz', city: 'NOLA', value: 90 })
+          assert(render7, '<p>Dynamic: Welcome Liz!</p><p>Cached: High temperature today in NOLA is 90.</p>')
+          assert(teddy.caches.weather.entries.NOLA.markup, '<p>Cached: High temperature today in NOLA is 90.</p>')
+          const missingNY = !teddy.caches.weather.entries.NY
+          assert(missingNY, true)
+
+          // see if deleting SF from the city cache works
+          teddy.clearCache('weather', 'SF')
+          const missingSF = !teddy.caches.weather.entries.SF
+          assert(missingSF)
+
+          // see if deleting entire city cache works
+          teddy.clearCache('weather')
+          const missingAll = !teddy.caches.weather
+          assert(missingAll)
+        },
+        expected: ''
+      },
+      {
+        message: 'should render cache element correctly with dynamic attributes (misc/cacheElementDynamicAttrsNested.html)',
+        template: 'misc/cacheElementDynamicAttrsNested.html',
+        type: 'async',
+        test: async (teddy, template, model, assert) => {
+          teddy.clearCache('weather')
+
+          // these will be cached
+          const render1 = teddy.render(template, { name: 'weather', key: 'city.acronym', user: 'Joe', city: { acronym: 'NY' }, value: 30 })
+          assert(render1, '<p>Dynamic: Welcome Joe!</p><p>Cached: High temperature today in NY is 30.</p>')
+          assert(teddy.caches.weather.entries.NY.markup, '<p>Cached: High temperature today in NY is 30.</p>')
+          await timeout(100)
+
+          const render2 = teddy.render(template, { name: 'weather', key: 'city.acronym', user: 'Bob', city: { acronym: 'SF' }, value: 60 })
+          assert(render2, '<p>Dynamic: Welcome Bob!</p><p>Cached: High temperature today in SF is 60.</p>')
+          assert(teddy.caches.weather.entries.SF.markup, '<p>Cached: High temperature today in SF is 60.</p>')
+          await timeout(100)
+
+          const render3 = teddy.render(template, { name: 'weather', key: 'city.acronym', user: 'Moe', city: { acronym: 'LA' }, value: 80 })
+          assert(render3, '<p>Dynamic: Welcome Moe!</p><p>Cached: High temperature today in LA is 80.</p>')
+          assert(teddy.caches.weather.entries.LA.markup, '<p>Cached: High temperature today in LA is 80.</p>')
+          await timeout(100)
+
+          // will display from cache
+          const render4 = teddy.render(template, { name: 'weather', key: 'city.acronym', user: 'Sue', city: { acronym: 'NY' }, value: 300 }) // new temperature value should not print because old value is cached
+          assert(render4, '<p>Dynamic: Welcome Sue!</p><p>Cached: High temperature today in NY is 30.</p>')
+          assert(teddy.caches.weather.entries.NY.markup, '<p>Cached: High temperature today in NY is 30.</p>')
+          await timeout(100)
+
+          const render5 = teddy.render(template, { name: 'weather', key: 'city.acronym', user: 'Jay', city: { acronym: 'SF' }, value: 600 }) // new temperature value should not print because old value is cached
+          assert(render5, '<p>Dynamic: Welcome Jay!</p><p>Cached: High temperature today in SF is 60.</p>')
+          assert(teddy.caches.weather.entries.SF.markup, '<p>Cached: High temperature today in SF is 60.</p>')
+          await timeout(100)
+
+          const render6 = teddy.render(template, { name: 'weather', key: 'city.acronym', user: 'Mae', city: { acronym: 'LA' }, value: 800 }) // new temperature value should not print because old value is cached
+          assert(render6, '<p>Dynamic: Welcome Mae!</p><p>Cached: High temperature today in LA is 80.</p>')
+          assert(teddy.caches.weather.entries.LA.markup, '<p>Cached: High temperature today in LA is 80.</p>')
+          await timeout(100)
+
+          // should drop NY and replace it with NOLA due to max caches being 3 and NY being the least recently accessed
+          const render7 = teddy.render(template, { name: 'weather', key: 'city.acronym', user: 'Liz', city: { acronym: 'NOLA' }, value: 90 })
+          assert(render7, '<p>Dynamic: Welcome Liz!</p><p>Cached: High temperature today in NOLA is 90.</p>')
+          assert(teddy.caches.weather.entries.NOLA.markup, '<p>Cached: High temperature today in NOLA is 90.</p>')
+          const missingNY = !teddy.caches.weather.entries.NY
+          assert(missingNY)
+
+          // see if deleting SF from the city cache works
+          teddy.clearCache('weather', 'SF')
+          const missingSF = !teddy.caches.weather.entries.SF
+          assert(missingSF)
+
+          // see if deleting entire city cache works
+          teddy.clearCache('weather')
+          const missingAll = !teddy.caches.weather
+          assert(missingAll)
+        },
+        expected: ''
+      },
+      {
+        message: 'should render template, then render cached template, then render the template again when the cache expires (misc/cacheWholeTemplate.html)',
+        template: 'misc/cacheWholeTemplate.html',
+        type: 'async',
+        test: async (teddy, template, model, assert) => {
+          teddy.setCache({
+            template,
+            key: null,
+            maxAge: 1000
+          })
+          const start1 = new Date().getTime()
           teddy.render(template, model)
-          const end = new Date().getTime()
-          const time = end - start
-          console.log('    → Non-cached time to parse: ', time)
+          const end1 = new Date().getTime()
+          const time1 = end1 - start1
+          console.log('    → Non-cached time to parse: ', time1)
+
           const start2 = new Date().getTime()
           teddy.render(template, model)
           const end2 = new Date().getTime()
           const time2 = end2 - start2
           console.log('    → Cached time to parse:     ', time2)
-          const lessThan = time2 < time || time2 > time || time2 === time // this is necessary because CI CPU cycles vary so there's no way to guarantee the result
-          return lessThan
+
+          await timeout(1100)
+          const start3 = new Date().getTime()
+          teddy.render(template, model)
+          const end3 = new Date().getTime()
+          const time3 = end3 - start3
+          console.log('    → Non-cached time to parse after clearing cache: ', time3)
+          const fasterSlower = time2 < 100 && time3 > 100
+          assert(fasterSlower)
         },
-        expected: true
+        expected: ''
       },
       {
-        message: 'should ignore loop with invalid through attribute (looping/undefinedObjectLoop.html)',
-        template: 'looping/undefinedObjectLoop.html',
-        test: (teddy, template, model) => teddy.render(template, model),
-        expected: '<div></div>'
+        message: 'should render template, then render cached template, then render the template again when the cache is explicitly cleared (misc/cacheWholeTemplate.html)',
+        template: 'misc/cacheWholeTemplate.html',
+        type: 'async',
+        test: async (teddy, template, model, assert) => {
+          teddy.setCache({
+            template,
+            key: null,
+            maxAge: 1000
+          })
+          const start1 = new Date().getTime()
+          teddy.render(template, model)
+          const end1 = new Date().getTime()
+          const time1 = end1 - start1
+          console.log('    → Non-cached time to parse: ', time1)
+
+          const start2 = new Date().getTime()
+          teddy.render(template, model)
+          const end2 = new Date().getTime()
+          const time2 = end2 - start2
+          console.log('    → Cached time to parse:     ', time2)
+          teddy.clearCache({
+            template,
+            key: null
+          })
+
+          const start3 = new Date().getTime()
+          teddy.render(template, model)
+          const end3 = new Date().getTime()
+          const time3 = end3 - start3
+          console.log('    → Non-cached time to parse after clearing cache: ', time3)
+          const fasterSlower = time2 < 100 && time3 > 100
+          assert(fasterSlower)
+        },
+        expected: ''
       },
       {
-        message: 'should ignore loop with no contents (looping/emptyMarkupLoop.html)',
-        template: 'looping/emptyMarkupLoop.html',
-        test: (teddy, template, model) => teddy.render(template, model),
-        expected: '<div></div>'
+        message: 'should render template, then render cached template, then render the template again when the cache expires via keyed values (misc/cacheWholeTemplate.html)',
+        template: 'misc/cacheWholeTemplate.html',
+        type: 'async',
+        test: async (teddy, template, model, assert) => {
+          const modelNY = Object.assign({ city: 'NY' }, model)
+          const modelSF = Object.assign({ city: 'SF' }, model)
+          teddy.setCache({
+            template,
+            key: 'city',
+            maxAge: 1000
+          })
+          const start1 = new Date().getTime()
+          teddy.render(template, modelNY)
+          const end1 = new Date().getTime()
+          const time1 = end1 - start1
+          console.log('    → Non-cached time to parse (NY): ', time1)
+
+          const start3 = new Date().getTime()
+          teddy.render(template, modelNY)
+          const end3 = new Date().getTime()
+          const time3 = end3 - start3
+          console.log('    → Cached time to parse (NY):     ', time3)
+
+          const start2 = new Date().getTime()
+          teddy.render(template, modelSF)
+          const end2 = new Date().getTime()
+          const time2 = end2 - start2
+          console.log('    → Non-cached time to parse (SF): ', time2)
+
+          await timeout(1100)
+          const start4 = new Date().getTime()
+          teddy.render(template, modelSF)
+          const end4 = new Date().getTime()
+          const time4 = end4 - start4
+          console.log('    → Non-cached time to parse after clearing cache (SF): ', time4)
+          const fasterSlower = time3 < 100 && time4 > 100
+          assert(fasterSlower)
+        },
+        expected: ''
       },
       {
-        message: 'should loop without nested markup (looping/noMarkupLoop.html)',
-        template: 'looping/noMarkupLoop.html',
-        test: (teddy, template, model) => teddy.render(template, model),
-        expected: '<div>abc</div>'
+        message: 'should render template, then render cached template, then render the template again when the cache expires via keyed values when the cache is explicitly cleared (misc/cacheWholeTemplate.html)',
+        template: 'misc/cacheWholeTemplate.html',
+        type: 'async',
+        test: async (teddy, template, model, assert) => {
+          const modelNY = Object.assign({ city: 'NY' }, model)
+          const modelSF = Object.assign({ city: 'SF' }, model)
+          teddy.setCache({
+            template,
+            key: 'city',
+            maxAge: 1000
+          })
+          const start1 = new Date().getTime()
+          teddy.render(template, modelNY)
+          const end1 = new Date().getTime()
+          const time1 = end1 - start1
+          console.log('    → Non-cached time to parse (NY): ', time1)
+
+          const start3 = new Date().getTime()
+          teddy.render(template, modelNY)
+          const end3 = new Date().getTime()
+          const time3 = end3 - start3
+          console.log('    → Cached time to parse (NY):     ', time3)
+
+          const start2 = new Date().getTime()
+          teddy.render(template, modelSF)
+          const end2 = new Date().getTime()
+          const time2 = end2 - start2
+          console.log('    → Non-cached time to parse (SF): ', time2)
+          teddy.clearCache({
+            template,
+            key: 'city'
+          })
+
+          const start4 = new Date().getTime()
+          teddy.render(template, modelSF)
+          const end4 = new Date().getTime()
+          const time4 = end4 - start4
+          console.log('    → Non-cached time to parse after clearing cache (SF): ', time4)
+          const fasterSlower = time3 < 100 && time4 > 100
+          assert(fasterSlower)
+        },
+        expected: ''
       },
       {
-        message: 'should loop through {letters} correctly with numeric val (looping/numericalVal.html)',
-        template: 'looping/numericalVal.html',
-        test: (teddy, template, model) => teddy.render(template, model),
-        expected: '<p>a</p><p>b</p><p>c</p>'
+        message: 'should render template, then render cached template, then render the template again when the cache expires via keyed values with nesting (misc/cacheWholeTemplate.html)',
+        template: 'misc/cacheWholeTemplate.html',
+        type: 'async',
+        test: async (teddy, template, model, assert) => {
+          const modelNY = Object.assign({ city: { acronym: 'NY' } }, model)
+          const modelSF = Object.assign({ city: { acronym: 'SF' } }, model)
+          teddy.setCache({
+            template,
+            key: 'city.acronym',
+            maxAge: 1000
+          })
+          const start1 = new Date().getTime()
+          teddy.render(template, modelNY)
+          const end1 = new Date().getTime()
+          const time1 = end1 - start1
+          console.log('    → Non-cached time to parse (NY): ', time1)
+
+          const start3 = new Date().getTime()
+          teddy.render(template, modelNY)
+          const end3 = new Date().getTime()
+          const time3 = end3 - start3
+          console.log('    → Cached time to parse (NY):     ', time3)
+
+          const start2 = new Date().getTime()
+          teddy.render(template, modelSF)
+          const end2 = new Date().getTime()
+          const time2 = end2 - start2
+          console.log('    → Non-cached time to parse (SF): ', time2)
+
+          await timeout(1100)
+          const start4 = new Date().getTime()
+          teddy.render(template, modelSF)
+          const end4 = new Date().getTime()
+          const time4 = end4 - start4
+          console.log('    → Non-cached time to parse after clearing cache (SF): ', time4)
+          const fasterSlower = time3 < 100 && time4 > 100
+          assert(fasterSlower)
+        },
+        expected: ''
       },
       {
-        message: 'should loop through {letters} correctly with camelCase val (looping/camelCaseLoopVal.html)',
-        template: 'looping/camelCaseLoopVal.html',
-        test: (teddy, template, model) => teddy.render(template, model),
-        expected: '<p>a</p><p>b</p><p>c</p>'
+        message: 'should render template, then render cached template, then render the template again when the cache expires via keyed values with nesting when the cache is explicitly cleared (misc/cacheWholeTemplate.html)',
+        template: 'misc/cacheWholeTemplate.html',
+        type: 'async',
+        test: async (teddy, template, model, assert) => {
+          const modelNY = Object.assign({ city: { acronym: 'NY' } }, model)
+          const modelSF = Object.assign({ city: { acronym: 'SF' } }, model)
+          teddy.setCache({
+            template,
+            key: 'city.acronym',
+            maxAge: 1000
+          })
+          const start1 = new Date().getTime()
+          teddy.render(template, modelNY)
+          const end1 = new Date().getTime()
+          const time1 = end1 - start1
+          console.log('    → Non-cached time to parse (NY): ', time1)
+
+          const start3 = new Date().getTime()
+          teddy.render(template, modelNY)
+          const end3 = new Date().getTime()
+          const time3 = end3 - start3
+          console.log('    → Cached time to parse (NY):     ', time3)
+
+          const start2 = new Date().getTime()
+          teddy.render(template, modelSF)
+          const end2 = new Date().getTime()
+          const time2 = end2 - start2
+          console.log('    → Non-cached time to parse (SF): ', time2)
+          teddy.clearCache({
+            template,
+            key: 'city.acronym'
+          })
+
+          const start4 = new Date().getTime()
+          teddy.render(template, modelSF)
+          const end4 = new Date().getTime()
+          const time4 = end4 - start4
+          console.log('    → Non-cached time to parse after clearing cache (SF): ', time4)
+          const fasterSlower = time3 < 100 && time4 > 100
+          assert(fasterSlower)
+        },
+        expected: ''
       },
       {
-        message: 'should loop through {letters} keys correctly with no val attribute (looping/loopNoVal.html)',
-        template: 'looping/loopNoVal.html',
-        test: (teddy, template, model) => teddy.render(template, model),
-        expected: '<p>0</p><p>1</p><p>2</p>'
+        message: 'should drop caches which have expired due to maximum being reached (misc/cacheWholeTemplate.html)',
+        template: 'misc/cacheWholeTemplate.html',
+        type: 'async',
+        test: async (teddy, template, model, assert) => {
+          const modelNY = Object.assign({ city: { acronym: 'NY' } }, model)
+          const modelSF = Object.assign({ city: { acronym: 'SF' } }, model)
+          const modelLA = Object.assign({ city: { acronym: 'LA' } }, model)
+          let present
+          teddy.setCache({
+            template,
+            key: 'city.acronym',
+            maxAge: 1000,
+            maxCaches: 2
+          })
+          const start1 = new Date().getTime()
+          teddy.render(template, modelNY)
+          const end1 = new Date().getTime()
+          const time1 = end1 - start1
+          console.log('    → Non-cached time to parse (NY): ', time1)
+          present = typeof teddy.templateCaches[template]['city.acronym'].entries.NY === 'object'
+          assert(present)
+          await timeout(100)
+
+          const start2 = new Date().getTime()
+          teddy.render(template, modelSF)
+          const end2 = new Date().getTime()
+          const time2 = end2 - start2
+          console.log('    → Non-cached time to parse (SF): ', time2)
+          present = typeof teddy.templateCaches[template]['city.acronym'].entries.SF === 'object'
+          assert(present)
+          await timeout(100)
+
+          const start3 = new Date().getTime()
+          teddy.render(template, modelLA)
+          const end3 = new Date().getTime()
+          const time3 = end3 - start3
+          console.log('    → Non-cached time to parse (LA): ', time3)
+          present = typeof teddy.templateCaches[template]['city.acronym'].entries.LA === 'object'
+          assert(present)
+
+          present = typeof teddy.templateCaches[template]['city.acronym'].entries.NY !== 'object'
+          assert(present)
+        },
+        expected: ''
       },
       {
-        message: 'should ignore loops with missing attributes (looping/loopInvalidAttributes.html)',
-        template: 'looping/loopInvalidAttributes.html',
+        message: 'should avoid rendering templates that are not strings',
+        template: 5,
         test: (teddy, template, model) => teddy.render(template, model),
-        expected: '<div></div>'
+        expected: ''
       },
       {
-        message: 'should ignore undefined members of objects and arrays (looping/loopUndefinedMember.html)',
-        template: 'looping/loopUndefinedMember.html',
-        test: (teddy, template, model) => teddy.render(template, model),
-        expected: '<p>a</p><p>{letter}</p><p>c</p><p>{item.a}</p><p>{item.b}</p><p>{item.c}</p><p>4</p><p>5</p><p>6</p><p>7</p><p>8</p><p>9</p>'
+        message: 'should render a template with missing or invalid model (misc/emptyModelMarkup.html)',
+        template: 'misc/emptyModelMarkup.html',
+        test: (teddy, template, _model) => teddy.render(template, 1),
+        expected: '<div><p>Hello</p></div>'
       },
       {
-        message: 'should loop through {letters} correctly and evaluate other teddy tags (looping/loopIncludesIfUnless.html)',
-        template: 'looping/loopIncludesIfUnless.html',
+        message: 'should not render {variables} that don\'t exist in the model (misc/varNotInModel.html)',
+        template: 'misc/varNotInModel.html',
         test: (teddy, template, model) => teddy.render(template, model),
-        expected: '<p>a</p><p>Some content</p><p>Hello</p><p>b</p><p>Some content</p><p>Hello</p><p>c</p><p>Some content</p><p>Hello</p>'
+        expected: '{noExist}'
       },
       {
-        message: 'should render deeply nested vars with teddy code (looping/nestedObjectWithTeddyContent.html)',
-        template: 'looping/nestedObjectWithTeddyContent.html',
-        test: (teddy, template, model) => teddy.render(template, model),
-        expected: '<p>1</p><p>Something Exists</p><p>2</p><p>Something Exists</p>'
+        message: 'should set each verbosity level',
+        template: '',
+        type: 'custom',
+        test: (teddy, _template, _model, assert) => {
+          let verbosity = ''
+          teddy.setVerbosity()
+          verbosity += teddy.params.verbosity + ', '
+          teddy.setVerbosity('none')
+          verbosity += teddy.params.verbosity + ', '
+          teddy.setVerbosity(0)
+          verbosity += teddy.params.verbosity + ', '
+          teddy.setVerbosity('verbose')
+          verbosity += teddy.params.verbosity + ', '
+          teddy.setVerbosity(2)
+          verbosity += teddy.params.verbosity + ', '
+          teddy.setVerbosity('DEBUG')
+          verbosity += teddy.params.verbosity + ', '
+          teddy.setVerbosity(3)
+          verbosity += teddy.params.verbosity
+
+          assert(verbosity, '1, 0, 0, 2, 2, 3, 3')
+          verbosity = ''
+          if (typeof process === 'object') {
+            if (process.env.NODE_ENV === 'test') {
+              teddy.setVerbosity(0)
+            } else if (process.env.NODE_ENV === 'cover') {
+              teddy.setVerbosity(3)
+            }
+          } else {
+            teddy.setVerbosity(0)
+          }
+        },
+        expected: ''
       },
       {
-        message: 'should render deeply nested vars with teddy code and respect noparse flag (looping/nestedObjectWithTeddyContentNoParse.html)',
-        template: 'looping/nestedObjectWithTeddyContentNoParse.html',
+        message: 'should render undefined variables as text (misc/undefinedVar.html)',
+        template: 'misc/undefinedVar.html',
         test: (teddy, template, model) => teddy.render(template, model),
-        expected: '<p>1</p><p><if something="Some content">Something Exists</if></p><p>2</p><p><if something="Some content">Something Exists</if></p>'
+        expected: '<p>{undefinedVar}</p><p>{definedParent.undefinedMember}</p>'
       },
       {
-        message: 'should not crash if attempting to set a <loop> val that matches the name of something else in the model (looping/loopValNameCollision.html)',
-        template: 'looping/loopValNameCollision.html',
+        message: 'should prevent infinitely referencing variables (misc/varRefVar.html)',
+        template: 'misc/varRefVar.html',
         test: (teddy, template, model) => teddy.render(template, model),
-        expected: '<p>2</p><p>5</p><p>8</p>'
+        expected: '{foo}'
       },
       {
-        message: 'should print an empty string for array member set to an empty string (looping/loopValEmptyString.html)',
-        template: 'looping/loopValEmptyString.html',
+        message: 'should render empty strings as is for variables that are empty strings (misc/emptyStringVariable.html)',
+        template: 'misc/emptyStringVariable.html',
         test: (teddy, template, model) => teddy.render(template, model),
-        expected: '<p>one</p><p>two</p><p></p><p>three</p>'
+        expected: '<p></p><p></p>'
+      },
+      {
+        message: 'should render template with extraneous whitespace properly (misc/extraneousWhitespace.html)',
+        template: 'misc/extraneousWhitespace.html',
+        test: (teddy, template, model) => teddy.render(template, model),
+        expected: '<p>a</p><p>Something exists</p><p>b</p><p>Something exists</p><p>c</p><p>Something exists</p>'
+      },
+      {
+        message: 'should render {variables} that resolve to true or false boolean literals as strings (misc/printBooleanLiteral.html)',
+        template: 'misc/printBooleanLiteral.html',
+        test: (teddy, template, model) => teddy.render(template, model),
+        expected: '<p>true</p><p>{somethingFalse}</p>'
+      },
+      {
+        message: 'should render {zero} as 0 (misc/zero.html)',
+        template: 'misc/zero.html',
+        test: (teddy, template, model) => teddy.render(template, model),
+        expected: '<p>0</p>'
+      },
+      {
+        message: 'should not render Teddy code in server-side comments in loops (misc/serverSideCommentsWithTeddyCode.html)',
+        template: 'misc/serverSideCommentsWithTeddyCode.html',
+        test: (teddy, template, model) => teddy.render(template, model),
+        expected: '<div><p>test</p><p>test</p><p>test</p><p>test</p><p>test</p><p>test</p></div>'
+      },
+      {
+        message: 'should parse embedded script tag correctly (misc/scriptWithEmptyObject.html)',
+        template: 'misc/scriptWithEmptyObject.html',
+        test: (teddy, template, model) => teddy.render(template, model),
+        expected: '<script>const something = {}</script>'
+      },
+      {
+        message: 'should parse a script tag with a JSON string correctly (misc/scriptWithJson.html)',
+        template: 'misc/scriptWithJson.html',
+        test: (teddy, template, model) => teddy.render(template, model),
+        expected: '<script>const thing = {"jhgfd":"{\\"id\\":1,\\"lkjhgfd\\":\\"sadfghj\\"}","lkjhgfds":"[]","asdfghj":"[{\\"kjhgfds\\":\\"asdfghj\\",\\"lkjhgfds\\":\\"asdfghjkl\\",\\"lkjhgfdsa\\":\\"asdfghjk\\",\\",ivtrew\\":\\"wesdfghj/l;kjhgrfds/ewrtyu\\",\\"hgbfvdsq\\":{\\"wertyukil\\":true},\\".,kjmhgfds\\":\\"/qwertyuikl/kjhgfds/k,jhgrefdsaz.css\\",\\"sdfhgjkl\\":\\"/,kjmhngefdsz/esrtyu/sdxfcgbhunjm-BorGorph.hfjsdknl\\"}]"}</script>'
       }
+      // ,{
+      //   message: '',
+      //   template: '',
+      //   test: (teddy, template, model) => teddy.render(template, model),
+      //   expected: ''
+      // }
     ]
+
   }
 ]

@@ -14,4 +14,8 @@ function ignoreSpaces (str) {
   return str.replace(/\s/g, '')
 }
 
-export { cleanString, ignoreSpaces }
+function timeout (ms) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+export { cleanString, ignoreSpaces, timeout }
