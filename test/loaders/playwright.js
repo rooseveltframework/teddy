@@ -1,10 +1,12 @@
-import { test, expect } from '@playwright/test'
-import teddy from '../../teddy.js'
-import makeModel from '../models/model.js'
-import testConditions from '../testConditions.js'
-import { ignoreSpaces } from '../testUtils.js'
-import fs from 'fs'
-import path from 'path'
+const playwright = require('@playwright/test')
+const { test, expect } = playwright
+const teddy = require('../../teddy.js').default
+const makeModel = require('../models/model.js')
+const testConditions = require('../testConditions.js')
+const testUtils = require('../testUtils.js')
+const { ignoreSpaces } = testUtils
+const fs = require('fs')
+const path = require('path')
 
 teddy.setVerbosity(0)
 

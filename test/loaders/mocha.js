@@ -1,10 +1,10 @@
 /* eslint-env mocha */
-
-import assert from 'assert'
-import makeModel from '../models/model.js'
-import teddy from '../../teddy.js'
-import testConditions from '../testConditions.js'
-import { ignoreSpaces } from '../testUtils.js'
+const assert = require('assert')
+const makeModel = require('../models/model.js')
+const teddy = require('../../teddy.js').default
+const testConditions = require('../testConditions.js')
+const testUtils = require('../testUtils.js')
+const { ignoreSpaces } = testUtils
 
 for (const tc of testConditions) {
   describe(tc.describe, () => {

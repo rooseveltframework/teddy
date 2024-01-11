@@ -1,6 +1,7 @@
-import { timeout } from './testUtils.js'
+const testUtils = require('./testUtils')
+const { timeout } = testUtils
 
-export default [
+module.exports = [
   {
     describe: 'Conditionals',
     tests: [

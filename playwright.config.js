@@ -1,4 +1,5 @@
-import { devices } from '@playwright/test'
+const playwright = require('@playwright/test')
+const { devices } = playwright
 
 const config = {
   testDir: './test/loaders',

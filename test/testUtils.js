@@ -10,4 +10,4 @@ function timeout (ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-export { ignoreSpaces, timeout }
+module.exports = { ignoreSpaces, timeout }

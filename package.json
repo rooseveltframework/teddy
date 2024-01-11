@@ -2,7 +2,6 @@
   "name": "teddy",
   "description": "Teddy Templating Engine",
   "author": "Roosevelt Framework Team <rooseveltframework@gmail.com>",
-  "type": "module",
   "exports": {
     "import": "./dist/teddy.js",
     "require": "./dist/teddy.cjs"
@@ -30,6 +29,10 @@
     "xregexp": "5.1.1"
   },
   "devDependencies": {
+    "@babel/cli": "7.23.4",
+    "@babel/core": "7.23.7",
+    "@babel/preset-env": "7.23.8",
+    "@babel/register": "7.23.7",
     "@playwright/test": "1.40.1",
     "c8": "9.0.0",
     "chai": "5.0.0",
@@ -59,9 +62,9 @@
     "coverage": "cross-env NODE_ENV=cover c8 --reporter=text --reporter=lcov mocha --timeout 60000 test/*.js && karma start",
     "lint": "standard && eslint ./test && standard --plugin html *.html",
     "lint-fix": "standard --fix && eslint ./test && standard --plugin html *.html --fix",
-    "test": "npm run build && playwright test && cross-env NODE_ENV=test mocha --timeout 6000 test/loaders/mocha.js",
+    "test": "npm run build && playwright test && cross-env NODE_ENV=test mocha --require @babel/register --timeout 6000 test/loaders/mocha.js",
     "test-playwright": "npm run build && playwright test",
-    "test-mocha": "npm run build && cross-env NODE_ENV=test mocha --timeout 6000 test/loaders/mocha.js",
+    "test-mocha": "npm run build && cross-env NODE_ENV=test mocha --require @babel/register --timeout 6000 test/loaders/mocha.js",
     "prepack": "npm run build"
   },
   "repository": {
