@@ -32,7 +32,6 @@ teddy.setVerbosity(0)
 })('test/templates')
 
 for (const tc of testConditions) {
-  // run the tests
   test.describe(tc.describe, () => {
     let model
 

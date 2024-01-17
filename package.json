@@ -63,8 +63,9 @@
     "lint": "standard && eslint ./test && standard --plugin html *.html",
     "lint-fix": "standard --fix && eslint ./test && standard --plugin html *.html --fix",
     "test": "npm run build && playwright test && cross-env NODE_ENV=test mocha --require @babel/register --timeout 6000 test/loaders/mocha.js",
-    "test-playwright": "npm run build && playwright test",
-    "test-mocha": "npm run build && cross-env NODE_ENV=test mocha --require @babel/register --timeout 6000 test/loaders/mocha.js",
+    "t": "npm run build && playwright test && cross-env NODE_ENV=test mocha --require @babel/register --timeout 6000 test/loaders/mocha.js",
+    "test:client": "npm run build && playwright test",
+    "test:server": "npm run build && cross-env NODE_ENV=test mocha --require @babel/register --timeout 6000 test/loaders/mocha.js",
     "prepack": "npm run build"
   },
   "repository": {
