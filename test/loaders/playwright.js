@@ -2,7 +2,7 @@ const playwright = require('@playwright/test')
 const { test, expect } = playwright
 const teddy = require('../../teddy.js').default
 const makeModel = require('../models/model.js')
-const testConditions = require('../testConditions.js')
+const testConditions = require('../tests.js')
 const testUtils = require('../testUtils.js')
 const { ignoreSpaces } = testUtils
 const fs = require('fs')
@@ -31,7 +31,13 @@ teddy.setVerbosity(0)
   }
 })('test/templates')
 
-for (const tc of testConditions) {
+let conditions = testConditions.filter(condition => (!condition?.skip || !condition.skip))
+
+if (conditions.some(condition => condition.only)) {
+  conditions = conditions.filter(condition => condition.only)
+}
+
+for (const tc of conditions) {
   test.describe(tc.describe, () => {
     let model
 
