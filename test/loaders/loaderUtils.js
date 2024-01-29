@@ -2,18 +2,36 @@ const path = require('path')
 const fs = require('fs')
 const teddy = require('../../teddy.js').default
 
-function checkForSkipAndOnly (array) {
-  // check for skip
-  if (array.some(item => item.skip)) {
-    array = array.filter(item => !item.skip)
+function sanitizeTests (conditions) {
+  // search condition tests for only's
+  if (conditions.some(condition => condition.tests.some(test => test?.only))) {
+    conditions = conditions.filter(condition => condition.tests.some(test => test.only))
   }
 
-  // check for only
-  if (array.some(item => item.only)) {
-    array = array.filter(item => item.only)
+  // check for condition skip
+  if (conditions.some(condition => condition.skip)) {
+    conditions = conditions.filter(condition => !condition.skip)
   }
 
-  return array
+  // check for condition only
+  if (conditions.some(condition => condition.only)) {
+    conditions = conditions.filter(condition => condition.only)
+  }
+
+  // check condition tests
+  for (const condition of conditions) {
+    // check for test skip
+    if (condition.tests.some(test => test.skip)) {
+      condition.tests = condition.tests.filter(test => !test.skip)
+    }
+
+    // check for test only
+    if (condition.tests.some(test => test.only)) {
+      condition.tests = condition.tests.filter(test => test.only)
+    }
+  }
+
+  return conditions
 }
 
 // pre-register teddy templates
@@ -39,6 +57,6 @@ async function registerTemplates (dir) {
 }
 
 module.exports = {
-  checkForSkipAndOnly,
+  sanitizeTests,
   registerTemplates
 }

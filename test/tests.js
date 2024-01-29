@@ -6,7 +6,9 @@ const { timeout } = testUtils
 
   These tests are shared across all loaders (found in test/loaders).
 
-  If the test is more complex than rendering a template, the `test` method has a 4th parameter (`assert`) that allows you to utilize the respective loaders equality checker. Using the `assert` param should result in comparisons (assert(a, b), assert(a, !b))
+  If the test is more complex than rendering a template, the `test` method has a 4th parameter (`assert`) that allows you to utilize the respective loaders equality checker. You will also need to add a `type` parameter to the test object (`async` or `custom`).
+
+  Using the `assert` param should result in comparisons (assert(a, b), assert(a, !b))
 
   To skip test suites or individual tests, add `skip: true` to the suite/test object
 
@@ -826,7 +828,7 @@ module.exports = [
       {
         message: 'should compile a template and return a function which when given data will render HTML',
         template: '<p>{hello}</p>',
-        test: (teddy, template, model) => {
+        test: (teddy, template, _model) => {
           const templateFunction = teddy.compile(template)
           return templateFunction({ hello: 'world' })
         },
@@ -898,13 +900,16 @@ module.exports = [
         test: (teddy, template, model) => teddy.render(template, model),
         expected: ' <p>{doesntExist.someKey}</p> <p class="false"></p>'
       },
-      // todo: <!DOCTYPE>...<head> does not appear in playwright tests
       {
-        skip: true,
         message: 'should render plain HTML with no teddy tags with no changes (misc/plainHTML.html)',
         template: 'misc/plainHTML',
-        test: (teddy, template, model) => teddy.render(template, model),
-        expected: '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="format-detection" content="telephone=no"><title>Plain HTML</title><link rel="stylesheet" href="/css/styles.css"></head><body><main><p>This template contains no teddy tags. Just HTML.</p></main><script type="text/javascript" src="/js/main.js"></script></body></html>'
+        type: 'custom',
+        test: (teddy, template, model, assert) => {
+          const teddyTemplate = teddy.render(template, model)
+
+          assert(teddyTemplate, '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="format-detection" content="telephone=no"><title>Plain HTML</title><link rel="stylesheet" href="/css/styles.css"></head><body><main><p>This template contains no teddy tags. Just HTML.</p></main><script type="text/javascript" src="/js/main.js"></script></body></html>')
+        },
+        expected: ''
       },
       {
         message: 'should render {variables} within style element (misc/styleVariables.html)',

@@ -5,11 +5,11 @@ const makeModel = require('../models/model.js')
 const testConditions = require('../tests.js')
 const testUtils = require('../testUtils.js')
 const { ignoreSpaces } = testUtils
-const { checkForSkipAndOnly, registerTemplates } = require('./loaderUtils.js')
+const { sanitizeTests, registerTemplates } = require('./loaderUtils.js')
 
 teddy.setVerbosity(0)
 
-const conditions = checkForSkipAndOnly(testConditions)
+const conditions = sanitizeTests(testConditions)
 
 for (const tc of conditions) {
   test.describe(tc.describe, () => {
@@ -24,7 +24,6 @@ for (const tc of conditions) {
       model = makeModel()
     })
 
-    tc.tests = checkForSkipAndOnly(tc.tests)
     for (const t of tc.tests) {
       test(t.message, async ({ page }) => {
         // callback function used on custom and asynchronous tests
