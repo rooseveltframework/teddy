@@ -83,7 +83,7 @@ function makeModel () {
     somethingElse: true,
     varWithVarInside: 'Variable with a variable inside: {subVar}',
     subVar: 'And another: {something}',
-    dynamicInclude: 'misc/variable.html',
+    dynamicInclude: 'misc/variable',
     escapeTest: '<span>raw html</span>',
     doubleFlagEscapeTest: '<h1>double bars</h1> {something}',
     nullVar: null,

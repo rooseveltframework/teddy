@@ -4,13 +4,10 @@ const makeModel = require('../models/model.js')
 const teddy = require('../../teddy.js').default
 const testConditions = require('../tests.js')
 const testUtils = require('../testUtils.js')
+const { checkForSkipAndOnly } = require('./loaderUtils.js')
 const { ignoreSpaces } = testUtils
 
-let conditions = testConditions.filter(condition => (!condition?.skip || !condition.skip))
-
-if (conditions.some(condition => condition.only)) {
-  conditions = conditions.filter(condition => condition.only)
-}
+const conditions = checkForSkipAndOnly(testConditions)
 
 for (const tc of conditions) {
   describe(tc.describe, () => {
@@ -24,6 +21,7 @@ for (const tc of conditions) {
       }
     })
 
+    tc.tests = checkForSkipAndOnly(tc.tests)
     for (const t of tc.tests) {
       if (t.skip) continue
 

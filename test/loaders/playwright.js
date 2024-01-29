@@ -5,37 +5,11 @@ const makeModel = require('../models/model.js')
 const testConditions = require('../tests.js')
 const testUtils = require('../testUtils.js')
 const { ignoreSpaces } = testUtils
-const fs = require('fs')
-const path = require('path')
+const { checkForSkipAndOnly, registerTemplates } = require('./loaderUtils.js')
 
 teddy.setVerbosity(0)
 
-// pre-register teddy templates
-;(function registerTemplates (dir) {
-  const files = fs.readdirSync(dir)
-
-  for (const file of files) {
-    const filePath = path.join(dir, file)
-    const fileStat = fs.statSync(filePath)
-
-    if (fileStat.isDirectory()) {
-      // run again until file is found
-      registerTemplates(filePath)
-    } else {
-      const path = filePath.replace('test/templates/', '')
-
-      // set teddy template with file contents
-      const content = fs.readFileSync(filePath, 'utf-8')
-      teddy.setTemplate(path, content)
-    }
-  }
-})('test/templates')
-
-let conditions = testConditions.filter(condition => (!condition?.skip || !condition.skip))
-
-if (conditions.some(condition => condition.only)) {
-  conditions = conditions.filter(condition => condition.only)
-}
+const conditions = checkForSkipAndOnly(testConditions)
 
 for (const tc of conditions) {
   test.describe(tc.describe, () => {
@@ -44,12 +18,14 @@ for (const tc of conditions) {
     test.beforeAll(() => {
       // this ensures that teddy is not using the fs module to retrieve templates
       teddy.setTemplateRoot('test/noTemplatesHere')
+
+      registerTemplates('test/templates')
+
       model = makeModel()
     })
 
+    tc.tests = checkForSkipAndOnly(tc.tests)
     for (const t of tc.tests) {
-      if (t.skip) continue
-
       test(t.message, async ({ page }) => {
         // callback function used on custom and asynchronous tests
         const cb = (result, expected = true) => {

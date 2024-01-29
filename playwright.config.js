@@ -4,7 +4,7 @@ const { devices } = playwright
 const config = {
   testDir: './test/loaders',
   testMatch: 'playwright.js',
-  testIgnore: ['models/*.js', 'testConditions.js'],
+  testIgnore: ['models/*.js', 'tests.js'],
   timeout: 30 * 1000,
   expect: {
     timeout: 5000
