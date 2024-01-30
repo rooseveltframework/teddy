@@ -8,9 +8,11 @@ module.exports = [
     output: {
       path: path.join(__dirname, 'dist'),
       filename: 'teddy.js',
-      library: 'teddy',
-      libraryTarget: 'umd',
-      libraryExport: 'default',
+      library: {
+        name: 'teddy',
+        type: 'umd',
+        export: 'default'
+      },
       globalObject: 'this'
     },
     externals: {
@@ -43,9 +45,11 @@ module.exports = [
     output: {
       path: path.join(__dirname, 'dist'),
       filename: 'teddy.min.js',
-      library: 'teddy',
-      libraryTarget: 'umd',
-      libraryExport: 'default',
+      library: {
+        name: 'teddy',
+        type: 'umd',
+        export: 'default'
+      },
       globalObject: 'this'
     },
     externals: {
