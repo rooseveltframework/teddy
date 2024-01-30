@@ -269,19 +269,19 @@ module.exports = [
         message: 'should evaluate <option> elements with the middle one selected (conditionals/oneLineValueVarsLooped.html)',
         template: 'conditionals/oneLineValueVarsLooped',
         test: (teddy, template, model) => teddy.render(template, model),
-        expected: '<option value="1">1</option><option value="2" selected="true">2</option><option value="3">3</option>'
+        expected: '<option value="1">1</option><option value="2" selected>2</option><option value="3">3</option>'
       },
       {
         message: 'should evaluate <option> elements with the middle one selected (conditionals/conditionalValueVarsLooped.html)',
         template: 'conditionals/conditionalValueVarsLooped',
         test: (teddy, template, model) => teddy.render(template, model),
-        expected: '<option value="1">1</option><option value="2" selected="true">2</option><option value="3">3</option>'
+        expected: '<option value="1">1</option><option value="2" selected>2</option><option value="3">3</option>'
       },
       {
         message: 'should evaluate one line if "if-something=\'Some content\'" as true and still add the id attribute regardless of the if statement outcome (conditionals/oneLineValueWithAdditionalAttributesNotImpactedByIf.html)',
         template: 'conditionals/oneLineValueWithAdditionalAttributesNotImpactedByIf',
         test: (teddy, template, model) => teddy.render(template, model),
-        expected: '<p id="someId" class="something-is-present">One line if.</p><p id="someId">One line if.</p><p id="someId" disabled="true">One line if.</p><option value="3" selected="true">One line if.</option><option value="3" selected="true">One line if.</option>'
+        expected: '<p id="someId" class="something-is-present">One line if.</p><p id="someId">One line if.</p><p id="someId" disabled>One line if.</p><option value="3" selected>One line if.</option><option value="3" selected>One line if.</option>'
       },
       {
         message: 'should evaluate one line if "if-something=\'\'" as false (conditionals/oneLineEmpty.html)',
@@ -649,7 +649,7 @@ module.exports = [
         message: 'should parse loop through nested object correctly (looping/nestedObjectLoopLookup.html)',
         template: 'looping/nestedObjectLoopLookup',
         test: (teddy, template, model) => teddy.render(template, model),
-        expected: '<p>1</p><input type="text" checked="true"><p>2</p><input type="text"><p>3</p><input type="text" checked="true">'
+        expected: '<p>1</p><input type="text" checked><p>2</p><input type="text"><p>3</p><input type="text" checked>'
       },
       {
         message: 'should parse nested loops correctly (looping/nestedLoopsObjectWithArrayOfObjects.html)',
