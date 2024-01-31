@@ -26,6 +26,12 @@ for (const tc of conditions) {
 
     for (const t of tc.tests) {
       test(t.message, async ({ page }) => {
+        if (t.playwright) {
+          const params = { teddy, model, template: t.template }
+          await t.playwright(params, page, expect)
+          return
+        }
+
         // callback function used on custom and asynchronous tests
         const cb = (result, expected = true) => {
           if (typeof expected === 'string') {

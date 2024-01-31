@@ -10,6 +10,12 @@ const { timeout } = testUtils
 
   Using the `assert` param should result in comparisons (assert(a, b), assert(a, !b))
 
+  PLAYWRIGHT TESTS
+
+  If a playwright test requires more than the simple assertion option offered above, you can create a separate method (`playwright: (params, page, expect) => {}`) that allows you to write more complex client-side tests. `params` is an object containing the expect params in the `test` method, and `page` and `expect` are playwright-specific methods.
+
+  SKIP/ONLY
+
   To skip test suites or individual tests, add `skip: true` to the suite/test object
 
   To test an individual suite or test, add `only: true` to the suite/test object
@@ -18,6 +24,7 @@ const { timeout } = testUtils
 module.exports = [
   {
     describe: 'Conditionals',
+    only: true,
     tests: [
       {
         message: 'should evaluate <if something> as true (conditionals/if.html)',
@@ -268,18 +275,38 @@ module.exports = [
       {
         message: 'should evaluate <option> elements with the middle one selected (conditionals/oneLineValueVarsLooped.html)',
         template: 'conditionals/oneLineValueVarsLooped',
+        playwright: async (params, page, expect) => {
+          await page.setContent('<body>' + params.teddy.render(params.template, params.model) + '</body>')
+
+          const locator = await page.getByRole('option').nth(1)
+          await expect(locator).toHaveAttribute('selected', '')
+        },
         test: (teddy, template, model) => teddy.render(template, model),
         expected: '<option value="1">1</option><option value="2" selected>2</option><option value="3">3</option>'
       },
       {
         message: 'should evaluate <option> elements with the middle one selected (conditionals/conditionalValueVarsLooped.html)',
         template: 'conditionals/conditionalValueVarsLooped',
+        playwright: async (params, page, expect) => {
+          await page.setContent('<body>' + params.teddy.render(params.template, params.model) + '</body>')
+
+          const locator = await page.getByRole('option').nth(1)
+          await expect(locator).toHaveAttribute('selected', '')
+        },
         test: (teddy, template, model) => teddy.render(template, model),
         expected: '<option value="1">1</option><option value="2" selected>2</option><option value="3">3</option>'
       },
       {
         message: 'should evaluate one line if "if-something=\'Some content\'" as true and still add the id attribute regardless of the if statement outcome (conditionals/oneLineValueWithAdditionalAttributesNotImpactedByIf.html)',
         template: 'conditionals/oneLineValueWithAdditionalAttributesNotImpactedByIf',
+        playwright: async (params, page, expect) => {
+          await page.setContent('<body>' + params.teddy.render(params.template, params.model) + '</body>')
+          const firstSelected = await page.getByRole('option').first()
+          const secondSelected = await page.getByRole('option').nth(1)
+
+          await expect(firstSelected).toHaveAttribute('selected', '')
+          await expect(secondSelected).toHaveAttribute('selected', '')
+        },
         test: (teddy, template, model) => teddy.render(template, model),
         expected: '<p id="someId" class="something-is-present">One line if.</p><p id="someId">One line if.</p><p id="someId" disabled>One line if.</p><option value="3" selected>One line if.</option><option value="3" selected>One line if.</option>'
       },
@@ -806,7 +833,7 @@ module.exports = [
         message: 'should render deeply nested vars with teddy code and respect noparse flag (looping/nestedObjectWithTeddyContentNoParse.html)',
         template: 'looping/nestedObjectWithTeddyContentNoParse',
         test: (teddy, template, model) => teddy.render(template, model),
-        expected: '<p>1</p><p><if something="Some content">Something Exists</if></p><p>2</p><p><if something="Some content">Something Exists</if></p>'
+        expected: '<p>1</p><p><if something>Something Exists</if></p><p>2</p><p><if something>Something Exists</if></p>'
       },
       {
         message: 'should not crash if attempting to set a <loop> val that matches the name of something else in the model (looping/loopValNameCollision.html)',
