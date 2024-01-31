@@ -25,13 +25,8 @@
     "xregexp": "5.1.1"
   },
   "devDependencies": {
-    "@babel/cli": "7.23.4",
-    "@babel/core": "7.23.7",
-    "@babel/preset-env": "7.23.8",
-    "@babel/register": "7.23.7",
     "@playwright/test": "1.40.1",
     "c8": "9.0.0",
-    "chai": "5.0.0",
     "codecov": "3.8.3",
     "cross-env": "7.0.3",
     "eslint": "8.56.0",
@@ -67,7 +62,7 @@
     "test": "npm run build && playwright test && cross-env NODE_ENV=test mocha --require @babel/register --timeout 6000 test/loaders/mocha.js",
     "t": "npm run build && playwright test && cross-env NODE_ENV=test mocha --require @babel/register --timeout 6000 test/loaders/mocha.js",
     "test:client": "npm run build && playwright test",
-    "test:server": "npm run build && cross-env NODE_ENV=test mocha --require @babel/register --timeout 6000 test/loaders/mocha.js",
+    "test:server": "npm run build && cross-env NODE_ENV=test mocha --timeout 6000 test/loaders/mocha.js",
     "prepack": "npm run build"
   },
   "repository": {

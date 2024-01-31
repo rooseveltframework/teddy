@@ -24,7 +24,6 @@ const { timeout } = testUtils
 module.exports = [
   {
     describe: 'Conditionals',
-    only: true,
     tests: [
       {
         message: 'should evaluate <if something> as true (conditionals/if.html)',

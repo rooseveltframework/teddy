@@ -1,6 +1,6 @@
 const playwright = require('@playwright/test')
 const { test, expect } = playwright
-const teddy = require('../../teddy.js').default
+const teddy = require('../../dist/teddy.js')
 const makeModel = require('../models/model.js').default
 const testConditions = require('../tests.js')
 const testUtils = require('../testUtils.js')
