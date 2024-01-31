@@ -60,7 +60,6 @@
     }
   },
   "scripts": {
-    "start": "node index.js",
     "build": "webpack",
     "coverage": "cross-env NODE_ENV=cover c8 --reporter=text --reporter=lcov mocha --timeout 60000 test/*.js",
     "lint": "standard && eslint ./test && standard --plugin html *.html",
