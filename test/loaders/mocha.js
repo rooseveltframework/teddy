@@ -1,8 +1,7 @@
 /* eslint-env mocha */
 const assert = require('assert')
-const makeModel = require('../models/model.js').default
+const makeModel = require('../models/model.js')
 const teddy = require('../../dist/teddy.js')
-// const teddy = require('../../teddy.js').default
 const testConditions = require('../tests.js')
 const testUtils = require('../testUtils.js')
 const { sanitizeTests } = require('./loaderUtils.js')

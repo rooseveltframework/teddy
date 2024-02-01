@@ -1,7 +1,7 @@
 const playwright = require('@playwright/test')
 const { test, expect } = playwright
 const teddy = require('../../dist/teddy.js')
-const makeModel = require('../models/model.js').default
+const makeModel = require('../models/model.js')
 const testConditions = require('../tests.js')
 const testUtils = require('../testUtils.js')
 const { ignoreSpaces } = testUtils
@@ -19,7 +19,8 @@ for (const tc of conditions) {
       // this ensures that teddy is not using the fs module to retrieve templates
       teddy.setTemplateRoot('test/noTemplatesHere')
 
-      registerTemplates('test/templates')
+      registerTemplates(teddy, 'test/templates')
+      // console.log(teddy.getTemplates())
 
       model = makeModel()
     })

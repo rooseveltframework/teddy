@@ -488,6 +488,7 @@ module.exports = [
   },
   {
     describe: 'Includes',
+    only: true,
     tests: [
       {
         message: 'should <include> a template (includes/include.html)',

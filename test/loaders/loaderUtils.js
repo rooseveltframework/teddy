@@ -1,6 +1,5 @@
 const path = require('path')
 const fs = require('fs')
-const teddy = require('../../teddy.js').default
 
 function sanitizeTests (conditions) {
   // search condition tests for only's
@@ -35,7 +34,7 @@ function sanitizeTests (conditions) {
 }
 
 // pre-register teddy templates
-async function registerTemplates (dir) {
+function registerTemplates (teddy, dir) {
   const files = fs.readdirSync(dir)
 
   for (const file of files) {
@@ -44,7 +43,7 @@ async function registerTemplates (dir) {
 
     if (fileStat.isDirectory()) {
       // run again until file is found
-      registerTemplates(filePath)
+      registerTemplates(teddy, filePath)
     } else {
       // remove unneeded path and filetype
       const path = filePath.replace('test/templates/', '').replace('.html', '')
