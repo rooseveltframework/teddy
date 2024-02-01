@@ -18,10 +18,7 @@ for (const tc of conditions) {
     test.beforeAll(() => {
       // this ensures that teddy is not using the fs module to retrieve templates
       teddy.setTemplateRoot('test/noTemplatesHere')
-
       registerTemplates(teddy, 'test/templates')
-      // console.log(teddy.getTemplates())
-
       model = makeModel()
     })
 

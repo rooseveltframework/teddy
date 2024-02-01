@@ -488,7 +488,6 @@ module.exports = [
   },
   {
     describe: 'Includes',
-    only: true,
     tests: [
       {
         message: 'should <include> a template (includes/include.html)',
@@ -511,6 +510,16 @@ module.exports = [
       {
         message: 'should populate <include> <arg> in the child template; the class should render (includes/includeArgCheckedByOneLineIfWrapper.html)',
         template: 'includes/includeArgCheckedByOneLineIfWrapper',
+        playwright: async (params, page, expect) => {
+          // temporarily set template root so teddy can find included templates
+          params.teddy.setTemplateRoot('test/templates')
+
+          await page.setContent('<body>' + params.teddy.render(params.template, params.model) + '</body>')
+
+          await expect(page.locator('html')).toContainText('Is it populated? populated')
+
+          params.teddy.setTemplateRoot('test/noTemplatesHere')
+        },
         test: (teddy, template, model) => teddy.render(template, model),
         expected: '<p class="populated">Is it populated? populated</p>'
       },
@@ -607,6 +616,11 @@ module.exports = [
       {
         message: 'should escape from infinite loop of includes via setMaxPasses (includes/includeInfiniteLoop.html)',
         template: 'includes/includeInfiniteLoop',
+        playwright: async (params, page, expect) => {
+          await page.setContent('<body>' + params.teddy.render(params.template, params.model) + '</body>')
+
+          await expect(page.locator('html')).toContainText('{infinity2}')
+        },
         test: (teddy, template, model) => {
           teddy.setVerbosity(3)
           teddy.setMaxPasses(100)
@@ -614,6 +628,7 @@ module.exports = [
           try {
             teddy.render(template, model)
           } catch (e) {
+            console.log(e)
             return e.message
           }
         },
@@ -675,6 +690,13 @@ module.exports = [
       {
         message: 'should parse loop through nested object correctly (looping/nestedObjectLoopLookup.html)',
         template: 'looping/nestedObjectLoopLookup',
+        playwright: async (params, page, expect) => {
+          await page.setContent('<body>' + params.teddy.render(params.template, params.model) + '</body>')
+
+          await expect(page.locator('input').first()).toHaveAttribute('checked', '')
+          await expect(page.locator('input').nth(1)).not.toHaveAttribute('checked', '')
+          await expect(page.locator('input').nth(2)).toHaveAttribute('checked', '')
+        },
         test: (teddy, template, model) => teddy.render(template, model),
         expected: '<p>1</p><input type="text" checked><p>2</p><input type="text"><p>3</p><input type="text" checked>'
       },
@@ -832,6 +854,11 @@ module.exports = [
       {
         message: 'should render deeply nested vars with teddy code and respect noparse flag (looping/nestedObjectWithTeddyContentNoParse.html)',
         template: 'looping/nestedObjectWithTeddyContentNoParse',
+        playwright: async (params, page, expect) => {
+          await page.setContent('<body>' + params.teddy.render(params.template, params.model) + '</body>')
+
+          await expect(page.locator('html')).toContainText('1 Something Exists 2 Something Exists')
+        },
         test: (teddy, template, model) => teddy.render(template, model),
         expected: '<p>1</p><p><if something>Something Exists</if></p><p>2</p><p><if something>Something Exists</if></p>'
       },
