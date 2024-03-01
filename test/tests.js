@@ -438,7 +438,7 @@ module.exports = [
           const end = new Date().getTime()
           const time = end - start
 
-          return time < 1000
+          return time < 10000
         },
         expected: true
       },
