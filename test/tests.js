@@ -628,7 +628,6 @@ module.exports = [
           try {
             teddy.render(template, model)
           } catch (e) {
-            console.log(e)
             return e.message
           }
         },
@@ -1532,7 +1531,10 @@ module.exports = [
       {
         message: 'should prevent infinitely referencing variables (misc/varRefVar.html)',
         template: 'misc/varRefVar',
-        test: (teddy, template, model) => teddy.render(template, model),
+        test: (teddy, template, model) => {
+          teddy.setVerbosity(0)
+          return teddy.render(template, model)
+        },
         expected: '{foo}'
       },
       {
@@ -1574,7 +1576,10 @@ module.exports = [
       {
         message: 'should parse a script tag with a JSON string correctly (misc/scriptWithJson.html)',
         template: 'misc/scriptWithJson',
-        test: (teddy, template, model) => teddy.render(template, model),
+        test: (teddy, template, model) => {
+          teddy.setVerbosity(0)
+          return teddy.render(template, model)
+        },
         expected: '<script>const thing = {"jhgfd":"{\\"id\\":1,\\"lkjhgfd\\":\\"sadfghj\\"}","lkjhgfds":"[]","asdfghj":"[{\\"kjhgfds\\":\\"asdfghj\\",\\"lkjhgfds\\":\\"asdfghjkl\\",\\"lkjhgfdsa\\":\\"asdfghjk\\",\\",ivtrew\\":\\"wesdfghj/l;kjhgrfds/ewrtyu\\",\\"hgbfvdsq\\":{\\"wertyukil\\":true},\\".,kjmhgfds\\":\\"/qwertyuikl/kjhgfds/k,jhgrefdsaz.css\\",\\"sdfhgjkl\\":\\"/,kjmhngefdsz/esrtyu/sdxfcgbhunjm-BorGorph.hfjsdknl\\"}]"}</script>'
       }
       // ,{
