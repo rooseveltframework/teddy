@@ -8,7 +8,6 @@ const { sanitizeTests } = require('./loaderUtils.js')
 const { ignoreSpaces } = testUtils
 
 const conditions = sanitizeTests(testConditions)
-
 for (const tc of conditions) {
   describe(tc.describe, () => {
     let model
