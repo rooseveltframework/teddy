@@ -46,7 +46,7 @@
     "playwright": "1.40.1",
     "standard": "17.1.0",
     "terser-webpack-plugin": "5.3.10",
-    "webpack": "5.89.0",
+    "webpack": "5.91.0",
     "webpack-cli": "5.1.4"
   },
   "standard": {
