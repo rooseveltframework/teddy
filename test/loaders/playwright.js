@@ -2,13 +2,14 @@ import teddyImport from '../../dist/teddy.js'
 import { test, expect } from '@playwright/test'
 import makeModel from '../models/model.js'
 import testConditions from '../tests.js'
+import importConditions from '../clientTests.js'
 import { ignoreSpaces } from '../testUtils.js'
 import { sanitizeTests, registerTemplates } from './loaderUtils.js'
 
 const teddyRequire = require('../../dist/teddy.js')
 const teddySource = require('../../teddy.js').default
 
-const conditions = sanitizeTests(testConditions)
+const conditions = sanitizeTests([...testConditions, ...importConditions])
 const sources = [
   {
     teddy: teddyImport,
