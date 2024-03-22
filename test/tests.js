@@ -1,5 +1,6 @@
-const testUtils = require('./testUtils')
-const { timeout } = testUtils
+import { timeout } from './testUtils.js'
+import { execSync } from 'child_process'
+import fs from 'fs'
 
 /*
   WRITING TESTS
@@ -21,7 +22,7 @@ const { timeout } = testUtils
   To test an individual suite or test, add `only: true` to the suite/test object
 */
 
-module.exports = [
+export default [
   {
     describe: 'Conditionals',
     tests: [
@@ -1590,5 +1591,36 @@ module.exports = [
       // }
     ]
 
+  },
+  {
+    describe: 'Client tests',
+    tests: [
+      {
+        message: 'should be able to be required',
+        type: 'custom',
+        test: async (_params, _page, _model, assert) => {
+          fs.writeFileSync('test/app/client.cjs', 'const teddy = require("../../dist/teddy.cjs")\nconsole.log(teddy)')
+          const output = execSync('node ./test/app/client.cjs').toString()
+
+          assert(output.includes("params: { verbosity: 1, templateRoot: './', maxPasses: 1000 }"))
+
+          fs.unlinkSync('test/app/client.cjs')
+        },
+        expected: ''
+      },
+      {
+        message: 'should be able to be imported',
+        type: 'custom',
+        test: (_params, _page, _model, assert) => {
+          fs.writeFileSync('test/app/client.js', 'import teddy from "../../dist/teddy.js"\nconsole.log(teddy)')
+          const output = execSync('node ./test/app/client.js').toString()
+
+          assert(output.includes("params: { verbosity: 1, templateRoot: './', maxPasses: 1000 }"))
+
+          fs.unlinkSync('test/app/client.js')
+        },
+        expected: ''
+      }
+    ]
   }
 ]

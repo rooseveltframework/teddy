@@ -1,11 +1,10 @@
 /* eslint-env mocha */
-const assert = require('assert')
-const makeModel = require('../models/model.js')
-const teddy = require('../../dist/teddy.js')
-const testConditions = require('../tests.js')
-const testUtils = require('../testUtils.js')
-const { sanitizeTests } = require('./loaderUtils.js')
-const { ignoreSpaces } = testUtils
+import assert from 'assert'
+import makeModel from '../models/model.js'
+import testConditions from '../tests.js'
+import { ignoreSpaces } from '../testUtils.js'
+import { sanitizeTests } from './loaderUtils.js'
+import teddy from '../../teddy.js'
 
 const conditions = sanitizeTests(testConditions)
 for (const tc of conditions) {
@@ -19,7 +18,6 @@ for (const tc of conditions) {
         teddy.setVerbosity(0)
       }
     })
-
     for (const t of tc.tests) {
       if (t.skip) continue
 

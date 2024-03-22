@@ -1,5 +1,4 @@
-const playwright = require('@playwright/test')
-const { devices } = playwright
+import { devices } from '@playwright/test'
 
 const config = {
   testDir: './test/loaders',
@@ -34,4 +33,4 @@ const config = {
   ]
 }
 
-module.exports = config
+export default config

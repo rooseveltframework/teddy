@@ -1,4 +1,4 @@
-function ignoreSpaces (str) {
+export function ignoreSpaces (str) {
   if (typeof str !== 'string') {
     return str
   }
@@ -6,8 +6,8 @@ function ignoreSpaces (str) {
   return str.replace(/\s/g, '')
 }
 
-function timeout (ms) {
+export function timeout (ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-module.exports = { ignoreSpaces, timeout }
+export default { ignoreSpaces, timeout }

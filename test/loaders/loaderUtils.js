@@ -1,7 +1,7 @@
-const path = require('path')
-const fs = require('fs')
+import path from 'path'
+import fs from 'fs'
 
-function sanitizeTests (conditions) {
+export function sanitizeTests (conditions) {
   // search condition tests for only's
   if (conditions.some(condition => condition.tests.some(test => test?.only))) {
     conditions = conditions.filter(condition => condition.tests.some(test => test.only))
@@ -34,7 +34,7 @@ function sanitizeTests (conditions) {
 }
 
 // pre-register teddy templates
-function registerTemplates (teddy, dir) {
+export function registerTemplates (teddy, dir) {
   const files = fs.readdirSync(dir)
 
   for (const file of files) {
@@ -53,9 +53,4 @@ function registerTemplates (teddy, dir) {
       teddy.setTemplate(path, content.replace(/\n/g, ''))
     }
   }
-}
-
-module.exports = {
-  sanitizeTests,
-  registerTemplates
 }
