@@ -12,7 +12,8 @@
   "files": [
     "dist/teddy.js",
     "dist/teddy.cjs",
-    "dist/teddy.min.js"
+    "dist/teddy.min.js",
+    "dist/teddy.min.cjs"
   ],
   "type": "module",
   "exports": {
