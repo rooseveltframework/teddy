@@ -62,9 +62,13 @@
       "mocha/no-exclusive-tests": "error"
     }
   },
+  "c8": {
+    "exclude": ["dist/**", "test/**"],
+    "reporter": ["text", "lcov"]
+  },
   "scripts": {
     "build": "webpack",
-    "coverage": "npm run build && cross-env NODE_ENV=cover c8 --reporter=text --reporter=lcov mocha --timeout 60000 test/loaders/mocha.js",
+    "coverage": "npm run build && cross-env NODE_ENV=cover c8 mocha --timeout 60000 test/loaders/mocha.js",
     "lint": "standard && eslint ./test && standard --plugin html *.html",
     "lint-fix": "standard --fix && eslint ./test && standard --plugin html *.html --fix",
     "test": "npm run test:server && npm run test:client",
