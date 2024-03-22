@@ -1,4 +1,4 @@
-function makeModel () {
+export default function makeModel () {
   let i
   const charList = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
   const cl = charList.length
@@ -323,8 +323,6 @@ function makeModel () {
   return model
 }
 
-if (typeof module !== 'undefined') {
-  module.exports = makeModel
-} else {
+if (typeof module === 'undefined') {
   const model = makeModel() // eslint-disable-line no-unused-vars
 }

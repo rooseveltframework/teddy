@@ -1,10 +1,11 @@
 // #region globals
 
-import * as fs from 'fs' // node filesystem module
-import * as path from 'path' // node path module
-import * as cheerio from 'cheerio' // dom parser
-import * as XRegExp from 'xregexp/lib' // needed for matchRecursive
-import * as matchRecursiveModule from 'xregexp/lib/addons/matchrecursive' // include matchRecursive addon
+import fs from 'fs' // node filesystem module
+import path from 'path' // node path module
+import { load as cheerioLoad } from 'cheerio' // dom parser
+import XRegExp from 'xregexp/lib/index.js' // needed for matchRecursive
+import matchRecursiveModule from 'xregexp/lib/addons/matchrecursive.js' // include matchRecursive addon
+
 matchRecursiveModule(XRegExp) // load matchRecursive addon into XRegExp
 const cheerioOptions = { xml: { xmlMode: false, lowerCaseAttributeNames: false, decodeEntities: false } }
 const params = {} // teddy parameters
@@ -237,7 +238,7 @@ function parseIncludes (dom, model, dynamic) {
           }
         }
         const localMarkup = parseVars(contents, localModel)
-        let localDom = cheerio.load(localMarkup || '', cheerioOptions)
+        let localDom = cheerioLoad(localMarkup || '', cheerioOptions)
         localDom = parseConditionals(localDom, localModel)
         localDom = parseOneLineConditionals(localDom, localModel)
         localDom = parseLoops(localDom, localModel)
@@ -609,13 +610,13 @@ function parseLoops (dom, model) {
           getOrSetObjectByDotNotation(localModel, keyName, key)
           getOrSetObjectByDotNotation(localModel, valName, val)
           const localMarkup = parseVars(loopContents, localModel)
-          let localDom = cheerio.load(localMarkup || '', cheerioOptions)
+          let localDom = cheerioLoad(localMarkup || '', cheerioOptions)
           localDom = parseConditionals(localDom, localModel)
           localDom = parseOneLineConditionals(localDom, localModel)
           localDom = parseLoops(localDom, localModel)
           newMarkup += localDom.html()
         }
-        const newDom = cheerio.load(newMarkup || '', cheerioOptions)
+        const newDom = cheerioLoad(newMarkup || '', cheerioOptions)
         dom(el).replaceWith(newDom.html())
         parsedTags++
       }
@@ -931,7 +932,7 @@ function render (template, model, callback) {
 
   // start the render
   renderedTemplate = loadTemplate(template)
-  dom = cheerio.load(renderedTemplate || '', cheerioOptions)
+  dom = cheerioLoad(renderedTemplate || '', cheerioOptions)
   let oldTemplate
   let passes = 0
   let parseDynamicIncludes = false
@@ -952,7 +953,7 @@ function render (template, model, callback) {
     const hasLoop = renderedTemplate.includes('</loop>')
     oldTemplate = renderedTemplate || ''
     if (passes > 1) {
-      dom = cheerio.load(renderedTemplate || '', cheerioOptions)
+      dom = cheerioLoad(renderedTemplate || '', cheerioOptions)
       if (parseDynamicIncludes) dom = parseIncludes(dom, model, true)
     }
     if (hasCache) dom = replaceCacheElements(dom, model)
@@ -973,7 +974,7 @@ function render (template, model, callback) {
       parseDynamicIncludes = true
     }
     if (oldTemplate === renderedTemplate && cachesStillPresent) {
-      dom = cheerio.load(renderedTemplate || '', cheerioOptions)
+      dom = cheerioLoad(renderedTemplate || '', cheerioOptions)
       dom = defineNewCaches(dom, model)
       renderedTemplate = dom.html()
     }
@@ -981,7 +982,7 @@ function render (template, model, callback) {
 
   // remove stray teddy tags if any exist
   if (renderedTemplate.includes('teddy_deferred_one_line_conditional="true"') || renderedTemplate.includes('</include>') || renderedTemplate.includes('</arg>') || renderedTemplate.includes('</if>') || renderedTemplate.includes('</unless>') || renderedTemplate.includes('</elseif>') || renderedTemplate.includes('</elseunless>') || renderedTemplate.includes('</else>') || renderedTemplate.includes('</loop>') || renderedTemplate.includes('</cache>')) {
-    dom = cheerio.load(renderedTemplate || '', cheerioOptions)
+    dom = cheerioLoad(renderedTemplate || '', cheerioOptions)
     dom = cleanupStrayTeddyTags(dom)
     renderedTemplate = dom.html()
   }
