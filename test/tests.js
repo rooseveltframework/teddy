@@ -1599,12 +1599,12 @@ export default [
         message: 'should be able to be required',
         type: 'custom',
         test: async (_params, _page, _model, assert) => {
-          fs.writeFileSync('test/app/client.cjs', 'const teddy = require("../../dist/teddy.cjs")\nconsole.log(teddy)')
-          const output = execSync('node ./test/app/client.cjs').toString()
+          fs.writeFileSync('test/client.cjs', 'const teddy = require("../dist/teddy.cjs")\nconsole.log(teddy)')
+          const output = execSync('node ./test/client.cjs').toString()
 
           assert(output.includes("params: { verbosity: 1, templateRoot: './', maxPasses: 1000 }"))
 
-          fs.unlinkSync('test/app/client.cjs')
+          fs.unlinkSync('test/client.cjs')
         },
         expected: ''
       },
@@ -1612,12 +1612,12 @@ export default [
         message: 'should be able to be imported',
         type: 'custom',
         test: (_params, _page, _model, assert) => {
-          fs.writeFileSync('test/app/client.js', 'import teddy from "../../dist/teddy.js"\nconsole.log(teddy)')
-          const output = execSync('node ./test/app/client.js').toString()
+          fs.writeFileSync('test/client.js', 'import teddy from "../dist/teddy.js"\nconsole.log(teddy)')
+          const output = execSync('node ./test/client.js').toString()
 
           assert(output.includes("params: { verbosity: 1, templateRoot: './', maxPasses: 1000 }"))
 
-          fs.unlinkSync('test/app/client.js')
+          fs.unlinkSync('test/client.js')
         },
         expected: ''
       }
