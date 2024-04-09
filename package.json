@@ -64,12 +64,19 @@
     }
   },
   "c8": {
-    "exclude": ["dist/**", "test/**"],
-    "reporter": ["text", "lcov"]
+    "exclude": [
+      "dist/**",
+      "test/**"
+    ],
+    "reporter": [
+      "text",
+      "lcov"
+    ]
   },
   "scripts": {
     "build": "webpack",
-    "coverage": "npm run build && cross-env NODE_ENV=cover c8 mocha --timeout 60000 test/loaders/mocha.js",
+    "coverage": "npm run build && cross-env NODE_ENV=cover c8 mocha --timeout 60000 test/loaders/mocha.js && c8 playwright test",
+    "coverage:client": "npm run build && cross-env NODE_ENV=cover c8 playwright test",
     "lint": "standard && eslint ./test && standard --plugin html *.html",
     "lint-fix": "standard --fix && eslint ./test && standard --plugin html *.html --fix",
     "test": "npm run test:server && npm run test:client",

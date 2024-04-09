@@ -4,17 +4,17 @@ import testConditions from '../tests.js'
 import { ignoreSpaces } from '../testUtils.js'
 import { sanitizeTests, registerTemplates } from './loaderUtils.js'
 import teddy from '../../teddy.js'
-import fs from 'fs'
+// import fs from 'fs'
 
 const conditions = sanitizeTests(testConditions)
 
 for (const tc of conditions) {
   test.describe(tc.describe, () => {
-    let coverageObj
+    // let coverageObj
     let model
 
     test.beforeAll(() => {
-      coverageObj = { result: [] }
+      // coverageObj = { result: [] }
 
       // this ensures that teddy is not using the fs module to retrieve templates
       teddy.setTemplateRoot('test/noTemplatesHere')
@@ -22,12 +22,12 @@ for (const tc of conditions) {
       model = makeModel()
     })
 
-    test.afterAll(() => {
-      console.log('🚀 fires', coverageObj)
-      // write the coverage
-      fs.mkdirSync('coverage/tmp', { recursive: true })
-      fs.writeFileSync('coverage/tmp/coverage-playwright.json', JSON.stringify(coverageObj))
-    })
+    // test.afterAll(() => {
+    //   // console.log('🚀 fires', coverageObj)
+    //   // write the coverage
+    //   fs.mkdirSync('coverage/tmp', { recursive: true })
+    //   fs.writeFileSync('coverage/tmp/coverage-playwright.json', JSON.stringify(coverageObj))
+    // })
 
     for (const t of tc.tests) {
       test(t.message, async ({ page, browserName }) => {
@@ -68,15 +68,14 @@ for (const tc of conditions) {
           expect(t.test(teddy, t.template, model)).toBe(t.expected)
         }
 
-        if (browserName === 'chromium') {
-          const coverage = await page.coverage.stopJSCoverage()
-          coverage.forEach(item => {
-            delete item.source
-            // item.url = process.cwd()
-          })
-          console.log(coverage)
-          coverageObj.result.push(...coverage)
-        }
+        // if (browserName === 'chromium') {
+        //   const coverage = await page.coverage.stopJSCoverage()
+        //   // coverage.forEach(item => {
+        //   //   delete item.source
+        //   //   // item.url = process.cwd()
+        //   // })
+        //   coverageObj.result.push(...coverage)
+        // }
 
         await page.close()
       })
