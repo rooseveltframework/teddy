@@ -23,3 +23,11 @@ jobs:
         with:
           directory: "coverage"
           fail_ci_if_error: true
+      - name: Upload reports to codecov
+        env:
+          CODECOV_TOKEN: ${{secrets.CODECOV_TOKEN}}
+        run: |
+          curl -Os https://uploader.codecov.io/latest/linux/codecov
+          find . -iregex "codecov.*"
+          chmod +x codecov
+          ./codecov -t ${CODECOV_TOKEN}
