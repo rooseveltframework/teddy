@@ -10,10 +10,7 @@
   ],
   "version": "0.6.5",
   "files": [
-    "dist/teddy.js",
-    "dist/teddy.cjs",
-    "dist/teddy.min.js",
-    "dist/teddy.min.cjs"
+    "dist/*"
   ],
   "type": "module",
   "exports": {
@@ -34,34 +31,23 @@
     "xregexp": "5.1.1"
   },
   "devDependencies": {
-    "@playwright/test": "1.40.1",
-    "c8": "9.0.0",
+    "@playwright/test": "1.43.0",
+    "c8": "9.1.0",
     "codecov": "3.8.3",
     "cross-env": "7.0.3",
-    "eslint": "8.56.0",
-    "eslint-plugin-html": "7.1.0",
-    "eslint-plugin-mocha": "10.2.0",
-    "mocha": "10.2.0",
+    "eslint": "9.0.0",
+    "eslint-plugin-html": "8.0.0",
+    "eslint-plugin-mocha": "10.4.1",
+    "mocha": "10.4.0",
     "standard": "17.1.0",
     "terser-webpack-plugin": "5.3.10",
-    "webpack": "5.89.0",
+    "webpack": "5.91.0",
     "webpack-cli": "5.1.4"
   },
   "standard": {
     "ignore": [
       "test/client.js"
     ]
-  },
-  "eslintConfig": {
-    "extends": [
-      "standard"
-    ],
-    "plugins": [
-      "mocha"
-    ],
-    "rules": {
-      "mocha/no-exclusive-tests": "error"
-    }
   },
   "c8": {
     "exclude": [
