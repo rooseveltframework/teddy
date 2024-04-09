@@ -2,7 +2,7 @@
 
 ## Next version
 
-- Overhauled testing suite to use Playwright, replacing Karma.
+- Put your changes here...
 
 ## 0.6.5
 

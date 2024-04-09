@@ -1,2 +1,4 @@
 fixes:
   - "/home/runner/work/teddy/teddy/::"
+codecov:
+  token: b418f66d-056f-4898-8030-7954e48e7e3b
