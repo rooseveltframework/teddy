@@ -16,7 +16,7 @@ export default [
         path: false
       }
     },
-    devtool: 'cheap-module-source-map',
+    devtool: 'source-map',
     output: {
       path: path.join(__dirname, 'dist'),
       filename: 'teddy.js',
@@ -51,7 +51,7 @@ export default [
   {
     name: 'main',
     entry: './teddy.js',
-    devtool: 'cheap-module-source-map',
+    devtool: 'source-map',
     output: {
       path: path.join(__dirname, 'dist'),
       filename: 'teddy.cjs',

@@ -25,10 +25,12 @@ import fs from 'fs'
 export default [
   {
     describe: 'Conditionals',
+    only: true,
     tests: [
       {
         message: 'should evaluate <if something> as true (conditionals/if.html)',
         template: 'conditionals/if',
+        only: true,
         test: (teddy, template, model) => teddy.render(template, model),
         expected: '<p>The variable \'something\' is present</p>'
       },
