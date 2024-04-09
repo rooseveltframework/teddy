@@ -14,29 +14,14 @@ for (const tc of conditions) {
     let model
 
     test.beforeAll(() => {
-      // coverageObj = { result: [] }
-
       // this ensures that teddy is not using the fs module to retrieve templates
       teddy.setTemplateRoot('test/noTemplatesHere')
       registerTemplates(teddy, 'test/templates')
       model = makeModel()
     })
 
-    // test.afterAll(() => {
-    //   // console.log('🚀 fires', coverageObj)
-    //   // write the coverage
-    //   fs.mkdirSync('coverage/tmp', { recursive: true })
-    //   fs.writeFileSync('coverage/tmp/coverage-playwright.json', JSON.stringify(coverageObj))
-    // })
-
     for (const t of tc.tests) {
-      test(t.message, async ({ page, browserName }) => {
-        if (browserName === 'chromium') {
-          await page.coverage.startJSCoverage({
-            reportAnonymousScripts: true
-          })
-        }
-
+      test(t.message, async ({ page }) => {
         // callback function used on custom and asynchronous tests
         const cb = (result, expected = true) => {
           if (typeof expected === 'string') {
@@ -67,17 +52,6 @@ for (const tc of conditions) {
         } else if (typeof t.expected === 'boolean') { // test code that is resolved in the test without a callback
           expect(t.test(teddy, t.template, model)).toBe(t.expected)
         }
-
-        // if (browserName === 'chromium') {
-        //   const coverage = await page.coverage.stopJSCoverage()
-        //   // coverage.forEach(item => {
-        //   //   delete item.source
-        //   //   // item.url = process.cwd()
-        //   // })
-        //   coverageObj.result.push(...coverage)
-        // }
-
-        await page.close()
       })
     }
   })
