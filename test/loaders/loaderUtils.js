@@ -46,7 +46,7 @@ export function registerTemplates (teddy, dir) {
       registerTemplates(teddy, filePath)
     } else {
       // remove unneeded path and filetype
-      const path = filePath.replace('test/templates/', '').replace('.html', '')
+      const path = filePath.replaceAll('\\', '/').replace('test/templates/', '').replace('.html', '')
 
       // set teddy template with file contents
       const content = fs.readFileSync(filePath, 'utf-8')
