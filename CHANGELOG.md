@@ -4,6 +4,11 @@
 
 - Put your changes here...
 
+## 0.6.6
+
+- Fixed issue causing the template caching feature to not work properly in Express apps.
+- Updated various dependencies.
+
 ## 0.6.5
 
 - Fixed scenario where one-line if with only a false condition could crash if it's fed by arguments from an include element.
