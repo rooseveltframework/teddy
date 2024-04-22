@@ -864,7 +864,8 @@ function render (template, model, callback) {
   // ensure template is a string
   if (typeof template !== 'string') {
     if (params.verbosity > 1) console.warn('teddy.render attempted to render a template which is not a string.')
-    return ''
+    if (typeof callback === 'function') return callback(null, '')
+    else return ''
   }
 
   // ensure model is an object
@@ -893,9 +894,16 @@ function render (template, model, callback) {
     if (singletonCache) {
       // check if the timestamp exceeds max age
       if (!singletonCache.created) cacheKey = 'none'
-      else if (!singletonCache.maxAge) return singletonCache.markup // if no max age is set, then this cache doesn't expire
-      else if (singletonCache.created + singletonCache.maxAge < Date.now()) cacheKey = 'none' // if yes re-render the template and cache it again
-      else return singletonCache.markup // if no return the cached markup and skip the template render
+      else if (!singletonCache.maxAge) {
+        // if no max age is set, then this cache doesn't expire
+        if (typeof callback === 'function') return callback(null, singletonCache.markup)
+        else return singletonCache.markup
+      } else if (singletonCache.created + singletonCache.maxAge < Date.now()) cacheKey = 'none' // if yes re-render the template and cache it again
+      else {
+        // if no return the cached markup and skip the template render
+        if (typeof callback === 'function') return callback(null, singletonCache.markup)
+        else return singletonCache.markup
+      }
     } else {
       // loop through its keys
       for (const key in templateCache) {
@@ -911,14 +919,16 @@ function render (template, model, callback) {
               const entry = templateCacheAtThisKey.entries[entryKey]
               if (!templateCacheAtThisKey.maxAge) {
                 // if no max age is set, then this cache doesn't expire
-                return entry.markup
+                if (typeof callback === 'function') return callback(null, entry.markup)
+                else return entry.markup
               } else if (entry.created + templateCacheAtThisKey.maxAge < Date.now()) {
                 // if yes re-render the template and cache it again
                 cacheKey = key
                 break
               } else {
                 // if no return the cached markup and skip the template render
-                return entry.markup
+                if (typeof callback === 'function') return callback(null, entry.markup)
+                else return entry.markup
               }
             }
           }
@@ -1005,11 +1015,8 @@ function render (template, model, callback) {
     }
   }
 
-  // execute callback if present, otherwise simply return the rendered template string
-  if (typeof callback === 'function') callback(null, renderedTemplate)
+  if (typeof callback === 'function') return callback(null, renderedTemplate)
   else return renderedTemplate
-
-  return renderedTemplate
 }
 
 // #endregion
