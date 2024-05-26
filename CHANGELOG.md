@@ -4,6 +4,11 @@
 
 - Put your changes here...
 
+## 0.6.7
+
+- Fixed issue causing server-side comments to not be stripped from templates parsed as strings instead of as files.
+- Updated various dependencies.
+
 ## 0.6.6
 
 - Fixed issue causing the template caching feature to not work properly in Express apps.
