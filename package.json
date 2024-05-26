@@ -8,7 +8,7 @@
       "url": "https://github.com/rooseveltframework/teddy/graphs/contributors"
     }
   ],
-  "version": "0.6.6",
+  "version": "0.6.7",
   "files": [
     "dist"
   ],
@@ -31,11 +31,11 @@
     "xregexp": "5.1.1"
   },
   "devDependencies": {
-    "@playwright/test": "1.44.0",
+    "@playwright/test": "1.44.1",
     "c8": "9.1.0",
     "codecov": "3.8.3",
     "cross-env": "7.0.3",
-    "eslint": "9.2.0",
+    "eslint": "9.3.0",
     "eslint-plugin-html": "8.1.1",
     "eslint-plugin-mocha": "10.4.3",
     "mocha": "10.4.0",
@@ -62,15 +62,15 @@
   },
   "scripts": {
     "build": "webpack",
-    "coverage": "npm run coverage:server && npm run coverage:client",
-    "coverage:server": "npm run build && cross-env NODE_ENV=cover c8 mocha --timeout 60000 test/loaders/mocha.js",
-    "coverage:client": "npm run build && cross-env NODE_ENV=cover c8 playwright test",
+    "coverage": "npm run coverage-server && npm run coverage-client",
+    "coverage-server": "npm run build && cross-env NODE_ENV=cover c8 mocha --timeout 60000 test/loaders/mocha.js",
+    "coverage-client": "npm run build && cross-env NODE_ENV=cover c8 playwright test",
     "lint": "standard && eslint ./test && standard --plugin html *.html",
     "lint-fix": "standard --fix && eslint ./test && standard --plugin html *.html --fix",
-    "test": "npm run test:server && npm run test:client",
-    "t": "npm run test:server && npm run test:client",
-    "test:client": "npm run build && playwright test",
-    "test:server": "npm run build && cross-env NODE_ENV=test mocha --timeout 60000 test/loaders/mocha.js",
+    "test": "npm run test-server && npm run test-client",
+    "t": "npm run test-server && npm run test-client",
+    "test-client": "npm run build && playwright test",
+    "test-server": "npm run build && cross-env NODE_ENV=test mocha --timeout 60000 test/loaders/mocha.js",
     "prepack": "npm run build"
   },
   "repository": {

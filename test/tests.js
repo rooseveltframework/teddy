@@ -943,6 +943,12 @@ export default [
         expected: '<p>test test</p>'
       },
       {
+        message: 'should remove {! server side comments !} in an inline template',
+        template: 'misc/serverSideComments',
+        test: (teddy, template, model) => teddy.render('{! comments !}<p>Should remove {! the !} comments.</p>', model),
+        expected: '<p>Should remove comments.</p>'
+      },
+      {
         message: 'should remove {! {! nested !} server side comments !} (misc/serverSideCommentsNested.html)',
         template: 'misc/serverSideCommentsNested',
         test: (teddy, template, model) => teddy.render(template, model),

@@ -105,6 +105,7 @@ function loadTemplate (template) {
         template = templates[template]
         register = true
       }
+      template = removeTeddyComments(template)
     }
   }
   if (register) {
