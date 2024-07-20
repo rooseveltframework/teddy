@@ -38,7 +38,7 @@
     "eslint": "9.3.0",
     "eslint-plugin-html": "8.1.1",
     "eslint-plugin-mocha": "10.4.3",
-    "mocha": "10.4.0",
+    "mocha": "10.7.0",
     "standard": "17.1.0",
     "terser-webpack-plugin": "5.3.10",
     "webpack": "5.91.0",
