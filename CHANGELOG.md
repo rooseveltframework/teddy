@@ -4,6 +4,11 @@
 
 - Put your changes here...
 
+## 0.6.8
+
+- Fixed issue with rendering special characters correctly when piped through a teddy noparse flagged variable.
+- Updated various dependencies.
+
 ## 0.6.7
 
 - Fixed issue causing server-side comments to not be stripped from templates parsed as strings instead of as files.
