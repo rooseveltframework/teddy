@@ -1588,6 +1588,12 @@ export default [
           return teddy.render(template, model)
         },
         expected: '<script>const thing = {"jhgfd":"{\\"id\\":1,\\"lkjhgfd\\":\\"sadfghj\\"}","lkjhgfds":"[]","asdfghj":"[{\\"kjhgfds\\":\\"asdfghj\\",\\"lkjhgfds\\":\\"asdfghjkl\\",\\"lkjhgfdsa\\":\\"asdfghjk\\",\\",ivtrew\\":\\"wesdfghj/l;kjhgrfds/ewrtyu\\",\\"hgbfvdsq\\":{\\"wertyukil\\":true},\\".,kjmhgfds\\":\\"/qwertyuikl/kjhgfds/k,jhgrefdsaz.css\\",\\"sdfhgjkl\\":\\"/,kjmhngefdsz/esrtyu/sdxfcgbhunjm-BorGorph.hfjsdknl\\"}]"}</script>'
+      },
+      {
+        message: 'should render special characters correctly when piped through a teddy noparse flagged variable (misc/specialChars.html)',
+        template: 'misc/specialChars',
+        test: (teddy, template, model) => teddy.render(template, model),
+        expected: '<p>special .$&@. chars</p>'
       }
       // ,{
       //   message: '',

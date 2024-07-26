@@ -37,18 +37,24 @@ for (const tc of conditions) {
           if (!t.expected) {
             await t.test(teddy, t.template, model, cb)
           } else if (typeof t.expected === 'string') {
-            // must wrap in body tags due to peculiarities in how document.write() works: https://github.com/microsoft/playwright/issues/24503
-            await page.setContent('<body>' + await t.test(teddy, t.template, model, cb) + '</body>')
-            expect(ignoreSpaces(await page.innerHTML('body'))).toEqual(ignoreSpaces(t.expected))
+            const content = await t.test(teddy, t.template, model, cb)
+            await page.setContent('<div id="content"></div>')
+            await page.evaluate((html) => {
+              document.getElementById('content').textContent = html
+            }, content)
+            expect(ignoreSpaces(await page.evaluate(() => document.getElementById('content').textContent))).toEqual(ignoreSpaces(t.expected))
           } else if (typeof t.expected === 'boolean') {
             expect(t.test(teddy, t.template, model, cb)).toBe(t.expected)
           }
         } else if (t?.type === 'custom') { // test code that is handled within that test (with use of a callback)
           t.test(teddy, t.template, model, cb)
         } else if (typeof t.expected === 'string') { // test code that needs to be appended to the playwright page
-          // must wrap in body tags due to peculiarities in how document.write() works: https://github.com/microsoft/playwright/issues/24503
-          await page.setContent('<body>' + t.test(teddy, t.template, model) + '</body>')
-          expect(ignoreSpaces(await page.innerHTML('body'))).toStrictEqual(ignoreSpaces(t.expected))
+          const content = t.test(teddy, t.template, model)
+          await page.setContent('<div id="content"></div>')
+          await page.evaluate((html) => {
+            document.getElementById('content').textContent = html
+          }, content)
+          expect(ignoreSpaces(await page.evaluate(() => document.getElementById('content').textContent))).toStrictEqual(ignoreSpaces(t.expected))
         } else if (typeof t.expected === 'boolean') { // test code that is resolved in the test without a callback
           expect(t.test(teddy, t.template, model)).toBe(t.expected)
         }

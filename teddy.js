@@ -643,7 +643,7 @@ function parseVars (templateString, model) {
       const originalMatch = match
       match = parseVars(match, model)
       try {
-        templateString = templateString.replace(new RegExp(`{${originalMatch}}`, 'i'), `{${match}}`)
+        templateString = templateString.replace(new RegExp(`{${originalMatch}}`, 'i'), () => `{${match}}`)
       } catch (e) {
         if (params.verbosity > 2) console.warn(`teddy.parseVars encountered a {variable} that could not be parsed: {${originalMatch}}`)
       }
@@ -672,7 +672,7 @@ function parseVars (templateString, model) {
       match = match.substring(0, match.length - 2) // remove last 2 char
       const parsed = getOrSetObjectByDotNotation(model, match) || `{${originalMatch}}`
       try {
-        templateString = templateString.replace(new RegExp(`{${originalMatch}}`.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&').replace(/-/g, '\\x2d'), 'i'), parsed)
+        templateString = templateString.replace(new RegExp(`{${originalMatch}}`.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&').replace(/-/g, '\\x2d'), 'i'), () => parsed)
       } catch (e) {
         return templateString
       }
@@ -683,7 +683,7 @@ function parseVars (templateString, model) {
       else if (parsed === 0) parsed = '0'
       else parsed = `{${match}}`
       try {
-        templateString = templateString.replace(new RegExp(`{${match}}`.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&').replace(/-/g, '\\x2d'), 'i'), parsed)
+        templateString = templateString.replace(new RegExp(`{${match}}`.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&').replace(/-/g, '\\x2d'), 'i'), () => parsed)
       } catch (e) {
         return templateString
       }
@@ -999,7 +999,9 @@ function render (template, model, callback) {
   }
 
   // replace <noteddy> blocks with the hidden code
-  for (const blockId in model._noTeddyBlocks) renderedTemplate = renderedTemplate.replace(`<noteddy id="${blockId}"></noteddy>`, model._noTeddyBlocks[blockId])
+  for (const blockId in model._noTeddyBlocks) {
+    renderedTemplate = renderedTemplate.replace(`<noteddy id="${blockId}"></noteddy>`, () => model._noTeddyBlocks[blockId])
+  }
 
   // cache the template
   if (cacheKey === 'none') {
