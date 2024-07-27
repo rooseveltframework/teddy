@@ -4,6 +4,11 @@
 
 - Put your changes here...
 
+## 0.6.9
+
+- Fixed issue with rendering variables with empty strings piped through variables with flags.
+- Updated various dependencies.
+
 ## 0.6.8
 
 - Fixed issue with rendering special characters correctly when piped through a teddy noparse flagged variable.

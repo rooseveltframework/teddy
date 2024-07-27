@@ -1594,6 +1594,12 @@ export default [
         template: 'misc/specialChars',
         test: (teddy, template, model) => teddy.render(template, model),
         expected: '<p>special .$&@. chars</p>'
+      },
+      {
+        message: 'should render empty strings as is for |p or |s variables that are empty strings (misc/emptyStringVariableFlags.html)',
+        template: 'misc/emptyStringVariableFlags',
+        test: (teddy, template, model) => teddy.render(template, model),
+        expected: '<p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p>'
       }
       // ,{
       //   message: '',
