@@ -1,0 +1,20 @@
+{!
+  should render empty strings as is for |p or |s variables that are empty strings
+!}
+
+<p>{emptyString|p}</p>
+
+<p>{definedParent.emptyMember|p}</p>
+
+<p>{emptyString|s}</p>
+
+<p>{definedParent.emptyMember|s}</p>
+
+<p>{emptyString|p|s}</p>
+
+<p>{definedParent.emptyMember|p|s}</p>
+
+<p>{emptyString|s|p}</p>
+
+<p>{definedParent.emptyMember|s|p}</p>
+

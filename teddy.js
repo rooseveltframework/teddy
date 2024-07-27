@@ -654,7 +654,7 @@ function parseVars (templateString, model) {
       const originalMatch = match
       match = match.substring(0, match.length - (lastFourChars.split('|').length - 1 > 1 ? 4 : 2)) // remove last 2-4 char
       const parsed = getOrSetObjectByDotNotation(model, match)
-      if (parsed) {
+      if (parsed || parsed === '') {
         const id = model._noTeddyBlocks.push(parsed) - 1
         try {
           try {
@@ -669,8 +669,9 @@ function parseVars (templateString, model) {
     } else if (lastFourChars.includes('|s')) {
       // no escape flag is set
       const originalMatch = match
-      match = match.substring(0, match.length - 2) // remove last 2 char
-      const parsed = getOrSetObjectByDotNotation(model, match) || `{${originalMatch}}`
+      match = match.substring(0, match.length - (lastFourChars.split('|').length - 1 > 1 ? 4 : 2)) // remove last 2-4 char
+      let parsed = getOrSetObjectByDotNotation(model, match)
+      if (!parsed && parsed !== '') parsed = `{${originalMatch}}`
       try {
         templateString = templateString.replace(new RegExp(`{${originalMatch}}`.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&').replace(/-/g, '\\x2d'), 'i'), () => parsed)
       } catch (e) {
