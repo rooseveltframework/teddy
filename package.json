@@ -37,7 +37,7 @@
     "cross-env": "7.0.3",
     "eslint": "9.8.0",
     "eslint-plugin-html": "8.1.1",
-    "eslint-plugin-mocha": "10.4.3",
+    "eslint-plugin-mocha": "10.5.0",
     "mocha": "10.7.0",
     "standard": "17.1.0",
     "terser-webpack-plugin": "5.3.10",
