@@ -5,6 +5,7 @@ import path from 'path' // node path module
 import { load as cheerioLoad } from 'cheerio' // dom parser
 import XRegExp from 'xregexp/lib/index.js' // needed for matchRecursive
 import matchRecursiveModule from 'xregexp/lib/addons/matchrecursive.js' // include matchRecursive addon
+import htmlEntities from 'html-entities' // escapes sensitive characters to prevent xss
 
 matchRecursiveModule(XRegExp) // load matchRecursive addon into XRegExp
 const cheerioOptions = { xml: { xmlMode: false, lowerCaseAttributeNames: false, decodeEntities: false } }
@@ -17,52 +18,6 @@ const templateCaches = {} // a place to store cached full templates
 // #endregion
 
 // #region private methods
-
-// escapes sensitive characters to prevent xss
-const escapeHtmlEntities = {
-  '&': '&amp;',
-  '<': '&lt;',
-  '>': '&gt;',
-  '"': '&#34;',
-  "'": '&#39;'
-}
-const entityKeys = Object.keys(escapeHtmlEntities)
-const ekl = entityKeys.length
-function escapeEntities (value) {
-  let escapedEntity = false
-  let newValue = ''
-  let i
-  let j
-
-  if (typeof value === 'object') { // cannot escape on this value
-    if (!value) return false // it is falsey to return false
-    else if (Array.isArray(value)) {
-      if (value.length === 0) return false // empty arrays are falsey
-      else return '[Array]' // print that it is an array with content in it, but do not print the contents
-    }
-    return '[Object]' // just print that it is an object, do not print the contents
-  } else if (value === undefined) return false // cannot escape on this value; undefined is falsey
-  else if (typeof value === 'boolean' || typeof value === 'number') return value // cannot escape on these values; if it's already a boolean or a number just return it
-  else {
-    // loop through value to find html entities
-    for (i = 0; i < value.length; i++) {
-      escapedEntity = false
-
-      // loop through list of html entities to escape
-      for (j = 0; j < ekl; j++) {
-        if (value[i] === entityKeys[j]) { // alter value to show escaped html entities
-          newValue += escapeHtmlEntities[entityKeys[j]]
-          escapedEntity = true
-          break
-        }
-      }
-
-      if (!escapedEntity) newValue += value[i]
-    }
-  }
-
-  return newValue
-}
 
 // loads the template from the filesystem
 function loadTemplate (template) {
@@ -605,6 +560,7 @@ function parseLoops (dom, model) {
         // loop through model[loopThrough] and parse teddy tags within the loop's iteration against the local model
         let newMarkup = ''
         const loopContents = dom(el).html()
+        if (loopThrough instanceof Set) loopThrough = [...loopThrough] // convert Sets to arrays
         for (const key in loopThrough) {
           const val = loopThrough[key]
           const localModel = Object.assign({}, model)
@@ -643,6 +599,7 @@ function parseVars (templateString, model) {
       const originalMatch = match
       match = parseVars(match, model)
       try {
+        templateString = templateString.replace(new RegExp(`\${${originalMatch}}`, 'i'), () => `\${${match}}`)
         templateString = templateString.replace(new RegExp(`{${originalMatch}}`, 'i'), () => `{${match}}`)
       } catch (e) {
         if (params.verbosity > 2) console.warn(`teddy.parseVars encountered a {variable} that could not be parsed: {${originalMatch}}`)
@@ -658,6 +615,7 @@ function parseVars (templateString, model) {
         const id = model._noTeddyBlocks.push(parsed) - 1
         try {
           try {
+            templateString = templateString.replace(new RegExp(`\${${originalMatch}}`.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&').replace(/-/g, '\\x2d'), 'i'), `<noteddy id="${id}"></noteddy>`)
             templateString = templateString.replace(new RegExp(`{${originalMatch}}`.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&').replace(/-/g, '\\x2d'), 'i'), `<noteddy id="${id}"></noteddy>`)
           } catch (e) {
             if (params.verbosity > 2) console.warn(`teddy.parseVars encountered a {variable} that could not be parsed: {${originalMatch}}`)
@@ -673,6 +631,7 @@ function parseVars (templateString, model) {
       let parsed = getOrSetObjectByDotNotation(model, match)
       if (!parsed && parsed !== '') parsed = `{${originalMatch}}`
       try {
+        templateString = templateString.replace(new RegExp(`\${${originalMatch}}`.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&').replace(/-/g, '\\x2d'), 'i'), () => parsed)
         templateString = templateString.replace(new RegExp(`{${originalMatch}}`.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&').replace(/-/g, '\\x2d'), 'i'), () => parsed)
       } catch (e) {
         return templateString
@@ -680,10 +639,11 @@ function parseVars (templateString, model) {
     } else {
       // no flags are set
       let parsed = getOrSetObjectByDotNotation(model, match)
-      if (parsed || parsed === '') parsed = escapeEntities(parsed)
+      if (parsed || parsed === '') parsed = htmlEntities.encode(parsed)
       else if (parsed === 0) parsed = '0'
       else parsed = `{${match}}`
       try {
+        templateString = templateString.replace(new RegExp(`\${${match}}`.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&').replace(/-/g, '\\x2d'), 'i'), () => parsed)
         templateString = templateString.replace(new RegExp(`{${match}}`.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&').replace(/-/g, '\\x2d'), 'i'), () => parsed)
       } catch (e) {
         return templateString

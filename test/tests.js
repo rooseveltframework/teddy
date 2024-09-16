@@ -664,6 +664,12 @@ export default [
         expected: '<p>a</p><p>b</p><p>c</p>'
       },
       {
+        message: 'should loop through {set} correctly (looping/loopValSet.html)',
+        template: 'looping/loopValSet',
+        test: (teddy, template, model) => teddy.render(template, model),
+        expected: '<p>a</p><p>b</p><p>c</p>'
+      },
+      {
         message: 'should loop through {names} correctly (looping/loopKeyVal.html)',
         template: 'looping/loopKeyVal',
         test: (teddy, template, model) => teddy.render(template, model),
@@ -905,6 +911,18 @@ export default [
         template: 'misc/multipleVariables',
         test: (teddy, template, model) => teddy.render(template, model),
         expected: '<p>Some content</p> <h5>More content</h5>'
+      },
+      {
+        message: 'should render {variables} (misc/variable.html)',
+        template: 'misc/variable',
+        test: (teddy, template, model) => teddy.render(template, model),
+        expected: '<p>Some content</p>'
+      },
+      {
+        message: 'should render template literal ${variables} (misc/variableTemplateLiteral.html)', // eslint-disable-line
+        template: 'misc/variableTemplateLiteral',
+        test: (teddy, template, model) => teddy.render(template, model),
+        expected: '<p>Some content</p>'
       },
       {
         message: 'should render nested {variables} (misc/nestedVars.html)',
