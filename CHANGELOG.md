@@ -4,6 +4,10 @@
 
 - Put your changes here...
 
+## 0.6.11
+
+- Added new setting `teddy.setEmptyVarBehavior('hide')` that will make it possible for variables which don't resolve to display as empty strings instead of displaying the variable.
+
 ## 0.6.10
 
 - Added support for template literal `${templateLiteral}` variables.
