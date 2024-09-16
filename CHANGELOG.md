@@ -4,6 +4,13 @@
 
 - Put your changes here...
 
+## 0.6.10
+
+- Added support for template literal `${templateLiteral}` variables.
+- Fixed bug that caused Teddy to crash if you attempted to loop through a Set.
+- Replaced internal HTML entities scanner with the `html-entities` npm package.
+- Updated various dependencies.
+
 ## 0.6.9
 
 - Fixed issue with rendering variables with empty strings piped through variables with flags.

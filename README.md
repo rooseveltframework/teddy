@@ -9,7 +9,7 @@ Teddy is the most readable and easy to learn templating language there is!
 
 Or put a more technical way, Teddy is an easy to read, HTML-inspired, mostly logic-less DOM templating engine with support for both server-side and client-side templating.
 
-It uses HTML-like `<tags>` for rudimentary templating logic and Teddy Roosevelt's facial hair for `{variables}`. 
+It uses HTML-like `<tags>` for rudimentary templating logic and Teddy Roosevelt's facial hair for `{variables}`.
 
 [Check out this live demo](https://rooseveltframework.github.io/teddy/playground.html) or see below for documentation on how to write Teddy templates.
 
@@ -119,6 +119,7 @@ HTML entities such as `<`, `>`, `&`, `'`, and `"` will be escaped by default as 
 
 If you need to suppress this escaping in certain scenarios, write your variable like this: `{varName|s}`.
 
+You can also use template literal `${templateLiteral}` variables as well.
 
 Includes
 ---
@@ -213,7 +214,7 @@ An `<unless>` statement structure with an `<elseunless>` tag which is evaluated 
 </else>
 ```
 
-Note: `<if something>` and `<if something=''>` are considered logically equivalent statements in Teddy. 
+Note: `<if something>` and `<if something=''>` are considered logically equivalent statements in Teddy.
 
 Boolean logic
 ---
@@ -387,7 +388,7 @@ Here's what the attributes mean:
 - `maxCaches`: The maximum number of caches that Teddy will be allowed to create for a given `<cache>` element. If the maximum is reached, Teddy will remove the oldest cache in the stack, where oldest is defined as the least recently created *or* accessed.
   - Default: 1000.
 
-You can also cache whole templates. For more details about that, see the API docs below. 
+You can also cache whole templates. For more details about that, see the API docs below.
 
 A complex example combining many tags
 ---
