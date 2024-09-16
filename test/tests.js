@@ -919,6 +919,17 @@ export default [
         expected: '<p>Some content</p>'
       },
       {
+        message: 'should render {variables} as blank when x is true (misc/undefinedVar.html)',
+        template: 'misc/undefinedVar',
+        test: (teddy, template, model) => {
+          teddy.setEmptyVarBehavior('hide')
+          const result = teddy.render(template, model)
+          teddy.setEmptyVarBehavior('display')
+          return result
+        },
+        expected: '<p></p><p></p>'
+      },
+      {
         message: 'should render template literal ${variables} (misc/variableTemplateLiteral.html)', // eslint-disable-line
         template: 'misc/variableTemplateLiteral',
         test: (teddy, template, model) => teddy.render(template, model),
@@ -1640,7 +1651,7 @@ export default [
           fs.writeFileSync('test/client.cjs', 'const teddy = require("../dist/teddy.cjs")\nconsole.log(teddy)')
           const output = execSync('node ./test/client.cjs', { encoding: 'utf-8' }).toString()
 
-          assert(output.includes('params: { verbosity:'))
+          assert(output.includes('emptyVarBehavior:'))
 
           fs.rmSync('test/client.cjs')
         },
@@ -1655,7 +1666,7 @@ export default [
           fs.writeFileSync('test/client.js', 'import teddy from "../dist/teddy.js"\nconsole.log(teddy)')
           const output = execSync('node ./test/client.js', { encoding: 'utf-8' }).toString()
 
-          assert(output.includes('params: { verbosity:'))
+          assert(output.includes('emptyVarBehavior:'))
 
           fs.rmSync('test/client.js')
         },

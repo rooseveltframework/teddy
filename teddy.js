@@ -610,7 +610,8 @@ function parseVars (templateString, model) {
       // no parse flag is set; also handles if no escape flag is set as well
       const originalMatch = match
       match = match.substring(0, match.length - (lastFourChars.split('|').length - 1 > 1 ? 4 : 2)) // remove last 2-4 char
-      const parsed = getOrSetObjectByDotNotation(model, match)
+      let parsed = getOrSetObjectByDotNotation(model, match)
+      if (params.emptyVarBehavior === 'hide' && !parsed) parsed = '' // display empty string instead of the variable text verbatim if this setting is set
       if (parsed || parsed === '') {
         const id = model._noTeddyBlocks.push(parsed) - 1
         try {
@@ -629,7 +630,8 @@ function parseVars (templateString, model) {
       const originalMatch = match
       match = match.substring(0, match.length - (lastFourChars.split('|').length - 1 > 1 ? 4 : 2)) // remove last 2-4 char
       let parsed = getOrSetObjectByDotNotation(model, match)
-      if (!parsed && parsed !== '') parsed = `{${originalMatch}}`
+      if (params.emptyVarBehavior === 'hide' && !parsed) parsed = '' // display empty string instead of the variable text verbatim if this setting is set
+      else if (!parsed && parsed !== '') parsed = `{${originalMatch}}`
       try {
         templateString = templateString.replace(new RegExp(`\${${originalMatch}}`.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&').replace(/-/g, '\\x2d'), 'i'), () => parsed)
         templateString = templateString.replace(new RegExp(`{${originalMatch}}`.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&').replace(/-/g, '\\x2d'), 'i'), () => parsed)
@@ -639,7 +641,8 @@ function parseVars (templateString, model) {
     } else {
       // no flags are set
       let parsed = getOrSetObjectByDotNotation(model, match)
-      if (parsed || parsed === '') parsed = htmlEntities.encode(parsed)
+      if (params.emptyVarBehavior === 'hide' && !parsed) parsed = '' // display empty string instead of the variable text verbatim if this setting is set
+      else if (parsed || parsed === '') parsed = htmlEntities.encode(parsed)
       else if (parsed === 0) parsed = '0'
       else parsed = `{${match}}`
       try {
@@ -739,6 +742,7 @@ function setDefaultParams () {
   params.verbosity = 1
   params.templateRoot = './'
   params.maxPasses = 1000
+  params.emptyVarBehavior = 'display' // or 'hide'
 }
 
 // mutator method to set verbosity param. takes human-readable string argument and converts it to an integer for more efficient checks against the setting
@@ -770,6 +774,12 @@ function setTemplateRoot (v) {
 // mutator method to set max passes param: the number of times the parser can iterate over the template
 function setMaxPasses (v) {
   params.maxPasses = Number(v)
+}
+
+// mutator method to set empty var behavior param: whether to display {variables} that don't resolve as text ('display') or as an empty string ('hide')
+function setEmptyVarBehavior (v) {
+  if (v === 'hide') params.emptyVarBehavior = 'hide'
+  else params.emptyVarBehavior = 'display'
 }
 
 // access templates
@@ -996,6 +1006,7 @@ export default {
   setVerbosity,
   setTemplateRoot,
   setMaxPasses,
+  setEmptyVarBehavior,
   getTemplates,
   setTemplate,
   setCache,

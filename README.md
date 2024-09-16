@@ -483,6 +483,9 @@ API documentation
 - `teddy.maxPasses(n)`: Sets the maximum number of passes the parser can execute over your template. If this maximum is exceeded, Teddy will stop attempting to render the template. The limit exists to prevent the possibility of teddy producing infinite loops due to improperly coded templates.
   - Default: 1000.
 
+- `teddy.setEmptyVarBehavior('hide')`: Will make it possible for variables which don't resolve to display as empty strings instead of displaying the variable.
+  - Default: 'display'.
+
 - `teddy.setCache(params)`: Declare a template-level cache.
 
   - Params:
