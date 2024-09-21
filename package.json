@@ -8,7 +8,7 @@
       "url": "https://github.com/rooseveltframework/teddy/graphs/contributors"
     }
   ],
-  "version": "0.6.11",
+  "version": "0.6.12",
   "files": [
     "dist"
   ],
@@ -27,16 +27,16 @@
     "node": ">=18.0.0"
   },
   "dependencies": {
-    "cheerio": "1.0.0",
+    "cheerio": "1.0.0-rc.12",
     "html-entities": "2.5.2",
     "xregexp": "5.1.1"
   },
   "devDependencies": {
-    "@playwright/test": "1.47.1",
+    "@playwright/test": "1.47.2",
     "c8": "10.1.2",
     "codecov": "3.8.3",
     "cross-env": "7.0.3",
-    "eslint": "9.10.0",
+    "eslint": "9.11.0",
     "eslint-plugin-html": "8.1.1",
     "eslint-plugin-mocha": "10.5.0",
     "mocha": "10.7.3",

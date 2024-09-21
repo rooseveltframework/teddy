@@ -4,6 +4,11 @@
 
 - Put your changes here...
 
+## 0.6.12
+
+- Downgraded `cheerio` to prevent webpack errors when using Teddy on frontend.
+- Updated various dependencies.
+
 ## 0.6.11
 
 - Added new setting `teddy.setEmptyVarBehavior('hide')` that will make it possible for variables which don't resolve to display as empty strings instead of displaying the variable.
