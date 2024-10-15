@@ -15,7 +15,7 @@
   "type": "module",
   "exports": {
     ".": {
-      "import": "./dist/teddy.js",
+      "import": "./dist/teddy.mjs",
       "require": "./dist/teddy.cjs"
     }
   },
