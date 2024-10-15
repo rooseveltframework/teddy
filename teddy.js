@@ -257,7 +257,7 @@ function parseConditionals (dom, model) {
                 nextSibling = nextSibling.nextSibling
             }
           }
-          removeStack.forEach((element) => dom(element).replaceWith(''))
+          for (const element of removeStack) dom(element).replaceWith('')
           dom(el).replaceWith(el.children)
           parsedTags++
         } else {
@@ -295,7 +295,7 @@ function parseConditionals (dom, model) {
                         nextSibling = nextSibling.nextSibling
                     }
                   }
-                  removeStack.forEach((element) => dom(element).replaceWith(''))
+                  for (const element of removeStack) dom(element).replaceWith('')
                   nextSibling = false
                   parsedTags++
                 } else {
@@ -335,7 +335,7 @@ function parseConditionals (dom, model) {
                         nextSibling = nextSibling.nextSibling
                     }
                   }
-                  removeStack.forEach((element) => dom(element).replaceWith(''))
+                  for (const element of removeStack) dom(element).replaceWith('')
                   nextSibling = false
                   parsedTags++
                 } else {
@@ -784,12 +784,12 @@ function matchByDelimiter (input, openDelimiter, closeDelimiter) {
   const regex = /{!([^{}]*)!}/g
   let match
 
-  result.forEach(segment => {
+  for (const segment of result) {
     while ((match = regex.exec(segment)) !== null) {
       individualSegments.push(match[1])
     }
     individualSegments.push(segment)
-  })
+  }
 
   return individualSegments
 }

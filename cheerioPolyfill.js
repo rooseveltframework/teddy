@@ -43,6 +43,7 @@ export function load (html) {
     // if query is an object, it's assumed we're trying to perform operations on a single dom node
     const el = query
     return {
+
       // e.g. dom(el).children() from teddy
       children: function () {
         return el.children
@@ -76,6 +77,7 @@ export function load (html) {
       }
     }
   }
+
   // e.g. dom.html() from teddy
   $.html = function () {
     return doc.body.innerHTML
