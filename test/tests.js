@@ -1640,10 +1640,10 @@ export default [
 
   },
   {
-    describe: 'Client tests',
+    describe: 'Bundler tests',
     tests: [
       {
-        message: 'should be able to be required',
+        message: 'should be able require teddy.cjs',
         type: 'custom',
         test: async (_params, _page, _model, assert) => {
           if (fs.existsSync('test/client.cjs')) fs.rmSync('test/client.cjs')
@@ -1658,12 +1658,12 @@ export default [
         expected: ''
       },
       {
-        message: 'should be able to be imported',
+        message: 'should be able to import teddy.mjs',
         type: 'custom',
         test: (_params, _page, _model, assert) => {
           if (fs.existsSync('test/client.js')) fs.rmSync('test/client.js')
 
-          fs.writeFileSync('test/client.js', 'import teddy from "../dist/teddy.js"\nconsole.log(teddy)')
+          fs.writeFileSync('test/client.js', 'import teddy from "../dist/teddy.mjs"\nconsole.log(teddy)')
           const output = execSync('node ./test/client.js', { encoding: 'utf-8' }).toString()
 
           assert(output.includes('emptyVarBehavior:'))
@@ -1672,6 +1672,7 @@ export default [
         },
         expected: ''
       }
+      // TODO: write bundler tests for client-side files that are exclusive to the playwright environent where the window variable is present
     ]
   }
 ]
