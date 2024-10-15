@@ -2,12 +2,8 @@
 
 import fs from 'fs' // node filesystem module
 import path from 'path' // node path module
-import { load as cheerioLoad } from 'cheerio' // dom parser
-import XRegExp from 'xregexp/lib/index.js' // needed for matchRecursive
-import matchRecursiveModule from 'xregexp/lib/addons/matchrecursive.js' // include matchRecursive addon
-import htmlEntities from 'html-entities' // escapes sensitive characters to prevent xss
+import { load as cheerioLoad } from 'cheerio/slim' // dom parser
 
-matchRecursiveModule(XRegExp) // load matchRecursive addon into XRegExp
 const cheerioOptions = { xml: { xmlMode: false, lowerCaseAttributeNames: false, decodeEntities: false } }
 const params = {} // teddy parameters
 setDefaultParams() // set params to the defaults
@@ -81,7 +77,7 @@ function removeTeddyComments (renderedTemplate) {
     oldTemplate = renderedTemplate
     let vars
     try {
-      vars = XRegExp.matchRecursive(renderedTemplate, '{!', '!}', 'g')
+      vars = matchByDelimiter(renderedTemplate, '{!', '!}')
     } catch (e) {
       return renderedTemplate // it will match {! comments {! with comments in them !} !} but if there are unbalanced brackets, just return the original text
     }
@@ -586,7 +582,7 @@ function parseLoops (dom, model) {
 function parseVars (templateString, model) {
   let vars
   try {
-    vars = XRegExp.matchRecursive(templateString, '{', '}', 'g')
+    vars = matchByDelimiter(templateString, '{', '}')
   } catch (e) {
     return templateString // it will match {vars{withVarsInThem}} but if there are unbalanced brackets, just return the original text
   }
@@ -642,7 +638,7 @@ function parseVars (templateString, model) {
       // no flags are set
       let parsed = getOrSetObjectByDotNotation(model, match)
       if (params.emptyVarBehavior === 'hide' && !parsed) parsed = '' // display empty string instead of the variable text verbatim if this setting is set
-      else if (parsed || parsed === '') parsed = htmlEntities.encode(parsed)
+      else if (parsed || parsed === '') parsed = escapeEntities(parsed)
       else if (parsed === 0) parsed = '0'
       else parsed = `{${match}}`
       try {
@@ -716,6 +712,86 @@ function cleanupStrayTeddyTags (dom) {
     }
   } while (parsedTags)
   return dom
+}
+
+// escapes sensitive characters to prevent xss
+const escapeHtmlEntities = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&#34;',
+  "'": '&#39;'
+}
+const entityKeys = Object.keys(escapeHtmlEntities)
+const ekl = entityKeys.length
+function escapeEntities (value) {
+  let escapedEntity = false
+  let newValue = ''
+  let i
+  let j
+
+  if (typeof value === 'object') { // cannot escape on this value
+    if (!value) return false // it is falsey to return false
+    else if (Array.isArray(value)) {
+      if (value.length === 0) return false // empty arrays are falsey
+      else return '[Array]' // print that it is an array with content in it, but do not print the contents
+    }
+    return '[Object]' // just print that it is an object, do not print the contents
+  } else if (value === undefined) return false // cannot escape on this value; undefined is falsey
+  else if (typeof value === 'boolean' || typeof value === 'number') return value // cannot escape on these values; if it's already a boolean or a number just return it
+  else {
+    // loop through value to find html entities
+    for (i = 0; i < value.length; i++) {
+      escapedEntity = false
+
+      // loop through list of html entities to escape
+      for (j = 0; j < ekl; j++) {
+        if (value[i] === entityKeys[j]) { // alter value to show escaped html entities
+          newValue += escapeHtmlEntities[entityKeys[j]]
+          escapedEntity = true
+          break
+        }
+      }
+
+      if (!escapedEntity) newValue += value[i]
+    }
+  }
+
+  return newValue
+}
+
+// match strings by a custom delimiter
+function matchByDelimiter (input, openDelimiter, closeDelimiter) {
+  const stack = []
+  const result = []
+  const openLength = openDelimiter.length
+  const closeLength = closeDelimiter.length
+
+  for (let i = 0; i < input.length; i++) {
+    if (input.substring(i, i + openLength) === openDelimiter) {
+      stack.push(i + openLength)
+      i += openLength - 1
+    } else if (input.substring(i, i + closeLength) === closeDelimiter) {
+      const start = stack.pop()
+      if (stack.length === 0) {
+        result.push(input.substring(start, i))
+      }
+      i += closeLength - 1
+    }
+  }
+
+  const individualSegments = []
+  const regex = /{!([^{}]*)!}/g
+  let match
+
+  result.forEach(segment => {
+    while ((match = regex.exec(segment)) !== null) {
+      individualSegments.push(match[1])
+    }
+    individualSegments.push(segment)
+  })
+
+  return individualSegments
 }
 
 // gets or sets an object by dot notation, e.g. thing.nestedThing.furtherNestedThing: two arguments gets, three arguments sets

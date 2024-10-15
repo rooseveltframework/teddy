@@ -1663,7 +1663,7 @@ export default [
         test: (_params, _page, _model, assert) => {
           if (fs.existsSync('test/client.js')) fs.rmSync('test/client.js')
 
-          fs.writeFileSync('test/client.js', 'import teddy from "../dist/teddy.js"\nconsole.log(teddy)')
+          fs.writeFileSync('test/client.js', 'import teddy from "../dist/teddy.mjs"\nconsole.log(teddy)')
           const output = execSync('node ./test/client.js', { encoding: 'utf-8' }).toString()
 
           assert(output.includes('emptyVarBehavior:'))

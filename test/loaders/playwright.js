@@ -4,7 +4,8 @@ import testConditions from '../tests.js'
 import { ignoreSpaces } from '../testUtils.js'
 import { sanitizeTests, registerTemplates } from './loaderUtils.js'
 import teddy from '../../teddy.js'
-// import fs from 'fs'
+
+// TODO: refactor this loader to import teddy from within the page's DOM so we can import the version of teddy without cheerio
 
 const conditions = sanitizeTests(testConditions)
 

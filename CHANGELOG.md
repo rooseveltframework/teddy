@@ -4,6 +4,12 @@
 
 - Put your changes here...
 
+## 0.6.13
+
+- Removed `xregexp` and `html-entities` dependencies. Also Replaced `cheerio` with `cheerio/slim`. These changes have reduced bundle size significantly.
+- Began work on `cheerioPolyfill.js` which will allow Teddy to execute in client-side contexts without using `cheerio`. This will result in even smaller bundle sizes (currently around 16kb minified), however the work is unfinished.
+- Updated various dependencies.
+
 ## 0.6.12
 
 - Downgraded `cheerio` to prevent webpack errors when using Teddy on frontend.
