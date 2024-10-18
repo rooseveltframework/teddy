@@ -2,7 +2,10 @@
 
 ## Next version
 
-- Put your changes here...
+- Fixed client-side tests to test Teddy in the browser properly.
+- Refactored tests to improve maintainability.
+- Did further work on `cheerioPolyfill.js`. It's more than half finished, but it isn't fully done yet.
+- Updated various dependencies.
 
 ## 0.6.13
 

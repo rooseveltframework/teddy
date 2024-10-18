@@ -30,11 +30,11 @@
     "cheerio": "1.0.0"
   },
   "devDependencies": {
-    "@playwright/test": "1.48.0",
+    "@playwright/test": "1.48.1",
     "c8": "10.1.2",
     "codecov": "3.8.3",
     "cross-env": "7.0.3",
-    "eslint": "9.12.0",
+    "eslint": "9.13.0",
     "eslint-plugin-html": "8.1.2",
     "eslint-plugin-mocha": "10.5.0",
     "mocha": "10.7.3",
@@ -63,7 +63,7 @@
     "build": "webpack",
     "coverage": "npm run coverage-server && npm run coverage-client",
     "coverage-server": "npm run build && cross-env NODE_ENV=cover c8 mocha --timeout 60000 test/loaders/mocha.js",
-    "coverage-client": "npm run build && cross-env NODE_ENV=cover c8 playwright test",
+    "coverage-client": "npm run build && cross-env NODE_ENV=cover c8 --include=dist/teddy.js playwright test",
     "lint": "standard && eslint ./test && standard --plugin html *.html",
     "lint-fix": "standard --fix && eslint ./test && standard --plugin html *.html --fix",
     "test": "npm run test-server && npm run test-client",

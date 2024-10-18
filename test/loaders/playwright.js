@@ -1,65 +1,104 @@
-import { test, expect } from '@playwright/test'
-import makeModel from '../models/model.js'
-import testConditions from '../tests.js'
-import { ignoreSpaces } from '../testUtils.js'
-import { sanitizeTests, registerTemplates } from './loaderUtils.js'
-import teddy from '../../teddy.js'
+import path from 'path'
+import fs from 'fs'
+import { fileURLToPath } from 'url'
+import { test as playwrightTest } from '@playwright/test'
+import { loadTests } from './loadTests.js'
+import makeModel from '../model.js'
+import testGroups from '../tests.js'
 
-// TODO: refactor this loader to import teddy from within the page's DOM so we can import the version of teddy without cheerio
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+const teddyPath = path.resolve(__dirname, '../../dist/teddy.js')
+const testsToRun = loadTests(testGroups)
 
-const conditions = sanitizeTests(testConditions)
+// pre-register teddy templates
+function registerTemplates (dir) {
+  const templates = []
 
-for (const tc of conditions) {
-  test.describe(tc.describe, () => {
-    // let coverageObj
-    let model
+  function readDir (directory) {
+    const files = fs.readdirSync(directory)
 
-    test.beforeAll(() => {
-      // this ensures that teddy is not using the fs module to retrieve templates
-      teddy.setTemplateRoot('test/noTemplatesHere')
-      registerTemplates(teddy, 'test/templates')
-      model = makeModel()
-    })
+    for (const file of files) {
+      const filePath = path.join(directory, file)
+      const fileStat = fs.statSync(filePath)
 
-    for (const t of tc.tests) {
-      test(t.message, async ({ page }) => {
-        // callback function used on custom and asynchronous tests
-        const cb = (result, expected = true) => {
-          if (typeof expected === 'string') {
-            expected = ignoreSpaces(expected)
-          }
-          expect(ignoreSpaces(result)).toBe(expected)
-        }
+      if (fileStat.isDirectory()) {
+        readDir(filePath)
+      } else if (filePath.includes('.html')) {
+        const relativePath = path.relative(dir, filePath).replace(/\\/g, '/')
+        const content = fs.readFileSync(filePath, 'utf-8').replace(/\n/g, '')
+        templates.push({
+          path: relativePath,
+          content
+        })
+      }
+    }
+  }
 
-        if (t.playwright) {
-          const params = { teddy, model, template: t.template }
-          await t.playwright(params, page, expect)
-        } else if (t?.type === 'async') { // test asynchronous code
-          if (!t.expected) {
-            await t.test(teddy, t.template, model, cb)
-          } else if (typeof t.expected === 'string') {
-            const content = await t.test(teddy, t.template, model, cb)
-            await page.setContent('<div id="content"></div>')
-            await page.evaluate((html) => {
-              document.getElementById('content').textContent = html
-            }, content)
-            expect(ignoreSpaces(await page.evaluate(() => document.getElementById('content').textContent))).toEqual(ignoreSpaces(t.expected))
-          } else if (typeof t.expected === 'boolean') {
-            expect(t.test(teddy, t.template, model, cb)).toBe(t.expected)
-          }
-        } else if (t?.type === 'custom') { // test code that is handled within that test (with use of a callback)
-          t.test(teddy, t.template, model, cb)
-        } else if (typeof t.expected === 'string') { // test code that needs to be appended to the playwright page
-          const content = t.test(teddy, t.template, model)
-          await page.setContent('<div id="content"></div>')
-          await page.evaluate((html) => {
-            document.getElementById('content').textContent = html
-          }, content)
-          expect(ignoreSpaces(await page.evaluate(() => document.getElementById('content').textContent))).toStrictEqual(ignoreSpaces(t.expected))
-        } else if (typeof t.expected === 'boolean') { // test code that is resolved in the test without a callback
-          expect(t.test(teddy, t.template, model)).toBe(t.expected)
-        }
-      })
+  readDir(dir)
+  return templates
+}
+const templates = registerTemplates('test/templates')
+
+for (const testGroup of testsToRun) {
+  playwrightTest.describe(testGroup.describe, () => {
+    for (const test of testGroup.tests) {
+      if (test.skip) continue
+      if (test.runPlaywright) test.run = test.runPlaywright
+      if (!test.run) continue
+      else {
+        playwrightTest(test.message, async ({ page }) => {
+          // to debug, uncomment this:
+          // page.on('console', (msg) => console.log(msg))
+          // for deeper debugging: export DEBUG=pw:browser
+
+          const model = makeModel()
+
+          // set an initial DOM
+          await page.setContent(`<!DOCTYPE html>
+          <html lang="en">
+            <head>
+              <meta charset="utf-8">
+              <meta name="viewport" content="width=device-width,initial-scale=1">
+              <meta name="format-detection" content="telephone=no">
+              <title>Teddy Playwright Tests</title>
+            </head>
+            <body>
+            </body>
+          </html>`)
+          await page.addScriptTag({ path: teddyPath }) // add teddy script tag to the browser page
+          test.run = test.run?.toString() || '' // can't pass functions to page.evaluate, so we need to stringify the test.run function
+
+          await page.evaluate(async (params) => {
+            const { test, templates, model } = params
+
+            // load templates into browser context
+            for (const template of templates) window.teddy.setTemplate(template.path, template.content)
+            window.teddy.setTemplateRoot('test/templates')
+
+            console.log(window.teddy)
+
+            // fix the Set test by remaking the Set
+            model.set = new Set(['a', 'b', 'c'])
+
+            // convert test.run method back from string to an actual excutable function
+            test.run = eval(test.run) // eslint-disable-line
+            await test.run(window.teddy, test.template, model, teddyAssert, test.expected)
+
+            function teddyAssert (result, expected = true) {
+              if (typeof expected === 'string') expected = ignoreSpaces(expected)
+              if (ignoreSpaces(result) !== expected) {
+                throw new Error(`Assertion failed: expected ${expected}, got ${ignoreSpaces(result)}`)
+              }
+            }
+
+            function ignoreSpaces (str) {
+              if (typeof str !== 'string') return str
+              return str.replace(/\s/g, '')
+            }
+          }, { test, templates, model })
+        })
+      }
     }
   })
 }

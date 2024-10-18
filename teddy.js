@@ -5,6 +5,7 @@ import path from 'path' // node path module
 import { load as cheerioLoad } from 'cheerio/slim' // dom parser
 
 const cheerioOptions = { xml: { xmlMode: false, lowerCaseAttributeNames: false, decodeEntities: false } }
+const browser = !fs || !fs.readFileSync // true if we are executing in the browser context
 const params = {} // teddy parameters
 setDefaultParams() // set params to the defaults
 const templates = {} // loaded templates are stored as object collections, e.g. { "myTemplate.html": "<p>some markup</p>"}
@@ -24,7 +25,7 @@ function loadTemplate (template) {
   }
   const name = template
   let register = false
-  if (!templates[template] && template.indexOf('<') === -1 && fs !== undefined && fs.readFileSync !== undefined) {
+  if (!templates[template] && template.indexOf('<') === -1 && !browser) {
     // template is not found, it is not code, and we're in the node.js context
     register = true
     // append extension if not present
@@ -95,6 +96,7 @@ function replaceCacheElements (dom, model) {
     const tags = dom('cache:not([defer])')
     if (tags.length > 0) {
       for (const el of tags) {
+        if (browser) el.attribs = getAttribs(el)
         const name = el.attribs.name
         if (name.includes('{')) continue
         const key = el.attribs.key || 'none'
@@ -171,6 +173,7 @@ function parseIncludes (dom, model, dynamic) {
         }
         if (next) continue
         // get attributes
+        if (browser) el.attribs = getAttribs(el)
         const src = el.attribs.src
         if (!src) {
           if (params.verbosity > 1) console.warn('teddy encountered an include tag with no src attribute.')
@@ -185,6 +188,7 @@ function parseIncludes (dom, model, dynamic) {
         const localModel = Object.assign({}, model)
         for (const arg of dom(el).children()) {
           if (arg.name === 'arg') {
+            if (browser) arg.attribs = getAttribs(arg)
             const argval = Object.keys(arg.attribs)[0]
             getOrSetObjectByDotNotation(localModel, argval, dom(arg).html())
           }
@@ -227,6 +231,7 @@ function parseConditionals (dom, model) {
         if (next) continue
         // get conditions
         let args = []
+        if (browser) el.attribs = getAttribs(el)
         for (const attr in el.attribs) {
           const val = el.attribs[attr]
           if (val) args.push(`${attr}=${val}`)
@@ -268,6 +273,7 @@ function parseConditionals (dom, model) {
               case 'elseif':
                 // get conditions
                 args = []
+                if (browser) nextSibling.attribs = getAttribs(nextSibling)
                 for (const attr in nextSibling.attribs) {
                   const val = nextSibling.attribs[attr]
                   if (val) args.push(`${attr}=${val}`)
@@ -308,6 +314,7 @@ function parseConditionals (dom, model) {
               case 'elseunless':
                 // get conditions
                 args = []
+                if (browser) nextSibling.attribs = getAttribs(nextSibling)
                 for (const attr in nextSibling.attribs) {
                   const val = nextSibling.attribs[attr]
                   if (val) args.push(`${attr}=${val}`)
@@ -460,6 +467,7 @@ function parseOneLineConditionals (dom, model) {
       for (const el of tags) {
         // skip parsing this if it uses variables as part of its conditions; it will get caught in the next pass after parseVars runs
         let defer = false
+        if (browser) el.attribs = getAttribs(el)
         for (const attr in el.attribs) {
           const val = el.attribs[attr]
           if (val.includes('{')) {
@@ -490,6 +498,7 @@ function parseOneLineConditionals (dom, model) {
         let cond
         let ifTrue
         let ifFalse
+        if (browser) el.attribs = getAttribs(el)
         for (const attr in el.attribs) {
           const val = el.attribs[attr]
           if (attr.startsWith('if-')) {
@@ -537,6 +546,7 @@ function parseLoops (dom, model) {
         let loopThrough
         let keyName
         let valName
+        if (browser) el.attribs = getAttribs(el)
         for (const attr in el.attribs) {
           if (attr === 'through') loopThrough = getOrSetObjectByDotNotation(model, el.attribs[attr])
           else if (attr === 'key') keyName = el.attribs[attr]
@@ -660,6 +670,7 @@ function defineNewCaches (dom, model) {
     const tags = dom('cache[defer]')
     if (tags.length > 0) {
       for (const el of tags) {
+        if (browser) el.attribs = getAttribs(el)
         const name = el.attribs.name
         const key = el.attribs.key || 'none'
         const maxAge = parseInt(el.attribs.maxAge) || 0
@@ -703,6 +714,7 @@ function cleanupStrayTeddyTags (dom) {
         if (el.name === 'include' || el.name === 'arg' || el.name === 'if' || el.name === 'unless' || el.name === 'elseif' || el.name === 'elseunless' || el.name === 'else' || el.name === 'loop' || el.name === 'cache') {
           dom(el).remove()
         }
+        if (browser) el.attribs = getAttribs(el)
         for (const attr in el.attribs) {
           if (attr === 'true' || attr === 'false' || attr === 'teddy_deferred_one_line_conditional' || attr.startsWith('if-')) {
             dom(el).removeAttr(attr)
@@ -804,9 +816,36 @@ function getOrSetObjectByDotNotation (obj, dotNotation, value) {
     return obj[dotNotation[0]]
   } else if (dotNotation.length === 0) return obj
   else if (dotNotation.length === 1) {
-    if (obj) return obj[dotNotation[0]]
+    if (obj) {
+      if (browser) return caseInsensitiveLookup(obj, dotNotation[0])
+      else return obj[dotNotation[0]]
+    }
     return false
   } else return getOrSetObjectByDotNotation(obj[dotNotation[0]], dotNotation.slice(1), value)
+  function caseInsensitiveLookup (obj, key) {
+    const lowerCaseKey = key.toLowerCase()
+    const normalizedObj = Object.keys(obj).reduce((acc, k) => {
+      acc[k.toLowerCase()] = obj[k]
+      return acc
+    }, {})
+    return normalizedObj[lowerCaseKey]
+  }
+}
+
+// #endregion
+
+// #region cheerio polyfills
+
+function getAttribs (element) {
+  const attributes = element.attributes
+  const attributesObject = {}
+
+  for (let i = 0; i < attributes.length; i++) {
+    const attr = attributes[i]
+    attributesObject[attr.name] = attr.value
+  }
+
+  return attributesObject
 }
 
 // #endregion
