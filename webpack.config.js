@@ -139,13 +139,10 @@ export default [
       fallback: {
         fs: false,
         path: false
-      }
-      /*
-      TODO: uncomment this when cheerioPolyfill is done
+      },
       alias: {
         'cheerio/slim': path.resolve(__dirname, 'cheerioPolyfill.js')
       }
-      */
     }
   },
 
@@ -188,13 +185,10 @@ export default [
       fallback: {
         fs: false,
         path: false
-      }
-      /*
-      TODO: uncomment this when cheerioPolyfill is done
+      },
       alias: {
         'cheerio/slim': path.resolve(__dirname, 'cheerioPolyfill.js')
       }
-      */
     }
   },
 
@@ -237,13 +231,10 @@ export default [
       fallback: {
         fs: false,
         path: false
-      }
-      /*
-      TODO: uncomment this when cheerioPolyfill is done
+      },
       alias: {
         'cheerio/slim': path.resolve(__dirname, 'cheerioPolyfill.js')
       }
-      */
     }
   },
 
@@ -289,13 +280,10 @@ export default [
       fallback: {
         fs: false,
         path: false
-      }
-      /*
-      TODO: uncomment this when cheerioPolyfill is done
+      },
       alias: {
         'cheerio/slim': path.resolve(__dirname, 'cheerioPolyfill.js')
       }
-      */
     }
   },
 
@@ -338,13 +326,10 @@ export default [
       fallback: {
         fs: false,
         path: false
-      }
-      /*
-      TODO: uncomment this when cheerioPolyfill is done
+      },
       alias: {
         'cheerio/slim': path.resolve(__dirname, 'cheerioPolyfill.js')
       }
-      */
     }
   },
 
@@ -387,13 +372,10 @@ export default [
       fallback: {
         fs: false,
         path: false
-      }
-      /*
-      TODO: uncomment this when cheerioPolyfill is done
+      },
       alias: {
         'cheerio/slim': path.resolve(__dirname, 'cheerioPolyfill.js')
       }
-      */
     }
   }
 

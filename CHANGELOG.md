@@ -2,9 +2,13 @@
 
 ## Next version
 
+- Put your changes here...
+
+## 0.6.14
+
+- Finsihed work on `cheerioPolyfill.js` which makes it possible for Teddy to execute in client-side contexts without using `cheerio`, allowing for a very small bundle size for client-side Teddy (17kb minified).
 - Fixed client-side tests to test Teddy in the browser properly.
 - Refactored tests to improve maintainability.
-- Did further work on `cheerioPolyfill.js`. It's more than half finished, but it isn't fully done yet.
 - Updated various dependencies.
 
 ## 0.6.13

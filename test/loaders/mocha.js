@@ -13,7 +13,7 @@ for (const testGroup of testsToRun) {
     before(() => {
       teddy.setTemplateRoot('test/templates')
       model = makeModel()
-      if (process.env.NODE_ENV === 'test') teddy.setVerbosity(0)
+      if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'cover') teddy.setVerbosity(0)
     })
 
     for (const test of testGroup.tests) {
@@ -26,8 +26,16 @@ for (const testGroup of testsToRun) {
 }
 
 function teddyAssert (result, expected = true) {
+  result = ignoreSpaces(result)
   if (typeof expected === 'string') expected = ignoreSpaces(expected)
-  assert.equal(ignoreSpaces(result), expected)
+  if (Array.isArray(expected)) {
+    let match = false
+    for (let acceptable of expected) {
+      acceptable = ignoreSpaces(acceptable)
+      if (result === acceptable) match = true
+    }
+    assert.equal(match, true)
+  } else assert.equal(result, expected)
 }
 
 function ignoreSpaces (str) {

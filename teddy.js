@@ -108,7 +108,7 @@ function replaceCacheElements (dom, model) {
             const now = Date.now()
             // if max age is not set, then there is no max age and the cache content is still valid
             // or if last accessed + max age > now then the cache is not stale and the cache is still valid
-            if (!cache.maxAge || cache.entries[keyVal].lastAccessed + cache.maxAge > now) {
+            if (!(cache.maxAge && !cache.maxage) || cache.entries[keyVal].lastAccessed + (cache.maxAge || cache.maxage) > now) {
               const cacheContent = cache.entries[keyVal].markup
               cache.entries[keyVal].lastAccessed = now
               dom(el).replaceWith(cacheContent)
@@ -160,16 +160,16 @@ function parseIncludes (dom, model, dynamic) {
         // ensure this isn't the child of a no parse block
         let foundBody = false
         let next = false
-        let parent = el.parent
+        let parent = el.parent || el.parentNode
         while (!foundBody) {
           let parentName
           if (!parent) parentName = 'body'
-          else parentName = parent.name
+          else parentName = parent.name || parent.nodeName?.toLowerCase()
           if (parentName === 'noparse' || parentName === 'noteddy') {
             next = true
             break
           } else if (parentName === 'body') foundBody = true
-          else parent = parent.parent
+          else parent = parent.parent || parent.parentNode
         }
         if (next) continue
         // get attributes
@@ -187,6 +187,7 @@ function parseIncludes (dom, model, dynamic) {
         const contents = templates[src]
         const localModel = Object.assign({}, model)
         for (const arg of dom(el).children()) {
+          if (browser) arg.name = arg.nodeName?.toLowerCase()
           if (arg.name === 'arg') {
             if (browser) arg.attribs = getAttribs(arg)
             const argval = Object.keys(arg.attribs)[0]
@@ -217,16 +218,16 @@ function parseConditionals (dom, model) {
         // ensure this isn't the child of a loop or a no parse block
         let foundBody = false
         let next = false
-        let parent = el.parent
+        let parent = el.parent || el.parentNode
         while (!foundBody) {
           let parentName
           if (!parent) parentName = 'body'
-          else parentName = parent.name
+          else parentName = parent.name || parent.nodeName?.toLowerCase()
           if (parentName === 'loop' || parentName === 'noparse' || parentName === 'noteddy') {
             next = true
             break
           } else if (parentName === 'body') foundBody = true
-          else parent = parent.parent
+          else parent = parent.parent || parent.parentNode
         }
         if (next) continue
         // get conditions
@@ -239,6 +240,7 @@ function parseConditionals (dom, model) {
         }
         // check if it's an if tag and not an unless tag
         let isIf = true
+        if (browser) el.name = el.nodeName?.toLowerCase()
         if (el.name === 'unless') isIf = false
         // evaluate conditional
         const condResult = evaluateConditional(args, model)
@@ -247,6 +249,7 @@ function parseConditionals (dom, model) {
           let nextSibling = el.nextSibling
           const removeStack = []
           while (nextSibling) {
+            if (browser) nextSibling.name = nextSibling.nodeName?.toLowerCase()
             switch (nextSibling.name) {
               case 'elseif':
               case 'elseunless':
@@ -263,12 +266,13 @@ function parseConditionals (dom, model) {
             }
           }
           for (const element of removeStack) dom(element).replaceWith('')
-          dom(el).replaceWith(el.children)
+          dom(el).replaceWith(el.childNodes || el.children)
           parsedTags++
         } else {
           // true block is false; find the next elseif, elseunless, or else tag to evaluate
           let nextSibling = el.nextSibling
           while (nextSibling) {
+            if (browser) nextSibling.name = nextSibling.nodeName?.toLowerCase()
             switch (nextSibling.name) {
               case 'elseif':
                 // get conditions
@@ -282,10 +286,11 @@ function parseConditionals (dom, model) {
                 if (evaluateConditional(args, model)) {
                   // render the true block and discard the elseif, elseunless, and else blocks
                   const replaceSibling = nextSibling
-                  dom(replaceSibling).replaceWith(replaceSibling.children)
+                  dom(replaceSibling).replaceWith(replaceSibling.childNodes || replaceSibling.children)
                   nextSibling = el.nextSibling
                   const removeStack = []
                   while (nextSibling) {
+                    if (browser) nextSibling.name = nextSibling.nodeName?.toLowerCase()
                     switch (nextSibling.name) {
                       case 'elseif':
                       case 'elseunless':
@@ -323,10 +328,11 @@ function parseConditionals (dom, model) {
                 if (!evaluateConditional(args, model)) {
                   // render the true block and discard the elseif, elseunless, and else blocks
                   const replaceSibling = nextSibling
-                  dom(replaceSibling).replaceWith(replaceSibling.children)
+                  dom(replaceSibling).replaceWith(replaceSibling.childNodes || replaceSibling.children)
                   nextSibling = el.nextSibling
                   const removeStack = []
                   while (nextSibling) {
+                    if (browser) nextSibling.name = nextSibling.nodeName?.toLowerCase()
                     switch (nextSibling.name) {
                       case 'elseif':
                       case 'elseunless':
@@ -354,7 +360,7 @@ function parseConditionals (dom, model) {
                 break
               case 'else':
                 // else is always true, so if we've gotten here, then there's nothing to evaluate and we've reached the end of the conditional blocks
-                dom(nextSibling).replaceWith(nextSibling.children)
+                dom(nextSibling).replaceWith(nextSibling.childNodes || nextSibling.children)
                 nextSibling = false
                 parsedTags++
                 break
@@ -482,16 +488,16 @@ function parseOneLineConditionals (dom, model) {
         // ensure this isn't the child of a loop or a no parse block
         let foundBody = false
         let next = false
-        let parent = el.parent
+        let parent = el.parent || el.parentNode
         while (!foundBody) {
           let parentName
           if (!parent) parentName = 'body'
-          else parentName = parent.name
+          else parentName = parent.name || parent.nodeName?.toLowerCase()
           if (parentName === 'loop' || parentName === 'noparse' || parentName === 'noteddy') {
             next = true
             break
           } else if (parentName === 'body') foundBody = true
-          else parent = parent.parent
+          else parent = parent.parent || parent.parentNode
         }
         if (next) continue
         // get conditions
@@ -673,8 +679,8 @@ function defineNewCaches (dom, model) {
         if (browser) el.attribs = getAttribs(el)
         const name = el.attribs.name
         const key = el.attribs.key || 'none'
-        const maxAge = parseInt(el.attribs.maxAge) || 0
-        const maxCaches = parseInt(el.attribs.maxCaches) || 1000
+        const maxAge = parseInt(el.attribs.maxAge || el.attribs.maxage) || 0
+        const maxCaches = parseInt(el.attribs.maxCaches || el.attribs.maxcaches) || 1000
         const timestamp = Date.now()
         const markup = dom(el).html()
         if (!caches[name]) {
@@ -711,6 +717,7 @@ function cleanupStrayTeddyTags (dom) {
     const tags = dom('[teddy_deferred_one_line_conditional], include, arg, if, unless, elseif, elseunless, else, loop, cache')
     if (tags.length > 0) {
       for (const el of tags) {
+        if (browser) el.name = el.nodeName?.toLowerCase()
         if (el.name === 'include' || el.name === 'arg' || el.name === 'if' || el.name === 'unless' || el.name === 'elseif' || el.name === 'elseunless' || el.name === 'else' || el.name === 'loop' || el.name === 'cache') {
           dom(el).remove()
         }
@@ -832,10 +839,7 @@ function getOrSetObjectByDotNotation (obj, dotNotation, value) {
   }
 }
 
-// #endregion
-
-// #region cheerio polyfills
-
+// cheerio polyfill
 function getAttribs (element) {
   const attributes = element.attributes
   const attributesObject = {}
@@ -918,13 +922,13 @@ function setCache (params) {
   if (!templateCaches[params.template]) templateCaches[params.template] = {}
   if (params.key) {
     templateCaches[params.template][params.key] = {
-      maxAge: params.maxAge,
-      maxCaches: params.maxCaches || 1000,
+      maxAge: params.maxAge || params.maxage,
+      maxCaches: (params.maxCaches || params.maxcaches) || 1000,
       entries: {}
     }
   } else {
     templateCaches[params.template].none = {
-      maxAge: params.maxAge,
+      maxAge: params.maxAge || params.maxage,
       markup: null,
       created: null
     }
@@ -981,11 +985,11 @@ function render (template, model, callback) {
     if (singletonCache) {
       // check if the timestamp exceeds max age
       if (!singletonCache.created) cacheKey = 'none'
-      else if (!singletonCache.maxAge) {
+      else if (!singletonCache.maxAge && singletonCache.maxage) {
         // if no max age is set, then this cache doesn't expire
         if (typeof callback === 'function') return callback(null, singletonCache.markup)
         else return singletonCache.markup
-      } else if (singletonCache.created + singletonCache.maxAge < Date.now()) cacheKey = 'none' // if yes re-render the template and cache it again
+      } else if (singletonCache.created + (singletonCache.maxAge || singletonCache.maxage) < Date.now()) cacheKey = 'none' // if yes re-render the template and cache it again
       else {
         // if no return the cached markup and skip the template render
         if (typeof callback === 'function') return callback(null, singletonCache.markup)
@@ -1004,11 +1008,11 @@ function render (template, model, callback) {
             if (entryKey === cacheKeyModelVal) {
               // check if the timestamp exceeds max age
               const entry = templateCacheAtThisKey.entries[entryKey]
-              if (!templateCacheAtThisKey.maxAge) {
+              if (!templateCacheAtThisKey.maxAge && !templateCacheAtThisKey.maxage) {
                 // if no max age is set, then this cache doesn't expire
                 if (typeof callback === 'function') return callback(null, entry.markup)
                 else return entry.markup
-              } else if (entry.created + templateCacheAtThisKey.maxAge < Date.now()) {
+              } else if (entry.created + (templateCacheAtThisKey.maxAge || templateCacheAtThisKey.maxage) < Date.now()) {
                 // if yes re-render the template and cache it again
                 cacheKey = key
                 break
