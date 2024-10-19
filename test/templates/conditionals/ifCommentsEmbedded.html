@@ -2,12 +2,14 @@
   should evaluate <if doesntexist> as false and trigger <else> condition with embedded HTML comments in conditional statements
 !}
 
-<if doesntexist>
-  <p>The variable 'doesntexist' is present</p>
-</if>
+<div>
+  <if doesntexist>
+    <p>The variable 'doesntexist' is present</p>
+  </if>
 
-<else>
-  <!-- HTML comment -->
-  <!-- MOAR HTML comments -->
-  <p>The variable 'doesntexist' is not present</p>
-</else>
+  <else>
+    <!-- HTML comment -->
+    <!-- MOAR HTML comments -->
+    <p>The variable 'doesntexist' is not present</p>
+  </else>
+</div>

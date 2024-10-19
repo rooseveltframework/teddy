@@ -5,6 +5,7 @@ import fs from 'fs'
 // to skip test groups or individual tests, add `skip: true` to the group or test object
 // to test an individual group or test, add `only: true` to the group or test object
 // to run a test only in mocha or only in playwright, use `runMocha` or `runPlaywright` instead of `run`
+// if multiple results are acceptable, make `expected` an array of strings rather than a string
 
 export default [
   {
@@ -104,7 +105,7 @@ export default [
         message: 'should evaluate entire conditional and correctly show HTML comments (conditionals/commentConditional.html)',
         template: 'conditionals/commentConditional',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
-        expected: '<!-- COMMENT 1 --><p>The variable \'something\' is present</p><!-- COMMENT 2 -->'
+        expected: '<div><!-- COMMENT 1 --><p>The variable \'something\' is present</p><!-- COMMENT 2 --></div>'
       },
       {
         message: 'should evaluate <if something=\'no\'> as false and <elseif somethingElse> as true (conditionals/ifElseIf.html)',
@@ -260,19 +261,19 @@ export default [
         message: 'should evaluate <option> elements with the middle one selected (conditionals/oneLineValueVarsLooped.html)',
         template: 'conditionals/oneLineValueVarsLooped',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
-        expected: '<option value="1">1</option><option value="2" selected>2</option><option value="3">3</option>'
+        expected: ['<option value="1">1</option><option value="2" selected="">2</option><option value="3">3</option>', '<option value="1">1</option><option value="2" selected>2</option><option value="3">3</option>']
       },
       {
         message: 'should evaluate <option> elements with the middle one selected (conditionals/conditionalValueVarsLooped.html)',
         template: 'conditionals/conditionalValueVarsLooped',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
-        expected: '<option value="1">1</option><option value="2" selected>2</option><option value="3">3</option>'
+        expected: ['<option value="1">1</option><option value="2" selected="">2</option><option value="3">3</option>', '<option value="1">1</option><option value="2" selected>2</option><option value="3">3</option>']
       },
       {
         message: 'should evaluate one line if "if-something=\'Some content\'" as true and still add the id attribute regardless of the if statement outcome (conditionals/oneLineValueWithAdditionalAttributesNotImpactedByIf.html)',
         template: 'conditionals/oneLineValueWithAdditionalAttributesNotImpactedByIf',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
-        expected: '<p id="someId" class="something-is-present">One line if.</p><p id="someId">One line if.</p><p id="someId" disabled>One line if.</p><option value="3" selected>One line if.</option><option value="3" selected>One line if.</option>'
+        expected: ['<p id="someId" class="something-is-present">One line if.</p><p id="someId">One line if.</p><p id="someId" disabled="">One line if.</p><option value="3" selected="">One line if.</option><option value="3" selected="">One line if.</option>', '<p id="someId" class="something-is-present">One line if.</p><p id="someId">One line if.</p><p id="someId" disabled>One line if.</p><option value="3" selected>One line if.</option><option value="3" selected>One line if.</option>']
       },
       {
         message: 'should evaluate one line if "if-something=\'\'" as false (conditionals/oneLineEmpty.html)',
@@ -417,19 +418,19 @@ export default [
         message: 'should evaluate <if doesntexist> as false and trigger <else> condition with preceding HTML comment (conditionals/ifCommentElse.html)',
         template: 'conditionals/ifCommentElse',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
-        expected: '<!-- HTML comment --><p>The variable \'doesntexist\' is not present</p>'
+        expected: '<div><!-- HTML comment --><p>The variable \'doesntexist\' is not present</p></div>'
       },
       {
         message: 'should evaluate <if doesntexist> as false and trigger <else> condition with multiple preceding HTML comments (conditionals/ifMultipleCommentsElse.html)',
         template: 'conditionals/ifMultipleCommentsElse',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
-        expected: '<!-- HTML comment --><!-- MOAR HTML comments --><p>The variable \'doesntexist\' is not present</p>'
+        expected: '<div><!-- HTML comment --><!-- MOAR HTML comments --><p>The variable \'doesntexist\' is not present</p></div>'
       },
       {
         message: 'should evaluate <if doesntexist> as false and trigger <else> condition with embedded HTML comments in conditional statements (conditionals/ifCommentsEmbedded.html)',
         template: 'conditionals/ifCommentsEmbedded',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
-        expected: '<!-- HTML comment --><!-- MOAR HTML comments --><p>The variable \'doesntexist\' is not present</p>'
+        expected: '<div><!-- HTML comment --><!-- MOAR HTML comments --><p>The variable \'doesntexist\' is not present</p></div>'
       },
       {
         message: 'should evaluate the <unless> condition as true and not render the other conditions (conditionals/ifWithSiblingIfWithNestedIfElse.html)',
@@ -646,7 +647,7 @@ export default [
         message: 'should parse loop through nested object correctly (looping/nestedObjectLoopLookup.html)',
         template: 'looping/nestedObjectLoopLookup',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
-        expected: '<p>1</p><input type="text" checked><p>2</p><input type="text"><p>3</p><input type="text" checked>'
+        expected: ['<p>1</p><input type="text" checked=""><p>2</p><input type="text"><p>3</p><input type="text" checked="">', '<p>1</p><input type="text" checked><p>2</p><input type="text"><p>3</p><input type="text" checked>']
       },
       {
         message: 'should parse nested loops correctly (looping/nestedLoopsObjectWithArrayOfObjects.html)',
@@ -929,7 +930,7 @@ export default [
       {
         message: 'should render plain HTML with no teddy tags with no changes (misc/plainHTML.html)',
         template: 'misc/plainHTML',
-        run: async (teddy, template, model, assert, expected) => {
+        runMocha: async (teddy, template, model, assert, expected) => {
           const teddyTemplate = teddy.render(template, model)
 
           assert(teddyTemplate, '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="format-detection" content="telephone=no"><title>Plain HTML</title><link rel="stylesheet" href="/css/styles.css"></head><body><main><p>This template contains no teddy tags. Just HTML.</p></main><script type="text/javascript" src="/js/main.js"></script></body></html>')
@@ -1626,7 +1627,6 @@ export default [
         },
         expected: ''
       }
-      // TODO: write bundler tests for client-side files that are exclusive to the playwright environent where the window variable is present
     ]
   }
 ]

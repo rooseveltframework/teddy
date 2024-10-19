@@ -1,11 +1,14 @@
 {!
   should evaluate <if doesntexist> as false and trigger <else> condition with preceding HTML comment
 !}
-<if doesntexist>
-  <p>The variable 'doesntexist' is present</p>
-</if>
 
-<!-- HTML comment -->
-<else>
-  <p>The variable 'doesntexist' is not present</p>
-</else>
+<div>
+  <if doesntexist>
+    <p>The variable 'doesntexist' is present</p>
+  </if>
+
+  <!-- HTML comment -->
+  <else>
+    <p>The variable 'doesntexist' is not present</p>
+  </else>
+</div>
