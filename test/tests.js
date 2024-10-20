@@ -1626,6 +1626,62 @@ export default [
           fs.rmSync('test/client.js')
         },
         expected: ''
+      },
+      {
+        message: 'should be able require teddy.client.cjs',
+        runMocha: async (teddy, template, model, assert, expected) => {
+          if (fs.existsSync('test/client.cjs')) fs.rmSync('test/client.cjs')
+
+          fs.writeFileSync('test/client.cjs', 'const teddy = require("../dist/teddy.client.cjs")\nconsole.log(teddy)')
+          const output = execSync('node ./test/client.cjs', { encoding: 'utf-8' }).toString()
+
+          assert(output.includes('emptyVarBehavior:'))
+
+          fs.rmSync('test/client.cjs')
+        },
+        expected: ''
+      },
+      {
+        message: 'should be able to import teddy.client.mjs',
+        runMocha: async (teddy, template, model, assert, expected) => {
+          if (fs.existsSync('test/client.js')) fs.rmSync('test/client.js')
+
+          fs.writeFileSync('test/client.js', 'import teddy from "../dist/teddy.client.mjs"\nconsole.log(teddy)')
+          const output = execSync('node ./test/client.js', { encoding: 'utf-8' }).toString()
+
+          assert(output.includes('emptyVarBehavior:'))
+
+          fs.rmSync('test/client.js')
+        },
+        expected: ''
+      },
+      {
+        message: 'should be able require teddy.min.cjs',
+        runMocha: async (teddy, template, model, assert, expected) => {
+          if (fs.existsSync('test/client.cjs')) fs.rmSync('test/client.cjs')
+
+          fs.writeFileSync('test/client.cjs', 'const teddy = require("../dist/teddy.min.cjs")\nconsole.log(teddy)')
+          const output = execSync('node ./test/client.cjs', { encoding: 'utf-8' }).toString()
+
+          assert(output.includes('emptyVarBehavior:'))
+
+          fs.rmSync('test/client.cjs')
+        },
+        expected: ''
+      },
+      {
+        message: 'should be able to import teddy.min.mjs',
+        runMocha: async (teddy, template, model, assert, expected) => {
+          if (fs.existsSync('test/client.js')) fs.rmSync('test/client.js')
+
+          fs.writeFileSync('test/client.js', 'import teddy from "../dist/teddy.min.mjs"\nconsole.log(teddy)')
+          const output = execSync('node ./test/client.js', { encoding: 'utf-8' }).toString()
+
+          assert(output.includes('emptyVarBehavior:'))
+
+          fs.rmSync('test/client.js')
+        },
+        expected: ''
       }
     ]
   }

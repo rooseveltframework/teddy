@@ -1,8 +1,7 @@
-// create a native DOMParser
-const parser = new window.DOMParser()
-
 // stub out cheerio using native dom methods for frontend so we don't have to bundle cheerio on the frontend
 export function load (html) {
+  // create a native DOMParser
+  const parser = new window.DOMParser()
   const doc = parser.parseFromString(html, 'text/html')
   doc.body.innerHTML = doc.head.innerHTML + doc.body.innerHTML
 
