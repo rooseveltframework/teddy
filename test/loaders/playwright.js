@@ -40,6 +40,33 @@ function registerTemplates (dir) {
 const templates = registerTemplates('test/templates')
 
 function runPlaywrightAgainstTeddyBundle (teddyPath) {
+  playwrightTest.describe('Test that client-side bundles load', () => {
+    const teddyNonMinified = path.resolve(__dirname, '../../dist/teddy.js')
+    const teddyMinified = path.resolve(__dirname, '../../dist/teddy.min.js')
+
+    playwrightTest(`Load ${teddyNonMinified}`, async ({ page }) => {
+      // to debug, uncomment this:
+      // page.on('console', (msg) => console.log(msg))
+      // for deeper debugging: export DEBUG=pw:browser
+
+      await page.addScriptTag({ path: teddyNonMinified }) // add teddy script tag to the browser page
+      await page.evaluate(async () => {
+        if (!window?.teddy?.setTemplateRoot) throw new Error(`Assertion failed: expected ${teddyNonMinified} to load`)
+      })
+    })
+    playwrightTest(`Load ${teddyMinified}`, async ({ page }) => {
+      // to debug, uncomment this:
+      // page.on('console', (msg) => console.log(msg))
+      // for deeper debugging: export DEBUG=pw:browser
+
+      await page.addScriptTag({ path: teddyMinified }) // add teddy script tag to the browser page
+      await page.evaluate(async () => {
+        if (!window?.teddy?.setTemplateRoot) throw new Error(`Assertion failed: expected ${teddyMinified} to load`)
+      })
+    })
+  })
+
+  // run the main test suite
   const fileName = teddyPath.split('/').pop()
   for (const testGroup of testsToRun) {
     playwrightTest.describe(`${testGroup.describe} (dist/${fileName})`, () => {
@@ -112,4 +139,4 @@ function runPlaywrightAgainstTeddyBundle (teddyPath) {
 }
 
 runPlaywrightAgainstTeddyBundle(path.resolve(__dirname, '../../dist/teddy.js'))
-// runPlaywrightAgainstTeddyBundle(path.resolve(__dirname, '../../dist/teddy.min.js')) // uncomment to test the minified bundle too
+// runPlaywrightAgainstTeddyBundle(path.resolve(__dirname, '../../dist/teddy.min.js')) // uncomment to run the test suite against the minified bundle too
