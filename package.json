@@ -30,7 +30,7 @@
     "cheerio": "1.0.0"
   },
   "devDependencies": {
-    "@playwright/test": "1.48.1",
+    "@playwright/test": "1.48.2",
     "c8": "10.1.2",
     "codecov": "3.8.3",
     "cross-env": "7.0.3",
