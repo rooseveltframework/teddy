@@ -5,7 +5,7 @@ import path from 'path' // node path module
 import { load as cheerioLoad } from 'cheerio/slim' // dom parser
 
 const cheerioOptions = { xml: { xmlMode: false, lowerCaseAttributeNames: false, decodeEntities: false } }
-const browser = !fs || !fs.readFileSync // true if we are executing in the browser context
+const browser = cheerioLoad.isCheerioPolyfill // true if we are executing in the browser context
 const params = {} // teddy parameters
 setDefaultParams() // set params to the defaults
 const templates = {} // loaded templates are stored as object collections, e.g. { "myTemplate.html": "<p>some markup</p>"}
@@ -25,7 +25,7 @@ function loadTemplate (template) {
   }
   const name = template
   let register = false
-  if (!templates[template] && template.indexOf('<') === -1 && !browser) {
+  if (!templates[template] && template.indexOf('<') === -1 && fs && fs.readFileSync) {
     // template is not found, it is not code, and we're in the node.js context
     register = true
     // append extension if not present

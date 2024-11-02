@@ -18,3 +18,4 @@ coverage
 dist
 test-results
 test/client.*
+.npm-cache

@@ -4,6 +4,11 @@
 
 - Put your changes here...
 
+## 0.6.15
+
+- Fixed a bug which caused the `cheerio`-driven modules to not work client-side if you choose to use them there.
+- Updated various dependencies.
+
 ## 0.6.14
 
 - Finsihed work on `cheerioPolyfill.js` which makes it possible for Teddy to execute in client-side contexts without using `cheerio`, allowing for a very small bundle size for client-side Teddy (17kb minified).

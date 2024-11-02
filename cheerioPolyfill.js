@@ -68,3 +68,5 @@ export function load (html) {
 
   return $
 }
+
+load.isCheerioPolyfill = true
