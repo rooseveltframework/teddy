@@ -154,7 +154,7 @@ function parseIncludes (dom, model, dynamic) {
     let tags
     // dynamic includes are includes like <include src="{sourcedFromVariable}"></include>
     if (dynamic) tags = dom('include') // parse all includes
-    else tags = dom('include:not([teddy_deferred_dynamic_include])') // parse only includes that aren't dynamic
+    else tags = dom('include:not([teddydeferreddynamicinclude])') // parse only includes that aren't dynamic
     if (tags.length > 0) {
       for (const el of tags) {
         // ensure this isn't the child of a no parse block
@@ -180,7 +180,7 @@ function parseIncludes (dom, model, dynamic) {
           continue
         }
         if (src.includes('{')) {
-          dom(el).attr('teddy_deferred_dynamic_include', 'true') // mark it dynamic and then skip it
+          dom(el).attr('teddydeferreddynamicinclude', 'true') // mark it dynamic and then skip it
           continue
         }
         loadTemplate(src) // load the partial into the template list
@@ -233,7 +233,8 @@ function parseConditionals (dom, model) {
         // get conditions
         let args = []
         if (browser) el.attribs = getAttribs(el)
-        for (const attr in el.attribs) {
+        for (let attr in el.attribs) {
+          if (attr.includes('-teddyduplicate')) attr = attr.split('-teddyduplicate')[0] // the condition is a duplicate, so remove the `-teddyduplicate1` from `conditionName-teddyduplicate1`, `conditionName-teddyduplicate2`, etc
           const val = el.attribs[attr]
           if (val) args.push(`${attr}=${val}`)
           else args.push(attr)
@@ -482,7 +483,7 @@ function parseOneLineConditionals (dom, model) {
           }
         }
         if (defer) {
-          dom(el).attr('teddy_deferred_one_line_conditional', 'true')
+          dom(el).attr('teddydeferredonelineconditional', 'true')
           continue
         }
         // ensure this isn't the child of a loop or a no parse block
@@ -505,19 +506,21 @@ function parseOneLineConditionals (dom, model) {
         let ifTrue
         let ifFalse
         if (browser) el.attribs = getAttribs(el)
-        for (const attr in el.attribs) {
+        for (const origAttr in el.attribs) {
+          let attr = origAttr
           const val = el.attribs[attr]
+          if (attr.includes('-teddyduplicate')) attr = attr.split('-teddyduplicate')[0] // the condition is a duplicate, so remove the `-teddyduplicate1` from `conditionName-teddyduplicate1`, `conditionName-teddyduplicate2`, etc
           if (attr.startsWith('if-')) {
             const parts = attr.split('if-')
             if (val) cond = [`${[parts[1]]}=${val}`] // if-something="Some content"
             else cond = [`${[parts[1]]}`] // if-something
-            dom(el).removeAttr(attr)
+            dom(el).removeAttr(origAttr)
           } else if (attr === 'true') {
             ifTrue = val.replaceAll('&quot;', '"') // true="class='blah'"
-            dom(el).removeAttr(attr)
+            dom(el).removeAttr(origAttr)
           } else if (attr === 'false') {
-            ifFalse = val.replaceAll('&quot;', '"') // true="class='blah'"
-            dom(el).removeAttr(attr)
+            ifFalse = val.replaceAll('&quot;', '"') // false="class='blah'"
+            dom(el).removeAttr(origAttr)
           }
         }
         // evaluate conditional
@@ -714,7 +717,7 @@ function cleanupStrayTeddyTags (dom) {
   let parsedTags
   do {
     parsedTags = 0
-    const tags = dom('[teddy_deferred_one_line_conditional], include, arg, if, unless, elseif, elseunless, else, loop, cache')
+    const tags = dom('[teddydeferredonelineconditional], include, arg, if, unless, elseif, elseunless, else, loop, cache')
     if (tags.length > 0) {
       for (const el of tags) {
         if (browser) el.name = el.nodeName?.toLowerCase()
@@ -723,7 +726,7 @@ function cleanupStrayTeddyTags (dom) {
         }
         if (browser) el.attribs = getAttribs(el)
         for (const attr in el.attribs) {
-          if (attr === 'true' || attr === 'false' || attr === 'teddy_deferred_one_line_conditional' || attr.startsWith('if-')) {
+          if (attr === 'true' || attr === 'false' || attr === 'teddydeferredonelineconditional' || attr.startsWith('if-')) {
             dom(el).removeAttr(attr)
           }
         }
@@ -1070,7 +1073,7 @@ function render (template, model, callback) {
       renderedTemplate = removeTeddyComments(renderedTemplate)
       parseDynamicIncludes = false
     }
-    if (renderedTemplate.includes('teddy_deferred_dynamic_include="true"')) {
+    if (renderedTemplate.includes('teddydeferreddynamicinclude="true"')) {
       oldTemplate = '' // reset old template to force another pass
       parseDynamicIncludes = true
     }
@@ -1082,7 +1085,7 @@ function render (template, model, callback) {
   } while (oldTemplate !== renderedTemplate)
 
   // remove stray teddy tags if any exist
-  if (renderedTemplate.includes('teddy_deferred_one_line_conditional="true"') || renderedTemplate.includes('</include>') || renderedTemplate.includes('</arg>') || renderedTemplate.includes('</if>') || renderedTemplate.includes('</unless>') || renderedTemplate.includes('</elseif>') || renderedTemplate.includes('</elseunless>') || renderedTemplate.includes('</else>') || renderedTemplate.includes('</loop>') || renderedTemplate.includes('</cache>')) {
+  if (renderedTemplate.includes('teddydeferredonelineconditional="true"') || renderedTemplate.includes('</include>') || renderedTemplate.includes('</arg>') || renderedTemplate.includes('</if>') || renderedTemplate.includes('</unless>') || renderedTemplate.includes('</elseif>') || renderedTemplate.includes('</elseunless>') || renderedTemplate.includes('</else>') || renderedTemplate.includes('</loop>') || renderedTemplate.includes('</cache>')) {
     dom = cheerioLoad(renderedTemplate || '', cheerioOptions)
     dom = cleanupStrayTeddyTags(dom)
     renderedTemplate = dom.html()

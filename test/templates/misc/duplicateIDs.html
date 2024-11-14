@@ -1,0 +1,18 @@
+{!
+  should properly render templates with duplicate IDs
+!}
+
+<if blah>
+  <p id="blah">blah</p>
+</if>
+<else>
+  <p id="blah">no blah</p>
+</else>
+
+<if blah>
+  <p id="blah">blah</p>
+</if>
+<else>
+  <p id="blah">no blah</p>
+</else>
+

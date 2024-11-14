@@ -1,0 +1,9 @@
+{!
+  should loop through {letters} correctly in a select element
+!}
+
+<select>
+  <loop through='letters' val='letter'>
+    <option value="{letter}" if-letter="b" true='selected="selected"'>{letter}</option> {! outputs a, b, c !}
+  </loop>
+</select>
