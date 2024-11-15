@@ -164,7 +164,7 @@ function parseIncludes (dom, model, dynamic) {
         while (!foundBody) {
           let parentName
           if (!parent) parentName = 'body'
-          else parentName = parent.name || parent.nodeName?.toLowerCase()
+          else parentName = parent.nodeName?.toLowerCase() || parent.name
           if (parentName === 'noparse' || parentName === 'noteddy') {
             next = true
             break
@@ -187,8 +187,8 @@ function parseIncludes (dom, model, dynamic) {
         const contents = templates[src]
         const localModel = Object.assign({}, model)
         for (const arg of dom(el).children()) {
-          if (browser) arg.name = arg.nodeName?.toLowerCase()
-          if (arg.name === 'arg') {
+          const argName = browser ? arg.nodeName?.toLowerCase() : arg.name
+          if (argName === 'arg') {
             if (browser) arg.attribs = getAttribs(arg)
             const argval = Object.keys(arg.attribs)[0]
             getOrSetObjectByDotNotation(localModel, argval, dom(arg).html())
@@ -222,7 +222,7 @@ function parseConditionals (dom, model) {
         while (!foundBody) {
           let parentName
           if (!parent) parentName = 'body'
-          else parentName = parent.name || parent.nodeName?.toLowerCase()
+          else parentName = parent.nodeName?.toLowerCase() || parent.name
           if (parentName === 'loop' || parentName === 'noparse' || parentName === 'noteddy') {
             next = true
             break
@@ -241,8 +241,8 @@ function parseConditionals (dom, model) {
         }
         // check if it's an if tag and not an unless tag
         let isIf = true
-        if (browser) el.name = el.nodeName?.toLowerCase()
-        if (el.name === 'unless') isIf = false
+        const elName = browser ? el.nodeName?.toLowerCase() : el.name
+        if (elName === 'unless') isIf = false
         // evaluate conditional
         const condResult = evaluateConditional(args, model)
         if ((isIf && condResult) || ((!isIf && !condResult))) {
@@ -250,8 +250,8 @@ function parseConditionals (dom, model) {
           let nextSibling = el.nextSibling
           const removeStack = []
           while (nextSibling) {
-            if (browser) nextSibling.name = nextSibling.nodeName?.toLowerCase()
-            switch (nextSibling.name) {
+            const nextSiblingName = browser ? nextSibling.nodeName?.toLowerCase() : nextSibling.name
+            switch (nextSiblingName) {
               case 'elseif':
               case 'elseunless':
               case 'else':
@@ -273,8 +273,8 @@ function parseConditionals (dom, model) {
           // true block is false; find the next elseif, elseunless, or else tag to evaluate
           let nextSibling = el.nextSibling
           while (nextSibling) {
-            if (browser) nextSibling.name = nextSibling.nodeName?.toLowerCase()
-            switch (nextSibling.name) {
+            const nextSiblingName = browser ? nextSibling.nodeName?.toLowerCase() : nextSibling.name
+            switch (nextSiblingName) {
               case 'elseif':
                 // get conditions
                 args = []
@@ -291,8 +291,8 @@ function parseConditionals (dom, model) {
                   nextSibling = el.nextSibling
                   const removeStack = []
                   while (nextSibling) {
-                    if (browser) nextSibling.name = nextSibling.nodeName?.toLowerCase()
-                    switch (nextSibling.name) {
+                    const nextSiblingName = browser ? nextSibling.nodeName?.toLowerCase() : nextSibling.name
+                    switch (nextSiblingName) {
                       case 'elseif':
                       case 'elseunless':
                       case 'else':
@@ -333,8 +333,8 @@ function parseConditionals (dom, model) {
                   nextSibling = el.nextSibling
                   const removeStack = []
                   while (nextSibling) {
-                    if (browser) nextSibling.name = nextSibling.nodeName?.toLowerCase()
-                    switch (nextSibling.name) {
+                    const nextSiblingName = browser ? nextSibling.nodeName?.toLowerCase() : nextSibling.name
+                    switch (nextSiblingName) {
                       case 'elseif':
                       case 'elseunless':
                       case 'else':
@@ -493,7 +493,7 @@ function parseOneLineConditionals (dom, model) {
         while (!foundBody) {
           let parentName
           if (!parent) parentName = 'body'
-          else parentName = parent.name || parent.nodeName?.toLowerCase()
+          else parentName = parent.nodeName?.toLowerCase() || parent.name
           if (parentName === 'loop' || parentName === 'noparse' || parentName === 'noteddy') {
             next = true
             break
