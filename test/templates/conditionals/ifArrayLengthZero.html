@@ -1,0 +1,24 @@
+{!
+  should evaluate conditionals that examine array lengths correctly
+!}
+
+<p>{topObj.subObj.one}</p>
+<p>{topObj.subObj.zero}</p>
+<p>{topObj.subObj.emptyArray}</p>
+<p>{topObj.subObj.emptyArray.length}</p>
+<p>{topObj.subObj.populatedArray.length}</p>
+<if topObj.subObj.one="1">
+  <p>1 is present</p>
+</if>
+<if topObj.subObj.zero="0">
+  <p>0 is present</p>
+</if>
+<if topObj.subObj.emptyArray>
+  <p>emptyArray is present</p>
+</if>
+<if topObj.subObj.emptyArray.length="0">
+  <p>emptyArray length is 0</p>
+</if>
+<if topObj.subObj.populatedArray.length="3">
+  <p>populatedArray length is 3</p>
+</if>

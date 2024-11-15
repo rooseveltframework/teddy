@@ -117,6 +117,14 @@ export default function makeModel () {
         }
       }
     ],
+    topObj: {
+      subObj: {
+        one: 1,
+        zero: 0,
+        emptyArray: [],
+        populatedArray: ['fds', 'hgf', 'jkf']
+      }
+    },
     nestedObj: {
       'Thing With Name 1': {
         'Subthing With Name 1': [

@@ -55,6 +55,12 @@ export default [
         expected: '<p>The variable \'something\' is present</p>'
       },
       {
+        message: 'should evaluate conditionals that examine array lengths correctly (conditionals/ifArrayLengthZero.html)',
+        template: 'conditionals/ifArrayLengthZero',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: '<p>1</p><p>0</p><p>false</p><p>0</p><p>3</p><p>1ispresent</p><p>0ispresent</p><p>emptyArraylengthis0</p><p>populatedArraylengthis3</p>'
+      },
+      {
         message: 'should evaluate nested <unless> tag in the if (conditionals/unlessNestedIf.html)',
         template: 'conditionals/unlessNestedIf',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
