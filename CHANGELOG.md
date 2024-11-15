@@ -4,6 +4,10 @@
 
 - Put your changes here...
 
+## 0.6.18
+
+- Fixed a bug which caused client-side Teddy to rename yet more form elements accidentally.
+
 ## 0.6.17
 
 - Fixed a bug which caused client-side Teddy to handle array length lookups differently from `cheerio`-driven Teddy.
