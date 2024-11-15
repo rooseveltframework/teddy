@@ -4,6 +4,14 @@
 
 - Put your changes here...
 
+## 0.6.17
+
+- Fixed a bug which caused client-side Teddy to handle array length lookups differently from `cheerio`-driven Teddy.
+- Fixed a bug which caused client-side Teddy to crash if extra spaces were in markup attribute lists.
+- Fixed a bug which caused client-side Teddy to return the wrong data with 2 or more layers of object lookups if the object keys were camelCase.
+- Fixed a bug which caused client-side Teddy to rename some form elements accidentally.
+- Updated various dependencies.
+
 ## 0.6.16
 
 - Fixed a bug which caused client-side Teddy to fail in some situations like putting a `<loop>` in a `<select>` element.

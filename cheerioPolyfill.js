@@ -122,7 +122,13 @@ function parseTeddyDOMFromString (html) {
         }
 
         // apply attributes to the element
-        for (const [name, value] of attrMap) element.setAttribute(name, value || '')
+        for (const [name, value] of attrMap) {
+          try {
+            element.setAttribute(name, value || '')
+          } catch (e) {
+            console.warn('Error parsing an element attribute. You might have a typo in your HTML. A common cause is two spaces between element attributes.')
+          }
+        }
 
         // append the new element to the current parent
         dom[dom.length - 1].appendChild(element)

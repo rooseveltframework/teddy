@@ -720,8 +720,8 @@ function cleanupStrayTeddyTags (dom) {
     const tags = dom('[teddydeferredonelineconditional], include, arg, if, unless, elseif, elseunless, else, loop, cache')
     if (tags.length > 0) {
       for (const el of tags) {
-        if (browser) el.name = el.nodeName?.toLowerCase()
-        if (el.name === 'include' || el.name === 'arg' || el.name === 'if' || el.name === 'unless' || el.name === 'elseif' || el.name === 'elseunless' || el.name === 'else' || el.name === 'loop' || el.name === 'cache') {
+        const tagName = browser ? el.nodeName?.toLowerCase() : el.name
+        if (tagName === 'include' || tagName === 'arg' || tagName === 'if' || tagName === 'unless' || tagName === 'elseif' || tagName === 'elseunless' || tagName === 'else' || tagName === 'loop' || tagName === 'cache') {
           dom(el).remove()
         }
         if (browser) el.attribs = getAttribs(el)
@@ -831,8 +831,13 @@ function getOrSetObjectByDotNotation (obj, dotNotation, value) {
       else return obj[dotNotation[0]]
     }
     return false
-  } else return getOrSetObjectByDotNotation(obj[dotNotation[0]], dotNotation.slice(1), value)
+  } else {
+    if (browser) obj = caseInsensitiveLookup(obj, dotNotation[0])
+    else obj = obj[dotNotation[0]]
+    return getOrSetObjectByDotNotation(obj, dotNotation.slice(1), value)
+  }
   function caseInsensitiveLookup (obj, key) {
+    if (key === 'length') return obj.length
     const lowerCaseKey = key.toLowerCase()
     const normalizedObj = Object.keys(obj).reduce((acc, k) => {
       acc[k.toLowerCase()] = obj[k]
