@@ -4,6 +4,10 @@
 
 - Put your changes here...
 
+## 0.6.19
+
+- Made client-side Teddy parser a bit more tolerant of bad markup.
+
 ## 0.6.18
 
 - Fixed a bug which caused client-side Teddy to rename yet more form elements accidentally.
