@@ -265,6 +265,12 @@ export default [
         expected: '<option value="Some content">Some content</option>'
       },
       {
+        message: 'should evaluate one line if "if-something.something={something}" as false and remove attributes (conditionals/oneLineValueVarsNoQuotes.html)',
+        template: 'conditionals/oneLineValueVarsNoQuotes',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: '<option value="Some content">Some content</option>'
+      },
+      {
         message: 'should evaluate <option> elements with the middle one selected (conditionals/oneLineValueVarsLooped.html)',
         template: 'conditionals/oneLineValueVarsLooped',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
@@ -1567,6 +1573,12 @@ export default [
         template: 'misc/zero',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
         expected: '<p>0</p>'
+      },
+      {
+        message: 'should render html with a bad tag correctly (misc/badTag.html)',
+        template: 'misc/badTag',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: '<p>hello<br>world1</p><p>helloworld2</p>'
       },
       {
         message: 'should not render Teddy code in server-side comments in loops (misc/serverSideCommentsWithTeddyCode.html)',

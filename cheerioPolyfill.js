@@ -73,8 +73,9 @@ function parseTeddyDOMFromString (html) {
   const selfClosingTags = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr'])
   const root = document.createElement('body')
   const dom = [root]
+  const openTags = [] // stack to track open tags
   const tagAndCommentRegex = /<\/?([a-zA-Z0-9]+)([^>]*)>|<!--([\s\S]*?)-->/g
-  const attrRegex = /([a-zA-Z0-9-:._]+)(?:=(["'])(.*?)\2)?/g
+  const attrRegex = /([a-zA-Z0-9-:._]+)(?:=(["'])(.*?)\2|([^>\s]+))?/g
   let lastIndex = 0
   let match
 
@@ -97,8 +98,19 @@ function parseTeddyDOMFromString (html) {
       // handle tags
       const [fullMatch, tagName, attrString] = match
       const isClosingTag = fullMatch.startsWith('</')
-      if (isClosingTag) dom.pop() // pop the list if it's a closing tag
-      else {
+      if (isClosingTag) {
+        if (selfClosingTags.has(tagName.toLowerCase())) {
+          // convert incorrect closing tag for self-closing tag to self-closing tag
+          const element = document.createElement(tagName)
+          dom[dom.length - 1].appendChild(element)
+        } else {
+          // check if the closing tag matches the most recent open tag
+          if (openTags.length > 0 && openTags[openTags.length - 1] === tagName.toLowerCase()) {
+            openTags.pop()
+            dom.pop()
+          }
+        }
+      } else {
         // create a new element
         const element = document.createElement(tagName)
 
@@ -107,7 +119,7 @@ function parseTeddyDOMFromString (html) {
         const attrMap = new Map()
         while ((attrMatch = attrRegex.exec(attrString)) !== null) {
           const attrName = attrMatch[1]
-          const attrValue = attrMatch[3]
+          const attrValue = attrMatch[3] || attrMatch[4] || ''
 
           // handle duplicate attributes for special tags
           if (attrMap.has(attrName)) {
@@ -134,7 +146,10 @@ function parseTeddyDOMFromString (html) {
         dom[dom.length - 1].appendChild(element)
 
         // push the new element to the dom if it's not self-closing
-        if (!selfClosingTags.has(tagName.toLowerCase()) && !fullMatch.endsWith('/>')) dom.push(element)
+        if (!selfClosingTags.has(tagName.toLowerCase()) && !fullMatch.endsWith('/>')) {
+          dom.push(element)
+          openTags.push(tagName.toLowerCase())
+        }
       }
     }
 
