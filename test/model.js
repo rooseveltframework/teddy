@@ -98,6 +98,7 @@ export default function makeModel () {
       name: 'test'
     },
     teddyNull: null,
+    valWithQuotes: '"hi there!"',
     specialChars: 'special .$&@. chars',
     complexJSONString: '{"content":{"appTitle":"Some App","pageTitle":"{content.appTitle}"},"currentYear":1858,"mainDomain":"localhost:43711","NODE_ENV":"development"}',
     obj: {
