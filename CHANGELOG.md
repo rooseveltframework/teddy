@@ -4,6 +4,11 @@
 
 - Put your changes here...
 
+## 0.6.20
+
+- Fixed double-encoding HTML entity bug in client-side mode.
+- Updated various dependencies.
+
 ## 0.6.19
 
 - Made client-side Teddy parser a bit more tolerant of bad markup.

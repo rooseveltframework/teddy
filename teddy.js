@@ -782,6 +782,11 @@ function escapeEntities (value) {
   return newValue
 }
 
+// if an entity is double-encoded, this will fix that
+function reverseDoubleEncodedEntities (str) {
+  return str.replace(/&amp;(#\d+;|#x[0-9A-Fa-f]+;|[A-Za-z]+;)/g, '&$1')
+}
+
 // match strings by a custom delimiter
 function matchByDelimiter (input, openDelimiter, closeDelimiter) {
   const stack = []
@@ -1100,6 +1105,9 @@ function render (template, model, callback) {
   for (const blockId in model._noTeddyBlocks) {
     renderedTemplate = renderedTemplate.replace(`<noteddy id="${blockId}"></noteddy>`, () => model._noTeddyBlocks[blockId])
   }
+
+  // fix double-encoding html entity bug in client-side mode
+  if (browser) renderedTemplate = reverseDoubleEncodedEntities(renderedTemplate)
 
   // cache the template
   if (cacheKey === 'none') {

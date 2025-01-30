@@ -1575,6 +1575,12 @@ export default [
         expected: '<p>0</p>'
       },
       {
+        message: 'should render model value with quotes correctly without double-encoding the HTML entity (misc/varQuoteVal.html)',
+        template: 'misc/varQuoteVal',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: '<p>&#34;hithere!&#34;</p>'
+      },
+      {
         message: 'should render html with a bad tag correctly (misc/badTag.html)',
         template: 'misc/badTag',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
