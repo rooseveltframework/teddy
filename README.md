@@ -31,9 +31,8 @@ Table of contents
   - [Non-parsed-blocks](https://github.com/rooseveltframework/teddy#non-parsed-blocks)
   - [Caching blocks](https://github.com/rooseveltframework/teddy#caching-blocks)
   - [A complex example combining many tags](https://github.com/rooseveltframework/teddy#a-complex-example-combining-many-tags)
-- [Using Teddy in Node.js](https://github.com/rooseveltframework/teddy#using-teddy-in-nodejs)
-- [Using Teddy with client-side JS](https://github.com/rooseveltframework/teddy#using-teddy-with-client-side-js)
-- [API documentation](https://github.com/rooseveltframework/teddy#api-documentation)
+- [Usage](https://github.com/rooseveltframework/teddy#usage)
+- [API](https://github.com/rooseveltframework/teddy#api)
 - [Hacking the code](https://github.com/rooseveltframework/teddy#hacking-the-code)
 
 Why yet another templating engine?
@@ -418,12 +417,31 @@ We could perform many complex operations simultaneously. For instance, we could 
 
 *Tip: Using Teddy in [VS Code](https://code.visualstudio.com/)? Check out the [Teddy Snippets](https://marketplace.visualstudio.com/items?itemName=lannonbr.vscode-teddy-snippets) extension to help you write Teddy tags.*
 
-Using Teddy in Node.js
+Usage
 ===
 
-Install Teddy with npm: `npm i teddy`. Then require or import the module to gain access to its API. See [API documentation](https://github.com/rooseveltframework/teddy#api-documentation).
+Install Teddy with npm: `npm i teddy`.
 
-Teddy is also designed for use with [Express](http://expressjs.com).
+The package is distributed with builds intended for usage in Node.js and separate builds intended for browser use. The Node.js builds use [cheerio](https://www.npmjs.com/package/cheerio) for DOM parsing and the browser builds use native DOM parsing instead.
+
+*Note: Because the Node.js builds include cheerio as a dependency, they are much larger files. As such, you can use the Node.js builds in the browser if you want, but it is not recommended because they will result in much larger bundle sizes. Only do so if you encounter a bug that is exclusive to the browser builds.*
+
+For use in Node.js:
+
+- `dist/teddy.cjs`: CommonJS bundle.
+- `dist/teddy.mjs`: ES module.
+
+For use in browsers:
+
+- `dist/teddy.client.cjs`: CommonJS bundle.
+- `dist/teddy.js`: Standalone bundle that can be included via `<script>` tags.
+- `dist/teddy.min.js`: Minified standalone bundle that can be included via `<script>` tags.
+- `dist/teddy.client.mjs`: ES module.
+- `dist/teddy.min.mjs`: Minified ES module.
+
+Once Teddy is included in your app, you can then pass source code to Teddy's render method, like so: `teddy.render(sourceCode, yourModel)`. The render method will return a fully rendered template. See [API documentation](https://github.com/rooseveltframework/teddy#api) for more information about the Teddy API.
+
+To use Teddy with with [Express](http://expressjs.com):
 
 - First require or import `express` and `teddy`.
 - Then initialize Express and configure it to your liking.
@@ -433,21 +451,7 @@ If you're looking for a more fully-featured web framework to build web apps with
 
 If you're interested in using Teddy with the [gulp.js](http://gulpjs.com) build system for Node apps, check out the [gulp-teddy](https://github.com/Csombek/gulp-teddy) project.
 
-
-Using Teddy with client-side JS
-===
-
-- Use Teddy in a script tag without a module bundler: Install Teddy with npm. You can then load the `node_modules/teddy/dist/teddy.js` file into a script tag which will create a global `teddy` variable you can use to gain access to its API.
-- Use Teddy with a module bundler: Install Teddy with npm. You can then import the module from `node_modules/teddy/dist/teddy.js` to a module bundler like Browserify, Webpack, etc to gain access to its API.
-
-You can then pass source code to Teddy's render method, like so:  `teddy.render(sourceCode, yourModel)`. The render method will return a fully rendered template. See [API documentation](https://github.com/rooseveltframework/teddy#api-documentation) for more information about the Teddy API.
-
-Teddy is supported on all modern browsers. Support for Internet Explorer was dropped with Teddy 0.5.0.
-
-To install without npm, you can clone this repo and build teddy manually by running `npm run build`.
-
-
-API documentation
+API
 ===
 
 - `teddy.getTemplates()`: Get the internal cache of templates.
