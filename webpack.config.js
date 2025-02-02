@@ -287,52 +287,6 @@ export default [
     }
   },
 
-  // commonjs client-side (not cheerio-driven) minified
-  {
-    name: 'main',
-    entry: './teddy.js',
-    output: {
-      path: path.join(__dirname, 'dist'),
-      filename: 'teddy.min.cjs',
-      library: {
-        name: 'teddy',
-        type: 'umd',
-        export: 'default'
-      },
-      globalObject: 'this',
-      umdNamedDefine: true
-    },
-    mode: 'production',
-    devtool: 'source-map',
-    optimization: {
-      minimize: true,
-      minimizer: [
-        new TerserPlugin({
-          extractComments: false,
-          terserOptions: {
-            compress: {
-              defaults: true,
-              unused: true
-            },
-            mangle: true,
-            format: {
-              comments: false
-            }
-          }
-        })
-      ]
-    },
-    resolve: {
-      fallback: {
-        fs: false,
-        path: false
-      },
-      alias: {
-        'cheerio/slim': path.resolve(__dirname, 'cheerioPolyfill.js')
-      }
-    }
-  },
-
   // standalone (directly includable in a <script> tag) client-side (not cheerio-driven) minified
   {
     name: 'main',

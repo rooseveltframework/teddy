@@ -2,7 +2,9 @@
 
 ## Next version
 
-- Put your changes here...
+- Updated docs to clarify what the different builds of Teddy are meant to be used for.
+- Removed minified cjs build since there is no use case for it.
+- Updated various dependencies.
 
 ## 0.6.20
 
