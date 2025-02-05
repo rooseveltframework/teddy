@@ -428,16 +428,16 @@ The package is distributed with builds intended for usage in Node.js and separat
 
 For use in Node.js:
 
-- `dist/teddy.cjs`: CommonJS bundle.
-- `dist/teddy.mjs`: ES module.
+- `dist/teddy.cjs`: CommonJS bundle: `const teddy = require('teddy')`
+- `dist/teddy.mjs`: ES module: `import teddy from 'teddy'`
 
 For use in browsers:
 
-- `dist/teddy.client.cjs`: CommonJS bundle.
+- `dist/teddy.client.cjs`: CommonJS bundle: : `const teddy = require('teddy/client')`
 - `dist/teddy.js`: Standalone bundle that can be included via `<script>` tags.
 - `dist/teddy.min.js`: Minified standalone bundle that can be included via `<script>` tags.
-- `dist/teddy.client.mjs`: ES module.
-- `dist/teddy.min.mjs`: Minified ES module.
+- `dist/teddy.client.mjs`: ES module: `import teddy from 'teddy/client'`
+- `dist/teddy.min.mjs`: Minified ES module: `import teddy from 'teddy/client/min'`
 
 Once Teddy is included in your app, you can then pass source code to Teddy's render method, like so: `teddy.render(sourceCode, yourModel)`. The render method will return a fully rendered template. See [API documentation](https://github.com/rooseveltframework/teddy#api) for more information about the Teddy API.
 
