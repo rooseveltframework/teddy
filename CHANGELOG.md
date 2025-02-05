@@ -2,6 +2,9 @@
 
 ## Next version
 
+## 0.6.21
+
+- Fixed missing exports so you can require/import teddy less verbosely in your projects.
 - Updated docs to clarify what the different builds of Teddy are meant to be used for.
 - Removed minified cjs build since there is no use case for it.
 - Updated various dependencies.
