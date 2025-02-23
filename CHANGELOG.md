@@ -2,6 +2,13 @@
 
 ## Next version
 
+## 0.6.22
+
+- Made variable name lookups case insensitive in server-side Teddy to match client-side Teddy so as to match HTML grammar rules.
+- Added some performance improvements to loops and includes.
+- Fixed a bug preventing `<noparse>` and `<noteddy>` tags from working in markup passed to include tags.
+- Updated various dependencies.
+
 ## 0.6.21
 
 - Fixed missing exports so you can require/import teddy less verbosely in your projects.

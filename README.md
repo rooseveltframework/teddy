@@ -114,6 +114,8 @@ Variables
 
 Display a variable by simply writing `{varName}` anywhere in the template.
 
+All variable names are case-insensitive, both in `{varName}` form and when referenced in Teddy tags described below. This is to comply with the rules of HTML grammar which mandate that HTML tags and attributes be case insensitive.
+
 HTML entities such as `<`, `>`, `&`, `'`, and `"` will be escaped by default as a safeguard against [cross-site scripting](https://en.wikipedia.org/wiki/Cross-site_scripting).
 
 If you need to suppress this escaping in certain scenarios, write your variable like this: `{varName|s}`.
@@ -147,7 +149,6 @@ Pass arguments to the template:
 ```
 
 The arguments you've defined will be accessible as `{firstArgument}` and `{secondArgument|s}` in the child template `partial.html`. Note you must use the `|s` flag to suppress escaping HTML entities in order to render the HTML in the second argument.
-
 
 Conditionals
 ---
@@ -477,10 +478,10 @@ API
 
 - `teddy.setVerbosity(n)`: Sets the level of verbosity in Teddy's console logs. Call `teddy.setVerbosity(n)` where `n` equals one of the below values to change the default:
 
-  - `0`: No logging.
-  - `1`: The default. Concise logging. Will usually only log serious errors.
-  - `2`: Verbose logging. Logs even minor errors.
-  - `3`: Debug mode. Very verbose.
+  - `0` or `'none'`: No logging.
+  - `1` or `'concise'`: The default. Concise logging. Will usually only log serious errors.
+  - `2` or `'verbose'`: Verbose logging. Logs even minor errors.
+  - `3`, `'debug'`, or `'DEBUG'`: Debug mode. Very verbose.
 
 - `teddy.setDefaultParams()`: Reset all params to default.
 
@@ -524,7 +525,6 @@ API
     - `template`: Name of the template to delete the cache of.
     - `key`: Model variable cache index to delete it by.
       - If `key` is not provided, it will delete all caches of that template.
-
 
 Hacking the code
 ===
