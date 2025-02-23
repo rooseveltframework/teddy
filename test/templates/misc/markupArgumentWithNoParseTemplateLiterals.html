@@ -1,0 +1,9 @@
+{!
+  should render variable markup but should not parse any code in <noparse> tags
+!}
+
+{something|s}
+<noparse>
+  <p>${escapeTest}</p>
+  <p class="${escapeTest}">hello</p>
+</noparse>

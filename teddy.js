@@ -184,7 +184,7 @@ function parseIncludes (dom, model, dynamic) {
           continue
         }
         loadTemplate(src) // load the partial into the template list
-        const contents = templates[src]
+        const contents = templates[src] || ''
         const localModel = Object.assign({}, model)
         for (const arg of dom(el).children()) {
           const argName = browser ? arg.nodeName?.toLowerCase() : arg.name
@@ -194,12 +194,19 @@ function parseIncludes (dom, model, dynamic) {
             getOrSetObjectByDotNotation(localModel, argval, dom(arg).html())
           }
         }
-        const localMarkup = parseVars(contents, localModel)
-        let localDom = cheerioLoad(localMarkup || '', cheerioOptions)
-        localDom = parseConditionals(localDom, localModel)
-        localDom = parseOneLineConditionals(localDom, localModel)
-        localDom = parseLoops(localDom, localModel)
-        dom(el).replaceWith(localDom.html())
+        const hasNoteddy = contents.includes('</noteddy>')
+        const hasNoparse = contents.includes('</noparse>')
+        const hasIf = contents.includes('</if>')
+        const hasUnless = contents.includes('</unless>')
+        const hasTrue = contents.includes(' true=')
+        const hasFalse = contents.includes(' false=')
+        const hasLoop = contents.includes('</loop>')
+        let localDom = cheerioLoad(contents, cheerioOptions)
+        if (hasNoteddy || hasNoparse) localDom = tagNoParseBlocks(localDom, localModel)
+        if (hasIf || hasUnless) localDom = parseConditionals(localDom, localModel)
+        if (hasTrue || hasFalse) localDom = parseOneLineConditionals(localDom, localModel)
+        if (hasLoop) localDom = parseLoops(localDom, localModel)
+        dom(el).replaceWith(parseVars(localDom.html(), localModel))
         parsedTags++
       }
     }
@@ -574,18 +581,33 @@ function parseLoops (dom, model) {
         }
         // loop through model[loopThrough] and parse teddy tags within the loop's iteration against the local model
         let newMarkup = ''
-        const loopContents = dom(el).html()
+        let loopContents = dom(el).html()
         if (loopThrough instanceof Set) loopThrough = [...loopThrough] // convert Sets to arrays
         for (const key in loopThrough) {
           const val = loopThrough[key]
           const localModel = Object.assign({}, model)
           getOrSetObjectByDotNotation(localModel, keyName, key)
           getOrSetObjectByDotNotation(localModel, valName, val)
-          const localMarkup = parseVars(loopContents, localModel)
+          const hasNoteddyLoopContents = loopContents.includes('</noteddy>')
+          const hasNoparseLoopContents = loopContents.includes('</noparse>')
+          if (hasNoteddyLoopContents || hasNoparseLoopContents) {
+            let localDom = cheerioLoad(loopContents, cheerioOptions)
+            localDom = tagNoParseBlocks(localDom, localModel)
+            loopContents = localDom.html()
+          }
+          const localMarkup = parseVars(loopContents, localModel) || ''
+          const hasNoteddy = localMarkup.includes('</noteddy>')
+          const hasNoparse = localMarkup.includes('</noparse>')
+          const hasIf = localMarkup.includes('</if>')
+          const hasUnless = localMarkup.includes('</unless>')
+          const hasTrue = localMarkup.includes(' true=')
+          const hasFalse = localMarkup.includes(' false=')
+          const hasLoop = localMarkup.includes('</loop>')
           let localDom = cheerioLoad(localMarkup || '', cheerioOptions)
-          localDom = parseConditionals(localDom, localModel)
-          localDom = parseOneLineConditionals(localDom, localModel)
-          localDom = parseLoops(localDom, localModel)
+          if (hasNoteddy || hasNoparse) localDom = tagNoParseBlocks(localDom, localModel)
+          if (hasIf || hasUnless) localDom = parseConditionals(localDom, localModel)
+          if (hasTrue || hasFalse) localDom = parseOneLineConditionals(localDom, localModel)
+          if (hasLoop) localDom = parseLoops(localDom, localModel)
           newMarkup += localDom.html()
         }
         const newDom = cheerioLoad(newMarkup || '', cheerioOptions)
@@ -831,16 +853,9 @@ function getOrSetObjectByDotNotation (obj, dotNotation, value) {
     return obj[dotNotation[0]]
   } else if (dotNotation.length === 0) return obj
   else if (dotNotation.length === 1) {
-    if (obj) {
-      if (browser) return caseInsensitiveLookup(obj, dotNotation[0])
-      else return obj[dotNotation[0]]
-    }
+    if (obj) return caseInsensitiveLookup(obj, dotNotation[0])
     return false
-  } else {
-    if (browser) obj = caseInsensitiveLookup(obj, dotNotation[0])
-    else obj = obj[dotNotation[0]]
-    return getOrSetObjectByDotNotation(obj, dotNotation.slice(1), value)
-  }
+  } else return getOrSetObjectByDotNotation(caseInsensitiveLookup(obj, dotNotation[0]), dotNotation.slice(1), value)
   function caseInsensitiveLookup (obj, key) {
     if (key === 'length') return obj.length
     const lowerCaseKey = key.toLowerCase()
@@ -888,6 +903,7 @@ function setVerbosity (v) {
     case 2:
       v = 2
       break
+    case 'debug':
     case 'DEBUG':
     case 3:
       v = 3

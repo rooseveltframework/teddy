@@ -1,4 +1,3 @@
-
 Teddy templating engine
 ===
 
@@ -15,9 +14,9 @@ It uses HTML-like `<tags>` for rudimentary templating logic and Teddy Roosevelt'
 
 ![Teddy Roosevelt's facial hair is a curly brace.](https://github.com/rooseveltframework/generator-roosevelt/blob/main/generators/app/templates/statics/images/teddy.jpg "Teddy Roosevelt's facial hair is a curly brace.")
 
-
 Table of contents
 ===
+
 - [Why yet another templating engine?](https://github.com/rooseveltframework/teddy#why-yet-another-templating-engine)
   - [Other popular templating engines are too cryptic](https://github.com/rooseveltframework/teddy#other-popular-templating-engines-are-too-cryptic)
 - [Teddy, symbol-buster extraordinaire](https://github.com/rooseveltframework/teddy#teddy-symbol-buster-extraordinaire)
@@ -41,7 +40,6 @@ Why yet another templating engine?
 Good question.
 
 Here's why:
-
 
 Other popular templating engines are too cryptic
 ---
@@ -86,7 +84,6 @@ Want something simpler and more readable so you can stop wasting time memorizing
 
 Well you're not the only one.
 
-
 Teddy, symbol-buster extraordinaire
 ===
 
@@ -102,17 +99,17 @@ Here's how:
 - A `<loop>` tag for looping.
 - Server-side `{! comments !}` delimited by exclamation points in a fashion similar to `<!-- HTML comments -->`. Server-side comments are stripped out at the template compilation stage.
 
-
 How to write Teddy templates
 ===
 
 Here's some examples of how to write Teddy templates:
 
-
 Variables
 ---
 
 Display a variable by simply writing `{varName}` anywhere in the template.
+
+All variable names are case-insensitive, both in `{varName}` form and when referenced in Teddy tags described below. This is to comply with the rules of HTML grammar which mandate that HTML tags and attributes be case insensitive.
 
 HTML entities such as `<`, `>`, `&`, `'`, and `"` will be escaped by default as a safeguard against [cross-site scripting](https://en.wikipedia.org/wiki/Cross-site_scripting).
 
@@ -126,19 +123,19 @@ Includes
 Include another template:
 
 ```html
-<include src='partial.html'></include>
+<include src="partial.html"></include>
 ```
 
 Or use the no extension shorthand (Teddy will append the `.html` extension for you):
 
 ```html
-<include src='partial'></include>
+<include src="partial"></include>
 ```
 
 Pass arguments to the template:
 
 ```html
-<include src='partial.html'>
+<include src="partial.html">
   <arg firstArgument>Plain text argument</arg>
   <arg secondArgument>
     <span>Argument with HTML in it</span>
@@ -147,7 +144,6 @@ Pass arguments to the template:
 ```
 
 The arguments you've defined will be accessible as `{firstArgument}` and `{secondArgument|s}` in the child template `partial.html`. Note you must use the `|s` flag to suppress escaping HTML entities in order to render the HTML in the second argument.
-
 
 Conditionals
 ---
@@ -166,7 +162,7 @@ Check for the presence of a variable:
 Check a variable's value:
 
 ```html
-<if something='hello'>
+<if something="hello">
   <p>The variable 'something' is set to 'hello'</p>
 </if>
 <else>
@@ -213,7 +209,7 @@ An `<unless>` statement structure with an `<elseunless>` tag which is evaluated 
 </else>
 ```
 
-Note: `<if something>` and `<if something=''>` are considered logically equivalent statements in Teddy.
+Note: `<if something>` and `<if something="">` are considered logically equivalent statements in Teddy fjksdfjskd.
 
 Boolean logic
 ---
@@ -263,31 +259,30 @@ One-line ifs
 If you need a more concise conditional to control which attributes are applied to a given element, then use this syntax:
 
 ```html
-<p if-something true="class='shown'" false="class='hidden'">One-line if.</p>
+<p if-something true='class="shown"' false='class="hidden"'>One-line if.</p>
 ```
 
-In that structure, the attribute `if-something` checks to see if the variable `something` is truthy. This means it will check for either variable presence in the model or the boolean value `true`. If so, the class delcared in the `true` attribute is written to the element, resulting in the following output:
+In that structure, the attribute `if-something` checks to see if the variable `something` is truthy. This means it will check for either variable presence in the model or the boolean value `true`. If so, the class declared in the `true` attribute is written to the element, resulting in the following output:
 
 ```html
-<p class='shown'>One-line if.</p>
+<p class="shown">One-line if.</p>
 ```
 
 If not, this will check for non-presence in the model or the boolean value `false`. If so, the class declared in the `false` attribute is written to the element, resulting in the following output:
 
 ```html
-<p class='hidden'>One-line if.</p>
+<p class="hidden">One-line if.</p>
 ```
 
 Like the `<if>` tag you can check for both the presence of a variable as well as its value. To check the value of a variable, use this syntax:
 
 ```html
-<p if-something='hello' true="class='hello'" false="class='not-hello'">One-line if.</p>
+<p if-something="hello" true='class="hello"' false='class="not-hello"'>One-line if.</p>
 ```
 
 It's important to note that whichever type of quotes you use on the outside of your `true` or `false` attributes must be reversed on the inside. So if you use single quotes on the outside, then you must use double quotes on the inside.
 
 Also note you can only have one one-line if statement per element.
-
 
 Loops
 ---
@@ -301,12 +296,12 @@ letters = ['a', 'b', 'c'];
 It can be iterated over like so:
 
 ```html
-<loop through='letters' val='letter'>
+<loop through="letters" val="letter">
   <p>{letter}</p> <!-- outputs a, b, c -->
 </loop>
 ```
 
-In the above example `through='letters'` defines the JS model being iterated over and `val='letter'` defines a local variable for the current `letter` being iterated over.
+In the above example `through="letters"` defines the JS model being iterated over and `val="letter"` defines a local variable for the current `letter` being iterated over.
 
 When looping over more complex data structures, sometimes you will need access to both the key and the value of your array or object. For instance, suppose this JS model:
 
@@ -317,13 +312,13 @@ names = {jack: 'guy', jill: 'girl', hill: 'landscape'};
 It can be iterated over like so:
 
 ```html
-<loop through='names' key='name' val='description'>
+<loop through="names" key="name" val="description">
   <p>{name}</p> <!-- outputs jack, jill, hill -->
   <p>{description}</p> <!-- outputs guy, girl, landscape -->
 </loop>
 ```
 
-We once again define a `through` attribute which we set to `through='names'` and a `val` attribute which we set to `val='description'` similar to the last example. However this time we've iterated over a JS object with named keys instead of a simple indexed array, so it is useful to define a `key` attribute in the `<loop>` tag to gain access to the name of the current iteration variable. We have defined it as `key='name'` in this example.
+We once again define a `through` attribute which we set to `through="names"` and a `val` attribute which we set to `val="description"` similar to the last example. However this time we've iterated over a JS object with named keys instead of a simple indexed array, so it is useful to define a `key` attribute in the `<loop>` tag to gain access to the name of the current iteration variable. We have defined it as `key="name"` in this example.
 
 Even complex, hierarchical data structures can be iterated over. For instance, suppose this JS model:
 
@@ -334,7 +329,7 @@ objects = [{a:1, b:2, c:3}, {a:4, b:5, c:6}, {a:7, b:8, c:9}];
 For the above array of objects, we can combine the techniques illustrated above to display each member of the hierarchy in sequence:
 
 ```html
-<loop through='objects' key='i' val='item'>
+<loop through="objects" key="i" val="item">
   <p>{i}</p> <!-- outputs 0, 1, 2 -->
   <p>{item.a}</p> <!-- outputs 1, 4, 7 -->
   <p>{item.b}</p> <!-- outputs 2, 5, 8 -->
@@ -377,14 +372,20 @@ In the above example, assume that there are a large number of values that `{user
 Here's what the attributes mean:
 
 - `name`: What you want to name your cache. The name is necessary so you can manually clear the cache from JavaScript later if you like via `teddy.clearCache(name, keyVal)`.
+
   - `teddy.clearCache(name)` will delete the whole cache at that name, e.g. all values for `{city}`.
   - `teddy.clearCache(name, keyVal)` will delete just the value at that keyVal, e.g. just the cache for when `{city}` resolves to NY if you set keyVal to NY.
+
 - `key`: The model value to use to index new caches.
+
   - Example: Suppose `city` in the above example could resolve to three possible values: NY, SF, and LA. In that case, the caching feature will create 3 caches using the `city` key: one for each of the three possible values.
+
 - `maxAge`: How old the cache can be in milliseconds before it is invalidated and will be re-rendered.
+
   - Default: 0 (no limit).
 
 - `maxCaches`: The maximum number of caches that Teddy will be allowed to create for a given `<cache>` element. If the maximum is reached, Teddy will remove the oldest cache in the stack, where oldest is defined as the least recently created *or* accessed.
+
   - Default: 1000.
 
 You can also cache whole templates. For more details about that, see the API docs below.
@@ -401,12 +402,12 @@ objects = [{a:1, b:2, c:3}, {a:4, b:5, c:6}, {a:7, b:8, c:9}];
 We could perform many complex operations simultaneously. For instance, we could iterate over it with a `<loop>` and then at each iteration perform an `<if>` statement and `<include>` a partial:
 
 ```html
-<loop through='objects' val='item'>
-  <if item.a='4'>
+<loop through="objects" val="item">
+  <if item.a="4">
     <p>item.a is 4</p>
   </if>
-  <p if-item.b='5' true="class='item-b-is-five'" false='hidden'>item.b is 5</p>
-  <include src='partial.html'>
+  <p if-item.b="5" true='class="item-b-is-five"' false="hidden">item.b is 5</p>
+  <include src="partial.html">
     <arg firstArgument>{item.b}</arg>
     <arg secondArgument>
       <span>{item.c}</span>
@@ -474,20 +475,23 @@ API
     - ```javascript
       const templateFunction = teddy.compile('<p>{hello}</p>')
       templateFunction({ hello: 'world' }) // returns "<p>world</p>"
+      ```
 
 - `teddy.setVerbosity(n)`: Sets the level of verbosity in Teddy's console logs. Call `teddy.setVerbosity(n)` where `n` equals one of the below values to change the default:
 
-  - `0`: No logging.
-  - `1`: The default. Concise logging. Will usually only log serious errors.
-  - `2`: Verbose logging. Logs even minor errors.
-  - `3`: Debug mode. Very verbose.
+  - `0` or `'none'`: No logging.
+  - `1` or `'concise'`: The default. Concise logging. Will usually only log serious errors.
+  - `2` or `'verbose'`: Verbose logging. Logs even minor errors.
+  - `3`, `'debug'`, or `'DEBUG'`: Debug mode. Very verbose.
 
 - `teddy.setDefaultParams()`: Reset all params to default.
 
 - `teddy.maxPasses(n)`: Sets the maximum number of passes the parser can execute over your template. If this maximum is exceeded, Teddy will stop attempting to render the template. The limit exists to prevent the possibility of teddy producing infinite loops due to improperly coded templates.
+
   - Default: 1000.
 
 - `teddy.setEmptyVarBehavior('hide')`: Will make it possible for variables which don't resolve to display as empty strings instead of displaying the variable.
+
   - Default: 'display'.
 
 - `teddy.setCache(params)`: Declare a template-level cache.
@@ -495,13 +499,17 @@ API
   - Params:
 
     - `template`: Name of the template to cache.
+
     - `key`: Model variable to cache it by.
+
       - Set to `none` to cache the first render for all model values.
 
     - `maxAge`: How old the cache can be in milliseconds before it is invalidated and will be re-rendered.
+
       - Default: 0 (no limit).
 
     - `maxCaches`: The maximum number of caches that Teddy will be allowed to create for a given template/key combination. If the maximum is reached, Teddy will remove the oldest cache in the stack, where oldest is defined as the least recently created *or* accessed.
+
       - Default: 1000.
       - Note: does not apply to caches where `key` is not also set.
 
@@ -513,6 +521,7 @@ API
         key: 'city',
         maxAge: 1000
       })
+      ```
 
 - `teddy.clearCache(name)`: If `name` is a string, it will delete the whole cache at that name.
 
@@ -524,7 +533,6 @@ API
     - `template`: Name of the template to delete the cache of.
     - `key`: Model variable cache index to delete it by.
       - If `key` is not provided, it will delete all caches of that template.
-
 
 Hacking the code
 ===

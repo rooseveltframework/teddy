@@ -918,10 +918,30 @@ export default [
         expected: '<div><span>raw html</span></div>'
       },
       {
+        message: 'should force hide missing variables and treat them as empty strings {missing|h} (misc/varForceEmptyHide.html)',
+        template: 'misc/varForceEmptyHide',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: '<p></p>',
+        skip: true
+      },
+      {
+        message: 'should force display missing variables and display the variable {missing|d} but remove |d (misc/varForceEmptyDisplay.html)',
+        template: 'misc/varForceEmptyDisplay',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: '<p>{missing}</p>',
+        skip: true
+      },
+      {
         message: 'should not parse any code in <noteddy> tags (misc/varNoParsing.html)',
         template: 'misc/varNoParsing',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
         expected: '<p>{escapeTest}</p>'
+      },
+      {
+        message: 'should not parse any code in <noparse> tags (misc/varNoParsing2.html)',
+        template: 'misc/varNoParsing2',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: '<p>hello</p><p>${escapeTest}</p><p class="${escapeTest}">hello</p>' // eslint-disable-line
       },
       {
         message: 'should remove {! server side comments !} (misc/serverSideComments.html)',
@@ -950,7 +970,7 @@ export default [
       {
         message: 'should render plain HTML with no teddy tags with no changes (misc/plainHTML.html)',
         template: 'misc/plainHTML',
-        runMocha: async (teddy, template, model, assert, expected) => {
+        run: async (teddy, template, model, assert, expected) => {
           const teddyTemplate = teddy.render(template, model)
 
           assert(teddyTemplate, '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="format-detection" content="telephone=no"><title>Plain HTML</title><link rel="stylesheet" href="/css/styles.css"></head><body><main><p>This template contains no teddy tags. Just HTML.</p></main><script type="text/javascript" src="/js/main.js"></script></body></html>')
