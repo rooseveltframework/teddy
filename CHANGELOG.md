@@ -50,7 +50,7 @@
 
 ## 0.6.14
 
-- Finsihed work on `cheerioPolyfill.js` which makes it possible for Teddy to execute in client-side contexts without using `cheerio`, allowing for a very small bundle size for client-side Teddy (17kb minified).
+- Finished work on `cheerioPolyfill.js` which makes it possible for Teddy to execute in client-side contexts without using `cheerio`, allowing for a very small bundle size for client-side Teddy (17kb minified).
 - Fixed client-side tests to test Teddy in the browser properly.
 - Refactored tests to improve maintainability.
 - Updated various dependencies.
@@ -212,7 +212,7 @@
 - Variables with spaces in them will now be parsed.
 - Fixed issue where one line if statements couldn't use variables as part of the condition.
 - Fixed issue where recursive variable resolution could cause an infinite loop.
-- Signifcant performance improvements.
+- Significant performance improvements.
 - Total rewrite into a much cleaner codebase:
   - Less reliance on regex and more reliance on character counting in base algorithm.
   - Code now split into separate files for development but bundled into a single JS file with Webpack during deployment.
