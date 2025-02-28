@@ -9,6 +9,7 @@ import testGroups from '../tests.js'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const testsToRun = loadTests(testGroups)
+let counter = 0
 
 // pre-register teddy templates
 function registerTemplates (dir) {
@@ -131,6 +132,15 @@ function runPlaywrightAgainstTeddyBundle (teddyPath) {
                 return str.replace(/\s/g, '')
               }
             }, { test, templates, model })
+          })
+          playwrightTest.afterEach(async ({ page }) => {
+            if (process.env.NYC_PROCESS_ID) {
+              const coverage = await page.evaluate(() => window.__coverage__)
+              if (coverage) {
+                counter++
+                fs.writeFileSync(path.join(process.cwd(), '.nyc_output', `coverage-${counter}.json`), JSON.stringify(coverage))
+              }
+            }
           })
         }
       }

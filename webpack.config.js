@@ -48,7 +48,18 @@ export default [
         fs: false,
         path: false
       }
-    }
+    },
+    module: process.argv.includes('coverage')
+      ? {
+          rules: [
+            {
+              test: /\.js/,
+              exclude: /node_modules/,
+              use: '@jsdevtools/coverage-istanbul-loader'
+            }
+          ]
+        }
+      : undefined
   },
 
   // commonjs server-side (cheerio-driven)
@@ -92,7 +103,18 @@ export default [
         fs: false,
         path: false
       }
-    }
+    },
+    module: process.argv.includes('coverage')
+      ? {
+          rules: [
+            {
+              test: /\.js/,
+              exclude: /node_modules/,
+              use: '@jsdevtools/coverage-istanbul-loader'
+            }
+          ]
+        }
+      : undefined
   },
 
   // #endregion
@@ -143,7 +165,18 @@ export default [
       alias: {
         'cheerio/slim': path.resolve(__dirname, 'cheerioPolyfill.js')
       }
-    }
+    },
+    module: process.argv.includes('coverage')
+      ? {
+          rules: [
+            {
+              test: /\.js/,
+              exclude: /node_modules/,
+              use: '@jsdevtools/coverage-istanbul-loader'
+            }
+          ]
+        }
+      : undefined
   },
 
   // commonjs client-side (not cheerio-driven)
@@ -189,7 +222,18 @@ export default [
       alias: {
         'cheerio/slim': path.resolve(__dirname, 'cheerioPolyfill.js')
       }
-    }
+    },
+    module: process.argv.includes('coverage')
+      ? {
+          rules: [
+            {
+              test: /\.js/,
+              exclude: /node_modules/,
+              use: '@jsdevtools/coverage-istanbul-loader'
+            }
+          ]
+        }
+      : undefined
   },
 
   // standalone (directly includable in a <script> tag) client-side (not cheerio-driven) minified
@@ -235,7 +279,18 @@ export default [
       alias: {
         'cheerio/slim': path.resolve(__dirname, 'cheerioPolyfill.js')
       }
-    }
+    },
+    module: process.argv.includes('coverage')
+      ? {
+          rules: [
+            {
+              test: /\.js/,
+              exclude: /node_modules/,
+              use: '@jsdevtools/coverage-istanbul-loader'
+            }
+          ]
+        }
+      : undefined
   },
 
   // #endregion
@@ -284,7 +339,18 @@ export default [
       alias: {
         'cheerio/slim': path.resolve(__dirname, 'cheerioPolyfill.js')
       }
-    }
+    },
+    module: process.argv.includes('coverage')
+      ? {
+          rules: [
+            {
+              test: /\.js/,
+              exclude: /node_modules/,
+              use: '@jsdevtools/coverage-istanbul-loader'
+            }
+          ]
+        }
+      : undefined
   },
 
   // standalone (directly includable in a <script> tag) client-side (not cheerio-driven) minified
@@ -330,7 +396,18 @@ export default [
       alias: {
         'cheerio/slim': path.resolve(__dirname, 'cheerioPolyfill.js')
       }
-    }
+    },
+    module: process.argv.includes('coverage')
+      ? {
+          rules: [
+            {
+              test: /\.js/,
+              exclude: /node_modules/,
+              use: '@jsdevtools/coverage-istanbul-loader'
+            }
+          ]
+        }
+      : undefined
   }
 
   // #endregion
