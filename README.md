@@ -107,7 +107,7 @@ Here's some examples of how to write Teddy templates:
 Variables
 ---
 
-Display a variable by simply writing `{varName}` anywhere in the template.
+Display a variable by simply writing `{varName}` anywhere in the template. You can also use template literal `${templateLiteral}` variables as well.
 
 All variable names are case-insensitive, both in `{varName}` form and when referenced in Teddy tags described below. This is to comply with the rules of HTML grammar which mandate that HTML tags and attributes be case insensitive.
 
@@ -115,7 +115,23 @@ HTML entities such as `<`, `>`, `&`, `'`, and `"` will be escaped by default as 
 
 If you need to suppress this escaping in certain scenarios, write your variable like this: `{varName|s}`.
 
-You can also use template literal `${templateLiteral}` variables as well.
+### A note about inline CSS or JS via Teddy variables
+
+If you want to pass inline CSS or JS code to a `<style>` or `<script>` tag via a Teddy variable, you can do so like this:
+
+```html
+<style>{inlineStyles|s}</style>
+<script>{inlineScript|s}</script>
+```
+
+That will work, but your code editor may complain that this is a syntax error. To avoid that, Teddy also provides a convenience tag called `<inline>` to let you do it like this instead:
+
+```html
+<inline css="inlineStyles"></inline>
+<inline js="inlineScript"></inline>
+```
+
+The `<inline>` tag approach will work the same as the previous examples using `<style>` or `<script>` tags manually, but code editors will not consider it a syntax error.
 
 Includes
 ---

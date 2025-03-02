@@ -494,6 +494,12 @@ export default [
         expected: '<p class="populated">Is it populated? populated</p>'
       },
       {
+        message: 'should populate case insensitive <include> <arg> in the child template; the class should render (includes/includeArgCheckedByOneLineIfWrapperCaseInsensitive.html)',
+        template: 'includes/includeArgCheckedByOneLineIfWrapperCaseInsensitive',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: '<p class="populated">Is it populated? populated</p>'
+      },
+      {
         message: 'should <include> a template with arguments (includes/includeWithArguments.html)',
         template: 'includes/includeWithArguments',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
@@ -930,6 +936,12 @@ export default [
         run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
         expected: '<p>{missing}</p>',
         skip: true
+      },
+      {
+        message: 'should render <inline> tags (misc/inlineTag.html)',
+        template: 'misc/inlineTag',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: '<div><style>body{font-family:sans-serif;}</style><script>console.log("hello")</script></div>'
       },
       {
         message: 'should not parse any code in <noteddy> tags (misc/varNoParsing.html)',
