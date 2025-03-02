@@ -184,7 +184,7 @@ function parseIncludes (dom, model, dynamic) {
           continue
         }
         loadTemplate(src) // load the partial into the template list
-        const contents = templates[src] || ''
+        let contents = templates[src] || ''
         const localModel = Object.assign({}, model)
         for (const arg of dom(el).children()) {
           const argName = browser ? arg.nodeName?.toLowerCase() : arg.name
@@ -201,12 +201,19 @@ function parseIncludes (dom, model, dynamic) {
         const hasTrue = contents.includes(' true=')
         const hasFalse = contents.includes(' false=')
         const hasLoop = contents.includes('</loop>')
-        let localDom = cheerioLoad(contents, cheerioOptions)
-        if (hasNoteddy || hasNoparse) localDom = tagNoParseBlocks(localDom, localModel)
+        const hasInline = contents.includes('</inline>')
+        let localDom
+        if (hasNoteddy || hasNoparse) {
+          localDom = cheerioLoad(contents, cheerioOptions)
+          localDom = tagNoParseBlocks(localDom, localModel)
+          contents = localDom.html()
+        }
+        localDom = cheerioLoad(parseVars(contents, localModel), cheerioOptions)
         if (hasIf || hasUnless) localDom = parseConditionals(localDom, localModel)
         if (hasTrue || hasFalse) localDom = parseOneLineConditionals(localDom, localModel)
         if (hasLoop) localDom = parseLoops(localDom, localModel)
-        dom(el).replaceWith(parseVars(localDom.html(), localModel))
+        if (hasInline) localDom = parseInlines(localDom, localModel)
+        dom(el).replaceWith(localDom.html())
         parsedTags++
       }
     }
@@ -603,15 +610,50 @@ function parseLoops (dom, model) {
           const hasTrue = localMarkup.includes(' true=')
           const hasFalse = localMarkup.includes(' false=')
           const hasLoop = localMarkup.includes('</loop>')
+          const hasInline = localMarkup.includes('</inline>')
           let localDom = cheerioLoad(localMarkup || '', cheerioOptions)
           if (hasNoteddy || hasNoparse) localDom = tagNoParseBlocks(localDom, localModel)
           if (hasIf || hasUnless) localDom = parseConditionals(localDom, localModel)
           if (hasTrue || hasFalse) localDom = parseOneLineConditionals(localDom, localModel)
           if (hasLoop) localDom = parseLoops(localDom, localModel)
+          if (hasInline) localDom = parseInlines(localDom, localModel)
           newMarkup += localDom.html()
         }
         const newDom = cheerioLoad(newMarkup || '', cheerioOptions)
         dom(el).replaceWith(newDom.html())
+        parsedTags++
+      }
+    }
+  } while (parsedTags)
+  return dom
+}
+
+// render <inline> tags
+function parseInlines (dom, model) {
+  let parsedTags
+  do {
+    parsedTags = 0
+    const tags = dom('inline')
+    if (tags.length > 0) {
+      for (const el of tags) {
+        // get attributes
+        let css
+        let js
+        if (browser) el.attribs = getAttribs(el)
+        for (const attr in el.attribs) {
+          if (attr === 'css') css = getOrSetObjectByDotNotation(model, el.attribs[attr])
+          else if (attr === 'js') js = getOrSetObjectByDotNotation(model, el.attribs[attr])
+        }
+        // reject if it has invalid attributes
+        if (!css && !js) {
+          if (params.verbosity > 1) console.warn('teddy encountered an <inline> element without a css or js attribute.')
+          dom(el).replaceWith('')
+          continue
+        }
+        let replaceWith = ''
+        if (css) replaceWith = `<style>${css}</style>`
+        else replaceWith = `<script>${js}</script>`
+        dom(el).replaceWith(replaceWith)
         parsedTags++
       }
     }
@@ -1081,6 +1123,7 @@ function render (template, model, callback) {
     const hasFalse = renderedTemplate.includes(' false=')
     const hasInclude = renderedTemplate.includes('</include>')
     const hasLoop = renderedTemplate.includes('</loop>')
+    const hasInline = renderedTemplate.includes('</inline>')
     oldTemplate = renderedTemplate || ''
     if (passes > 1) {
       dom = cheerioLoad(renderedTemplate || '', cheerioOptions)
@@ -1092,6 +1135,7 @@ function render (template, model, callback) {
     if (hasTrue || hasFalse) dom = parseOneLineConditionals(dom, model)
     if (hasInclude) dom = parseIncludes(dom, model)
     if (hasLoop) dom = parseLoops(dom, model)
+    if (hasInline) dom = parseInlines(dom, model)
     const cachesStillPresent = renderedTemplate.includes('</cache>')
     renderedTemplate = dom.html()
     renderedTemplate = parseVars(renderedTemplate, model)

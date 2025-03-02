@@ -2,6 +2,14 @@
 
 ## Next version
 
+- Put your changes here...
+
+## 0.6.23
+
+- Added new `<inline>` tag for adding inline CSS or JS using Teddy variables. Usage is optional, but it can help you avoid syntax error warnings in your code editor.
+- Fixed a bug preventing `<include>` args from parsing correctly in certain circumstances.
+- Updated various dependencies.
+
 ## 0.6.22
 
 - Made variable name lookups case insensitive in server-side Teddy to match client-side Teddy so as to match HTML grammar rules.
