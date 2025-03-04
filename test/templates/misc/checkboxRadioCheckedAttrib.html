@@ -1,0 +1,21 @@
+{!
+  should check checkboxes or radio butons using special teddy attribute to avoid a one-line if
+!}
+
+<div checked-value="b">
+  <input type="checkbox" name="letters" value="a">
+  <input type="checkbox" name="letters" value="b">
+  <input type="checkbox" name="letters" value="c">
+</div>
+
+<div checked-value="b">
+  <input type="radio" name="letters" value="a">
+  <input type="radio" name="letters" value="b">
+  <input type="radio" name="letters" value="c">
+</div>
+
+<div checked-value="b" checked-value="c">
+  <input type="checkbox" name="letters" value="a">
+  <input type="checkbox" name="letters" value="b">
+  <input type="checkbox" name="letters" value="c">
+</div>

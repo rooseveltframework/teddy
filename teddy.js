@@ -179,7 +179,7 @@ function parseIncludes (dom, model, dynamic) {
           if (params.verbosity > 1) console.warn('teddy encountered an include tag with no src attribute.')
           continue
         }
-        if (src.includes('{')) {
+        if (src.startsWith('{')) {
           dom(el).attr('teddydeferreddynamicinclude', 'true') // mark it dynamic and then skip it
           continue
         }
@@ -202,6 +202,7 @@ function parseIncludes (dom, model, dynamic) {
         const hasFalse = contents.includes(' false=')
         const hasLoop = contents.includes('</loop>')
         const hasInline = contents.includes('</inline>')
+        const hasSelected = contents.includes(' selected-value=') || contents.includes(' checked-value=')
         let localDom
         if (hasNoteddy || hasNoparse) {
           localDom = cheerioLoad(contents, cheerioOptions)
@@ -213,6 +214,7 @@ function parseIncludes (dom, model, dynamic) {
         if (hasTrue || hasFalse) localDom = parseOneLineConditionals(localDom, localModel)
         if (hasLoop) localDom = parseLoops(localDom, localModel)
         if (hasInline) localDom = parseInlines(localDom, localModel)
+        if (hasSelected) localDom = parseSelectedAttributeValues(dom, localModel)
         dom(el).replaceWith(localDom.html())
         parsedTags++
       }
@@ -249,9 +251,11 @@ function parseConditionals (dom, model) {
         if (browser) el.attribs = getAttribs(el)
         for (let attr in el.attribs) {
           if (attr.includes('-teddyduplicate')) attr = attr.split('-teddyduplicate')[0] // the condition is a duplicate, so remove the `-teddyduplicate1` from `conditionName-teddyduplicate1`, `conditionName-teddyduplicate2`, etc
-          const val = el.attribs[attr]
-          if (val) args.push(`${attr}=${val}`)
-          else args.push(attr)
+          let val = el.attribs[attr]
+          if (val) {
+            if (val.startsWith('{')) val = parseVars(val, model)
+            args.push(`${attr}=${val}`)
+          } else args.push(attr)
         }
         // check if it's an if tag and not an unless tag
         let isIf = true
@@ -491,7 +495,7 @@ function parseOneLineConditionals (dom, model) {
         if (browser) el.attribs = getAttribs(el)
         for (const attr in el.attribs) {
           const val = el.attribs[attr]
-          if (val.includes('{')) {
+          if (val.startsWith('{')) {
             defer = true
             break
           }
@@ -516,18 +520,19 @@ function parseOneLineConditionals (dom, model) {
         }
         if (next) continue
         // get conditions
-        let cond
         let ifTrue
         let ifFalse
         if (browser) el.attribs = getAttribs(el)
+        const args = []
         for (const origAttr in el.attribs) {
           let attr = origAttr
-          const val = el.attribs[attr]
+          let val = el.attribs[attr]
           if (attr.includes('-teddyduplicate')) attr = attr.split('-teddyduplicate')[0] // the condition is a duplicate, so remove the `-teddyduplicate1` from `conditionName-teddyduplicate1`, `conditionName-teddyduplicate2`, etc
+          if (val?.startsWith('{')) val = parseVars(val, model)
           if (attr.startsWith('if-')) {
             const parts = attr.split('if-')
-            if (val) cond = [`${[parts[1]]}=${val}`] // if-something="Some content"
-            else cond = [`${[parts[1]]}`] // if-something
+            if (val) args.push(`${parts[1]}=${val}`)
+            else args.push(parts[1])
             dom(el).removeAttr(origAttr)
           } else if (attr === 'true') {
             ifTrue = val.replaceAll('&quot;', '"') // true="class='blah'"
@@ -535,10 +540,13 @@ function parseOneLineConditionals (dom, model) {
           } else if (attr === 'false') {
             ifFalse = val.replaceAll('&quot;', '"') // false="class='blah'"
             dom(el).removeAttr(origAttr)
+          } else if (attr === 'and' || attr === 'or' || attr === 'xor') {
+            args.push(attr)
+            dom(el).removeAttr(origAttr)
           }
         }
         // evaluate conditional
-        if (evaluateConditional(cond, model)) {
+        if (evaluateConditional(args, model)) {
           if (ifTrue) {
             const parts = ifTrue.split('=')
             dom(el).attr(parts[0], parts[1] ? parts[1].replace(/["']/g, '') : '')
@@ -571,8 +579,11 @@ function parseLoops (dom, model) {
         let valName
         if (browser) el.attribs = getAttribs(el)
         for (const attr in el.attribs) {
-          if (attr === 'through') loopThrough = getOrSetObjectByDotNotation(model, el.attribs[attr])
-          else if (attr === 'key') keyName = el.attribs[attr]
+          if (attr === 'through') {
+            let attrVal = el.attribs[attr]
+            if (attrVal.startsWith('{')) attrVal = parseVars(attrVal, model)
+            loopThrough = getOrSetObjectByDotNotation(model, attrVal)
+          } else if (attr === 'key') keyName = el.attribs[attr]
           else if (attr === 'val') valName = el.attribs[attr]
         }
         // reject the loop if it has invalid attributes
@@ -611,12 +622,14 @@ function parseLoops (dom, model) {
           const hasFalse = localMarkup.includes(' false=')
           const hasLoop = localMarkup.includes('</loop>')
           const hasInline = localMarkup.includes('</inline>')
+          const hasSelected = localMarkup.includes(' selected-value=') || localMarkup.includes(' checked-value=')
           let localDom = cheerioLoad(localMarkup || '', cheerioOptions)
           if (hasNoteddy || hasNoparse) localDom = tagNoParseBlocks(localDom, localModel)
           if (hasIf || hasUnless) localDom = parseConditionals(localDom, localModel)
           if (hasTrue || hasFalse) localDom = parseOneLineConditionals(localDom, localModel)
           if (hasLoop) localDom = parseLoops(localDom, localModel)
           if (hasInline) localDom = parseInlines(localDom, localModel)
+          if (hasSelected) localDom = parseSelectedAttributeValues(dom, localModel)
           newMarkup += localDom.html()
         }
         const newDom = cheerioLoad(newMarkup || '', cheerioOptions)
@@ -661,6 +674,44 @@ function parseInlines (dom, model) {
   return dom
 }
 
+// render `selected-value` and `checked-value` attributes
+function parseSelectedAttributeValues (dom, model) {
+  let parsedTags
+  do {
+    parsedTags = 0
+    const tags = dom('[selected-value], [checked-value]') // TODO: `${attrName}-teddyduplicate${count++}`
+    if (tags.length > 0) {
+      for (const el of tags) {
+        // get attributes
+        if (browser) el.attribs = getAttribs(el)
+        for (let attr in el.attribs) {
+          const origAttr = attr
+          if (attr.includes('-teddyduplicate')) attr = attr.split('-teddyduplicate')[0]
+          if (attr === 'selected-value') {
+            const val = parseVars(el.attribs[origAttr], model) || el.attribs[origAttr]
+            const children = dom(el).find('option[value]')
+            for (const opt of children) {
+              if (browser) opt.attribs = getAttribs(opt)
+              if (opt.attribs.value === val) dom(opt).attr('selected', 'selected')
+              dom(el).removeAttr(origAttr)
+            }
+          } else if (attr === 'checked-value') {
+            const val = parseVars(el.attribs[origAttr], model) || el.attribs[origAttr]
+            const children = dom(el).find('input[type="checkbox"][value], input[type="radio"][value]')
+            for (const opt of children) {
+              if (browser) opt.attribs = getAttribs(opt)
+              if (opt.attribs.value === val) dom(opt).attr('checked', 'checked')
+              dom(el).removeAttr(origAttr)
+            }
+          }
+        }
+        parsedTags++
+      }
+    }
+  } while (parsedTags)
+  return dom
+}
+
 // render {variables}
 function parseVars (templateString, model) {
   let vars
@@ -684,13 +735,15 @@ function parseVars (templateString, model) {
         if (params.verbosity > 2) console.warn(`teddy.parseVars encountered a {variable} that could not be parsed: {${originalMatch}}`)
       }
     }
-    const lastFourChars = match.slice(-4)
-    if (lastFourChars.includes('|p')) {
+    const lastSixChars = match.slice(-6)
+    // TODO: detect precisely how many |flags there are
+    if (lastSixChars.includes('|p')) {
       // no parse flag is set; also handles if no escape flag is set as well
       const originalMatch = match
-      match = match.substring(0, match.length - (lastFourChars.split('|').length - 1 > 1 ? 4 : 2)) // remove last 2-4 char
+      match = match.substring(0, match.length - (lastSixChars.split('|').length - 1) * 2) // remove last 2-n chars
       let parsed = getOrSetObjectByDotNotation(model, match)
-      if (params.emptyVarBehavior === 'hide' && !parsed) parsed = '' // display empty string instead of the variable text verbatim if this setting is set
+      if (!parsed && !lastSixChars.includes('|d') && (params.emptyVarBehavior === 'hide' || lastSixChars.includes('|h'))) parsed = '' // display empty string instead of the variable text verbatim if this setting is set
+      if (typeof parsed === 'string' && parsed.startsWith('{') && parsed.includes('|d')) parsed = parsed.replace('|d', '')
       if (parsed || parsed === '') {
         const id = model._noTeddyBlocks.push(parsed) - 1
         try {
@@ -704,13 +757,14 @@ function parseVars (templateString, model) {
           return templateString
         }
       }
-    } else if (lastFourChars.includes('|s')) {
+    } else if (lastSixChars.includes('|s')) {
       // no escape flag is set
       const originalMatch = match
-      match = match.substring(0, match.length - (lastFourChars.split('|').length - 1 > 1 ? 4 : 2)) // remove last 2-4 char
+      match = match.substring(0, match.length - (lastSixChars.split('|').length - 1) * 2) // remove last 2-n chars
       let parsed = getOrSetObjectByDotNotation(model, match)
-      if (params.emptyVarBehavior === 'hide' && !parsed) parsed = '' // display empty string instead of the variable text verbatim if this setting is set
+      if (!parsed && !lastSixChars.includes('|d') && (params.emptyVarBehavior === 'hide' || lastSixChars.includes('|h'))) parsed = '' // display empty string instead of the variable text verbatim if this setting is set
       else if (!parsed && parsed !== '') parsed = `{${originalMatch}}`
+      if (typeof parsed === 'string' && parsed.startsWith('{') && parsed.includes('|d')) parsed = parsed.replace('|d', '')
       try {
         templateString = templateString.replace(new RegExp(`\${${originalMatch}}`.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&').replace(/-/g, '\\x2d'), 'i'), () => parsed)
         templateString = templateString.replace(new RegExp(`{${originalMatch}}`.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&').replace(/-/g, '\\x2d'), 'i'), () => parsed)
@@ -720,10 +774,11 @@ function parseVars (templateString, model) {
     } else {
       // no flags are set
       let parsed = getOrSetObjectByDotNotation(model, match)
-      if (params.emptyVarBehavior === 'hide' && !parsed) parsed = '' // display empty string instead of the variable text verbatim if this setting is set
+      if (!parsed && !lastSixChars.includes('|d') && (params.emptyVarBehavior === 'hide' || lastSixChars.includes('|h'))) parsed = '' // display empty string instead of the variable text verbatim if this setting is set
       else if (parsed || parsed === '') parsed = escapeEntities(parsed)
       else if (parsed === 0) parsed = '0'
       else parsed = `{${match}}`
+      if (typeof parsed === 'string' && parsed.startsWith('{') && parsed.includes('|d')) parsed = parsed.replace('|d', '')
       try {
         templateString = templateString.replace(new RegExp(`\${${match}}`.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&').replace(/-/g, '\\x2d'), 'i'), () => parsed)
         templateString = templateString.replace(new RegExp(`{${match}}`.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&').replace(/-/g, '\\x2d'), 'i'), () => parsed)
@@ -1104,6 +1159,26 @@ function render (template, model, callback) {
 
   // start the render
   renderedTemplate = loadTemplate(template)
+
+  // replace duplicate attributes with temporary unique names before loading into cheerio
+  if (!browser) {
+    renderedTemplate = renderedTemplate.replace(/<([a-zA-Z][a-zA-Z0-9-]*)([^>]*)>/g, (match, tagName, attributes) => {
+      const attrRegex = /([a-zA-Z0-9-:._]+)(?:=(["'])(.*?)\2|([^>\s]+))?/g
+      const attrMap = new Map()
+      let count = 1
+      const processedAttributes = attributes.replace(attrRegex, (attrMatch, attrName, quote, attrValue) => {
+        if (attrMap.has(attrName)) {
+          const newAttrName = `${attrName}-teddyduplicate${count++}`
+          return attrMatch.replace(attrName, newAttrName)
+        } else {
+          attrMap.set(attrName, true)
+          return attrMatch
+        }
+      })
+      return `<${tagName}${processedAttributes}>`
+    })
+  }
+
   dom = cheerioLoad(renderedTemplate || '', cheerioOptions)
   let oldTemplate
   let passes = 0
@@ -1124,6 +1199,7 @@ function render (template, model, callback) {
     const hasInclude = renderedTemplate.includes('</include>')
     const hasLoop = renderedTemplate.includes('</loop>')
     const hasInline = renderedTemplate.includes('</inline>')
+    const hasSelected = renderedTemplate.includes(' selected-value=') || renderedTemplate.includes(' checked-value=')
     oldTemplate = renderedTemplate || ''
     if (passes > 1) {
       dom = cheerioLoad(renderedTemplate || '', cheerioOptions)
@@ -1136,6 +1212,7 @@ function render (template, model, callback) {
     if (hasInclude) dom = parseIncludes(dom, model)
     if (hasLoop) dom = parseLoops(dom, model)
     if (hasInline) dom = parseInlines(dom, model)
+    if (hasSelected) dom = parseSelectedAttributeValues(dom, model)
     const cachesStillPresent = renderedTemplate.includes('</cache>')
     renderedTemplate = dom.html()
     renderedTemplate = parseVars(renderedTemplate, model)

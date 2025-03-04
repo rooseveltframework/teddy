@@ -25,10 +25,16 @@ export default [
         expected: '<p>The variable \'doesntexist\' is not present</p>'
       },
       {
-        message: 'should evaluate <if something=\'Some content\'> as true (conditionals/ifValue.html)',
+        message: 'should evaluate <if something="Some content"> as true (conditionals/ifValue.html)',
         template: 'conditionals/ifValue',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
-        expected: '<p>The variable \'something\' is set to \'Some content\'</p>'
+        expected: '<p>The variable "something" is set to "Some content"</p>'
+      },
+      {
+        message: 'should evaluate <if something="{something}"> as true (conditionals/ifVariable.html)',
+        template: 'conditionals/ifVariable',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: '<p>The variable "something" is set to "Some content"</p>'
       },
       {
         message: 'should evaluate <if emptyArray> as false (conditionals/ifEmptyArray.html)',
@@ -209,6 +215,12 @@ export default [
         template: 'conditionals/oneLine',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
         expected: '<p class="something-is-present">One line if.</p>'
+      },
+      {
+        message: 'should evaluate one line if "if-something" as true (conditionals/oneLineBooleanLogic.html)',
+        template: 'conditionals/oneLineBooleanLogic',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: '<p class="something-is-not-present">One line if.</p><p class="something-is-present">One line if.</p><p class="something-is-present">One line if.</p>'
       },
       {
         message: 'should evaluate one line if "if-somethingFalse" as false (conditionals/oneLineIfBooleanValue.html)',
@@ -634,6 +646,12 @@ export default [
         expected: '<select><option value="a">a</option><option value="b" selected="selected">b</option><option value="c">c</option></select>'
       },
       {
+        message: 'should loop through {letters} correctly in a select element (looping/selectOptionsAttribOnSelect.html)',
+        template: 'looping/selectOptionsAttribOnSelect',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: '<select><option value="a">a</option><option value="b" selected="selected">b</option><option value="c">c</option></select><select><option value="a">a</option><option value="b" selected="selected">b</option><option value="c">c</option></select>'
+      },
+      {
         message: 'should loop through {set} correctly (looping/loopValSet.html)',
         template: 'looping/loopValSet',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
@@ -642,6 +660,12 @@ export default [
       {
         message: 'should loop through {names} correctly (looping/loopKeyVal.html)',
         template: 'looping/loopKeyVal',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: '<p>jack</p> <p>guy</p><p>jill</p> <p>girl</p><p>hill</p> <p>landscape</p>'
+      },
+      {
+        message: 'should loop through {namesVar} correctly (looping/loopKeyValVars.html)',
+        template: 'looping/loopKeyValVars',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
         expected: '<p>jack</p> <p>guy</p><p>jill</p> <p>girl</p><p>hill</p> <p>landscape</p>'
       },
@@ -883,6 +907,12 @@ export default [
         expected: '<p id="blah">no blah</p><p id="blah">no blah</p>'
       },
       {
+        message: 'should check checkboxes or radio butons using special teddy attribute to avoid a one-line if (misc/checkboxRadioCheckedAttrib.html)',
+        template: 'misc/checkboxRadioCheckedAttrib',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: '<div><input type="checkbox" name="letters" value="a"><input type="checkbox" name="letters" value="b" checked="checked"><input type="checkbox" name="letters" value="c"></div><div><input type="radio" name="letters" value="a"><input type="radio" name="letters" value="b" checked="checked"><input type="radio" name="letters" value="c"></div><div><input type="checkbox" name="letters" value="a"><input type="checkbox" name="letters" value="b" checked="checked"><input type="checkbox" name="letters" value="c" checked="checked"></div>'
+      },
+      {
         message: 'should render {variables} as blank when x is true (misc/undefinedVar.html)',
         template: 'misc/undefinedVar',
         run: async (teddy, template, model, assert, expected) => {
@@ -927,15 +957,13 @@ export default [
         message: 'should force hide missing variables and treat them as empty strings {missing|h} (misc/varForceEmptyHide.html)',
         template: 'misc/varForceEmptyHide',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
-        expected: '<p></p>',
-        skip: true
+        expected: '<p></p>'
       },
       {
         message: 'should force display missing variables and display the variable {missing|d} but remove |d (misc/varForceEmptyDisplay.html)',
         template: 'misc/varForceEmptyDisplay',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
-        expected: '<p>{missing}</p>',
-        skip: true
+        expected: '<p>{missing}</p>'
       },
       {
         message: 'should render <inline> tags (misc/inlineTag.html)',

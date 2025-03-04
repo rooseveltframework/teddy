@@ -1,0 +1,8 @@
+{!
+  should loop through {namesVar} correctly with key {nameVar} and val {descriptionVar}
+!}
+
+<loop through='{namesVar}' key='name' val='description'>
+  <p>{name}</p> {! outputs jack, jill, hill !}
+  <p>{description}</p> {! outputs guy, girl, landscape !}
+</loop>
