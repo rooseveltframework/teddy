@@ -1,0 +1,15 @@
+{!
+  should loop through {letters} correctly in a select element using special teddy attribute for select elements to avoid a one-line if
+!}
+
+<select selected-value="b">
+  <loop through='letters' val='letter'>
+    <option value="{letter}">{letter}</option> {! outputs a, b, c !}
+  </loop>
+</select>
+
+<select selected-value="{lowercaseB}">
+  <loop through='letters' val='letter'>
+    <option value="{letter}">{letter}</option> {! outputs a, b, c !}
+  </loop>
+</select>

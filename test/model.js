@@ -22,6 +22,7 @@ export default function makeModel () {
       'three'
     ],
     names: { jack: 'guy', jill: 'girl', hill: 'landscape' },
+    namesVar: 'names',
     nameList: [
       'jack',
       'jill',
@@ -82,6 +83,7 @@ export default function makeModel () {
     dynamicValue: 'Some content',
     somethingMore: 'More content',
     somethingElse: true,
+    lowercaseB: 'b',
     varWithVarInside: 'Variable with a variable inside: {subVar}',
     subVar: 'And another: {something}',
     dynamicInclude: 'misc/variable',

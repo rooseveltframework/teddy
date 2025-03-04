@@ -20,6 +20,11 @@ export function load (html) {
         return el.childNodes
       },
 
+      // e.g. dom(el).find() from teddy
+      find: function (selector) {
+        return el.querySelectorAll(selector)
+      },
+
       // e.g. dom(arg).html() from teddy
       html: function () {
         return getTeddyDOMInnerHTML(el)

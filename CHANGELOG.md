@@ -4,6 +4,17 @@
 
 - Put your changes here...
 
+## 0.6.24
+
+- Added `{varName|h}` to force hide or `{varName|d}` to force display variable. This is a per-var override for:
+  - `teddy.setEmptyVarBehavior('hide')`: Will make it possible for variables which don't resolve to display as empty strings instead of displaying the variable.
+    - Default: 'display'.
+- Added support for sourcing most Teddy attribute values dynamically from `{variables}`.
+- Added boolean logic to one-line if statements.
+- Added `selected-value` and `checked-value` attributes for setting what option to select or what checkbox / radio to check in a more concise way than using one-line ifs.
+- Fixed a bug that prevented boolean logic from working if there were multiple `and` or multiple `or` attributes on an element.
+- Updated various dependencies.
+
 ## 0.6.23
 
 - Added new `<inline>` tag for adding inline CSS or JS using Teddy variables. Usage is optional, but it can help you avoid syntax error warnings in your code editor.
