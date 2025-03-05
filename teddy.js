@@ -214,7 +214,7 @@ function parseIncludes (dom, model, dynamic) {
         if (hasTrue || hasFalse) localDom = parseOneLineConditionals(localDom, localModel)
         if (hasLoop) localDom = parseLoops(localDom, localModel)
         if (hasInline) localDom = parseInlines(localDom, localModel)
-        if (hasSelected) localDom = parseSelectedAttributeValues(dom, localModel)
+        if (hasSelected) localDom = parseSelectedAttributeValues(localDom, localModel)
         dom(el).replaceWith(localDom.html())
         parsedTags++
       }
@@ -629,7 +629,7 @@ function parseLoops (dom, model) {
           if (hasTrue || hasFalse) localDom = parseOneLineConditionals(localDom, localModel)
           if (hasLoop) localDom = parseLoops(localDom, localModel)
           if (hasInline) localDom = parseInlines(localDom, localModel)
-          if (hasSelected) localDom = parseSelectedAttributeValues(dom, localModel)
+          if (hasSelected) localDom = parseSelectedAttributeValues(localDom, localModel)
           newMarkup += localDom.html()
         }
         const newDom = cheerioLoad(newMarkup || '', cheerioOptions)
@@ -679,7 +679,7 @@ function parseSelectedAttributeValues (dom, model) {
   let parsedTags
   do {
     parsedTags = 0
-    const tags = dom('[selected-value], [checked-value]') // TODO: `${attrName}-teddyduplicate${count++}`
+    const tags = dom('select[selected-value], [checked-value]')
     if (tags.length > 0) {
       for (const el of tags) {
         // get attributes
@@ -693,16 +693,16 @@ function parseSelectedAttributeValues (dom, model) {
             for (const opt of children) {
               if (browser) opt.attribs = getAttribs(opt)
               if (opt.attribs.value === val) dom(opt).attr('selected', 'selected')
-              dom(el).removeAttr(origAttr)
             }
+            dom(el).removeAttr(origAttr)
           } else if (attr === 'checked-value') {
             const val = parseVars(el.attribs[origAttr], model) || el.attribs[origAttr]
             const children = dom(el).find('input[type="checkbox"][value], input[type="radio"][value]')
             for (const opt of children) {
               if (browser) opt.attribs = getAttribs(opt)
               if (opt.attribs.value === val) dom(opt).attr('checked', 'checked')
-              dom(el).removeAttr(origAttr)
             }
+            dom(el).removeAttr(origAttr)
           }
         }
         parsedTags++

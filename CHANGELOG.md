@@ -4,6 +4,10 @@
 
 - Put your changes here...
 
+## 0.6.25
+
+- Fixed bugs associated with `selected-value` and `checked-value` attributes.
+
 ## 0.6.24
 
 - Added `{varName|h}` to force hide or `{varName|d}` to force display variable. This is a per-var override for:
