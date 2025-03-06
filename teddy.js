@@ -736,9 +736,7 @@ function parseVars (templateString, model) {
       }
     }
     const lastSixChars = match.slice(-6)
-    // TODO: detect precisely how many |flags there are
-    if (lastSixChars.includes('|p')) {
-      // no parse flag is set; also handles if no escape flag is set as well
+    if (lastSixChars.includes('|p')) { // no parse flag is set
       const originalMatch = match
       match = match.substring(0, match.length - (lastSixChars.split('|').length - 1) * 2) // remove last 2-n chars
       let parsed = getOrSetObjectByDotNotation(model, match)
@@ -757,30 +755,36 @@ function parseVars (templateString, model) {
           return templateString
         }
       }
-    } else if (lastSixChars.includes('|s')) {
-      // no escape flag is set
+    } else if (lastSixChars.includes('|s')) { // no escape flag is set
       const originalMatch = match
       match = match.substring(0, match.length - (lastSixChars.split('|').length - 1) * 2) // remove last 2-n chars
       let parsed = getOrSetObjectByDotNotation(model, match)
+      let skipTemplateLiteralReplacement = false
       if (!parsed && !lastSixChars.includes('|d') && (params.emptyVarBehavior === 'hide' || lastSixChars.includes('|h'))) parsed = '' // display empty string instead of the variable text verbatim if this setting is set
-      else if (!parsed && parsed !== '') parsed = `{${originalMatch}}`
+      else if (!parsed && parsed !== '') {
+        skipTemplateLiteralReplacement = true
+        parsed = `{${originalMatch}}`
+      }
       if (typeof parsed === 'string' && parsed.startsWith('{') && parsed.includes('|d')) parsed = parsed.replace('|d', '')
       try {
-        templateString = templateString.replace(new RegExp(`\${${originalMatch}}`.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&').replace(/-/g, '\\x2d'), 'i'), () => parsed)
+        if (!skipTemplateLiteralReplacement) templateString = templateString.replace(new RegExp(`\${${originalMatch}}`.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&').replace(/-/g, '\\x2d'), 'i'), () => parsed)
         templateString = templateString.replace(new RegExp(`{${originalMatch}}`.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&').replace(/-/g, '\\x2d'), 'i'), () => parsed)
       } catch (e) {
         return templateString
       }
-    } else {
-      // no flags are set
+    } else { // no flags are set
       let parsed = getOrSetObjectByDotNotation(model, match)
+      let skipTemplateLiteralReplacement = false
       if (!parsed && !lastSixChars.includes('|d') && (params.emptyVarBehavior === 'hide' || lastSixChars.includes('|h'))) parsed = '' // display empty string instead of the variable text verbatim if this setting is set
       else if (parsed || parsed === '') parsed = escapeEntities(parsed)
       else if (parsed === 0) parsed = '0'
-      else parsed = `{${match}}`
+      else {
+        skipTemplateLiteralReplacement = true
+        parsed = `{${match}}`
+      }
       if (typeof parsed === 'string' && parsed.startsWith('{') && parsed.includes('|d')) parsed = parsed.replace('|d', '')
       try {
-        templateString = templateString.replace(new RegExp(`\${${match}}`.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&').replace(/-/g, '\\x2d'), 'i'), () => parsed)
+        if (!skipTemplateLiteralReplacement) templateString = templateString.replace(new RegExp(`\${${match}}`.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&').replace(/-/g, '\\x2d'), 'i'), () => parsed)
         templateString = templateString.replace(new RegExp(`{${match}}`.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&').replace(/-/g, '\\x2d'), 'i'), () => parsed)
       } catch (e) {
         return templateString
