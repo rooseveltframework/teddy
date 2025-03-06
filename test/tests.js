@@ -930,6 +930,13 @@ export default [
         expected: '<p>Some content</p>'
       },
       {
+        message: 'should render template literal ${variables} (misc/variableVarWithTemplateLiteralContents.html)', // eslint-disable-line
+        template: 'misc/variableVarWithTemplateLiteralContents',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: '<p>Some content</p>',
+        only: true
+      },
+      {
         message: 'should render nested {variables} (misc/nestedVars.html)',
         template: 'misc/nestedVars',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
