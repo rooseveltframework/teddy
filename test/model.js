@@ -103,6 +103,7 @@ export default function makeModel () {
     valWithQuotes: '"hi there!"',
     specialChars: 'special .$&@. chars',
     templateLiteral: '${something}', // eslint-disable-line
+    templateLiteralWithNonexistentVar: '${nonexistentVar}', // eslint-disable-line
     inlineStyles: 'body { font-family: sans-serif; }',
     inlineScript: 'console.log("hello")',
     complexJSONString: '{"content":{"appTitle":"Some App","pageTitle":"{content.appTitle}"},"currentYear":1858,"mainDomain":"localhost:43711","NODE_ENV":"development"}',

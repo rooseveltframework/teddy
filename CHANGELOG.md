@@ -4,6 +4,11 @@
 
 - Put your changes here...
 
+## 0.6.26
+
+- Fixed a bug that could cause ${templateLiteral} strings to lose their $ character if they were meant to print as strings and not be parsed as Teddy variables.
+- Updated various dependencies.
+
 ## 0.6.25
 
 - Fixed bugs associated with `selected-value` and `checked-value` attributes.
