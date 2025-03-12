@@ -71,19 +71,26 @@ function loadTemplate (template) {
   }
 }
 
-// remove teddy {! comments !}
+// remove teddy {! comments !} and <!--! comments -->
 function removeTeddyComments (renderedTemplate) {
   let oldTemplate
   do {
     oldTemplate = renderedTemplate
     let vars
+
     try {
       vars = matchByDelimiter(renderedTemplate, '{!', '!}')
     } catch (e) {
       return renderedTemplate // it will match {! comments {! with comments in them !} !} but if there are unbalanced brackets, just return the original text
     }
-    const varsLength = vars.length
-    for (let i = 0; i < varsLength; i++) renderedTemplate = renderedTemplate.replace(`{!${vars[i]}!}`, '')
+    for (let i = 0; i < vars.length; i++) renderedTemplate = renderedTemplate.replace(`{!${vars[i]}!}`, '')
+
+    try {
+      vars = matchByDelimiter(renderedTemplate, '<!--!', '-->')
+    } catch (e) {
+      return renderedTemplate
+    }
+    for (let i = 0; i < vars.length; i++) renderedTemplate = renderedTemplate.replace(`<!--!${vars[i]}-->`, '')
   } while (oldTemplate !== renderedTemplate)
   return renderedTemplate
 }
@@ -185,6 +192,10 @@ function parseIncludes (dom, model, dynamic) {
         }
         loadTemplate(src) // load the partial into the template list
         let contents = templates[src] || ''
+        if (typeof templates[src] !== 'string' && params.includeNotFoundBehavior === 'display') {
+          contents = `Template "${src}" not found!`
+          if (params.verbosity > 1) console.warn(`teddy encountered an include tag with a src set to a template that could not be found: ${src}`)
+        }
         const localModel = Object.assign({}, model)
         for (const arg of dom(el).children()) {
           const argName = browser ? arg.nodeName?.toLowerCase() : arg.name
@@ -991,6 +1002,7 @@ function setDefaultParams () {
   params.templateRoot = './'
   params.maxPasses = 1000
   params.emptyVarBehavior = 'display' // or 'hide'
+  params.includeNotFoundBehavior = 'display' // or 'hide'
 }
 
 // mutator method to set verbosity param. takes human-readable string argument and converts it to an integer for more efficient checks against the setting
@@ -1029,6 +1041,12 @@ function setMaxPasses (v) {
 function setEmptyVarBehavior (v) {
   if (v === 'hide') params.emptyVarBehavior = 'hide'
   else params.emptyVarBehavior = 'display'
+}
+
+// mutator method to set include tag not found param: whether to display an error when an <include> tag src can't be found
+function setIncludeNotFoundBehavior (v) {
+  if (v === 'hide') params.includeNotFoundBehavior = 'hide'
+  else params.includeNotFoundBehavior = 'display'
 }
 
 // access templates
@@ -1283,6 +1301,7 @@ export default {
   setTemplateRoot,
   setMaxPasses,
   setEmptyVarBehavior,
+  setIncludeNotFoundBehavior,
   getTemplates,
   setTemplate,
   setCache,
