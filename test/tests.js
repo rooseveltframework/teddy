@@ -593,7 +593,7 @@ export default [
         message: 'should ignore includes with invalid markup (includes/invalidIncludeMarkup.html)',
         template: 'includes/invalidIncludeMarkup',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
-        expected: '<div><p>Some content</p></div>'
+        expected: '<div>Template "noExist.html" not found!<p>Some content</p></div>'
       },
       {
         message: 'should escape from infinite loop of includes via setMaxPasses (includes/includeInfiniteLoop.html)',

@@ -77,7 +77,7 @@ Here's how:
 - An `<include>` tag for layout templates and partials which accepts arguments via child `<arg>` elements.
 - Flow control tags: `<if>`, `<unless>`, `<elseif>`, `<elseunless>`, and `<else>` for basic templating logic.
 - A `<loop>` tag for looping.
-- Server-side `{! comments !}` delimited by exclamation points in a fashion similar to `<!-- HTML comments -->`. Server-side comments are stripped out at the template compilation stage.
+- Server-side comments using `<!--! this syntax -->` or `{! this syntax !}` which are stripped out at the template compilation stage.
 
 How to write Teddy templates
 ===
@@ -414,20 +414,20 @@ In the above example, assume that there are a large number of values that `{user
 Here's what the attributes mean:
 
 - `name`: What you want to name your cache. The name is necessary so you can manually clear the cache from JavaScript later if you like via `teddy.clearCache(name, keyVal)`.
-  
+
   - `teddy.clearCache(name)` will delete the whole cache at that name, e.g. all values for `{city}`.
   - `teddy.clearCache(name, keyVal)` will delete just the value at that keyVal, e.g. just the cache for when `{city}` resolves to NY if you set keyVal to NY.
 
 - `key`: The model value to use to index new caches.
-  
+
   - Example: Suppose `city` in the above example could resolve to three possible values: NY, SF, and LA. In that case, the caching feature will create 3 caches using the `city` key: one for each of the three possible values.
 
 - `maxAge`: How old the cache can be in milliseconds before it is invalidated and will be re-rendered.
-  
+
   - Default: 0 (no limit).
 
 - `maxCaches`: The maximum number of caches that Teddy will be allowed to create for a given `<cache>` element. If the maximum is reached, Teddy will remove the oldest cache in the stack, where oldest is defined as the least recently created *or* accessed.
-  
+
   - Default: 1000.
 
 You can also cache whole templates. For more details about that, see the API docs below.
@@ -502,25 +502,25 @@ API
 - `teddy.setTemplate(name, template)`: Add a new template to the template cache.
 
 - `teddy.render(template, model)`: Render a template by supplying either source code or a file name (in Node.js).
-  
+
   - Returns fully rendered HTML.
-  - Removes `{! teddy comments !}`
+  - Removes `<!--! teddy comments -->` and `{! teddy comments !}`
 
 - `teddy.setTemplateRoot(path)`: Set the location of your templates directory.
-  
+
   - Default is the current directory.
 
 - `teddy.compile(templateString)`: Takes a template string and returns a function which when given model data will render HTML from the template and model data.
-  
+
   - e.g.
-    
+
     - ```javascript
       const templateFunction = teddy.compile('<p>{hello}</p>')
       templateFunction({ hello: 'world' }) // returns "<p>world</p>"
       ```
 
 - `teddy.setVerbosity(n)`: Sets the level of verbosity in Teddy's console logs. Call `teddy.setVerbosity(n)` where `n` equals one of the below values to change the default:
-  
+
   - `0` or `'none'`: No logging.
   - `1` or `'concise'`: The default. Concise logging. Will usually only log serious errors.
   - `2` or `'verbose'`: Verbose logging. Logs even minor errors.
@@ -529,36 +529,40 @@ API
 - `teddy.setDefaultParams()`: Reset all params to default.
 
 - `teddy.maxPasses(n)`: Sets the maximum number of passes the parser can execute over your template. If this maximum is exceeded, Teddy will stop attempting to render the template. The limit exists to prevent the possibility of teddy producing infinite loops due to improperly coded templates.
-  
-  - Default: 1000.
+
+  - Default: `1000`.
 
 - `teddy.setEmptyVarBehavior('hide')`: Will make it possible for variables which don't resolve to display as empty strings instead of displaying the variable.
-  
-  - Default: 'display'.
-  
+
+  - Default: `'display'`.
+
   - Override this behavior on a per variable basis by using `{varName|h}` to force it to hide or `{varName|d}` to force it to display.
 
+- `teddy.setIncludeNotFoundBehavior('hide')`: Will make it possible for `<include>` tags which don't resolve to display as empty strings instead of displaying an error.
+
+  - Default: `'display'`.
+
 - `teddy.setCache(params)`: Declare a template-level cache.
-  
+
   - Params:
-    
+
     - `template`: Name of the template to cache.
-    
+
     - `key`: Model variable to cache it by.
-      
-      - Set to `none` to cache the first render for all model values.
-    
+
+      - Set to `'none'` to cache the first render for all model values.
+
     - `maxAge`: How old the cache can be in milliseconds before it is invalidated and will be re-rendered.
-      
-      - Default: 0 (no limit).
-    
+
+      - Default: `0` (no limit).
+
     - `maxCaches`: The maximum number of caches that Teddy will be allowed to create for a given template/key combination. If the maximum is reached, Teddy will remove the oldest cache in the stack, where oldest is defined as the least recently created *or* accessed.
-      
-      - Default: 1000.
+
+      - Default: `1000`.
       - Note: does not apply to caches where `key` is not also set.
-  
+
   - Example:
-    
+
     - ```javascript
       teddy.setCache({
         template: 'someTemplate.html',
@@ -572,7 +576,7 @@ API
 - `teddy.clearCache(name, keyVal)`: Deletes just the value at that keyVal. Assumes `name` will be a string.
 
 - `teddy.clearCache(params)`: If `params` is an object, it will delete a whole template-level cache.
-  
+
   - Params:
     - `template`: Name of the template to delete the cache of.
     - `key`: Model variable cache index to delete it by.

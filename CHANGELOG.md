@@ -4,6 +4,12 @@
 
 - Put your changes here...
 
+## 1.0.0
+
+- Added support for a new `<!--! server-side comments -->` syntax.
+- Changed the behavior of `<include>` tags to display an error when attempting to include a template that does not exist.
+- Updated various dependencies.
+
 ## 0.6.26
 
 - Fixed a bug that could cause ${templateLiteral} strings to lose their $ character if they were meant to print as strings and not be parsed as Teddy variables.
