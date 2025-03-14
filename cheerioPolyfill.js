@@ -102,15 +102,16 @@ function parseTeddyDOMFromString (html) {
     } else {
       // handle tags
       const [fullMatch, tagName, attrString] = match
+      const lowerCaseTagName = tagName.toLowerCase()
       const isClosingTag = fullMatch.startsWith('</')
       if (isClosingTag) {
-        if (selfClosingTags.has(tagName.toLowerCase())) {
+        if (selfClosingTags.has(lowerCaseTagName)) {
           // convert incorrect closing tag for self-closing tag to self-closing tag
           const element = document.createElement(tagName)
           dom[dom.length - 1].appendChild(element)
         } else {
           // check if the closing tag matches the most recent open tag
-          if (openTags.length > 0 && openTags[openTags.length - 1] === tagName.toLowerCase()) {
+          if (openTags.length > 0 && openTags[openTags.length - 1] === lowerCaseTagName) {
             openTags.pop()
             dom.pop()
           }
@@ -141,7 +142,24 @@ function parseTeddyDOMFromString (html) {
         // apply attributes to the element
         for (const [name, value] of attrMap) {
           try {
-            element.setAttribute(name, value || '')
+            // replace elements with `src` attributes with `data-teddy-defer-attr-src` so the browser doesn't try to prefetch the asset
+            // this is needed because the value of the `src` attribute could be a {teddyVariable} and that fetch won't resolve
+            switch (lowerCaseTagName) {
+              case 'img':
+              case 'video':
+              case 'audio':
+              case 'iframe':
+              case 'script':
+                if (name === 'src') element.setAttribute('data-teddy-defer-attr-src', value) // replace src with data-teddy-defer-attr-src
+                else element.setAttribute(name, value || '')
+                break
+              case 'link':
+                if (name === 'href') element.setAttribute('data-teddy-defer-attr-href', value) // replace src with data-teddy-defer-attr-href
+                else element.setAttribute(name, value || '')
+                break
+              default:
+                element.setAttribute(name, value || '')
+            }
           } catch (e) {
             console.warn('Error parsing an element attribute. You might have a typo in your HTML. A common cause is two spaces between element attributes.')
           }
@@ -151,9 +169,9 @@ function parseTeddyDOMFromString (html) {
         dom[dom.length - 1].appendChild(element)
 
         // push the new element to the dom if it's not self-closing
-        if (!selfClosingTags.has(tagName.toLowerCase()) && !fullMatch.endsWith('/>')) {
+        if (!selfClosingTags.has(lowerCaseTagName) && !fullMatch.endsWith('/>')) {
           dom.push(element)
-          openTags.push(tagName.toLowerCase())
+          openTags.push(lowerCaseTagName)
         }
       }
     }

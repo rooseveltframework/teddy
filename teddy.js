@@ -1265,8 +1265,13 @@ function render (template, model, callback) {
     renderedTemplate = renderedTemplate.replace(`<noteddy id="${blockId}"></noteddy>`, () => model._noTeddyBlocks[blockId])
   }
 
-  // fix double-encoding html entity bug in client-side mode
-  if (browser) renderedTemplate = reverseDoubleEncodedEntities(renderedTemplate)
+  if (browser) {
+    // fix double-encoding html entity bug in client-side mode
+    renderedTemplate = reverseDoubleEncodedEntities(renderedTemplate)
+
+    // now that we're done with the render, reset data-teddy-defer-attr-src and data-teddy-defer-attr-href to native attributes
+    renderedTemplate = renderedTemplate.replaceAll('data-teddy-defer-attr-src', 'src').replaceAll('data-teddy-defer-attr-href', 'href')
+  }
 
   // cache the template
   if (cacheKey === 'none') {
