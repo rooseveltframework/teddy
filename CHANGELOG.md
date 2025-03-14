@@ -4,6 +4,11 @@
 
 - Put your changes here...
 
+## 1.0.1
+
+- Fixed a bug that caused client-side Teddy to try to fetch resources from the server inappropriately while parsing the template.
+- Updated dependencies.
+
 ## 1.0.0
 
 - Added support for a new `<!--! server-side comments -->` syntax.

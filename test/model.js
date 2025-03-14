@@ -106,6 +106,7 @@ export default function makeModel () {
     templateLiteralWithNonexistentVar: '${nonexistentVar}', // eslint-disable-line
     inlineStyles: 'body { font-family: sans-serif; }',
     inlineScript: 'console.log("hello")',
+    imgSrc: 'hello.jpg',
     complexJSONString: '{"content":{"appTitle":"Some App","pageTitle":"{content.appTitle}"},"currentYear":1858,"mainDomain":"localhost:43711","NODE_ENV":"development"}',
     obj: {
       one: {

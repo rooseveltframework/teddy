@@ -1659,6 +1659,12 @@ export default [
         expected: '<div><p>test</p><p>test</p><p>test</p><p>test</p><p>test</p><p>test</p></div>'
       },
       {
+        message: 'should render img tags correctly (misc/imgSrc.html)',
+        template: 'misc/imgSrc',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: '<img src="something.jpg"><img src="hello.jpg">'
+      },
+      {
         message: 'should parse embedded script tag correctly (misc/scriptWithEmptyObject.html)',
         template: 'misc/scriptWithEmptyObject',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
