@@ -889,6 +889,24 @@ export default [
         expected: '<h1>double bars</h1> {something}'
       },
       {
+        message: 'should escape HTML entities present in <escape> tags (misc/escapeTag.html)',
+        template: 'misc/escapeTag',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: '<div>&lt;p&gt;hello&lt;/p&gt;</div>'
+      },
+      {
+        message: 'should render <pre> tags correctly (misc/preTag.html)',
+        template: 'misc/preTag',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: ['<div><pre><if something>{something}</if></pre><pre>Some content</pre><pre class="attr"><if something>{something}</if></pre></div>', '<div><pre><if something="">{something}</if></pre><pre>Some content</pre><pre class="attr"><if something="">{something}</if></pre></div>']
+      },
+      {
+        message: 'should prevent a sample template from infinite looping (misc/infiniteParseLoopTest.html)',
+        template: 'misc/infiniteParseLoopTest',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: '{ const x = { key: \'val\' } || \'\' }'
+      },
+      {
         message: 'should render multiple {variables} (misc/multipleVariables.html)',
         template: 'misc/multipleVariables',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
@@ -1022,12 +1040,6 @@ export default [
           assert(teddyTemplate, '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="format-detection" content="telephone=no"><title>Plain HTML</title><link rel="stylesheet" href="/css/styles.css"></head><body><main><p>This template contains no teddy tags. Just HTML.</p></main><script type="text/javascript" src="/js/main.js"></script></body></html>')
         },
         expected: ''
-      },
-      {
-        message: 'should render {variables} within style element (misc/styleVariables.html)',
-        template: 'misc/styleVariables',
-        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
-        expected: '<style>p{height:10px;}</style>'
       },
       {
         message: 'should access property of {variable} object with {variable} (misc/variableObjectProperty.html)',

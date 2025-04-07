@@ -138,11 +138,19 @@ function tagNoParseBlocks (dom, model) {
   let parsedTags
   do {
     parsedTags = 0
-    const tags = dom('noteddy:not([id]), noparse:not([id])')
+    let tags = dom('noteddy:not([id]), noparse:not([id])')
     if (tags.length > 0) {
       for (const el of tags) {
         const id = model._noTeddyBlocks.push(dom(el).html()) - 1
         dom(el).replaceWith(`<noteddy id="${id}"></noteddy>`)
+        parsedTags++
+      }
+    }
+    tags = dom('pre:not([id]):not([parse])')
+    if (tags.length > 0) {
+      for (const el of tags) {
+        const id = model._noTeddyBlocks.push(dom(el).toString()) - 1
+        dom(el).replaceWith(`<noteddy id="${id}" pre="true"></noteddy>`)
         parsedTags++
       }
     }
@@ -207,20 +215,23 @@ function parseIncludes (dom, model, dynamic) {
         }
         const hasNoteddy = contents.includes('</noteddy>')
         const hasNoparse = contents.includes('</noparse>')
+        const hasPre = contents.includes('</pre>')
         const hasIf = contents.includes('</if>')
         const hasUnless = contents.includes('</unless>')
         const hasTrue = contents.includes(' true=')
         const hasFalse = contents.includes(' false=')
         const hasLoop = contents.includes('</loop>')
         const hasInline = contents.includes('</inline>')
+        const hasEscape = contents.includes('</escape>')
         const hasSelected = contents.includes(' selected-value=') || contents.includes(' checked-value=')
         let localDom
-        if (hasNoteddy || hasNoparse) {
+        if (hasNoteddy || hasNoparse || hasPre) {
           localDom = cheerioLoad(contents, cheerioOptions)
           localDom = tagNoParseBlocks(localDom, localModel)
           contents = localDom.html()
         }
         localDom = cheerioLoad(parseVars(contents, localModel), cheerioOptions)
+        if (hasEscape) localDom = parseEscapes(localDom, localModel)
         if (hasIf || hasUnless) localDom = parseConditionals(localDom, localModel)
         if (hasTrue || hasFalse) localDom = parseOneLineConditionals(localDom, localModel)
         if (hasLoop) localDom = parseLoops(localDom, localModel)
@@ -619,7 +630,8 @@ function parseLoops (dom, model) {
           getOrSetObjectByDotNotation(localModel, valName, val)
           const hasNoteddyLoopContents = loopContents.includes('</noteddy>')
           const hasNoparseLoopContents = loopContents.includes('</noparse>')
-          if (hasNoteddyLoopContents || hasNoparseLoopContents) {
+          const hasPreLoopContents = loopContents.includes('</pre>')
+          if (hasNoteddyLoopContents || hasNoparseLoopContents || hasPreLoopContents) {
             let localDom = cheerioLoad(loopContents, cheerioOptions)
             localDom = tagNoParseBlocks(localDom, localModel)
             loopContents = localDom.html()
@@ -633,8 +645,10 @@ function parseLoops (dom, model) {
           const hasFalse = localMarkup.includes(' false=')
           const hasLoop = localMarkup.includes('</loop>')
           const hasInline = localMarkup.includes('</inline>')
+          const hasEscape = localMarkup.includes('</escape>')
           const hasSelected = localMarkup.includes(' selected-value=') || localMarkup.includes(' checked-value=')
           let localDom = cheerioLoad(localMarkup || '', cheerioOptions)
+          if (hasEscape) localDom = parseEscapes(localDom, localModel)
           if (hasNoteddy || hasNoparse) localDom = tagNoParseBlocks(localDom, localModel)
           if (hasIf || hasUnless) localDom = parseConditionals(localDom, localModel)
           if (hasTrue || hasFalse) localDom = parseOneLineConditionals(localDom, localModel)
@@ -678,6 +692,22 @@ function parseInlines (dom, model) {
         if (css) replaceWith = `<style>${css}</style>`
         else replaceWith = `<script>${js}</script>`
         dom(el).replaceWith(replaceWith)
+        parsedTags++
+      }
+    }
+  } while (parsedTags)
+  return dom
+}
+
+// render <escape> tags
+function parseEscapes (dom, model) {
+  let parsedTags
+  do {
+    parsedTags = 0
+    const tags = dom('escape')
+    if (tags.length > 0) {
+      for (const el of tags) {
+        dom(el).replaceWith(escapeEntities(dom(el).html()))
         parsedTags++
       }
     }
@@ -735,6 +765,10 @@ function parseVars (templateString, model) {
   for (let i = 0; i < varsLength; i++) {
     let match = vars[i]
     if (match === '') continue // empty {}
+    if (!/^(\d+|[a-zA-Z_$][a-zA-Z0-9_$|{}.]*(\.[a-zA-Z_$][a-zA-Z0-9_$|{}.]*)*)$/.test(match)) {
+      if (params.verbosity > 2) console.warn(`teddy.parseVars encountered a {variable} that could not be parsed: {${match}}`)
+      continue // skip invalid variables
+    }
     if (match.includes('{')) {
       // there's a variable inside the variable name
       const originalMatch = match
@@ -851,7 +885,7 @@ function cleanupStrayTeddyTags (dom) {
   let parsedTags
   do {
     parsedTags = 0
-    const tags = dom('[teddydeferredonelineconditional], include, arg, if, unless, elseif, elseunless, else, loop, cache')
+    const tags = dom('[teddydeferredonelineconditional], pre[parse], include, arg, if, unless, elseif, elseunless, else, loop, cache')
     if (tags.length > 0) {
       for (const el of tags) {
         const tagName = browser ? el.nodeName?.toLowerCase() : el.name
@@ -860,7 +894,7 @@ function cleanupStrayTeddyTags (dom) {
         }
         if (browser) el.attribs = getAttribs(el)
         for (const attr in el.attribs) {
-          if (attr === 'true' || attr === 'false' || attr === 'teddydeferredonelineconditional' || attr.startsWith('if-')) {
+          if (attr === 'true' || attr === 'false' || attr === 'parse' || attr === 'teddydeferredonelineconditional' || attr.startsWith('if-')) {
             dom(el).removeAttr(attr)
           }
         }
@@ -1214,6 +1248,7 @@ function render (template, model, callback) {
     const hasCache = renderedTemplate.includes('</cache>')
     const hasNoteddy = renderedTemplate.includes('</noteddy>')
     const hasNoparse = renderedTemplate.includes('</noparse>')
+    const hasPre = renderedTemplate.includes('</pre>')
     const hasIf = renderedTemplate.includes('</if>')
     const hasUnless = renderedTemplate.includes('</unless>')
     const hasTrue = renderedTemplate.includes(' true=')
@@ -1221,6 +1256,7 @@ function render (template, model, callback) {
     const hasInclude = renderedTemplate.includes('</include>')
     const hasLoop = renderedTemplate.includes('</loop>')
     const hasInline = renderedTemplate.includes('</inline>')
+    const hasEscape = renderedTemplate.includes('</escape>')
     const hasSelected = renderedTemplate.includes(' selected-value=') || renderedTemplate.includes(' checked-value=')
     oldTemplate = renderedTemplate || ''
     if (passes > 1) {
@@ -1228,7 +1264,8 @@ function render (template, model, callback) {
       if (parseDynamicIncludes) dom = parseIncludes(dom, model, true)
     }
     if (hasCache) dom = replaceCacheElements(dom, model)
-    if (hasNoteddy || hasNoparse) dom = tagNoParseBlocks(dom, model)
+    if (hasEscape) dom = parseEscapes(dom, model)
+    if (hasNoteddy || hasNoparse || hasPre) dom = tagNoParseBlocks(dom, model)
     if (hasIf || hasUnless) dom = parseConditionals(dom, model)
     if (hasTrue || hasFalse) dom = parseOneLineConditionals(dom, model)
     if (hasInclude) dom = parseIncludes(dom, model)
@@ -1254,7 +1291,7 @@ function render (template, model, callback) {
   } while (oldTemplate !== renderedTemplate)
 
   // remove stray teddy tags if any exist
-  if (renderedTemplate.includes('teddydeferredonelineconditional="true"') || renderedTemplate.includes('</include>') || renderedTemplate.includes('</arg>') || renderedTemplate.includes('</if>') || renderedTemplate.includes('</unless>') || renderedTemplate.includes('</elseif>') || renderedTemplate.includes('</elseunless>') || renderedTemplate.includes('</else>') || renderedTemplate.includes('</loop>') || renderedTemplate.includes('</cache>')) {
+  if (renderedTemplate.includes('teddydeferredonelineconditional="true"') || renderedTemplate.includes('</include>') || renderedTemplate.includes('</arg>') || renderedTemplate.includes('</if>') || renderedTemplate.includes('</unless>') || renderedTemplate.includes('</elseif>') || renderedTemplate.includes('</elseunless>') || renderedTemplate.includes('</else>') || renderedTemplate.includes('</loop>') || renderedTemplate.includes('</cache>') || renderedTemplate.includes('</pre>')) {
     dom = cheerioLoad(renderedTemplate || '', cheerioOptions)
     dom = cleanupStrayTeddyTags(dom)
     renderedTemplate = dom.html()
@@ -1263,6 +1300,7 @@ function render (template, model, callback) {
   // replace <noteddy> blocks with the hidden code
   for (const blockId in model._noTeddyBlocks) {
     renderedTemplate = renderedTemplate.replace(`<noteddy id="${blockId}"></noteddy>`, () => model._noTeddyBlocks[blockId])
+    renderedTemplate = renderedTemplate.replace(`<noteddy id="${blockId}" pre="true"></noteddy>`, () => model._noTeddyBlocks[blockId])
   }
 
   if (browser) {

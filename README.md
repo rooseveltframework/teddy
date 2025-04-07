@@ -91,7 +91,7 @@ Display a variable by simply writing `{varName}` anywhere in the template. You c
 
 All variable names are case-insensitive, both in `{varName}` form and when referenced in Teddy tags described below. This is to comply with the rules of HTML grammar which mandate that HTML tags and attributes be case insensitive.
 
-HTML entities such as `<`, `>`, `&`, `'`, and `"` will be escaped by default as a safeguard against [cross-site scripting](https://en.wikipedia.org/wiki/Cross-site_scripting).
+HTML entities such as `<`, `>`, `&`, `'`, and `"` will be escaped by default as a safeguard against [cross-site scripting](https://en.wikipedia.org/wiki/Cross-site_scripting). If you want to deliberately escape some text or some HTML, then wrap it in an `<escape>` tag like this: `<escape><p>hello</p></escape>` which will output: `&lt;p&gt;hello&lt;/p&gt;`.
 
 If you need to suppress this escaping in certain scenarios, write your variable like this: `{varName|s}`.
 
@@ -393,7 +393,7 @@ You can also instruct the contents of a variable to not be parsed after that var
 <p>{this_var_will_be_parsed_but_its_contents_will_not_be|p}</p>
 ```
 
-Note: Teddy tags will also not be parsed if they appear inside of elements that interpret child text as plain text, e.g. `<style>`, `<script>`, `<textarea>`, etc.
+Note: Teddy tags will also not be parsed if they appear inside of elements that interpret child text as plain text, e.g. `<style>`, `<script>`, `<textarea>`, etc. Teddy will also not parse anything in a `<pre>` tag unless you add a `parse` attribute to the `<pre>` tag like `<pre parse>`.
 
 Caching blocks
 ---
