@@ -30,6 +30,11 @@ export function load (html) {
         return getTeddyDOMInnerHTML(el)
       },
 
+      // e.g. dom(arg).toString() from teddy
+      toString: function () {
+        return getTeddyDOMOuterHTML(el)
+      },
+
       // e.g. dom(el).attr('teddydeferreddynamicinclude', 'true') from teddy
       attr: function (attr, val) {
         return el.setAttribute(attr, val)
@@ -66,6 +71,11 @@ export function load (html) {
   // e.g. dom.html() from teddy
   $.html = function () {
     return getTeddyDOMInnerHTML(doc)
+  }
+
+  // e.g. dom.toString() from teddy
+  $.toString = function () {
+    return getTeddyDOMOuterHTML(doc)
   }
 
   return $
@@ -191,18 +201,17 @@ function parseTeddyDOMFromString (html) {
   return root
 }
 
-// custom function to get inner HTML without escaping various things to prevent teddy from infinitely escaping them
+// custom functions to get inner/outer HTML without escaping various things to prevent teddy from infinitely escaping them
+const doublyEncodedEntities = {
+  '&amp;amp;': '&amp;',
+  '&amp;lt;': '&lt;',
+  '&amp;gt;': '&gt;',
+  '&amp;quot;': '&quot;',
+  '&amp;#39;': '&#39;',
+  '&amp;#x2F;': '&#x2F;'
+}
+const entityEntries = Object.entries(doublyEncodedEntities)
 function getTeddyDOMInnerHTML (node) {
-  const doublyEncodedEntities = {
-    '&amp;amp;': '&amp;',
-    '&amp;lt;': '&lt;',
-    '&amp;gt;': '&gt;',
-    '&amp;quot;': '&quot;',
-    '&amp;#39;': '&#39;',
-    '&amp;#x2F;': '&#x2F;'
-  }
-  const entityEntries = Object.entries(doublyEncodedEntities)
-
   // build html string
   let html = ''
   for (const child of node.childNodes) {
@@ -222,4 +231,21 @@ function getTeddyDOMInnerHTML (node) {
   }
 
   return html
+}
+function getTeddyDOMOuterHTML (node) {
+  // start with the outerHTML of the node
+  let outerHTML = ''
+
+  if (node.nodeType === window.Node.ELEMENT_NODE) {
+    outerHTML = node.outerHTML
+  } else if (node.nodeType === window.Node.TEXT_NODE) {
+    outerHTML = node.textContent
+  } else if (node.nodeType === window.Node.COMMENT_NODE) {
+    outerHTML = `<!--${node.textContent}-->`
+  }
+
+  // replace doubly encoded entities
+  for (const [doublyEncoded, singleEncoded] of entityEntries) outerHTML = outerHTML.replace(new RegExp(doublyEncoded, 'g'), singleEncoded)
+
+  return outerHTML
 }

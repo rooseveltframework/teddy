@@ -4,6 +4,13 @@
 
 - Put your changes here...
 
+## 1.1.0
+
+- Added `<escape>` tag.
+- Excluded `<pre>` tags from Teddy parsing. Add a `parse` attribute to prevent this behavior.
+- Fixed a bug that could cause infinite loops in variable parsing.
+- Updated dependencies.
+
 ## 1.0.1
 
 - Fixed a bug that caused client-side Teddy to try to fetch resources from the server inappropriately while parsing the template.
