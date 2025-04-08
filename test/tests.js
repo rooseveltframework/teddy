@@ -1653,6 +1653,12 @@ export default [
         expected: '<p>0</p>'
       },
       {
+        message: 'should render {key-with-dashes} as true (misc/keyWithDashes.html)',
+        template: 'misc/keyWithDashes',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: '<p>true</p>'
+      },
+      {
         message: 'should render model value with quotes correctly without double-encoding the HTML entity (misc/varQuoteVal.html)',
         template: 'misc/varQuoteVal',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),

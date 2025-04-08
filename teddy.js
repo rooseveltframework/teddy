@@ -765,7 +765,7 @@ function parseVars (templateString, model) {
   for (let i = 0; i < varsLength; i++) {
     let match = vars[i]
     if (match === '') continue // empty {}
-    if (!/^(\d+|[a-zA-Z_$][a-zA-Z0-9_$|{}.]*(\.[a-zA-Z_$][a-zA-Z0-9_$|{}.]*)*)$/.test(match)) {
+    if (!/^(\d+|[a-zA-Z_$][a-zA-Z0-9_$|{}.-]*(\.[a-zA-Z_$][a-zA-Z0-9_$|{}.-]*)*)$/.test(match)) {
       if (params.verbosity > 2) console.warn(`teddy.parseVars encountered a {variable} that could not be parsed: {${match}}`)
       continue // skip invalid variables
     }
