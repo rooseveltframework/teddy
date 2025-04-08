@@ -11,6 +11,7 @@ export default function makeModel () {
     undefinedVar: undefined,
     emptyString: '',
     zero: 0,
+    'key-with-dashes': true,
     set: new Set(['a', 'b', 'c']),
     definedParent: { undefinedMember: undefined, emptyMember: '' },
     camelLetters: ['a', 'b', 'c'],
