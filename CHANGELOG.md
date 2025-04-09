@@ -4,6 +4,11 @@
 
 - Put your changes here...
 
+## 1.1.2
+
+- Added `teddy.clearTemplates()` method to clear the template cache.
+- Updated dependencies.
+
 ## 1.1.1
 
 - Added support for `variables-with-dashes-in-their-names`.

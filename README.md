@@ -501,6 +501,8 @@ API
 
 - `teddy.setTemplate(name, template)`: Add a new template to the template cache.
 
+- `teddy.clearTemplates()`: Clear the template cache.
+
 - `teddy.render(template, model)`: Render a template by supplying either source code or a file name (in Node.js).
 
   - Returns fully rendered HTML.

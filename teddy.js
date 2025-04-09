@@ -8,7 +8,7 @@ const cheerioOptions = { xml: { xmlMode: false, lowerCaseAttributeNames: false, 
 const browser = cheerioLoad.isCheerioPolyfill // true if we are executing in the browser context
 const params = {} // teddy parameters
 setDefaultParams() // set params to the defaults
-const templates = {} // loaded templates are stored as object collections, e.g. { "myTemplate.html": "<p>some markup</p>"}
+let templates = {} // loaded templates are stored as object collections, e.g. { "myTemplate.html": "<p>some markup</p>"}
 const caches = {} // a place to store cached portions of templates
 const templateCaches = {} // a place to store cached full templates
 
@@ -1100,6 +1100,11 @@ function setTemplate (file, template) {
   templates[file] = template
 }
 
+// mutator method to clear template cache entirely
+function clearTemplates () {
+  templates = {}
+}
+
 function setCache (params) {
   if (!templateCaches[params.template]) templateCaches[params.template] = {}
   if (params.key) {
@@ -1347,6 +1352,7 @@ export default {
   setIncludeNotFoundBehavior,
   getTemplates,
   setTemplate,
+  clearTemplates,
   setCache,
   clearCache,
   render,
