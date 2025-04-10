@@ -91,7 +91,7 @@ Display a variable by simply writing `{varName}` anywhere in the template. You c
 
 All variable names are case-insensitive, both in `{varName}` form and when referenced in Teddy tags described below. This is to comply with the rules of HTML grammar which mandate that HTML tags and attributes be case insensitive.
 
-HTML entities such as `<`, `>`, `&`, `'`, and `"` will be escaped by default as a safeguard against [cross-site scripting](https://en.wikipedia.org/wiki/Cross-site_scripting). If you want to deliberately escape some text or some HTML, then wrap it in an `<escape>` tag like this: `<escape><p>hello</p></escape>` which will output: `&lt;p&gt;hello&lt;/p&gt;`.
+HTML entities such as `<`, `>`, `&`, `'`, and `"` will be escaped by default as a safeguard against [cross-site scripting](https://en.wikipedia.org/wiki/Cross-site_scripting). If you want to deliberately escape some text or some HTML, then wrap it in an `<escape>` tag like `<escape><p>hello</p></escape>` or an escape comment like `<!--#<p>hello</p>-->` which will output: `&lt;p&gt;hello&lt;/p&gt;`.
 
 If you need to suppress this escaping in certain scenarios, write your variable like this: `{varName|s}`.
 

@@ -4,6 +4,11 @@
 
 - Put your changes here...
 
+## 1.1.3
+
+- Added `<!--# escape comments -->`.
+- Updated dependencies.
+
 ## 1.1.2
 
 - Added `teddy.clearTemplates()` method to clear the template cache.

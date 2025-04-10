@@ -895,6 +895,12 @@ export default [
         expected: '<div>&lt;p&gt;hello&lt;/p&gt;</div>'
       },
       {
+        message: 'should escape HTML entities present in <!--# escape --> comments (misc/escapeComment.html)',
+        template: 'misc/escapeComment',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: '<div><code>&lt;p&gt;</code><code>&lt;script&gt;</code></div>'
+      },
+      {
         message: 'should render <pre> tags correctly (misc/preTag.html)',
         template: 'misc/preTag',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
@@ -1674,7 +1680,7 @@ export default [
         message: 'should not render Teddy code in server-side comments in loops (misc/serverSideCommentsWithTeddyCode.html)',
         template: 'misc/serverSideCommentsWithTeddyCode',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
-        expected: '<div><p>test</p><p>test</p><p>test</p><p>test</p><p>test</p><p>test</p></div>'
+        expected: '<div><p>test</p><div>&lt;p&gt;hello&lt;/p&gt;</div><p>test</p><p>test</p><div>&lt;p&gt;hello&lt;/p&gt;</div><p>test</p><p>test</p><div>&lt;p&gt;hello&lt;/p&gt;</div><p>test</p></div>'
       },
       {
         message: 'should render img tags correctly (misc/imgSrc.html)',
