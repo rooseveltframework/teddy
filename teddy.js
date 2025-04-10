@@ -71,7 +71,7 @@ function loadTemplate (template) {
   }
 }
 
-// remove teddy {! comments !} and <!--! comments -->
+// remove teddy {! comments !} and <!--! comments -->; also replace <!--# content --> with <escape>content</escape>
 function removeTeddyComments (renderedTemplate) {
   let oldTemplate
   do {
@@ -91,6 +91,13 @@ function removeTeddyComments (renderedTemplate) {
       return renderedTemplate
     }
     for (let i = 0; i < vars.length; i++) renderedTemplate = renderedTemplate.replace(`<!--!${vars[i]}-->`, '')
+
+    try {
+      vars = matchByDelimiter(renderedTemplate, '<!--#', '-->')
+    } catch (e) {
+      return renderedTemplate
+    }
+    for (let i = 0; i < vars.length; i++) renderedTemplate = renderedTemplate.replace(`<!--#${vars[i]}-->`, `<escape>${vars[i]}</escape>`)
   } while (oldTemplate !== renderedTemplate)
   return renderedTemplate
 }
@@ -222,8 +229,9 @@ function parseIncludes (dom, model, dynamic) {
         const hasFalse = contents.includes(' false=')
         const hasLoop = contents.includes('</loop>')
         const hasInline = contents.includes('</inline>')
-        const hasEscape = contents.includes('</escape>')
+        const hasEscape = contents.includes('</escape>') || contents.includes('<!--#')
         const hasSelected = contents.includes(' selected-value=') || contents.includes(' checked-value=')
+        if (hasEscape) contents = parseEscapes(contents)
         let localDom
         if (hasNoteddy || hasNoparse || hasPre) {
           localDom = cheerioLoad(contents, cheerioOptions)
@@ -231,7 +239,6 @@ function parseIncludes (dom, model, dynamic) {
           contents = localDom.html()
         }
         localDom = cheerioLoad(parseVars(contents, localModel), cheerioOptions)
-        if (hasEscape) localDom = parseEscapes(localDom, localModel)
         if (hasIf || hasUnless) localDom = parseConditionals(localDom, localModel)
         if (hasTrue || hasFalse) localDom = parseOneLineConditionals(localDom, localModel)
         if (hasLoop) localDom = parseLoops(localDom, localModel)
@@ -631,6 +638,8 @@ function parseLoops (dom, model) {
           const hasNoteddyLoopContents = loopContents.includes('</noteddy>')
           const hasNoparseLoopContents = loopContents.includes('</noparse>')
           const hasPreLoopContents = loopContents.includes('</pre>')
+          const hasEscape = loopContents.includes('</escape>') || loopContents.includes('<!--#')
+          if (hasEscape) loopContents = parseEscapes(loopContents)
           if (hasNoteddyLoopContents || hasNoparseLoopContents || hasPreLoopContents) {
             let localDom = cheerioLoad(loopContents, cheerioOptions)
             localDom = tagNoParseBlocks(localDom, localModel)
@@ -645,10 +654,8 @@ function parseLoops (dom, model) {
           const hasFalse = localMarkup.includes(' false=')
           const hasLoop = localMarkup.includes('</loop>')
           const hasInline = localMarkup.includes('</inline>')
-          const hasEscape = localMarkup.includes('</escape>')
           const hasSelected = localMarkup.includes(' selected-value=') || localMarkup.includes(' checked-value=')
           let localDom = cheerioLoad(localMarkup || '', cheerioOptions)
-          if (hasEscape) localDom = parseEscapes(localDom, localModel)
           if (hasNoteddy || hasNoparse) localDom = tagNoParseBlocks(localDom, localModel)
           if (hasIf || hasUnless) localDom = parseConditionals(localDom, localModel)
           if (hasTrue || hasFalse) localDom = parseOneLineConditionals(localDom, localModel)
@@ -700,19 +707,8 @@ function parseInlines (dom, model) {
 }
 
 // render <escape> tags
-function parseEscapes (dom, model) {
-  let parsedTags
-  do {
-    parsedTags = 0
-    const tags = dom('escape')
-    if (tags.length > 0) {
-      for (const el of tags) {
-        dom(el).replaceWith(escapeEntities(dom(el).html()))
-        parsedTags++
-      }
-    }
-  } while (parsedTags)
-  return dom
+function parseEscapes (templateString) {
+  return templateString.replace(/<escape>(.*?)<\/escape>/gs, (_, content) => escapeEntities(content.trim()))
 }
 
 // render `selected-value` and `checked-value` attributes
@@ -1240,6 +1236,9 @@ function render (template, model, callback) {
     })
   }
 
+  const hasEscape = renderedTemplate.includes('</escape>') || renderedTemplate.includes('<!--#')
+  if (hasEscape) renderedTemplate = parseEscapes(renderedTemplate)
+
   dom = cheerioLoad(renderedTemplate || '', cheerioOptions)
   let oldTemplate
   let passes = 0
@@ -1261,7 +1260,6 @@ function render (template, model, callback) {
     const hasInclude = renderedTemplate.includes('</include>')
     const hasLoop = renderedTemplate.includes('</loop>')
     const hasInline = renderedTemplate.includes('</inline>')
-    const hasEscape = renderedTemplate.includes('</escape>')
     const hasSelected = renderedTemplate.includes(' selected-value=') || renderedTemplate.includes(' checked-value=')
     oldTemplate = renderedTemplate || ''
     if (passes > 1) {
@@ -1269,7 +1267,6 @@ function render (template, model, callback) {
       if (parseDynamicIncludes) dom = parseIncludes(dom, model, true)
     }
     if (hasCache) dom = replaceCacheElements(dom, model)
-    if (hasEscape) dom = parseEscapes(dom, model)
     if (hasNoteddy || hasNoparse || hasPre) dom = tagNoParseBlocks(dom, model)
     if (hasIf || hasUnless) dom = parseConditionals(dom, model)
     if (hasTrue || hasFalse) dom = parseOneLineConditionals(dom, model)
