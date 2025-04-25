@@ -1,0 +1,55 @@
+@view-transition { /* enable multi-page view transitions */
+  navigation: auto;
+}
+
+body {
+  background-color: #fff;
+  color: #000;
+  font-family: sans-serif;
+}
+
+a:link, a:visited {
+  color: #00f;
+}
+
+@mixin dark-mode {
+  body {
+    background-color: #000;
+    color: #fff;
+  }
+
+  a:link, a:visited {
+    color: #99f;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  @include dark-mode;
+}
+
+html.dark {
+  @include dark-mode;
+}
+
+main > header > h1, main > header > h2 {
+  float: left;
+  margin: 0;
+  font-size: 150%;
+}
+
+main > header > h1::after {
+  content: "—";
+  margin: 0 5px;
+}
+
+nav {
+  clear: both;
+}
+
+form#mode {
+  position: absolute;
+  right: 8px;
+  width: auto;
+  container-type: unset;
+  display: block;
+}

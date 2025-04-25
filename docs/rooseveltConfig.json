@@ -1,0 +1,44 @@
+{
+  "makeBuildArtifacts": "staticsOnly",
+  "viewEngine": [
+    "html:teddy"
+  ],
+  "css": {
+    "sourcePath": "css",
+    "compiler": {
+      "enable": true,
+      "module": "sass",
+      "options": {}
+    },
+    "output": "css",
+    "versionFile": null
+  },
+  "js": {
+    "sourcePath": "js",
+    "webpack": {
+      "enable": true,
+      "bundles": [
+        {
+          "config": {
+            "entry": "${js.sourcePath}/main.js",
+            "output": {
+              "path": "${publicFolder}/js"
+            },
+            "resolve": {
+              "alias": {
+                "fs": false,
+                "path": false
+              },
+              "modules": [
+                "${js.sourcePath}",
+                "${buildFolder}/js",
+                "${appDir}",
+                "node_modules"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  }
+}

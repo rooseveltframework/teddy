@@ -1,0 +1,48 @@
+{
+  "name": "teddy-documentation",
+  "main": "build.js",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "check-if-css-is-disabled": "2.0.2",
+    "highlight.js": "11.11.1",
+    "roosevelt": "0.30.6",
+    "teddy": "../",
+    "sass": "1.86.3",
+    "webpack": "5.99.5"
+  },
+  "devDependencies": {
+    "http-server": "14.1.1",
+    "nodemon": "3.1.9",
+    "standard": "17.1.2",
+    "stylelint": "16.18.0",
+    "stylelint-config-standard-scss": "14.0.0"
+  },
+  "nodemonConfig": {
+    "ignore": [
+      "public/"
+    ],
+    "ext": "scss html js json"
+  },
+  "standard": {
+    "ignore": [
+      "public/"
+    ]
+  },
+  "scripts": {
+    "d": "nodemon --exec \"node build.js --development-mode && http-server public/\"",
+    "dev": "nodemon --exec \"node build.js --development-mode && http-server public/\"",
+    "development": "nodemon --exec \"node build.js --development-mode && http-server public/\"",
+    "p": "nodemon --exec \"node build.js --production-mode && http-server public/\"",
+    "prod": "nodemon --exec \"node build.js --production-mode && http-server public/\"",
+    "production": "nodemon --exec \"node build.js --production-mode && http-server public/\"",
+    "build": "node build.js --production-mode",
+    "build-dev": "node build.js --development-mode",
+    "lint": "npm run standard && npm run stylelint",
+    "standard": "./node_modules/.bin/standard",
+    "stylelint": "./node_modules/.bin/stylelint \"statics/css/**/*.scss\"",
+    "start": "nodemon --exec \"node build.js --production-mode && http-server public/\"",
+    "test": "npm run lint"
+  }
+}

@@ -1,0 +1,80 @@
+<include src="layouts/main">
+  <arg pageTitle>Teddy templating engine</arg>
+  <arg pageContent>
+    <article>
+      <p><a href='https://www.npmjs.com/package/teddy'><img src="https://img.shields.io/npm/v/teddy.svg" alt="npm"></a></p>
+
+      <img src="/images/teddy.jpg" alt="Teddy Roosevelt's facial hair is a curly brace." title="Teddy Roosevelt's facial hair is a curly brace." class="float-right rounded-edges">
+
+      <p>Teddy is the most readable and easy to learn templating language there is!</p>
+
+      <p>Or put a more technical way, Teddy is an easy to read, HTML-inspired, mostly logic-less DOM templating engine with support for both server-side and client-side templating.</p>
+
+      <p>It uses HTML-like <code><!--#<tags>--></code> for rudimentary templating logic and Teddy Roosevelt's facial hair for <code>{variables}</code>.</p>
+
+      <h2 id="whyanothertemplatingengine">Why yet another templating engine?</h2>
+
+      <p>Good question.</p>
+
+      <p>Here's why:</p>
+
+      <h3 id="toocryptic">Other popular templating engines are too cryptic</h3>
+
+      <p>Are you tired of all those unnecessarily cryptic templating systems out there that look like this?</p>
+
+      <pre><code class='language-html' lang='html'><escape>
+<h1>{{header}}</h1>
+{{#bug}}
+{{/bug}}
+
+{{#items}}
+  {{#first}}
+    <li><strong>{{name}}</strong></li>
+  {{/first}}
+  {{#link}}
+    <li><a href="{{url}}">{{name}}</a></li>
+  {{/link}}
+{{/items}}
+
+{{#empty}}
+  <p>The list is empty.</p>
+{{/empty}}
+      </escape></code></pre>
+
+      <p>...Or this?</p>
+
+      <pre><code class='language-html' lang='html'><escape>
+{{#each comments}}
+<h2><a href="/posts/{{../permalink}}#{{id}}">{{title}}</a></h2>
+<div>{{body}}</div>
+{{/each}}
+      </escape></code></pre>
+
+      <p>...Or this?</p>
+
+      <pre><code class='language-html' lang='html'><escape>{#names}{.}{@idx}{.}{/idx}{@sep}, {/sep}{/names}</escape></code></pre>
+
+      <p>Want something simpler and more readable so you can stop wasting time memorizing what all those funky symbols do so you can focus more on getting actual work done?</p>
+
+      <p>Well you're not the only one.</p>
+
+      <h3 id="symbolbuster">Teddy, symbol-buster extraordinaire</h3>
+
+      <p>Teddy the trust-buster was a man of the people, curtailing the abuse of monopolists. As <a href='http://www.cracked.com/article_15895_the-5-most-badass-presidents-all-time_p5.html'>the most badass President of all-time</a>, there's no way he'd put up with all this indecipherable templating nonsense.</p>
+
+      <p>As such, Teddy the templating engine is an engine of the people, curtailing the abuse of indecipherable templating systems. Teddy trust-buster extraordinaire is now symbol-buster extraordinaire.</p>
+
+      <p>Here's how:</p>
+
+      <ul>
+        <li>More concise <code>{variable}</code> syntax. One curly bracket. Not two, not three, no pound signs, no question marks, no backticks, no gang signs, and no hieroglyphs.</li>
+        <li>An <code><!--#<include>--></code> tag for layout templates and partials which accepts arguments via child <code><!--#<arg>--></code> elements.</li>
+        <li>Flow control tags: <code><!--#<if>--></code>, <code><!--#<unless>--></code>, <code><!--#<elseif>--></code>, <code><!--#<elseunless>--></code>, and <code><!--#<else>--></code> for basic templating logic.</li>
+        <li>A <code><!--#<loop>--></code> tag for looping.</li>
+        <li>Server-side comments using <code>&lt;!--! this syntax --&gt;</code> or <code>&#123;! this syntax !&#125;</code> which are stripped out at the template compilation stage.</li>
+      </ul>
+
+      <p>This module was built and is maintained by the <a href="https://rooseveltframework.org">Roosevelt web framework team</a>, but it can be used independently of Roosevelt as well.</p>
+    </article>
+  </arg>
+</include>
