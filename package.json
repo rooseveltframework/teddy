@@ -11,7 +11,8 @@
   "version": "1.1.4",
   "files": [
     "dist",
-    "docs/statics/pages"
+    "docs/statics/pages",
+    "*.md"
   ],
   "type": "module",
   "exports": {
