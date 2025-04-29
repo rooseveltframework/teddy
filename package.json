@@ -10,7 +10,8 @@
   ],
   "version": "1.1.4",
   "files": [
-    "dist"
+    "dist",
+    "docs/statics/pages"
   ],
   "type": "module",
   "exports": {
