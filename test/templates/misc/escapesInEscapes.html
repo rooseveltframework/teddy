@@ -1,0 +1,12 @@
+{!
+  should escape escapes in escapes properly
+!}
+
+<div>
+  <p>
+    <code><!--#<escape>--></code> or
+    <code><!--#<escape><p>hello1</p></escape>--></code> or
+    <code><escape><!--#<p>hello2</p>--></escape></code> or
+    <code><escape><escape><p>hello3</p></escape></escape></code>
+  </p>
+</div>

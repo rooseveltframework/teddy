@@ -1,8 +1,9 @@
-# Teddy Changelog
+## 1.1.4
 
-## Next version
-
-- Put your changes here...
+- Added slicker live demo docs.
+- Added some performance improvements.
+- Fixed a bug when escaping escape tags or escape comments.
+- Updated dependencies.
 
 ## 1.1.3
 

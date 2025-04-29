@@ -71,13 +71,14 @@ function loadTemplate (template) {
   }
 }
 
-// remove teddy {! comments !} and <!--! comments -->; also replace <!--# content --> with <escape>content</escape>
+// remove teddy {! comments !} and <!--! comments -->; also replace <escape>tags</escape> and <!--# content -->
 function removeTeddyComments (renderedTemplate) {
   let oldTemplate
   do {
     oldTemplate = renderedTemplate
     let vars
 
+    // server-side comments
     try {
       vars = matchByDelimiter(renderedTemplate, '{!', '!}')
     } catch (e) {
@@ -92,12 +93,23 @@ function removeTeddyComments (renderedTemplate) {
     }
     for (let i = 0; i < vars.length; i++) renderedTemplate = renderedTemplate.replace(`<!--!${vars[i]}-->`, '')
 
+    // <!--# escape --> blocks and <escape> tags
+    let firstMatch
     try {
-      vars = matchByDelimiter(renderedTemplate, '<!--#', '-->')
+      firstMatch = getFirstMatchByDelimiters(renderedTemplate, [['<!--#', '-->'], ['<escape>', '</escape>']])
     } catch (e) {
       return renderedTemplate
     }
-    for (let i = 0; i < vars.length; i++) renderedTemplate = renderedTemplate.replace(`<!--#${vars[i]}-->`, `<escape>${vars[i]}</escape>`)
+    let newContent = firstMatch
+    if (firstMatch) {
+      if (firstMatch.startsWith('<!--#')) {
+        newContent = newContent.substring(0, newContent.length - 3).slice(5)
+        renderedTemplate = renderedTemplate.replace(firstMatch, escapeEntities(newContent.trim()))
+      } else {
+        newContent = newContent.substring(0, newContent.length - 9).slice(8)
+        renderedTemplate = renderedTemplate.replace(firstMatch, escapeEntities(newContent.trim()))
+      }
+    }
   } while (oldTemplate !== renderedTemplate)
   return renderedTemplate
 }
@@ -229,9 +241,7 @@ function parseIncludes (dom, model, dynamic) {
         const hasFalse = contents.includes(' false=')
         const hasLoop = contents.includes('</loop>')
         const hasInline = contents.includes('</inline>')
-        const hasEscape = contents.includes('</escape>') || contents.includes('<!--#')
         const hasSelected = contents.includes(' selected-value=') || contents.includes(' checked-value=')
-        if (hasEscape) contents = parseEscapes(contents)
         let localDom
         if (hasNoteddy || hasNoparse || hasPre) {
           localDom = cheerioLoad(contents, cheerioOptions)
@@ -638,8 +648,6 @@ function parseLoops (dom, model) {
           const hasNoteddyLoopContents = loopContents.includes('</noteddy>')
           const hasNoparseLoopContents = loopContents.includes('</noparse>')
           const hasPreLoopContents = loopContents.includes('</pre>')
-          const hasEscape = loopContents.includes('</escape>') || loopContents.includes('<!--#')
-          if (hasEscape) loopContents = parseEscapes(loopContents)
           if (hasNoteddyLoopContents || hasNoparseLoopContents || hasPreLoopContents) {
             let localDom = cheerioLoad(loopContents, cheerioOptions)
             localDom = tagNoParseBlocks(localDom, localModel)
@@ -706,11 +714,6 @@ function parseInlines (dom, model) {
   return dom
 }
 
-// render <escape> tags
-function parseEscapes (templateString) {
-  return templateString.replace(/<escape>(.*?)<\/escape>/gs, (_, content) => escapeEntities(content.trim()))
-}
-
 // render `selected-value` and `checked-value` attributes
 function parseSelectedAttributeValues (dom, model) {
   let parsedTags
@@ -757,8 +760,7 @@ function parseVars (templateString, model) {
   } catch (e) {
     return templateString // it will match {vars{withVarsInThem}} but if there are unbalanced brackets, just return the original text
   }
-  const varsLength = vars.length
-  for (let i = 0; i < varsLength; i++) {
+  for (let i = 0; i < vars.length; i++) {
     let match = vars[i]
     if (match === '') continue // empty {}
     if (!/^(\d+|[a-zA-Z_$][a-zA-Z0-9_$|{}.-]*(\.[a-zA-Z_$][a-zA-Z0-9_$|{}.-]*)*)$/.test(match)) {
@@ -957,32 +959,66 @@ function matchByDelimiter (input, openDelimiter, closeDelimiter) {
   const result = []
   const openLength = openDelimiter.length
   const closeLength = closeDelimiter.length
-
   for (let i = 0; i < input.length; i++) {
     if (input.substring(i, i + openLength) === openDelimiter) {
       stack.push(i + openLength)
       i += openLength - 1
     } else if (input.substring(i, i + closeLength) === closeDelimiter) {
       const start = stack.pop()
-      if (stack.length === 0) {
-        result.push(input.substring(start, i))
-      }
+      if (stack.length === 0) result.push(input.substring(start, i))
       i += closeLength - 1
     }
   }
 
-  const individualSegments = []
-  const regex = /{!([^{}]*)!}/g
-  let match
+  return result
+}
 
-  for (const segment of result) {
-    while ((match = regex.exec(segment)) !== null) {
-      individualSegments.push(match[1])
+function getFirstMatchByDelimiters (str, delimiters) {
+  const openers = []
+  const closers = []
+  for (const delimiter of delimiters) {
+    openers.push(delimiter[0])
+    closers.push(delimiter[1])
+  }
+  const currentlyOpenBrackets = {}
+  let currentDelimiter = -1
+  let match = ''
+
+  for (let charIndex = 0; charIndex < str.length; charIndex++) {
+    for (let delimiterIndex = 0; delimiterIndex < openers.length; delimiterIndex++) {
+      if (currentDelimiter < 0 || currentDelimiter === delimiterIndex) {
+        const opener = openers[delimiterIndex]
+        const openerLength = opener.length
+        const closer = closers[delimiterIndex]
+        const closerLength = closer.length
+        let chunk = str.substring(charIndex, charIndex + openerLength)
+        if (chunk === opener) {
+          if (!currentlyOpenBrackets[opener]) {
+            match = opener.slice(0, -1)
+            currentlyOpenBrackets[opener] = 1
+            currentDelimiter = delimiterIndex
+            charIndex = charIndex + openerLength - 1 // move the loop ahead beyond the delimiter
+          } else {
+            currentlyOpenBrackets[opener]++
+          }
+        } else {
+          chunk = str.substring(charIndex, charIndex + closerLength)
+          if (chunk === closer) {
+            if (currentlyOpenBrackets[opener]) {
+              if (currentlyOpenBrackets[opener] > 1) currentlyOpenBrackets[opener]-- // they're nested; keep going
+              else if (currentlyOpenBrackets[opener] === 1) {
+                match += closer
+                return match
+              }
+            }
+          }
+        }
+        if (currentlyOpenBrackets[opener]) match += str.charAt(charIndex)
+      }
     }
-    individualSegments.push(segment)
   }
 
-  return individualSegments
+  return match
 }
 
 // gets or sets an object by dot notation, e.g. thing.nestedThing.furtherNestedThing: two arguments gets, three arguments sets
@@ -1013,12 +1049,10 @@ function getOrSetObjectByDotNotation (obj, dotNotation, value) {
 function getAttribs (element) {
   const attributes = element.attributes
   const attributesObject = {}
-
   for (let i = 0; i < attributes.length; i++) {
     const attr = attributes[i]
     attributesObject[attr.name] = attr.value
   }
-
   return attributesObject
 }
 
@@ -1235,9 +1269,6 @@ function render (template, model, callback) {
       return `<${tagName}${processedAttributes}>`
     })
   }
-
-  const hasEscape = renderedTemplate.includes('</escape>') || renderedTemplate.includes('<!--#')
-  if (hasEscape) renderedTemplate = parseEscapes(renderedTemplate)
 
   dom = cheerioLoad(renderedTemplate || '', cheerioOptions)
   let oldTemplate

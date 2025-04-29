@@ -1,5 +1,14 @@
 # How to contribute
 
+## Coding
+
+If you want to write code for this project, here's how to set up a development environment:
+
+- Fork/clone this repo.
+- Install dependencies: `npm ci`
+- Do a build: `npm run build` — builds are needed after every code change.
+- Run the tests: `npm t`
+
 ## Before opening a pull request
 
 - Run: `npm run build`.

@@ -901,6 +901,12 @@ export default [
         expected: '<div><code>&lt;p&gt;</code><code>&lt;script&gt;</code></div>'
       },
       {
+        message: 'should escape escapes in escapes properly (misc/escapesInEscapes.html)',
+        template: 'misc/escapesInEscapes',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: '<div><p><code>&lt;escape&gt;</code>or<code>&lt;escape&gt;&lt;p&gt;hello1&lt;/p&gt;&lt;/escape&gt;</code>or<code>&lt;!--#&lt;p&gt;hello2&lt;/p&gt;--&gt;</code>or<code>&lt;escape&gt;&lt;p&gt;hello3&lt;/p&gt;&lt;/escape&gt;</code></p></div>'
+      },
+      {
         message: 'should render <pre> tags correctly (misc/preTag.html)',
         template: 'misc/preTag',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
