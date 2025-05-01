@@ -46,7 +46,7 @@
     "eslint": "9.25.1",
     "eslint-plugin-html": "8.1.2",
     "eslint-plugin-mocha": "11.0.0",
-    "mocha": "11.1.0",
+    "mocha": "11.2.2",
     "nyc": "17.1.0",
     "standard": "17.1.2",
     "terser-webpack-plugin": "5.3.14",
