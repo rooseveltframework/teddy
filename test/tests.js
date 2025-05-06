@@ -1072,6 +1072,12 @@ export default [
         expected: '<p>🎉🥳🎈🎊</p>'
       },
       {
+        message: 'should render two class attributes correctly (misc/twoClasses.html)',
+        template: 'misc/twoClasses',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: '<p class="one" class-teddyduplicate1="two">2</p>'
+      },
+      {
         message: 'should cache the contents of the cache element but not anything outside of it (misc/cacheElement.html)',
         template: 'misc/cacheElement',
         run: async (teddy, template, model, assert, expected) => {
