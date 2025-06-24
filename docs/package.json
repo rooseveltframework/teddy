@@ -9,7 +9,7 @@
     "highlight.js": "11.11.1",
     "roosevelt": "0.30.6",
     "teddy": "../",
-    "sass": "1.86.3",
+    "sass": "1.89.2",
     "webpack": "5.99.9"
   },
   "devDependencies": {
