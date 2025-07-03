@@ -16,7 +16,7 @@
     "http-server": "14.1.1",
     "nodemon": "3.1.10",
     "standard": "17.1.2",
-    "stylelint": "16.18.0",
+    "stylelint": "16.21.1",
     "stylelint-config-standard-scss": "14.0.0"
   },
   "nodemonConfig": {
