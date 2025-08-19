@@ -7,7 +7,7 @@
   "dependencies": {
     "check-if-css-is-disabled": "2.0.2",
     "highlight.js": "11.11.1",
-    "roosevelt": "0.31.3",
+    "roosevelt": "0.31.4",
     "teddy": "../",
     "sass": "1.89.2",
     "webpack": "5.100.1"
