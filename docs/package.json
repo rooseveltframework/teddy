@@ -17,7 +17,7 @@
     "nodemon": "3.1.14",
     "standard": "17.1.2",
     "stylelint": "16.26.1",
-    "stylelint-config-standard-scss": "15.0.1"
+    "stylelint-config-standard-scss": "17.0.0"
   },
   "nodemonConfig": {
     "ignore": [
