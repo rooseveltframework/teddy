@@ -50,7 +50,7 @@
     "nyc": "18.0.0",
     "standard": "17.1.2",
     "terser-webpack-plugin": "5.4.0",
-    "webpack": "5.105.4",
+    "webpack": "5.106.2",
     "webpack-cli": "7.0.2"
   },
   "standard": {
