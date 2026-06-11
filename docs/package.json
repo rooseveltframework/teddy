@@ -10,7 +10,7 @@
     "roosevelt": "0.31.8",
     "teddy": "../",
     "sass": "1.99.0",
-    "webpack": "5.106.2"
+    "webpack": "5.107.2"
   },
   "devDependencies": {
     "http-server": "14.1.1",
