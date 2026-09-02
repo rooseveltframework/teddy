@@ -6,7 +6,7 @@
   },
   "dependencies": {
     "check-if-css-is-disabled": "2.0.2",
-    "highlight.js": "11.11.1",
+    "highlight.js": "11.12.0",
     "roosevelt": "0.31.8",
     "teddy": "../",
     "sass": "1.99.0",
