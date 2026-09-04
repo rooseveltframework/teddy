@@ -1,3 +1,7 @@
+## 2.0.1
+
+- Fixed a `<loop>` whose `through` names a `{variable}` in the middle of its path, rather than at its head, rendering nothing.
+
 ## 2.0.0
 
 - Breaking: Removed support for non-well formed templates. A template, and any markup arriving through the model, now has to be complete on its own.

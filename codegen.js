@@ -435,9 +435,9 @@ function emitLoop (node, state, out) {
   const keyName = JSON.stringify(node.keyName ?? null)
   const valName = JSON.stringify(node.valName ?? null)
 
-  // a through naming a {variable} is not known until there is a model to read it from, so that one goes through the helper; anything else is a path this code can read directly, which matters for a loop nested inside another whose collection is the outer loop's val
+  // a through naming a {variable} anywhere in its path is not known until there is a model to read it from, so that one goes through the helper; anything else is a path this code can read directly, which matters for a loop nested inside another whose collection is the outer loop's val
   let js = ''
-  if (node.through && node.through.startsWith('{')) {
+  if (node.through && node.through.includes('{')) {
     js += `const ${collection} = r.collection(${JSON.stringify(node.through)}, ${keyName}, ${valName}, ${state.model})\n`
   } else {
     const source = access(node.through, state)

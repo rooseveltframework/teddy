@@ -1053,9 +1053,11 @@ export function createCompiler (deps) {
   }
 
   // what a loop iterates when the name it was pointed at is only known once there is a model to read it from
+  //
+  // a {variable} may sit anywhere in the path rather than at its head, so any brace means the path has to be resolved before it is looked up
   function loopCollection (through, keyName, valName, model) {
     let source = through
-    if (source && source.startsWith('{')) source = parseVars(source, model)
+    if (source && source.includes('{')) source = parseVars(source, model)
     return iterable(source ? getOrSetObjectByDotNotation(model, source) : undefined, keyName, valName)
   }
 

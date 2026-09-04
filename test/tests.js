@@ -794,6 +794,13 @@ export default [
         expected: '<p>guy</p><p>girl</p><p>landscape</p><p>man</p><p>woman</p><p>scenary</p>'
       },
       {
+        // a through whose middle segment is a {variable} from the enclosing loop is only known once there is a model to read it from, so the loop must resolve the variable before it looks up the path
+        message: 'should render the body of a nested loop whose through names a {variable} from the enclosing loop in the middle of its path (looping/loopThroughWithVarInPath.html)',
+        template: 'looping/loopThroughWithVarInPath',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: '<p id="first">First</p><span>one</span><span>two</span><p id="second">Second</p><span>three</span>'
+      },
+      {
         message: 'should not render the loop (looping/commentedLoopInLoop.html)',
         template: 'looping/commentedLoopInLoop',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),

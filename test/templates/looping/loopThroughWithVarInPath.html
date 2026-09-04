@@ -1,0 +1,10 @@
+{!
+  should render the body of a nested loop whose through names a {variable} from the enclosing loop in the middle of its path
+!}
+
+<loop through="sections" key="sectionKey" val="section">
+  <p id="{sectionKey}">{section.label}</p>
+  <loop through="sections.{sectionKey}.entries" val="entry">
+    <span>{entry}</span>
+  </loop>
+</loop>
