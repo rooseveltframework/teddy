@@ -87,6 +87,7 @@ export default function makeModel () {
       { name: 'first', active: true, tags: ['a', 'b'] },
       { name: 'second', active: false, tags: ['c'] }
     ],
+    contentWord: 'content',
     something: 'Some content',
     somethingTrue: true,
     somethingFalse: false,

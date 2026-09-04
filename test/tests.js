@@ -365,6 +365,19 @@ export default [
         expected: '<p class="some-class">Some content</p>'
       },
       {
+        // a condition's value may name a {variable} anywhere in it rather than only at its head, and either way the value is not known until there is a model to read it from
+        message: 'should evaluate <if something=\'Some {contentWord}\'> as true, with the variable in the middle of the value (conditionals/conditionalValueVarInMiddle.html)',
+        template: 'conditionals/conditionalValueVarInMiddle',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: '<p>true</p>'
+      },
+      {
+        message: 'should evaluate one line if "if-something" whose value names a {variable} in the middle (conditionals/oneLineValueVarInMiddle.html)',
+        template: 'conditionals/oneLineValueVarInMiddle',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: '<p class="matched">Some content</p>'
+      },
+      {
         message: 'should evaluate <if something> as true and the nested <if not:somethingElse> as false, triggering the nested <else> condition (conditionals/nestedConditional.html)',
         template: 'conditionals/nestedConditional',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),

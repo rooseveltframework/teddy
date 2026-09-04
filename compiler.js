@@ -250,8 +250,8 @@ export function createCompiler (deps) {
         // split the way the interpreter splits it rather than by length, so an attribute name containing if- more than once is read identically
         const condition = name.split('if-')[1]
         current.argSources.push([condition, value])
-        // a condition whose value is a variable is not known until there is a model to read it from, exactly as for an <if> tag
-        if (value && value.startsWith('{')) current.dynamic = true
+        // a condition whose value names a variable is not known until there is a model to read it from, exactly as for an <if> tag. the variable may sit anywhere in the value rather than at its head, so any brace means the value has to be resolved
+        if (value && value.includes('{')) current.dynamic = true
       } else if (OUTCOMES.has(name)) {
         if (current) current[name === 'true' ? 'ifTrue' : 'ifFalse'] = value.replaceAll('&quot;', '"')
       } else if (JOINERS.has(name)) {
@@ -1013,7 +1013,7 @@ export function createCompiler (deps) {
     for (const [name, value] of argSources) {
       if (value === null) args.push(name)
       else if (!value) args.push(name)
-      else args.push(`${name}=${model && value.startsWith('{') ? parseVars(value, model) : value}`)
+      else args.push(`${name}=${model && value.includes('{') ? parseVars(value, model) : value}`)
     }
     return args
   }
@@ -1023,7 +1023,7 @@ export function createCompiler (deps) {
     for (const [name, raw] of attribs) {
       let value = raw
       if (value) {
-        if (resolveValues && value.startsWith('{')) value = parseVars(value, model)
+        if (resolveValues && value.includes('{')) value = parseVars(value, model)
         args.push(`${name}=${value}`)
       } else args.push(name)
     }

@@ -1,6 +1,6 @@
 ## 2.0.1
 
-- Fixed a `<loop>` whose `through` names a `{variable}` in the middle of its path, rather than at its head, rendering nothing.
+- Fixed a `<loop>` whose `through` names a `{variable}` in the middle of its path, rather than at its head, rendering nothing. Fixed the same in the value of a condition: An `<if>`, or a one line `if-`, whose value named a `{variable}` anywhere but at its head was compared against the text as written rather than against what the variable resolved to.
 - Updated dependencies.
 
 ## 2.0.0
