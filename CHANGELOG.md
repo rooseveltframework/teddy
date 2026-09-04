@@ -1,6 +1,7 @@
 ## 2.0.1
 
 - Fixed a `<loop>` whose `through` names a `{variable}` in the middle of its path, rather than at its head, rendering nothing.
+- Updated dependencies.
 
 ## 2.0.0
 
