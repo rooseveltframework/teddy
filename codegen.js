@@ -42,9 +42,12 @@ export function emit (nodes, helpers) {
   const body = mergeWrites(`let o = ''\n${walk(nodes, state, 'o')}return o`)
   // eslint-disable-next-line no-new-func
   const compiled = new Function('m', 'r', 's', body)
-  const runtime = { ...helpers, flags: state.flags, branches: state.branches, nodes: state.nodes }
+  const data = { flags: state.flags, branches: state.branches, nodes: state.nodes }
+  const runtime = { ...helpers, ...data }
   return {
     source: body,
+    // what a precompiled copy of this template has to carry beside the source: the helpers are teddy's own, but these were worked out while writing the code that indexes into them
+    data,
     render: (model, renderState) => compiled(model, runtime, renderState)
   }
 }

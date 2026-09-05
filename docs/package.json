@@ -10,14 +10,14 @@
     "highlight.js": "11.12.0",
     "roosevelt": "0.33.2",
     "teddy": "../",
-    "sass": "1.103.1",
+    "sass": "1.104.0",
     "webpack": "5.110.3"
   },
   "devDependencies": {
     "http-server": "14.1.1",
     "nodemon": "3.1.14",
     "standard": "17.1.2",
-    "stylelint": "17.14.1",
+    "stylelint": "17.15.0",
     "stylelint-config-standard-scss": "17.0.0"
   },
   "nodemonConfig": {

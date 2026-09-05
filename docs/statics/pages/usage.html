@@ -37,8 +37,6 @@
         <li>In your Express config, make sure to include this line: <code>app.engine('html', teddy.__express)</code>.</li>
       </ul>
 
-      <p>If you're interested in using Teddy with the <a href='http://gulpjs.com'>gulp.js</a> build system for Node apps, check out the <a href='https://github.com/Csombek/gulp-teddy'>gulp-teddy</a> project.</p>
-
       <h2 id="variables">Variables</h2>
 
       <p>Display a variable by simply writing <code>{varName}</code> anywhere in the template. You can also use template literal <code>${templateLiteral}</code> variables as well.</p>
@@ -580,6 +578,49 @@
           <p><code>maxCaches</code>: The maximum number of caches that Teddy will be allowed to create for a given <code><!--#<cache>--></code> element. If the maximum is reached, Teddy will remove the oldest cache in the stack, where oldest is defined as the least recently created <em>or</em> accessed. Default: <code>1000</code>.</p>
         </li>
       </ul>
+
+      <h2 id="precompiling">Precompiling templates for the browser</h2>
+
+      <p>In Node.js, Teddy renders templates by converting the template code to JavaScript and running that. In a browser it cannot do that, because it would violate a strict <a href='https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CSP'>content security policy</a>. Browser builds thus render templates on-demand using a slower parser and compiler instead. You can safely use the faster JS converter method on the client too though if you precompile your templates in Node.js first and serve the precompiled JS to the browser instead of serving template code to the browser.</p>
+
+      <p>To do so, add a build step to your Node.js code:</p>
+
+      <pre><code class='language-javascript'>const teddy = require('teddy')
+const fs = require('fs')
+
+teddy.setTemplateRoot('views')
+fs.writeFileSync('public/page.js', teddy.precompile('page', { format: 'cjs' }))
+      </code></pre>
+
+      <p>What you get back is JavaScript source. Write it to a file, serve it, and let the page load it however that page loads anything else. Pass a <code>format</code> to say which way you want it written:</p>
+
+      <ul>
+        <li><code>'esm'</code> (the default): <code>export default</code>. For a bundler, for Node's <code>import</code>, and for <code>&lt;script type="module"&gt;</code>.</li>
+        <li><code>'cjs'</code>: <code>module.exports</code>. For <code>require</code>, and for a bundler that would rather have CommonJS.</li>
+        <li><code>'global'</code>: for a plain <code>&lt;script src&gt;</code> with no module loader anywhere. The templates collect on one <code>teddyPrecompiled</code> global, keyed by name, so a page can load as many of them as it likes.</li>
+      </ul>
+
+      <p>With <code>require</code>:</p>
+
+      <pre><code class='language-javascript'>const teddy = require('teddy/client')
+const page = require('./page.js')
+
+teddy.registerPrecompiled(page)
+document.body.innerHTML = teddy.render('page', model)
+      </code></pre>
+
+      <p>Or with no build tooling on the page at all, from <code>teddy.precompile('page', { format: 'global' })</code>:</p>
+
+      <pre><code class='language-html'><escape>
+<script src="/teddy.min.js"></script>
+<script src="/page.js"></script>
+<script>
+  teddy.registerPrecompiled(teddyPrecompiled['page'])
+  document.body.innerHTML = teddy.render('page', model)
+</script>
+      </escape></code></pre>
+
+      <p>From then on that template renders from the precompiled JavaScript rather than being compiled in the browser, which will result in much faster rendering.</p>
     </article>
   </arg>
 </include>
