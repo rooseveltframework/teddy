@@ -5,6 +5,7 @@ import path from 'path' // node path module
 import { load as cheerioLoad } from 'cheerio/slim' // dom parser
 import { createCompiler } from './compiler.js' // walks a template once so a render does not have to
 import { canEmit, emit } from './codegen.js' // turns what the compiler worked out into javascript; browser builds swap this for a stub
+import { encode, decode, FORMAT } from './precompiled.js' // reads and writes the data a template compiled ahead of time carries
 
 const cheerioOptions = { lowerCaseAttributeNames: false, decodeEntities: false }
 const browser = cheerioLoad.isCheerioPolyfill // true if we are executing in the browser context
@@ -433,30 +434,48 @@ function getOrSetObjectByDotNotation (obj, dotNotation, value) {
   if (typeof dotNotation === 'string') return getOrSetObjectByDotNotation(obj, dotNotation.split('.'), value)
   else if (dotNotation.length === 1 && value !== undefined) {
     // a lookup is case insensitive, so a key that differs from this one only in case has to go: leaving both in place means which one a later lookup finds depends on the order the keys happen to be in. this matters most for <include> <arg> names, because the browser lowercases attribute names and cheerio does not, so an <arg camelCase> would otherwise sit next to a model key of the same name in a different case
+    //
+    // only a key this object owns is ambiguous with the one about to be written, so only those are looked at. a key it merely inherits from the model an enclosing loop or include was reached with is shadowed by the write rather than left sitting behind it, and deleting one would reach back into a model that enclosing scope is still rendering from
     const key = dotNotation[0]
     if (!Object.prototype.hasOwnProperty.call(obj, key)) {
       const lowerCaseKey = key.toLowerCase()
-      for (const existing in obj) {
+      for (const existing of Object.keys(obj)) {
         if (existing !== key && existing.toLowerCase() === lowerCaseKey) delete obj[existing]
       }
     }
     obj[key] = value
     return obj[key]
-  } else if (dotNotation.length === 0) return obj
-  else if (dotNotation.length === 1) {
-    if (obj) return caseInsensitiveLookup(obj, dotNotation[0])
-    return false
-  } else return getOrSetObjectByDotNotation(caseInsensitiveLookup(obj, dotNotation[0]), dotNotation.slice(1), value)
+  } else {
+    // walked rather than recursed: the recursion handed each step a copy of the rest of the path, so a name of three segments allocated two arrays every time it was read
+    let current = obj
+    for (let i = 0; i < dotNotation.length; i++) {
+      if (!current) return false
+      current = caseInsensitiveLookup(current, dotNotation[i])
+    }
+    return current
+  }
   function caseInsensitiveLookup (obj, key) {
     if (key === 'length') return obj.length
     // a key that matches exactly is the overwhelming case, and answering it costs one lookup. the lowercased copy of the object below is only built when there is no exact match to be had, which is what stops a model lookup from costing as much as the object is wide on every single step of every single path
+    // asking what the object owns, rather than reading the key straight off it, is what makes an <arg> win against a model key that differs from it only in case. the browser lowercases attribute names, so an <arg escapeTest> arrives owned as escapetest while the model's own spelling is still reachable through the prototype chain: a plain read would find that one and stop, where the walk below prefers the key this object owns
     if (Object.prototype.hasOwnProperty.call(obj, key)) return obj[key]
+    // a loop body and an included template see the model they were reached with through the prototype chain rather than through a copy of it, so the keys worth looking at are the inherited ones too. a key the object owns answers ahead of one it inherits, which is what an exact match one line above would have done
     const lowerCaseKey = key.toLowerCase()
-    const normalizedObj = Object.keys(obj).reduce((acc, k) => {
-      acc[k.toLowerCase()] = obj[k]
-      return acc
-    }, {})
-    return normalizedObj[lowerCaseKey]
+    let own
+    let ownFound = false
+    let inherited
+    let inheritedFound = false
+    for (const k in obj) {
+      if (k.toLowerCase() !== lowerCaseKey) continue
+      if (Object.prototype.hasOwnProperty.call(obj, k)) {
+        own = obj[k]
+        ownFound = true
+      } else if (!inheritedFound) {
+        inherited = obj[k]
+        inheritedFound = true
+      }
+    }
+    return ownFound ? own : inherited
   }
 }
 
@@ -565,7 +584,7 @@ const compiler = createCompiler({
 // nodes is null for a template the compiler does not handle, and that answer is kept too, so a template it has already turned down is not walked again on every render only to be turned down again
 //
 // keyIsMarkup says the key is the template's own markup rather than a name it was looked up by. such an entry can never go stale, because the key is the content, so it is always kept: that is what makes teddy.compile() compile once even in development. an entry keyed by a name can go stale, since the file behind the name may change, so it is kept only on the same terms as the template source itself
-function prepareTemplate (cacheKey, markup, keyIsMarkup) {
+function prepareTemplate (cacheKey, markup, keyIsMarkup, emittedOut) {
   const keep = keyIsMarkup || params.cacheTemplates
   // give every repeated attribute name a unique one before the markup is parsed since html parsers strip duplicate attributes
   const prepared = markup.replace(/<([a-zA-Z][a-zA-Z0-9-]*)([^>]*)>/g, (match, tagName, attributes) => {
@@ -588,7 +607,10 @@ function prepareTemplate (cacheKey, markup, keyIsMarkup) {
   let render = null
   if (canEmit(nodes)) {
     try {
-      render = emit(nodes, compiler.helpers).render
+      const emitted = emit(nodes, compiler.helpers)
+      // only precompiling asks for this, and it is not kept on the entry: the source and the data behind it are wanted once, to be written out
+      if (emittedOut) emittedOut.emitted = emitted
+      render = emitted.render
     } catch (err) {
       if (params.verbosity > 1) console.warn(`teddy: could not emit javascript for this template, so it will be rendered by walking it instead: ${err.message}`)
       render = null
@@ -723,7 +745,7 @@ function render (template, model, callback) {
   // the entry is looked for before anything else happens, because reading the template and stripping its comments are template level work too
   let prepared = compiledCache.get(template)
   // a name may point at different markup than it did last time, so an entry keyed by one is only trusted on the same terms as the template source itself. an entry keyed by markup cannot go stale, because the key is the content
-  if (prepared && !prepared.keyIsMarkup && !params.cacheTemplates) prepared = undefined
+  if (prepared && !prepared.keyIsMarkup && !prepared.precompiled && !params.cacheTemplates) prepared = undefined
   if (!prepared) {
     let source = loadTemplate(template)
     // a name that resolves to nothing falls back to being rendered as though it were markup
@@ -743,11 +765,10 @@ function render (template, model, callback) {
   }
 
   if (browser) {
-    // fix double-encoding html entity bug in client-side mode
-    renderedTemplate = reverseDoubleEncodedEntities(renderedTemplate)
-
-    // now that we're done with the render, reset data-teddy-defer-attr-src and data-teddy-defer-attr-href to native attributes
-    renderedTemplate = renderedTemplate.replaceAll('data-teddy-defer-attr-src', 'src').replaceAll('data-teddy-defer-attr-href', 'href')
+    // the renamed src and href attributes are put back as the markup leaves the dom now, so a render no longer sweeps its whole output for them
+    //
+    // what is left is the double encoding, which can still arrive in a value the model supplied rather than through the parser. asking whether there is any is far cheaper than rewriting a page that has none, and nearly every page has none
+    if (renderedTemplate.includes('&amp;')) renderedTemplate = reverseDoubleEncodedEntities(renderedTemplate)
   }
 
   // cache the template
@@ -771,6 +792,61 @@ function render (template, model, callback) {
 
 // #endregion
 
+// writes a template out as the javascript teddy would otherwise have built for it at runtime, so that a browser can be handed the fast render rather than the slow one
+//
+// this runs where the emitter is, which is node: the returned string is an es module, meant to be written to a file at build time and loaded by the page that needs it. registerPrecompiled below is what the page then calls. nothing is built from a string at runtime, so a strict content security policy is satisfied
+const PRECOMPILED_WRAPPERS = {
+  // for a bundler, for node's `import`, and for a browser's <script type="module">
+  esm: body => `export default ${body}\n`,
+
+  // for `require`, and for a bundler that would rather have commonjs
+  cjs: body => `module.exports = ${body}\n`,
+
+  // for a plain <script src> with no module loader anywhere: the templates collect on one global, keyed by name, so that a page can load as many of them as it likes without them colliding
+  global: (body, name) => `;(function (root) {\n  root.teddyPrecompiled = root.teddyPrecompiled || {}\n  root.teddyPrecompiled[${JSON.stringify(name)}] = ${body}\n})(typeof globalThis !== 'undefined' ? globalThis : this)\n`
+}
+
+function precompile (template, options = {}) {
+  // the emitter is not in a browser build, so there would be nothing here to write out. saying so plainly beats reporting it as a template the emitter does not cover
+  if (browser) throw new Error('teddy: precompiling needs the code emitter, which browser builds do not carry. run teddy.precompile in node, at build time, and load what it writes with teddy.registerPrecompiled')
+  const format = options.format ?? 'esm'
+  const wrap = PRECOMPILED_WRAPPERS[format]
+  if (!wrap) throw new Error(`teddy: "${format}" is not a way teddy can write a precompiled template. it writes ${Object.keys(PRECOMPILED_WRAPPERS).join(', ')}`)
+  let source = loadTemplate(template)
+  if (source === null) source = template.slice(-5) === '.html' ? template.substring(0, template.length - 5) : template
+  const out = {}
+  prepareTemplate(template, source, template.includes('<'), out)
+  if (!out.emitted) throw new Error(`teddy: "${template}" holds something the emitter does not write code for, so it cannot be precompiled. it still renders by walking its node tree`)
+  const body = `{
+  format: ${FORMAT},
+  name: ${JSON.stringify(template)},
+  data: ${JSON.stringify(encode(out.emitted.data))},
+  render: function (m, r, s) {
+${out.emitted.source}
+  }
+}`
+  return `// teddy precompiled template: ${template}
+// generated: do not edit. rebuild this by running teddy.precompile() against the template again
+${wrap(body, template)}`
+}
+
+// takes what precompile wrote and renders with it from here on, in place of compiling the template
+function registerPrecompiled (artifact) {
+  if (!artifact || typeof artifact.render !== 'function') throw new Error('teddy: registerPrecompiled needs what teddy.precompile wrote')
+  if (artifact.format !== FORMAT) throw new Error(`teddy: this template was precompiled for teddy's format ${artifact.format}, and this teddy reads format ${FORMAT}. precompile it again`)
+  const data = decode(artifact.data, compiler.helpers.node)
+  const runtime = { ...compiler.helpers, ...data }
+  compiledCache.set(artifact.name, {
+    markup: '',
+    // there is no node tree behind a precompiled template: the emitted render is the only way it renders, and it is never the one that falls back to walking
+    nodes: null,
+    render: (model, state) => artifact.render(model, runtime, state),
+    keyIsMarkup: false,
+    precompiled: true
+  })
+  return artifact.name
+}
+
 export default {
   params,
   caches,
@@ -790,5 +866,7 @@ export default {
   setCache,
   clearCache,
   render,
+  precompile,
+  registerPrecompiled,
   __express: render
 }

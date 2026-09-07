@@ -64,15 +64,24 @@ for (const [sourcePath, data] of Object.entries(files).sort()) {
     either: total - uncovered.length,
     percent: total ? ((total - uncovered.length) / total * 100) : 100
   })
-  // a line only one half considers executable at all is usually a function's declaration or closing brace, which the two instrumenters disagree about counting; saying which half claimed it stops that reading as a real gap
+  // consecutive lines are reported as one range rather than one by one: a gap is nearly always a
+  // whole function nothing calls, and naming every line of it buried that under a wall of numbers
+  //
+  // which halves consider a line executable is carried along, because a line only one of them counts
+  // is usually a function's declaration or its closing brace, which the two instrumenters disagree
+  // about. saying so stops that reading as a real gap
   if (uncovered.length) {
-    gaps.push({
-      name,
-      uncovered: uncovered.map(line => {
-        const claimedBy = halves.map(h => h.label).filter(label => data.executableByHalf[label]?.has(line))
-        return claimedBy.length === halves.length ? String(line) : `${line} (only ${claimedBy.join(' and ')} counts this line)`
-      })
-    })
+    const claimedBy = line => halves.map(h => h.label).filter(label => data.executableByHalf[label]?.has(line)).join('+')
+    const runs = []
+    for (const line of uncovered) {
+      const claim = claimedBy(line)
+      const last = runs[runs.length - 1]
+      if (last && line === last.to + 1) {
+        last.to = line
+        if (!last.claims.includes(claim)) last.claims.push(claim)
+      } else runs.push({ from: line, to: line, claims: [claim] })
+    }
+    gaps.push({ name, runs, count: uncovered.length })
   }
 }
 
@@ -88,8 +97,29 @@ const overallEither = rows.reduce((sum, r) => sum + r.either, 0)
 console.log(`\n  ${'all files'.padEnd(width)}  ${String(overallTotal).padStart(6)}  ${''.padStart(7)}  ${''.padStart(7)}  ${String(overallEither).padStart(7)}  ${(overallEither / overallTotal * 100).toFixed(2).padStart(7)}`)
 
 if (gaps.length) {
-  console.log('\nlines nothing executes:')
-  for (const gap of gaps) console.log(`  ${gap.name}: ${gap.uncovered.join(', ')}`)
+  const everyHalf = halves.map(h => h.label).join('+')
+  // one row per run of lines, so a gap reads as the thing it is rather than as a list of numbers
+  const gapRows = gaps.flatMap(gap => gap.runs.map(run => ({
+    name: gap.name,
+    lines: run.from === run.to ? String(run.from) : `${run.from}-${run.to}`,
+    count: run.to - run.from + 1,
+    countedBy: run.claims.length > 1 ? 'mixed' : run.claims[0] === everyHalf ? 'both' : run.claims[0] || 'neither'
+  })))
+
+  const nameWidth = Math.max(...gapRows.map(r => r.name.length), 4)
+  const lineWidth = Math.max(...gapRows.map(r => r.lines.length), 5)
+  console.log('\nlines nothing executes:\n')
+  console.log(`  ${'file'.padEnd(nameWidth)}  ${'lines'.padEnd(lineWidth)}  ${'count'.padStart(5)}  counted by`)
+  console.log(`  ${'-'.repeat(nameWidth)}  ${'-'.repeat(lineWidth)}  ${'-'.repeat(5)}  ${'-'.repeat(10)}`)
+  for (const r of gapRows) {
+    console.log(`  ${r.name.padEnd(nameWidth)}  ${r.lines.padEnd(lineWidth)}  ${String(r.count).padStart(5)}  ${r.countedBy}`)
+  }
+
+  const totals = gaps.map(gap => `${gap.name} ${gap.count}`).join(', ')
+  console.log(`\n  ${gaps.reduce((sum, gap) => sum + gap.count, 0)} lines in ${gapRows.length} runs: ${totals}`)
+  console.log('\n  counted by says which halves\' instrumenter treated the line as executable at all.')
+  console.log('  a run counted by one half, or mixed, is usually a declaration or a closing brace the')
+  console.log('  two disagree about rather than logic nothing reaches.')
 } else {
   console.log('\nevery executable line is executed by one half or the other')
 }

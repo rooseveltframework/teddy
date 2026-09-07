@@ -23,6 +23,7 @@ export default [
     experiments: {
       outputModule: true
     },
+    target: 'node',
     mode: 'development',
     devtool: 'source-map',
     optimization: {

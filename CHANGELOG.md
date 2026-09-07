@@ -1,3 +1,10 @@
+## 2.0.2
+
+- Added `teddy.precompile` and `teddy.registerPrecompiled`, which let a browser render from the JavaScript Teddy would otherwise have built for a template at runtime. A `format` option writes it as an ES module, as CommonJS, or as a plain script.
+- Fixed `import teddy from 'teddy'` being unable to read a template from the filesystem in the ESM build.
+- Improved performance in various places.
+- Updated dependencies.
+
 ## 2.0.1
 
 - Fixed a `<loop>` whose `through` names a `{variable}` in the middle of its path, rather than at its head, rendering nothing. Fixed the same in the value of a condition: An `<if>`, or a one line `if-`, whose value named a `{variable}` anywhere but at its head was compared against the text as written rather than against what the variable resolved to.

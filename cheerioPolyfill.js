@@ -210,23 +210,27 @@ const doublyEncodedEntities = {
   '&amp;#39;': '&#39;',
   '&amp;#x2F;': '&#x2F;'
 }
-const entityEntries = Object.entries(doublyEncodedEntities)
+// built once rather than on every node of every serialization
+const entityFixes = Object.entries(doublyEncodedEntities).map(([doublyEncoded, singleEncoded]) => [new RegExp(doublyEncoded, 'g'), singleEncoded])
+
+// teddy renames src and href while the markup is a live dom, so that the browser does not try to fetch a url that is still a {variable}. a string is not a dom and cannot fetch anything, so the real attribute name goes back on as the markup leaves the dom. doing it here rather than at the end of a render is what saves every render a sweep of its whole output looking for these
+const deferredAttributes = /data-teddy-defer-attr-(src|href)/g
+
+// undoes what parsing the markup into a dom did to it: the double encoding a browser's serializer applies, and the attribute names teddy renamed on the way in
+function undoParserArtifacts (html) {
+  for (const [pattern, singleEncoded] of entityFixes) html = html.replace(pattern, singleEncoded)
+  return html.replace(deferredAttributes, '$1')
+}
 function getTeddyDOMInnerHTML (node) {
   // build html string
   let html = ''
   for (const child of node.childNodes) {
     if (child.nodeType === window.Node.ELEMENT_NODE) {
-      let outerHTML = child.outerHTML
-      for (const [doublyEncoded, singleEncoded] of entityEntries) outerHTML = outerHTML.replace(new RegExp(doublyEncoded, 'g'), singleEncoded)
-      html += outerHTML
+      html += undoParserArtifacts(child.outerHTML)
     } else if (child.nodeType === window.Node.TEXT_NODE) {
-      let textContent = child.textContent
-      for (const [doublyEncoded, singleEncoded] of entityEntries) textContent = textContent.replace(new RegExp(doublyEncoded, 'g'), singleEncoded)
-      html += textContent
+      html += undoParserArtifacts(child.textContent)
     } else if (child.nodeType === window.Node.COMMENT_NODE) {
-      let commentContent = child.textContent
-      for (const [doublyEncoded, singleEncoded] of entityEntries) commentContent = commentContent.replace(new RegExp(doublyEncoded, 'g'), singleEncoded)
-      html += `<!--${commentContent}-->`
+      html += `<!--${undoParserArtifacts(child.textContent)}-->`
     }
   }
 
@@ -244,8 +248,5 @@ function getTeddyDOMOuterHTML (node) {
     outerHTML = `<!--${node.textContent}-->`
   }
 
-  // replace doubly encoded entities
-  for (const [doublyEncoded, singleEncoded] of entityEntries) outerHTML = outerHTML.replace(new RegExp(doublyEncoded, 'g'), singleEncoded)
-
-  return outerHTML
+  return undoParserArtifacts(outerHTML)
 }

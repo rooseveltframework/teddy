@@ -11,10 +11,10 @@ function testTemplateNames (dir, base = dir, found = []) {
   return found
 }
 
-// these tests are shared by both mocha and playwright
+// these tests are shared by both runners: node's own test runner, and playwright
 // to skip test groups or individual tests, add `skip: true` to the group or test object
 // to test an individual group or test, add `only: true` to the group or test object
-// to run a test only in mocha or only in playwright, use `runMocha` or `runPlaywright` instead of `run`
+// to run a test only in node or only in a browser, use `runNode` or `runPlaywright` instead of `run`
 // if multiple results are acceptable, make `expected` an array of strings rather than a string
 // to see console output from the client-side tests, go to test/loaders/playwright.js and uncomment the debug code
 
@@ -1164,7 +1164,7 @@ export default [
       {
         // a whole template cache is keyed on a model value, and that value becomes the name of an entry. a name is always a string, so a key whose value is not one has to be read back as the string it was stored under or the entry is never found again
         message: 'should find a whole template cache entry again when the key it is stored under is not a string',
-        runMocha: async (teddy, template, model, assert, expected) => {
+        runNode: async (teddy, template, model, assert, expected) => {
           const markup = '<p>{n}</p>'
           const answers = []
           for (const keyVal of ['a1', 42, 0, '']) {
@@ -1181,7 +1181,7 @@ export default [
       },
       {
         message: 'should still re-render a whole template cache entry once it is older than its max age',
-        runMocha: async (teddy, template, model, assert, expected) => {
+        runNode: async (teddy, template, model, assert, expected) => {
           const markup = '<p>{n}</p>'
           teddy.clearTemplates()
           teddy.setCache({ template: markup, key: 'id', maxAge: 60000 })
@@ -1918,7 +1918,7 @@ export default [
     tests: [
       {
         message: 'should read a template again after it changes, rather than caching it, by default',
-        runMocha: async (teddy, template, model, assert, expected) => {
+        runNode: async (teddy, template, model, assert, expected) => {
           const file = 'test/templates/misc/cacheProbe.html'
           fs.writeFileSync(file, '<p>before</p>')
           teddy.clearTemplates()
@@ -1932,7 +1932,7 @@ export default [
       },
       {
         message: 'should keep a template it already read when the cache option is on',
-        runMocha: async (teddy, template, model, assert, expected) => {
+        runNode: async (teddy, template, model, assert, expected) => {
           const file = 'test/templates/misc/cacheProbeOn.html'
           fs.writeFileSync(file, '<p>before</p>')
           teddy.clearTemplates()
@@ -1947,7 +1947,7 @@ export default [
       },
       {
         message: "should take caching from express's view cache setting when no cache option is given",
-        runMocha: async (teddy, template, model, assert, expected) => {
+        runNode: async (teddy, template, model, assert, expected) => {
           const file = 'test/templates/misc/cacheProbeExpress.html'
           fs.writeFileSync(file, '<p>before</p>')
           teddy.clearTemplates()
@@ -1968,7 +1968,7 @@ export default [
       },
       {
         message: 'should let an explicit cache option override the view cache setting',
-        runMocha: async (teddy, template, model, assert, expected) => {
+        runNode: async (teddy, template, model, assert, expected) => {
           const file = 'test/templates/misc/cacheProbeOverride.html'
           fs.writeFileSync(file, '<p>before</p>')
           teddy.clearTemplates()
@@ -1983,7 +1983,7 @@ export default [
       },
       {
         message: 'should read an included template again after it changes',
-        runMocha: async (teddy, template, model, assert, expected) => {
+        runNode: async (teddy, template, model, assert, expected) => {
           const partial = 'test/templates/misc/cachePartial.html'
           const page = 'test/templates/misc/cachePage.html'
           fs.writeFileSync(partial, '<span>before</span>')
@@ -2000,7 +2000,7 @@ export default [
       },
       {
         message: 'should prefer a template registered with setTemplate over a file of the same name',
-        runMocha: async (teddy, template, model, assert, expected) => {
+        runNode: async (teddy, template, model, assert, expected) => {
           const file = 'test/templates/misc/cacheRegistered.html'
           fs.writeFileSync(file, '<p>from the filesystem</p>')
           teddy.clearTemplates()
@@ -2052,7 +2052,7 @@ export default [
     tests: [
       {
         message: 'should be able require teddy.cjs',
-        runMocha: async (teddy, template, model, assert, expected) => {
+        runNode: async (teddy, template, model, assert, expected) => {
           if (fs.existsSync('test/client.cjs')) fs.rmSync('test/client.cjs')
 
           fs.writeFileSync('test/client.cjs', 'const teddy = require("../dist/teddy.cjs")\nconsole.log(teddy)')
@@ -2066,7 +2066,7 @@ export default [
       },
       {
         message: 'should be able to import teddy.mjs',
-        runMocha: async (teddy, template, model, assert, expected) => {
+        runNode: async (teddy, template, model, assert, expected) => {
           if (fs.existsSync('test/client.js')) fs.rmSync('test/client.js')
 
           fs.writeFileSync('test/client.js', 'import teddy from "../dist/teddy.mjs"\nconsole.log(teddy)')
@@ -2080,7 +2080,7 @@ export default [
       },
       {
         message: 'should be able require teddy.client.cjs',
-        runMocha: async (teddy, template, model, assert, expected) => {
+        runNode: async (teddy, template, model, assert, expected) => {
           if (fs.existsSync('test/client.cjs')) fs.rmSync('test/client.cjs')
 
           fs.writeFileSync('test/client.cjs', 'const teddy = require("../dist/teddy.client.cjs")\nconsole.log(teddy)')
@@ -2094,7 +2094,7 @@ export default [
       },
       {
         message: 'should be able to import teddy.client.mjs',
-        runMocha: async (teddy, template, model, assert, expected) => {
+        runNode: async (teddy, template, model, assert, expected) => {
           if (fs.existsSync('test/client.js')) fs.rmSync('test/client.js')
 
           fs.writeFileSync('test/client.js', 'import teddy from "../dist/teddy.client.mjs"\nconsole.log(teddy)')
@@ -2108,7 +2108,7 @@ export default [
       },
       {
         message: 'should be able to import teddy.min.mjs',
-        runMocha: async (teddy, template, model, assert, expected) => {
+        runNode: async (teddy, template, model, assert, expected) => {
           if (fs.existsSync('test/client.js')) fs.rmSync('test/client.js')
 
           fs.writeFileSync('test/client.js', 'import teddy from "../dist/teddy.min.mjs"\nconsole.log(teddy)')
@@ -2190,7 +2190,7 @@ export default [
       },
       {
         message: 'should write out a value that refers back to itself rather than resolving forever, and say which values led round the loop',
-        runMocha: async (teddy, template, model, assert, expected) => {
+        runNode: async (teddy, template, model, assert, expected) => {
           const said = []
           const error = console.error
           console.error = message => said.push(message)
@@ -2208,7 +2208,7 @@ export default [
       },
       {
         message: 'should say so when a template closes a tag it never opened',
-        runMocha: async (teddy, template, model, assert, expected) => {
+        runNode: async (teddy, template, model, assert, expected) => {
           const said = []
           const warn = console.warn
           console.warn = message => said.push(message)
@@ -2226,7 +2226,7 @@ export default [
       },
       {
         message: 'should say so when a variable is given markup that does not open and close its own tags',
-        runMocha: async (teddy, template, model, assert, expected) => {
+        runNode: async (teddy, template, model, assert, expected) => {
           const said = []
           const warn = console.warn
           console.warn = message => said.push(message)
@@ -2243,7 +2243,7 @@ export default [
       },
       {
         message: 'should say so when an outcome attribute has no if- condition to go with it',
-        runMocha: async (teddy, template, model, assert, expected) => {
+        runNode: async (teddy, template, model, assert, expected) => {
           const said = []
           const warn = console.warn
           console.warn = message => said.push(message)
@@ -2262,7 +2262,7 @@ export default [
       },
       {
         message: 'should say so when an <arg> has no <include> around it',
-        runMocha: async (teddy, template, model, assert, expected) => {
+        runNode: async (teddy, template, model, assert, expected) => {
           const said = []
           const warn = console.warn
           console.warn = message => said.push(message)
@@ -2298,7 +2298,7 @@ export default [
       },
       {
         message: 'should say so when a selected-value cannot reach the elements it would mark',
-        runMocha: async (teddy, template, model, assert, expected) => {
+        runNode: async (teddy, template, model, assert, expected) => {
           const said = []
           const warn = console.warn
           console.warn = message => said.push(message)
@@ -2320,7 +2320,7 @@ export default [
         //
         // it has no runPlaywright counterpart on purpose: browser builds do not carry the emitter at all, so there is nothing there to fall back from
         message: 'should emit javascript for every template in the test suite rather than falling back to walking it',
-        runMocha: async (teddy, template, model, assert, expected) => {
+        runNode: async (teddy, template, model, assert, expected) => {
           const refused = []
           const warn = console.warn
           console.warn = message => {
@@ -2342,6 +2342,137 @@ export default [
           assert(refused.length ? refused.join(' | ') : 'none', 'none')
         },
         expected: 'none'
+      }
+    ]
+  },
+  {
+    // precompiling writes out the javascript teddy would otherwise have built at runtime, so that a
+    // browser can be handed the fast render rather than the slow one. it only runs in node, where the
+    // emitter is, so these are runNode rather than run
+    //
+    // test/comparePrecompiled.js does the same across every fixture; these cover the shapes that are
+    // easiest to get wrong and the ways precompiling is meant to refuse
+    describe: 'Precompiling',
+    tests: [
+      {
+        message: 'should render a precompiled template to the same bytes as compiling it at runtime',
+        runNode: async (teddy, template, model, assert, expected) => {
+          // one fixture for each shape the encoder has to survive: an arm that holds the branch that
+          // holds it back, a body reached from more than one place, the arguments an include binds,
+          // the variant lists a selection carries, and the map a dynamic include keeps
+          const names = ['conditionals/if', 'looping/nestedLoops', 'includes/includeWithArg', 'looping/selectOptions', 'includes/dynamicInclude', 'misc/variable']
+          const answers = []
+          for (const name of names) {
+            teddy.setTemplateRoot('test/templates')
+            teddy.clearTemplates()
+            const runtime = teddy.render(name, structuredClone(model))
+            const artifact = teddy.precompile(name)
+            teddy.clearTemplates()
+            teddy.registerPrecompiled((await import('data:text/javascript,' + encodeURIComponent(artifact))).default)
+            answers.push(teddy.render(name, structuredClone(model)) === runtime ? 'same' : 'DIFFERENT: ' + name)
+          }
+          teddy.clearTemplates()
+          assert(answers.join(', '), names.map(() => 'same').join(', '))
+        },
+        expected: 'same, same, same, same, same, same'
+      },
+      {
+        message: 'should write a precompiled template that loads as an es module, as commonjs, or as a plain script',
+        runNode: async (teddy, template, model, assert, expected) => {
+          const { mkdtempSync, writeFileSync, rmSync } = await import('fs')
+          const { tmpdir } = await import('os')
+          const { join } = await import('path')
+          const { createRequire } = await import('module')
+          const name = 'misc/variable'
+          teddy.setTemplateRoot('test/templates')
+          teddy.clearTemplates()
+          const runtime = teddy.render(name, structuredClone(model))
+          const scratch = mkdtempSync(join(tmpdir(), 'teddy-formats-'))
+          const answers = []
+          try {
+            // an es module and a plain script are both valid module bodies, so both can be reached
+            // by importing them: the module one exports what it wrote, the plain one puts it on a
+            // global. commonjs is the one that needs a require, since `module` is not a thing here
+            for (const format of ['esm', 'global']) {
+              const artifact = teddy.precompile(name, { format })
+              const loaded = await import('data:text/javascript,' + encodeURIComponent(artifact))
+              teddy.clearTemplates()
+              teddy.registerPrecompiled(format === 'esm' ? loaded.default : globalThis.teddyPrecompiled[name])
+              answers.push(`${format} ${teddy.render(name, structuredClone(model)) === runtime ? 'same' : 'DIFFERENT'}`)
+            }
+            const file = join(scratch, 'template.cjs')
+            writeFileSync(file, teddy.precompile(name, { format: 'cjs' }))
+            teddy.clearTemplates()
+            teddy.registerPrecompiled(createRequire(import.meta.url)(file))
+            answers.push(`cjs ${teddy.render(name, structuredClone(model)) === runtime ? 'same' : 'DIFFERENT'}`)
+          } finally {
+            rmSync(scratch, { recursive: true, force: true })
+            delete globalThis.teddyPrecompiled
+            teddy.clearTemplates()
+          }
+          assert(answers.join(', '), 'esm same, global same, cjs same')
+        },
+        expected: 'esm same, global same, cjs same'
+      },
+      {
+        message: 'should refuse to write a precompiled template in a way it does not know how to write',
+        runNode: async (teddy, template, model, assert, expected) => {
+          teddy.setTemplateRoot('test/templates')
+          let answer = 'wrote it anyway'
+          try {
+            teddy.precompile('misc/variable', { format: 'commonjs' })
+          } catch (err) {
+            answer = err.message.includes('is not a way teddy can write') ? 'refused' : err.message
+          }
+          assert(answer, 'refused')
+        },
+        expected: 'refused'
+      },
+      {
+        message: 'should keep rendering a precompiled template with template caching switched off, there being no source behind it to have gone stale',
+        runNode: async (teddy, template, model, assert, expected) => {
+          teddy.setTemplateRoot('test/templates')
+          teddy.clearTemplates()
+          const artifact = teddy.precompile('misc/variable')
+          teddy.clearTemplates()
+          teddy.setCacheTemplates(false)
+          teddy.registerPrecompiled((await import('data:text/javascript,' + encodeURIComponent(artifact))).default)
+          const first = teddy.render('misc/variable', structuredClone(model))
+          const second = teddy.render('misc/variable', structuredClone(model))
+          teddy.setCacheTemplates(true)
+          teddy.clearTemplates()
+          assert(first === second && first.length > 0 ? 'still precompiled' : 'lost it', 'still precompiled')
+        },
+        expected: 'still precompiled'
+      },
+      {
+        message: 'should refuse a precompiled template written for a different format',
+        runNode: async (teddy, template, model, assert, expected) => {
+          let answer = 'accepted it'
+          try {
+            teddy.registerPrecompiled({ format: 0, name: 'x', data: { root: null, table: [] }, render: () => '' })
+          } catch (err) {
+            answer = err.message.includes('precompile it again') ? 'refused' : err.message
+          }
+          assert(answer, 'refused')
+        },
+        expected: 'refused'
+      },
+      {
+        message: 'should refuse something that is not a precompiled template at all',
+        runNode: async (teddy, template, model, assert, expected) => {
+          const answers = []
+          for (const bad of [null, {}, { format: 1, name: 'x' }]) {
+            try {
+              teddy.registerPrecompiled(bad)
+              answers.push('accepted it')
+            } catch (err) {
+              answers.push(err.message.includes('needs what teddy.precompile wrote') ? 'refused' : err.message)
+            }
+          }
+          assert(answers.join(', '), 'refused, refused, refused')
+        },
+        expected: 'refused, refused, refused'
       }
     ]
   }

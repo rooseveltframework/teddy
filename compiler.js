@@ -109,7 +109,7 @@ export function createCompiler (deps) {
       if (arm.body === null) arm.body = compileMarkup(arm.bodySource, slots, slot.stack)
       return
     }
-    if (slot.bodySource !== undefined && slot.body === null) slot.body = compileMarkup(slot.bodySource, slots, slot.stack)
+    if (slot.bodySource !== null && slot.body === null) slot.body = compileMarkup(slot.bodySource, slots, slot.stack)
     // an argument's body is a template in its own right, rendered against the model the include is reached with
     if (slot.bindings) {
       for (const binding of slot.bindings) {
@@ -117,6 +117,48 @@ export function createCompiler (deps) {
       }
     }
   }
+  // every node is made here, and every one of them carries the same fields in the same order whether it uses them or not
+  //
+  // v8 gives an object its shape from the fields it is written with, and reading one field across a dozen different shapes is a lookup it cannot cache. renderNodes reads node.type off every node in a template, so a dozen shapes made that read, and the reads after it, as slow as a lookup gets. one shape makes them all the fastest kind. the nodes are built once when a template is compiled rather than once per render, so the fields a node does not use cost nothing worth counting
+  function makeNode (type) {
+    return {
+      type,
+      value: null,
+      source: null,
+      stack: null,
+      body: null,
+      bodySource: null,
+      branch: null,
+      index: 0,
+      through: null,
+      keyName: null,
+      valName: null,
+      conditionals: null,
+      outcomesNeedModel: false,
+      variantNeedsModel: false,
+      openTag: null,
+      closeTag: null,
+      tagName: null,
+      variants: null,
+      src: null,
+      bindings: null,
+      compiled: null,
+      valueSource: null,
+      ownValue: null,
+      name: null,
+      key: null,
+      maxAge: 0,
+      maxCaches: 0,
+      css: null,
+      js: null,
+      flags: null,
+      raw: false,
+      dollar: false,
+      path: null,
+      nameNodes: null
+    }
+  }
+
   function compileMarkup (source, slots, stack) {
     reportStrayClosingTags(source)
     const dom = cheerioLoad(source || '', cheerioOptions)
@@ -215,22 +257,24 @@ export function createCompiler (deps) {
         bodySource: dom(arm).html(),
         body: null
       })
-      slots.push({ type: 'arm', branch, index: branch.arms.length - 1, stack })
+      const armNode = makeNode('arm')
+      armNode.branch = branch
+      armNode.index = branch.arms.length - 1
+      armNode.stack = stack
+      slots.push(armNode)
       dom(arm).replaceWith(tokenFor(slots.length - 1))
     }
   }
 
   function claimLoop (dom, el, slots, stack) {
     const attribs = readAttribs(el)
-    slots.push({
-      type: 'loop',
-      stack,
-      through: attribValue(attribs, 'through'),
-      keyName: attribValue(attribs, 'key'),
-      valName: attribValue(attribs, 'val'),
-      bodySource: dom(el).html(),
-      body: null
-    })
+    const node = makeNode('loop')
+    node.stack = stack
+    node.through = attribValue(attribs, 'through')
+    node.keyName = attribValue(attribs, 'key')
+    node.valName = attribValue(attribs, 'val')
+    node.bodySource = dom(el).html()
+    slots.push(node)
     dom(el).replaceWith(tokenFor(slots.length - 1))
   }
 
@@ -274,19 +318,17 @@ export function createCompiler (deps) {
     // whether either half of a one line if has anything to ask a model about, settled here so that emitted code inside a <loop> knows not to build one. working out which outcomes apply needs a model only for a condition this could not settle, and writing the opening tag needs one only if the tag or an outcome holds a {variable}
     const outcomesNeedModel = conditionals.some(conditional => !conditional.checks)
     const variantNeedsModel = openTag.includes('{') || conditionals.some(conditional => (conditional.ifTrue || '').includes('{') || (conditional.ifFalse || '').includes('{'))
-    slots.push({
-      type: 'attrs',
-      conditionals,
-      outcomesNeedModel,
-      variantNeedsModel,
-      openTag,
-      closeTag,
-      tagName: tagNameOf(el),
-      variants: [],
-      bodySource: dom(el).html(),
-      body: null,
-      stack
-    })
+    const node = makeNode('attrs')
+    node.conditionals = conditionals
+    node.outcomesNeedModel = outcomesNeedModel
+    node.variantNeedsModel = variantNeedsModel
+    node.openTag = openTag
+    node.closeTag = closeTag
+    node.tagName = tagNameOf(el)
+    node.variants = []
+    node.bodySource = dom(el).html()
+    node.stack = stack
+    slots.push(node)
     dom(el).replaceWith(tokenFor(slots.length - 1))
   }
 
@@ -305,13 +347,12 @@ export function createCompiler (deps) {
 
     // a src that names a variable is not known until there is a model to read it from, so the partial behind it is loaded and compiled on the first render that asks for it and kept against that name
     if (src.includes('{')) {
-      slots.push({
-        type: 'dynamicInclude',
-        src,
-        bindings: readArgs(dom, el),
-        compiled: new Map(),
-        stack
-      })
+      const node = makeNode('dynamicInclude')
+      node.src = src
+      node.bindings = readArgs(dom, el)
+      node.compiled = new Map()
+      node.stack = stack
+      slots.push(node)
       dom(el).replaceWith(tokenFor(slots.length - 1))
       return
     }
@@ -328,13 +369,11 @@ export function createCompiler (deps) {
       markup = params.includeNotFoundBehavior === 'display' ? `Template "${src}" not found!` : ''
     }
 
-    slots.push({
-      type: 'scope',
-      bindings: readArgs(dom, el),
-      bodySource: markup,
-      body: null,
-      stack: stack.concat(src)
-    })
+    const node = makeNode('scope')
+    node.bindings = readArgs(dom, el)
+    node.bodySource = markup
+    node.stack = stack.concat(src)
+    slots.push(node)
     dom(el).replaceWith(tokenFor(slots.length - 1))
   }
 
@@ -413,22 +452,22 @@ export function createCompiler (deps) {
     const marked = []
     pushText(marked, closeTag && rebuilt.endsWith(closeTag) ? rebuilt.slice(0, rebuilt.length - closeTag.length) : rebuilt)
 
-    slots.push({
-      type: 'selection',
-      valueSource,
-      ownValue,
-      variants: [plain, marked],
-      closeTag,
-      bodySource: dom(el).html(),
-      body: null,
-      stack: []
-    })
+    const node = makeNode('selection')
+    node.valueSource = valueSource
+    node.ownValue = ownValue
+    node.variants = [plain, marked]
+    node.closeTag = closeTag
+    node.bodySource = dom(el).html()
+    node.stack = []
+    slots.push(node)
     dom(el).replaceWith(tokenFor(slots.length - 1))
   }
 
   // <noteddy> and <noparse> keep their contents out of teddy's hands. the interpreter lifts them out of the markup, renders everything else, and puts them back at the very end; here they simply become a piece of text nothing further is done to, which is the same thing said more directly
   function claimNoParse (dom, el, slots, keepTags) {
-    slots.push({ type: 'raw', value: keepTags ? dom(el).toString() : dom(el).html() })
+    const node = makeNode('raw')
+    node.value = keepTags ? dom(el).toString() : dom(el).html()
+    slots.push(node)
     dom(el).replaceWith(tokenFor(slots.length - 1))
   }
 
@@ -449,23 +488,24 @@ export function createCompiler (deps) {
   // a <cache> keeps the markup its body rendered to and writes that instead of rendering again. the interpreter does this in two halves, marking the element on the way in and storing what it produced once the output has gone stable; a compiled render knows when the body is finished, so it is one step here
   function claimCache (dom, el, slots, stack) {
     const attribs = readAttribs(el)
-    slots.push({
-      type: 'cache',
-      name: attribValue(attribs, 'name'),
-      // an absent key means the whole body is cached under one entry, which teddy calls 'none'
-      key: attribValue(attribs, 'key'),
-      maxAge: parseInt(attribValue(attribs, 'maxAge') || attribValue(attribs, 'maxage')) || 0,
-      maxCaches: parseInt(attribValue(attribs, 'maxCaches') || attribValue(attribs, 'maxcaches')) || 1000,
-      bodySource: dom(el).html(),
-      body: null,
-      stack
-    })
+    const node = makeNode('cache')
+    node.name = attribValue(attribs, 'name')
+    // an absent key means the whole body is cached under one entry, which teddy calls 'none'
+    node.key = attribValue(attribs, 'key')
+    node.maxAge = parseInt(attribValue(attribs, 'maxAge') || attribValue(attribs, 'maxage')) || 0
+    node.maxCaches = parseInt(attribValue(attribs, 'maxCaches') || attribValue(attribs, 'maxcaches')) || 1000
+    node.bodySource = dom(el).html()
+    node.stack = stack
+    slots.push(node)
     dom(el).replaceWith(tokenFor(slots.length - 1))
   }
 
   function claimInline (dom, el, slots) {
     const attribs = readAttribs(el)
-    slots.push({ type: 'inline', css: attribValue(attribs, 'css'), js: attribValue(attribs, 'js') })
+    const node = makeNode('inline')
+    node.css = attribValue(attribs, 'css')
+    node.js = attribValue(attribs, 'js')
+    slots.push(node)
     dom(el).replaceWith(tokenFor(slots.length - 1))
   }
 
@@ -631,6 +671,18 @@ export function createCompiler (deps) {
     return nodes
   }
 
+  function pushTextNode (nodes, value) {
+    const node = makeNode('text')
+    node.value = value
+    nodes.push(node)
+  }
+
+  function notFoundBody (src) {
+    const nodes = []
+    pushTextNode(nodes, params.includeNotFoundBehavior === 'display' ? `Template "${src}" not found!` : '')
+    return nodes
+  }
+
   function pushText (nodes, text) {
     if (!text) return
     let cursor = 0
@@ -664,29 +716,31 @@ export function createCompiler (deps) {
 
       // teddy substitutes a variable in both its {name} and its template literal ${name} form, so a dollar immediately before the brace is part of this variable's span and is consumed with it
       const spanStart = open > literalFrom && text[open - 1] === '$' ? open - 1 : open
-      if (spanStart > literalFrom) nodes.push({ type: 'text', value: text.slice(literalFrom, spanStart) })
+      if (spanStart > literalFrom) pushTextNode(nodes, text.slice(literalFrom, spanStart))
       if (computed) {
         const nameNodes = []
         pushText(nameNodes, inner)
-        nodes.push({ type: 'computedVar', nameNodes, source: text.slice(spanStart, close + 1) })
+        const node = makeNode('computedVar')
+        node.nameNodes = nameNodes
+        node.source = text.slice(spanStart, close + 1)
+        nodes.push(node)
       } else {
         // a variable's flags are the same for every render, so they are settled here rather than read off the end of its name every time
         const flags = variableFlags(inner)
-        nodes.push({
-          type: 'var',
-          name: inner,
-          flags,
-          source: text.slice(spanStart, close + 1),
-          dollar: spanStart !== open,
-          // only a raw variable can put markup into the page that a further look would parse: an escaped one cannot, and a no parse one is never looked at again
-          raw: flags.raw
-        })
+        const node = makeNode('var')
+        node.name = inner
+        node.flags = flags
+        node.source = text.slice(spanStart, close + 1)
+        node.dollar = spanStart !== open
+        // only a raw variable can put markup into the page that a further look would parse: an escaped one cannot, and a no parse one is never looked at again
+        node.raw = flags.raw
+        nodes.push(node)
       }
       cursor = close + 1
       literalFrom = cursor
     }
 
-    if (literalFrom < text.length) nodes.push({ type: 'text', value: text.slice(literalFrom) })
+    if (literalFrom < text.length) pushTextNode(nodes, text.slice(literalFrom))
   }
 
   // #endregion
@@ -762,7 +816,9 @@ export function createCompiler (deps) {
           break
 
         case 'var': {
-          const resolved = formatVariable(node.flags, getOrSetObjectByDotNotation(model, node.flags.name), model)
+          // the name is split once for the life of the template rather than on every render
+          if (node.path === null) node.path = node.flags.name.split('.')
+          const resolved = formatVariable(node.flags, getOrSetObjectByDotNotation(model, node.path), model)
           // nothing to write, so the variable stays in the markup verbatim
           if (!resolved) {
             out += node.source
@@ -935,7 +991,7 @@ export function createCompiler (deps) {
 
   // the model an included template sees: the one the include was reached with, plus its arguments
   function bindArgs (model, bindings, values) {
-    const localModel = Object.assign({}, model)
+    const localModel = Object.create(model || null)
     for (let i = 0; i < bindings.length; i++) getOrSetObjectByDotNotation(localModel, bindings[i].name, values[i])
     return localModel
   }
@@ -1062,10 +1118,12 @@ export function createCompiler (deps) {
   }
 
   // the model as a loop's body sees it: the model it was reached with, plus this iteration's key and val. emitted code needs this for the helpers it calls, which take a model rather than the javascript variables the emitted code keeps its locals in
+  //
+  // the enclosing model is reached through the prototype chain rather than copied. a loop of a thousand rows copied the whole model a thousand times, and because every copy started out owning nothing, writing this iteration's names into it also searched it for keys differing only in case each time round. an object made this way owns nothing but those two names, so neither cost is paid; a name holding a dot is left alone because setting one never did anything, and a value of undefined is left unset so that the enclosing model still answers for that name
   function loopScope (model, keyName, key, valName, value) {
-    const localModel = Object.assign({}, model)
-    getOrSetObjectByDotNotation(localModel, keyName, key)
-    getOrSetObjectByDotNotation(localModel, valName, value)
+    const localModel = Object.create(model || null)
+    if (keyName && key !== undefined && !keyName.includes('.')) localModel[keyName] = key
+    if (valName && value !== undefined && !valName.includes('.')) localModel[valName] = value
     return localModel
   }
 
@@ -1109,7 +1167,7 @@ export function createCompiler (deps) {
     }
     const markup = loadTemplate(src)
     body = markup === null
-      ? [{ type: 'text', value: params.includeNotFoundBehavior === 'display' ? `Template "${src}" not found!` : '' }]
+      ? notFoundBody(src)
       : compileTemplate(markup, node.stack.concat(src))
     node.compiled.set(src, body)
     return body
@@ -1121,10 +1179,10 @@ export function createCompiler (deps) {
 
     let out = ''
     const needsKey = !!node.keyName
-    const walk = loopWalk(collection, needsKey)
-    for (let i = 0; i < walk.length; i++) {
-      const key = needsKey ? walk[i] : null
-      out += renderNodes(node.body, loopScope(model, node.keyName, key, node.valName, needsKey ? collection[key] : walk[i]), state)
+    const items = loopWalk(collection, needsKey)
+    for (let i = 0; i < items.length; i++) {
+      const key = needsKey ? items[i] : null
+      out += renderNodes(node.body, loopScope(model, node.keyName, key, node.valName, needsKey ? collection[key] : items[i]), state)
     }
     return out
   }
@@ -1139,6 +1197,7 @@ export function createCompiler (deps) {
     renderNodes,
     isSelfContained,
     helpers: {
+      node: makeNode,
       get: getOrSetObjectByDotNotation,
       format: formatVariable,
       write: writeValue,

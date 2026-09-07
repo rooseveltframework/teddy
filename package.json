@@ -8,7 +8,7 @@
       "url": "https://github.com/rooseveltframework/teddy/graphs/contributors"
     }
   ],
-  "version": "2.0.1",
+  "version": "2.0.2",
   "files": [
     "dist",
     "docs/statics/pages",
@@ -40,7 +40,7 @@
   },
   "devDependencies": {
     "@jsdevtools/coverage-istanbul-loader": "3.0.5",
-    "@playwright/test": "1.62.1",
+    "@playwright/test": "1.63.0",
     "c8": "12.0.0",
     "cross-env": "10.1.0",
     "eslint-plugin-html": "8.2.0",
@@ -74,10 +74,11 @@
     "coverage-client": "npm run build -- --env coverage && nyc --silent playwright test && nyc report --reporter=json --report-dir=coverage/raw/client && npm run build",
     "lint": "standard && standard --plugin html",
     "lint-fix": "standard --fix && standard --plugin html --fix",
-    "test": "npm run test-server && npm run test-client",
-    "t": "npm run test-server && npm run test-client",
+    "test": "npm run test-server && npm run test-precompiled && npm run test-client",
+    "t": "npm run test-server && npm run test-precompiled && npm run test-client",
     "test-client": "npm run build && playwright test",
     "test-server": "npm run build && cross-env NODE_ENV=test node --test --test-timeout=60000 test/loaders/node.js",
+    "test-precompiled": "node test/comparePrecompiled.js",
     "prepack": "npm run build",
     "coverage-report": "node test/mergeCoverage.js"
   },

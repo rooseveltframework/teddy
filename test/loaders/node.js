@@ -42,7 +42,7 @@ for (const testGroup of testsToRun) {
 
     for (const test of testGroup.tests) {
       if (test.skip) continue
-      if (test.runMocha) test.run = test.runMocha
+      if (test.runNode) test.run = test.runNode
       if (!test.run) continue
       else it(test.message, async () => await test.run(teddy, test.template, model, teddyAssert, test.expected))
     }
