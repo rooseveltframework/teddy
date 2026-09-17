@@ -17,6 +17,11 @@ export function load (html) {
 
       // e.g. dom(el).children() from teddy
       children: function () {
+        return Array.from(childrenOf(el).childNodes).filter(node => node.nodeType === 1)
+      },
+
+      // e.g. dom(el).contents() from teddy, which is every child node rather than only the elements among them
+      contents: function () {
         return childrenOf(el).childNodes
       },
 

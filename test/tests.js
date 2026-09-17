@@ -2459,6 +2459,15 @@ export default [
         expected: '<my-card><template shadowrootmode="open"><div><slot name="description">fallback</slot><p>shadow</p></div></template><p slot="description">light</p></my-card>'
       },
       {
+        // a component reading its light dom through a default slot is commonly given text and nothing else, as <my-button>Click me</my-button> is
+        message: 'should pass text written inside a component through as its light dom',
+        run: async (teddy, template, model, assert, expected) => {
+          teddy.setTemplate('componentText', '<div><slot></slot></div>')
+          assert(teddy.render('<include src=\'componentText\' as=\'my-card\' mode=\'shadow\'>before<b>bold</b>after</include>', model), expected)
+        },
+        expected: '<my-card><template shadowrootmode="open"><div><slot></slot></div></template>before<b>bold</b>after</my-card>'
+      },
+      {
         message: "should render a component's light dom against the model the include was reached with",
         run: async (teddy, template, model, assert, expected) => {
           teddy.setTemplate('componentLight', '<p>x</p>')

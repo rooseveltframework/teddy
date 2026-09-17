@@ -8,7 +8,7 @@
       "url": "https://github.com/rooseveltframework/teddy/graphs/contributors"
     }
   ],
-  "version": "2.0.3",
+  "version": "2.0.4",
   "files": [
     "dist",
     "docs/statics/pages",
@@ -70,14 +70,14 @@
   "scripts": {
     "build": "webpack",
     "coverage": "npm run coverage-server && npm run coverage-client && npm run coverage-report",
-    "coverage-server": "npm run build && cross-env NODE_ENV=cover c8 --reporter=json --report-dir=coverage/raw/server node --test --test-timeout=60000 test/loaders/node.js",
+    "coverage-server": "npm run build && cross-env NODE_ENV=cover c8 --reporter=json --report-dir=coverage/raw/server node --test --test-timeout=60000 test/loaders/node.js test/docs.js",
     "coverage-client": "npm run build -- --env coverage && nyc --silent playwright test && nyc report --reporter=json --report-dir=coverage/raw/client && npm run build",
     "lint": "standard && standard --plugin html",
     "lint-fix": "standard --fix && standard --plugin html --fix",
     "test": "npm run test-server && npm run test-precompiled && npm run test-client",
     "t": "npm run test-server && npm run test-precompiled && npm run test-client",
     "test-client": "npm run build && playwright test",
-    "test-server": "npm run build && cross-env NODE_ENV=test node --test --test-timeout=60000 test/loaders/node.js",
+    "test-server": "npm run build && cross-env NODE_ENV=test node --test --test-timeout=60000 test/loaders/node.js test/docs.js",
     "test-precompiled": "node test/comparePrecompiled.js",
     "prepack": "npm run build",
     "coverage-report": "node test/mergeCoverage.js"
