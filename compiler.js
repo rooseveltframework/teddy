@@ -463,7 +463,7 @@ export function createCompiler (deps) {
       pushText(node.openNodes, `<${element}${passed.map(([name, value]) => value === '' ? ` ${name}` : ` ${name}="${value}"`).join('')}>${mode === 'light' ? '' : '<template shadowrootmode="open">'}`)
 
       // whatever the include was given that is not an <arg> is the component's light dom, which is what a <slot> in its shadow root projects. an <arg> names a value the template reads; this is content, and it belongs to the page rather than to the shadow root
-      node.lightSource = Array.from(dom(el).children()).filter(child => tagNameOf(child) !== 'arg').map(child => dom(child).toString()).join('')
+      node.lightSource = Array.from(dom(el).contents()).filter(child => tagNameOf(child) !== 'arg').map(child => dom(child).toString()).join('')
       // a component told to hydrate is sent the part of the model it renders from, so that the class upgrading it can render the same template again from new data without asking a server for anything. it names what it needs rather than being guessed at, because an argument carries rendered markup and so can only ever be a string: a component reading a list or an object reads it from the model, and only the model can carry it back out again
       const hydrate = attribValue(attribs, 'hydrate')
       // a bare hydrate would otherwise do nothing at all, which is not what anyone writing it meant

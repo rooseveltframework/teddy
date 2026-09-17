@@ -1,3 +1,8 @@
+## 2.0.4
+
+- Fixed text written inside an `<include>` that renders as a web component being dropped rather than passed through as the component's light DOM, so a component reading its content through a default `<slot>`, as `<my-button>Click me</my-button>` does, was given nothing to project. Only the elements written inside the include were kept, so an example mixing the two, like `<my-card>before<b>bold</b>after</my-card>`, lost everything but the `<b>`.
+- Updated dependencies.
+
 ## 2.0.3
 
 - Added support for `<include>` tags to render web components via a new `as` attribute.
