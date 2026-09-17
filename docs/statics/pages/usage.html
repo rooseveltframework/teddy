@@ -6,7 +6,7 @@
 
       <p>Install Teddy with npm: <code>npm i teddy</code>.</p>
 
-      <p>The package is distributed with builds intended for usage in Node.js and separate builds intended for browser use. The Node.js builds use <a href='https://www.npmjs.com/package/cheerio'>cheerio</a> for DOM parsing and the browser builds use native DOM parsing instead.</p>
+      <p>The package is distributed with builds intended for usage in Node.js and separate builds intended for browser use. The Node.js builds use <a href="https://www.npmjs.com/package/cheerio">cheerio</a> for DOM parsing and the browser builds use native DOM parsing instead.</p>
 
       <p><em>Note: Because the Node.js builds include cheerio as a dependency, they are much larger files. As such, you can use the Node.js builds in the browser if you want, but it is not recommended because they will result in much larger bundle sizes. Only do so if you encounter a bug that is exclusive to the browser builds.</em></p>
 
@@ -29,7 +29,7 @@
 
       <p>Once Teddy is included in your app, you can then pass source code to Teddy's render method, like so: <code>teddy.render(sourceCode, yourModel)</code>. The render method will return a fully rendered template.</p>
 
-      <p>To use Teddy with with <a href='http://expressjs.com'>Express</a>:</p>
+      <p>To use Teddy with with <a href="http://expressjs.com">Express</a>:</p>
 
       <ul>
         <li>First require or import <code>express</code> and <code>teddy</code>.</li>
@@ -65,7 +65,7 @@
 
       <h3 id="varescape">Variables escape HTML entities by default</h3>
 
-      <p>HTML entities such as <code>&lt;</code>, <code>&gt;</code>, <code>&amp;</code>, <code>'</code>, and <code>"</code> will be escaped by default as a safeguard against <a href='https://en.wikipedia.org/wiki/Cross-site_scripting'>cross-site scripting</a>.</p>
+      <p>HTML entities such as <code>&lt;</code>, <code>&gt;</code>, <code>&amp;</code>, <code>'</code>, and <code>"</code> will be escaped by default as a safeguard against <a href="https://en.wikipedia.org/wiki/Cross-site_scripting">cross-site scripting</a>.</p>
 
       <p>If you want to deliberately escape some text or some HTML, then wrap it in an <code><!--#<escape>--></code> tag like <code><!--#<escape><p>hello</p></escape>--></code> or an escape comment like <code><escape><!--#<p>hello</p>--></escape></code> which will output: <code><noparse>&amp;lt;p&amp;gt;hello&amp;lt;/p&amp;gt;</noparse></code> to render the code as text.</p>
 
@@ -95,14 +95,14 @@
 
       <p>If you want to pass inline CSS or JS code to a <code><!--#<style>--></code> or <code><!--#<script>--></code> tag via a Teddy variable, you can do so like this:</p>
 
-      <pre><code class='language-html'><escape>
+      <pre><code class="language-html"><escape>
 <style>{inlineStyles|s}</style>
 <script>{inlineScript|s}</script>
 </escape></code></pre>
 
       <p>That will work, but your code editor may complain that this is a syntax error. To avoid that, Teddy also provides a convenience tag called <code><!--#<inline>--></code> to let you do it like this instead:</p>
 
-      <pre><code class='language-html'><escape>
+      <pre><code class="language-html"><escape>
 <inline css="inlineStyles"></inline>
 <inline js="inlineScript"></inline>
       </escape></code></pre>
@@ -113,19 +113,19 @@
 
       <p>Include another template:</p>
 
-      <pre><code class='language-html'><escape>
+      <pre><code class="language-html"><escape>
 <include src="other-template.html"></include>
       </escape></code></pre>
 
       <p>Or use the no extension shorthand (Teddy will append the <code>.html</code> extension for you):</p>
 
-      <pre><code class='language-html'><escape>
+      <pre><code class="language-html"><escape>
 <include src="other-template"></include>
       </escape></code></pre>
 
       <p>Pass arguments to the template:</p>
 
-      <pre><code class='language-html'><escape>
+      <pre><code class="language-html"><escape>
 <include src="other-template">
   <arg firstArgument>Plain text argument</arg>
   <arg secondArgument>
@@ -172,7 +172,7 @@
 
       <p>Check for the presence of a variable:</p>
 
-      <pre><code class='language-html'><escape>
+      <pre><code class="language-html"><escape>
 <if something>
   <p>The variable 'something' is present</p>
 </if>
@@ -183,7 +183,7 @@
 
       <p>Check a variable's value:</p>
 
-      <pre><code class='language-html'><escape>
+      <pre><code class="language-html"><escape>
 <if something="hello">
   <p>The variable 'something' is set to 'hello'</p>
 </if>
@@ -194,7 +194,7 @@
 
       <p>Check for the non-presence of a variable:</p>
 
-      <pre><code class='language-html'><escape>
+      <pre><code class="language-html"><escape>
 <unless something>
   <p>The variable 'something' is not present</p>
 </unless>
@@ -205,7 +205,7 @@
 
       <p>An <code><!--#<if>--></code> statement structure with an <code><!--#<elseif>--></code> tag which is evaluated if the first <code><!--#<if>--></code> fails:</p>
 
-      <pre><code class='language-html'><escape>
+      <pre><code class="language-html"><escape>
 <if something>
   <p>The variable 'something' is present</p>
 </if>
@@ -219,7 +219,7 @@
 
       <p>An <code><!--#<unless>--></code> statement structure with an <code><!--#<elseunless>--></code> tag which is evaluated if the first <code><!--#<unless>--></code> fails:</p>
 
-      <pre><code class='language-html'><escape>
+      <pre><code class="language-html"><escape>
 <unless something>
   <p>The variable 'something' is not present</p>
 </unless>
@@ -266,7 +266,7 @@
 
       <p><code>or</code> operator:</p>
 
-      <pre><code class='language-html'><escape>
+      <pre><code class="language-html"><escape>
 <if something or somethingElse>
   <p>This will render if either 'something' or 'somethingElse' is present.</p>
 </if>
@@ -274,7 +274,7 @@
 
       <p><code>and</code> operator</p>
 
-      <pre><code class='language-html'><escape>
+      <pre><code class="language-html"><escape>
 <if something and somethingElse>
   <p>This will render if 'something' is present and 'somethingElse' is present too.</p>
 </if>
@@ -282,7 +282,7 @@
 
       <p><code>xor</code> operator:</p>
 
-      <pre><code class='language-html'><escape>
+      <pre><code class="language-html"><escape>
 <if something xor somethingElse>
   <p>This will render if either 'something' is present or 'somethingElse' is present, but it will not render if both are present.</p>
 </if>
@@ -293,7 +293,7 @@
 
       <p><code>not:</code> prefix:</p>
 
-      <pre><code class='language-html'><escape>
+      <pre><code class="language-html"><escape>
 <if not:something>
   <p>This will render if 'something' is not present.</p>
 </if>
@@ -329,18 +329,18 @@
 
       <p>If you need a more concise conditional to control which attributes are applied to a given element, then use this syntax:</p>
 
-      <pre><code class='language-html'><escape><p if-something true='class="shown"' false='class="hidden"'>One-line if.</p></escape></code></pre>
+      <pre><code class="language-html"><escape><p if-something true='class="shown"' false='class="hidden"'>One-line if.</p></escape></code></pre>
 
       <p>In that structure, the attribute <code>if-something</code> checks to see if the variable <code>something</code> is truthy. This means it will check for either variable presence in the model or the boolean value <code>true</code>. If so, the class declared in the <code>true</code> attribute is written to the element, resulting in the following output:</p>
-      <pre><code class='language-html'><escape><p class="shown">One-line if.</p></escape></code></pre>
+      <pre><code class="language-html"><escape><p class="shown">One-line if.</p></escape></code></pre>
 
       <p>If not, this will check for non-presence in the model or the boolean value <code>false</code>. If so, the class declared in the <code>false</code> attribute is written to the element, resulting in the following output:</p>
 
-      <pre><code class='language-html'><escape><p class="hidden">One-line if.</p></escape></code></pre>
+      <pre><code class="language-html"><escape><p class="hidden">One-line if.</p></escape></code></pre>
 
       <p>Like the <code><!--#<if>--></code> tag you can check for both the presence of a variable as well as its value. To check the value of a variable, use this syntax:</p>
 
-      <pre><code class='language-html'><escape><p if-something="hello" true='class="hello"' false='class="not-hello"'>One-line if.</p></escape></code></pre>
+      <pre><code class="language-html"><escape><p if-something="hello" true='class="hello"' false='class="not-hello"'>One-line if.</p></escape></code></pre>
 
       <p>It's important to note that whichever type of quotes you use on the outside of your <code>true</code> or <code>false</code> attributes must be reversed on the inside. So if you use single quotes on the outside, then you must use double quotes on the inside.</p>
 
@@ -372,11 +372,11 @@
 
       <p>Assume the following JS model:</p>
 
-      <pre><code class='language-javascript'>letters = ['a', 'b', 'c'];</code></pre>
+      <pre><code class="language-javascript">letters = ['a', 'b', 'c'];</code></pre>
 
       <p>It can be iterated over like so:</p>
 
-      <pre><code class='language-html'><escape>
+      <pre><code class="language-html"><escape>
 <loop through="letters" val="letter">
   <p>{letter}</p> <!-- outputs a, b, c -->
 </loop>
@@ -386,12 +386,12 @@
 
       <p>When looping over more complex data structures, sometimes you will need access to both the key and the value of your array or object. For instance, suppose this JS model:</p>
 
-      <pre><code class='language-javascript'>names = {jack: 'guy', jill: 'girl', hill: 'landscape'};
+      <pre><code class="language-javascript">names = {jack: 'guy', jill: 'girl', hill: 'landscape'};
       </code></pre>
 
       <p>It can be iterated over like so:</p>
 
-      <pre><code class='language-html'><escape>
+      <pre><code class="language-html"><escape>
 <loop through="names" key="name" val="description">
   <p>{name}</p> <!-- outputs jack, jill, hill -->
   <p>{description}</p> <!-- outputs guy, girl, landscape -->
@@ -402,12 +402,12 @@
 
       <p>Even complex, hierarchical data structures can be iterated over. For instance, suppose this JS model:</p>
 
-      <pre><code class='language-javascript'>objects = [{a:1, b:2, c:3}, {a:4, b:5, c:6}, {a:7, b:8, c:9}];
+      <pre><code class="language-javascript">objects = [{a:1, b:2, c:3}, {a:4, b:5, c:6}, {a:7, b:8, c:9}];
       </code></pre>
 
       <p>For the above array of objects, we can combine the techniques illustrated above to display each member of the hierarchy in sequence:</p>
 
-      <pre><code class='language-html'><escape>
+      <pre><code class="language-html"><escape>
 <loop through="objects" key="i" val="item">
   <p>{i}</p> <!-- outputs 0, 1, 2 -->
   <p>{item.a}</p> <!-- outputs 1, 4, 7 -->
@@ -448,7 +448,7 @@
 
       <p>You could use a one-line if to select <code><!--#<option>--></code> elements inside of <code><!--#<select>--></code> fields, or to select checkboxes / radio buttons like this:</p>
 
-      <pre><code class='language-html'><escape>
+      <pre><code class="language-html"><escape>
 <select>
   <option value="a" if-foo="a" true="selected">A</option>
   <option value="b" if-foo="b" true="selected">B</option>
@@ -460,7 +460,7 @@
 
       <p>Teddy also provides a convenience attribute <code>selected-value</code> to automate this process so you can write it like this:</p>
 
-      <pre><code class='language-html'><escape>
+      <pre><code class="language-html"><escape>
 <select selected-value="b">
   <option value="a">A</option>
   <option value="b">B</option> <!-- this will be selected -->
@@ -470,7 +470,7 @@
 
       <p>This also works with checkboxes and radio buttons using <code>checked-value</code>:</p>
 
-      <pre><code class='language-html'><escape>
+      <pre><code class="language-html"><escape>
 <div checked-value="b">
   <input type="checkbox" name="letters" value="a">
   <input type="checkbox" name="letters" value="b"> <!-- this will be selected -->
@@ -532,11 +532,11 @@
 
       <p>To skip teddy parsing a block of code, use a <code><!--#<noteddy>--></code> or <code><!--#<noparse>--></code> tag:</p>
 
-      <pre><code class='language-html'><escape><p><noteddy>{this_var_will_not_be_parsed}</noteddy></p></escape></code></pre>
+      <pre><code class="language-html"><escape><p><noteddy>{this_var_will_not_be_parsed}</noteddy></p></escape></code></pre>
 
       <p>You can also instruct the contents of a variable to not be parsed after that variable is rendered using the <code>|p</code> flag:</p>
 
-      <pre><code class='language-html'><escape><p>{this_var_will_be_parsed_but_its_contents_will_not_be|p}</p></escape></code></pre>
+      <pre><code class="language-html"><escape><p>{this_var_will_be_parsed_but_its_contents_will_not_be|p}</p></escape></code></pre>
 
       <p>Note: Teddy tags will also not be parsed if they appear inside of elements that interpret child text as plain text, e.g. <code><!--#<style>--></code>, <code><!--#<script>--></code>, <code><!--#<textarea>--></code>, etc. Teddy will also not parse anything in a <code><!--#<pre>--></code> tag unless you add a <code>parse</code> attribute to the <code><!--#<pre>--></code> tag like <code><!--#<pre parse>--></code>.</p>
 
@@ -546,7 +546,7 @@
 
       <p>Here's an example:</p>
 
-      <pre><code class='language-html'><escape>
+      <pre><code class="language-html"><escape>
 <p>Dynamic: Welcome {user}!</p>
 <cache name="weather" key="city" maxCaches="3">
   <p>Cached: High temperature today in {city} is {value}.</p>
@@ -581,11 +581,11 @@
 
       <h2 id="precompiling">Precompiling templates for the browser</h2>
 
-      <p>In Node.js, Teddy renders templates by converting the template code to JavaScript and running that. In a browser it cannot do that, because it would violate a strict <a href='https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CSP'>content security policy</a>. Browser builds thus render templates on-demand using a slower parser and compiler instead. You can safely use the faster JS converter method on the client too though if you precompile your templates in Node.js first and serve the precompiled JS to the browser instead of serving template code to the browser.</p>
+      <p>In Node.js, Teddy renders templates by converting the template code to JavaScript and running that. In a browser it cannot do that, because it would violate a strict <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CSP">content security policy</a>. Browser builds thus render templates on-demand using a slower parser and compiler instead. You can safely use the faster JS converter method on the client too though if you precompile your templates in Node.js first and serve the precompiled JS to the browser instead of serving template code to the browser.</p>
 
       <p>To do so, add a build step to your Node.js code:</p>
 
-      <pre><code class='language-javascript'>const teddy = require('teddy')
+      <pre><code class="language-javascript">const teddy = require('teddy')
 const fs = require('fs')
 
 teddy.setTemplateRoot('views')
@@ -602,7 +602,7 @@ fs.writeFileSync('public/page.js', teddy.precompile('page', { format: 'cjs' }))
 
       <p>With <code>require</code>:</p>
 
-      <pre><code class='language-javascript'>const teddy = require('teddy/client')
+      <pre><code class="language-javascript">const teddy = require('teddy/client')
 const page = require('./page.js')
 
 teddy.registerPrecompiled(page)
@@ -611,7 +611,7 @@ document.body.innerHTML = teddy.render('page', model)
 
       <p>Or with no build tooling on the page at all, from <code>teddy.precompile('page', { format: 'global' })</code>:</p>
 
-      <pre><code class='language-html'><escape>
+      <pre><code class="language-html"><escape>
 <script src="/teddy.min.js"></script>
 <script src="/page.js"></script>
 <script>
@@ -621,6 +621,141 @@ document.body.innerHTML = teddy.render('page', model)
       </escape></code></pre>
 
       <p>From then on that template renders from the precompiled JavaScript rather than being compiled in the browser, which will result in much faster rendering.</p>
+
+      <h2 id="components">Rendering an include as a web component</h2>
+
+      <p>Give an <code><!--#<include>--></code> an <code>as</code> attribute and Teddy renders the template into a <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM">declarative shadow root</a> inside the custom element you name, rather than in place of the include:</p>
+
+      <pre><code class="language-html"><escape>
+<include src="productCard" as="product-card"></include>
+      </escape></code></pre>
+
+      <p>Which renders:</p>
+
+      <pre><code class="language-html"><escape>
+<product-card>
+  <template shadowrootmode="open">
+    <style>.card { color: green }</style>
+    <div class="card">...</div>
+  </template>
+  <div class="card">...</div>
+</product-card>
+      </escape></code></pre>
+
+      <p>A browser's parser builds that shadow root as it reads the page, so the markup is there and its styles are encapsulated <em>before any JavaScript runs</em>. Nothing is rendered as one thing and then swapped for another, so there is no flash of empty or unstyled content.</p>
+
+      <p>The copy after the shadow root is fallback content, for a browser that does not build shadow roots and for anything that reads the page without being a browser at all. Only one of the two is ever shown, and <a href="#componentmodes">the mode</a> decides whether Teddy writes both of them.</p>
+
+      <p>When you later define the element its shadow root is already populated, so the class has only to attach behavior rather than render anything:</p>
+
+      <pre><code class="language-javascript">customElements.define('product-card', class extends HTMLElement {
+  connectedCallback () {
+    // this.shadowRoot already holds what the server rendered
+  }
+})
+      </code></pre>
+
+      <h3 id="componentattributes">Configuring a component</h3>
+
+      <p>Any attribute you write on the include that Teddy does not read for itself is put on the element it renders as, which is how a custom element is configured:</p>
+
+      <pre><code class="language-html"><escape>
+<include src="productCard" as="product-card" data-theme="dark" data-id="{product.id}"></include>
+      </escape></code></pre>
+
+      <p>Which renders:</p>
+
+      <pre><code class="language-html"><escape>
+<product-card data-theme="dark" data-id="7">
+  <template shadowrootmode="open">...</template>
+</product-card>
+      </escape></code></pre>
+
+      <h3 id="componentslots">Putting content inside a component</h3>
+
+      <p>A <code>&lt;slot&gt;</code> written in the template marks a place the page can put its own content. Suppose <code>productCard.html</code> has one:</p>
+
+      <pre><code class="language-html"><escape>
+<div class="card">
+  <h3>{name}</h3>
+  <slot name="description">No description yet.</slot>
+</div>
+      </escape></code></pre>
+
+      <p>Anything you write inside the include that is not an <code><!--#<arg>--></code> is content for those slots:</p>
+
+      <pre><code class="language-html"><escape>
+<include src="productCard" as="product-card">
+  <arg name>Kettle</arg>
+  <p slot="description">Boils water in under a minute.</p>
+</include>
+      </escape></code></pre>
+
+      <p>Which renders:</p>
+
+      <pre><code class="language-html"><escape>
+<product-card>
+  <template shadowrootmode="open">
+    <div class="card">
+      <h3>Kettle</h3>
+      <slot name="description">No description yet.</slot>
+    </div>
+  </template>
+  <div class="card">
+    <h3>Kettle</h3>
+  </div>
+  <p slot="description">Boils water in under a minute.</p>
+</product-card>
+      </escape></code></pre>
+
+      <h3 id="componentmodes">Choosing where a component's markup goes</h3>
+
+      <p>A declarative shadow root is only built by a browser that supports one. Where that support is missing the <code>&lt;template&gt;</code> is inert and the element renders nothing at all, and the same is true of anything that reads HTML without being a browser, such as a crawler that does not run a browser engine. So by default Teddy writes the markup twice: once into the shadow root, and once after it as fallback content. Use the <code>mode</code> attribute to override that behavior:</p>
+
+      <pre><code class="language-html"><escape>
+<include src="productCard" as="product-card" mode="shadow"></include>
+      </escape></code></pre>
+
+      <ul>
+        <li><code>both</code>: the default. The shadow root and a fallback copy of it. Only one of the two is ever shown, so this renders whatever the browser turns out to support, at the cost of writing the markup twice.</li>
+        <li><code>shadow</code>: the shadow root alone. Smaller, and worth choosing for a component whose content nobody would miss before its JavaScript loads, such as a tab bar or a toggle.</li>
+        <li><code>light</code>: the fallback alone, with no shadow root. The element is still yours to upgrade, but nothing is encapsulated until you do it yourself.</li>
+      </ul>
+
+      <h3 id="hydrating">Letting a component render itself again</h3>
+
+      <p>A component that re-renders in the browser needs two things: the template, and the data. Precompile the template as described above, then add <code>hydrate</code> to the include, naming the model keys the component renders from:</p>
+
+      <pre><code class="language-html"><escape>
+<include src="productCard" as="product-card" hydrate="product"></include>
+      </escape></code></pre>
+
+      <p>Teddy writes those keys beside the shadow root, as JSON in a script the browser will not execute:</p>
+
+      <pre><code class="language-html"><escape>
+<product-card>
+  <template shadowrootmode="open">...</template>
+  <script type="application/json" class="teddy-component-model">{"product":{"name":"Kettle","tags":["kitchen","steel"]}}</script>
+</product-card>
+      </escape></code></pre>
+
+      <p>So the element can render the same template the server rendered, against new data, with no request and no second copy of the template kept for the browser:</p>
+
+      <pre><code class="language-javascript">const teddy = require('teddy/client')
+const productCard = require('./productCard.js') // a precompiled teddy template
+
+teddy.registerPrecompiled(productCard)
+
+customElements.define('product-card', class extends HTMLElement {
+  connectedCallback () {
+    this.model = JSON.parse(this.querySelector('script.teddy-component-model').textContent)
+  }
+
+  update (product) {
+    this.shadowRoot.innerHTML = teddy.render('productCard', { product })
+  }
+})
+      </code></pre>
     </article>
   </arg>
 </include>

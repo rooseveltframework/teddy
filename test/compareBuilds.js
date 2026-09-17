@@ -1,12 +1,8 @@
 // renders every fixture in test/templates with two builds of teddy and compares the bytes
 //
-// the test suite asserts 219 expectations. this asserts that nothing anywhere changed,
-// including in the fixtures no test looks at closely, which is what a refactor of the
-// parser needs before it can be believed. any difference it reports is either a bug or a
-// deliberate change that should be written down in CHANGELOG.md.
+// the test suite asserts 219 expectations. this asserts that nothing anywhere changed, including in the fixtures no test looks at closely, which is what a refactor of the parser needs before it can be believed. any difference it reports is either a bug or a deliberate change that should be written down in CHANGELOG.md.
 //
-// both builds have to sit inside the repo so that they can resolve cheerio, and the paths
-// are read relative to wherever the command was run:
+// both builds have to sit inside the repo so that they can resolve cheerio, and the paths are read relative to wherever the command was run:
 //
 //   git show HEAD:teddy.js > before.js
 //   node test/compareBuilds.js before.js teddy.js
@@ -38,8 +34,7 @@ function templates (dir, found = []) {
   return found
 }
 
-// test/model.js generates random strings, so the model is built once and cloned per
-// render; otherwise the fixtures that print it differ for reasons that are not the change
+// test/model.js generates random strings, so the model is built once and cloned per render; otherwise the fixtures that print it differ for reasons that are not the change
 const sharedModel = makeModel()
 const freshModel = () => structuredClone(sharedModel)
 

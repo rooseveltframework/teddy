@@ -404,9 +404,31 @@ function emitAttrs (node, state, out) {
 
 // an include's arguments are templates of their own, so each is rendered into its own accumulator and the results become the model the included template sees
 function emitScope (node, state, out) {
-  if (!node.bindings.length) return walk(node.body, state, out)
+  // an include rendering as a custom element brought the two halves of that element with it, worked out when the template was compiled so that this and the tree walker cannot disagree about them
+  const open = node.element === null ? '' : walk(node.openNodes, state, out)
 
-  let js = ''
+  // the fallback copy a component carries is its own template again, read against the same model the shadow root was, so it is written while that scope is still in place rather than in closing
+  const body = () => {
+    let js = walk(node.body, state, out)
+    if (node.element === null) return js
+    if (node.mode !== 'light') js += `${out} += ${JSON.stringify('</template>')}\n`
+    if (node.fallbackNodes !== null) js += walk(node.fallbackNodes, state, out)
+    return js
+  }
+
+  // what closes a component is written where it is rendered rather than here: its light dom is a template of its own, and the model a hydrating one was sent is only known once the render has a model to read
+  //
+  // both are the model the include was reached with, so this is called once that scope has been put back
+  const closing = () => {
+    if (node.element === null) return ''
+    let js = walk(node.lightNodes, state, out)
+    if (node.hydrate) js += `${out} += r.payload(${nodeRef(node, state)}, ${state.model})\n`
+    return js + `${out} += ${JSON.stringify(`</${node.element}>`)}\n`
+  }
+
+  if (!node.bindings.length) return open + body() + closing()
+
+  let js = open
   const values = []
   for (const binding of node.bindings) {
     const acc = `g${state.uid++}`
@@ -421,10 +443,10 @@ function emitScope (node, state, out) {
   const outerBase = state.base
   state.model = scope
   state.base = scope
-  js += walk(node.body, state, out)
+  js += body()
   state.model = outerModel
   state.base = outerBase
-  return js
+  return js + closing()
 }
 
 // the loop's key and val become real javascript variables rather than keys copied into a fresh model object for every item, which is what lets the body read them with a plain property access

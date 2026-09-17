@@ -1,9 +1,6 @@
-// renders every fixture in test/templates twice and compares the bytes: once the ordinary way, and
-// once from what teddy.precompile wrote for it
+// renders every fixture in test/templates twice and compares the bytes: once the ordinary way, and once from what teddy.precompile wrote for it
 //
-// this is the gate a change to the emitter or to the precompiled format has to pass. compareBuilds
-// asks whether two builds of teddy agree; this asks whether a template compiled ahead of time
-// renders what the same template compiled at runtime renders, which is the whole promise of it
+// this is the gate a change to the emitter or to the precompiled format has to pass. compareBuilds asks whether two builds of teddy agree; this asks whether a template compiled ahead of time renders what the same template compiled at runtime renders, which is the whole promise of it
 //
 //   node test/comparePrecompiled.js
 import fs from 'fs'
@@ -44,8 +41,7 @@ for (const name of names) {
   teddy.clearTemplates()
   teddy.setCacheTemplates(false)
 
-  // a fixture that does not render the ordinary way has nothing to be compared against: one of them
-  // asks teddy to refuse a template that includes itself, and refusing is the right answer
+  // a fixture that does not render the ordinary way has nothing to be compared against: one of them asks teddy to refuse a template that includes itself, and refusing is the right answer
   let expected
   try {
     expected = teddy.render(name, freshModel())
