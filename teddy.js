@@ -35,7 +35,9 @@ const templateCaches = {} // a place to store cached full templates
 // #region private methods
 
 // resolves a template to its markup:
+//
 // a template may be the markup itself, the name of a template registered with setTemplate, or the path of a file to read
+//
 // returns null when a name is neither registered nor readable, so that callers can tell a template that is missing apart from one that legitimately rendered to nothing
 function loadTemplate (template) {
   // ensure template is a string
@@ -457,6 +459,7 @@ function getOrSetObjectByDotNotation (obj, dotNotation, value) {
   function caseInsensitiveLookup (obj, key) {
     if (key === 'length') return obj.length
     // a key that matches exactly is the overwhelming case, and answering it costs one lookup. the lowercased copy of the object below is only built when there is no exact match to be had, which is what stops a model lookup from costing as much as the object is wide on every single step of every single path
+    //
     // asking what the object owns, rather than reading the key straight off it, is what makes an <arg> win against a model key that differs from it only in case. the browser lowercases attribute names, so an <arg escapeTest> arrives owned as escapetest while the model's own spelling is still reachable through the prototype chain: a plain read would find that one and stop, where the walk below prefers the key this object owns
     if (Object.prototype.hasOwnProperty.call(obj, key)) return obj[key]
     // a loop body and an included template see the model they were reached with through the prototype chain rather than through a copy of it, so the keys worth looking at are the inherited ones too. a key the object owns answers ahead of one it inherits, which is what an exact match one line above would have done
@@ -543,9 +546,10 @@ function setIncludeNotFoundBehavior (v) {
 }
 
 // mutator method to set whether templates read from the filesystem are kept in memory
+//
 // off by default, matching how most other templating engines (e.g. ejs and pug) treat their own caching, so that editing a template takes effect without a restart
-// express sets its own `view cache` setting per mode and teddy picks that up in render, so an express app gets caching in
-// production and fresh reads in development without having to ask for either
+//
+// express sets its own `view cache` setting per mode and teddy picks that up in render, so an express app gets caching in production and fresh reads in development without having to ask for either
 function setCacheTemplates (v) {
   params.cacheTemplates = !!v
 }
@@ -657,8 +661,11 @@ function setCache (params) {
 }
 
 // delete one or more cached templates
+//
 // 1 string argument deletes the whole cache at that name for template partial caches
+//
 // 2 arguments deletes just the value at that keyVal for template partial caches
+//
 // 1 object argument assumes we're clearing whole template level cache
 function clearCache (name, keyVal) {
   if (typeof name === 'string') {
@@ -694,6 +701,7 @@ function render (template, model, callback) {
   if (model.settings && model.settings.views && path) params.templateRoot = path.resolve(model.settings.views)
 
   // caching is taken from the render options the way other templating engines (e.g. ejs and pug) take theirs, so that whoever is calling teddy decides
+  //
   // an explicit `cache` option wins; otherwise express' own `view cache` setting is used, which express turns on in production and off in development, so an express app gets the right behavior without asking for it
   if (typeof model.cache === 'boolean') params.cacheTemplates = model.cache
   else if (model.settings && typeof model.settings['view cache'] === 'boolean') params.cacheTemplates = model.settings['view cache']

@@ -20,6 +20,7 @@ for (const group of testGroups) {
 const testsToRun = loadTests(testGroups)
 
 // a test left marked `only` silently reduces the suite to that one test, so it must never reach a commit
+//
 // a `skip` is sometimes a deliberate marker for a known issue, so those are reported rather than failed, to keep them visible
 describe('test suite integrity', () => {
   it('should not have any tests or groups left marked as only', () => {

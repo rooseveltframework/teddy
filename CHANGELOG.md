@@ -1,3 +1,10 @@
+## 2.0.3
+
+- Added support for `<include>` tags to render web components via a new `as` attribute.
+- Fixed everything inside a `<template>` element being dropped by the browser builds, and teddy tags written inside one never being evaluated. A template element keeps its children in a document fragment of its own rather than among its child nodes, and neither the parser nor the element queries reached into it, so a browser render lost the contents entirely while Node kept them. Node builds were unaffected.
+- Fixed custom elements being mangled by the browser builds. A tag name was read as stopping at the first character that could not begin one, so `<my-card>` came out as a `<my>` tag carrying an attribute called `-card`. Since a custom element's name must contain a hyphen, none of them rendered correctly in a browser. Node builds were unaffected.
+- Updated dependencies.
+
 ## 2.0.2
 
 - Added `teddy.precompile` and `teddy.registerPrecompiled`, which let a browser render from the JavaScript Teddy would otherwise have built for a template at runtime. A `format` option writes it as an ES module, as CommonJS, or as a plain script.

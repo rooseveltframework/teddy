@@ -5,7 +5,9 @@
 // three rules:
 //
 // 1. static markup is taken from cheerio's own serializer, never reconstructed. the compiler replaces each teddy construct in the parsed dom with a placeholder text node and then serializes the whole document, so the literal chunks between placeholders are the same as what the interpreter would have produced
+//
 // 2. anything the compiler does not recognize abandons the compile entirely and the template is delegated to the interpreter; partial coverage is therefore safe: a template can only ever come out faster or unchanged, never wrong
+//
 // 3. value level semantics are not reimplemented here: formatVariable and evaluateConditional are teddy's own, called from here, so nothing about what a {variable} or an <if> means lives in two places
 
 function internalError (detail) {
@@ -34,6 +36,7 @@ const JOINERS = new Set(['and', 'or', 'xor'])
 const OUTCOMES = new Set(['true', 'false'])
 
 // every construct that owns the markup inside it, found in one pass so the outermost of them can be picked out. a one line if is in here through its outcome attributes, which is also how the interpreter finds them
+//
 // a <noteddy> or <pre> carrying an id is teddy's own marker for content it has already lifted out, not something in the template, so it is left alone here exactly as the old renderer left it alone
 const CONSTRUCTS = 'if, unless, loop, include, inline, cache, noteddy:not([id]), noparse:not([id]), pre:not([id]), [true], [false]'
 
@@ -116,6 +119,10 @@ export function createCompiler (deps) {
         if (binding.body === null) binding.body = compileMarkup(binding.bodySource, slots, slot.stack)
       }
     }
+    // a component's light dom is written at the call site, so it is rendered against the model the include was reached with rather than against the partial's
+    if (slot.lightSource !== null && slot.lightNodes === null) slot.lightNodes = compileMarkup(slot.lightSource, slots, slot.stack)
+    // the fallback a component carries is its own template again, so it is rendered against the same model the shadow root was
+    if (slot.fallbackSource !== null && slot.fallbackNodes === null) slot.fallbackNodes = compileMarkup(slot.fallbackSource, slots, slot.stack)
   }
   // every node is made here, and every one of them carries the same fields in the same order whether it uses them or not
   //
@@ -151,6 +158,14 @@ export function createCompiler (deps) {
       maxCaches: 0,
       css: null,
       js: null,
+      element: null,
+      hydrate: null,
+      openNodes: null,
+      mode: null,
+      lightSource: null,
+      lightNodes: null,
+      fallbackSource: null,
+      fallbackNodes: null,
       flags: null,
       raw: false,
       dollar: false,
@@ -335,6 +350,54 @@ export function createCompiler (deps) {
   // an <include> is resolved while compiling: the partial is loaded, compiled, and becomes part of the parent's tree, so nothing about finding or parsing it is left to happen per render
   //
   // an <arg> is compiled as a template of its own and rendered against the model the include is reached with, rather than being handed to the partial as unrendered markup for a later pass to finish. that is what keeps an argument carrying markup or a {variable} on the fast path, and it resolves such an argument against the caller's model rather than against the partial's, which differs only where one argument's body names another argument
+  //
+  // what the html spec allows a custom element to be called, near enough: lower case, starting with a letter, and holding at least one hyphen. the hyphen is what keeps it from colliding with a tag the browser may define later, and is why a name without one is not a custom element at all
+  const CUSTOM_ELEMENT_NAME = /^[a-z][a-z0-9.]*-[a-z0-9._-]*$/
+
+  // what an include reads for itself, so that everything else written on one can be passed along to the element it renders as
+  const COMPONENT_ATTRIBUTES = new Set(['src', 'as', 'hydrate', 'mode'])
+
+  // where a component's markup is written
+  //
+  // `both` writes it into a declarative shadow root and keeps a copy of it beside that as fallback content, so that a browser which builds shadow roots renders the first and one which does not renders the second. `shadow` writes the shadow root alone, which is smaller but renders nothing at all where declarative shadow dom is unsupported, including in anything that parses html without being a browser. `light` writes the fallback alone, into the element's light dom
+  const COMPONENT_MODES = new Set(['both', 'shadow', 'light'])
+
+  // the slot the fallback of a `both` component names, which no component defines
+  //
+  // a browser that builds the shadow root leaves a child naming a slot that is not there unassigned, and an unassigned child is not rendered, so the fallback sits there inert. one that does not build it has no slots to assign anything to, ignores the attribute, and renders the fallback
+  const FALLBACK_SLOT = 'teddy-fallback'
+
+  // markup inside one of these is content rather than something to render, so an element written there is left as it was
+  const UNPARSED = new Set(['pre', 'noteddy', 'noparse'])
+
+  function hasUnparsedAncestor (el) {
+    let parent = el.parent || el.parentNode
+    while (parent) {
+      if (parent.teddyTemplateHost) {
+        parent = parent.teddyTemplateHost
+        continue
+      }
+      const name = tagNameOf(parent)
+      if (!name) return false
+      // a <pre parse> is asking for its contents to be parsed, so it does not own them
+      if (UNPARSED.has(name) && !(name === 'pre' && carriesParse(parent))) return true
+      parent = parent.parent || parent.parentNode
+    }
+    return false
+  }
+
+  // what a component's markup looks like in the light dom, where a <style> would leak to the rest of the page, a <slot> has no shadow root to project anything into, and a <script> has already run once as part of the page
+  //
+  // a component holding a default <slot> would project the fallback straight back into itself beside the real content, so that one is held out of the slots by name. a component whose slots are all named, or which has none, needs nothing: its fallback is unassigned already
+  function fallbackMarkup (markup) {
+    const dom = cheerioLoad(markup || '', cheerioOptions)
+    const slots = Array.from(dom('slot')).filter(el => !hasUnparsedAncestor(el))
+    const held = slots.some(el => !attribValue(readAttribs(el), 'name'))
+    for (const el of Array.from(dom('style, script, slot')).filter(el => !hasUnparsedAncestor(el))) dom(el).remove()
+    const stripped = dom.html()
+    return held ? `<div slot="${FALLBACK_SLOT}">${stripped}</div>` : stripped
+  }
+
   function claimInclude (dom, el, slots, stack) {
     const src = attribValue(readAttribs(el), 'src')
 
@@ -373,6 +436,45 @@ export function createCompiler (deps) {
     node.bindings = readArgs(dom, el)
     node.bodySource = markup
     node.stack = stack.concat(src)
+    // an include asked to render as a custom element writes its markup into a declarative shadow root inside that element, rather than in place of it. a browser's parser builds the shadow root as it reads the page, so the markup is there, encapsulated, before any javascript runs; and when the element is upgraded its shadow root is already populated, so nothing has to be rendered again
+    //
+    // both halves of the wrapper are settled here, so that walking the tree and running emitted code cannot disagree about what a component looks like
+    const attribs = readAttribs(el)
+    const element = attribValue(attribs, 'as')
+    if (element) {
+      if (!CUSTOM_ELEMENT_NAME.test(element)) throw new Error(`teddy: "${element}" cannot name a custom element, so <include src="${src}" as="${element}"> has nothing it could render as. the name has to be lower case and hold a hyphen, like "my-card"`)
+      node.element = element
+
+      // every other attribute written on the include belongs to the element it renders as, which is how a custom element is configured: a class watches the attributes it named in observedAttributes, and teddy has nothing to say about which those are
+      //
+      // the opening tag is compiled rather than written out as it stands, so that an attribute whose value holds a {variable} resolves the way it would anywhere else
+      const passed = attribs.filter(([name]) => !COMPONENT_ATTRIBUTES.has(name))
+
+      // where the markup goes. a component is written into a declarative shadow root with a fallback copy beside it unless it asks for something else, that being the only arrangement which renders whatever the browser turns out to support
+      const mode = attribs.some(([name]) => name === 'mode') ? attribValue(attribs, 'mode') : 'both'
+      if (!COMPONENT_MODES.has(mode)) throw new Error(`teddy: <include src="${src}" as="${element}" mode="${mode}"> asks for a mode that is not one of ${[...COMPONENT_MODES].join(', ')}`)
+      node.mode = mode
+
+      // a component rendering into the light dom alone has no shadow root to hold its styles or fill its slots, so what it writes is the fallback markup rather than the template as it stands
+      if (mode === 'light') node.bodySource = fallbackMarkup(markup)
+      else if (mode === 'both') node.fallbackSource = fallbackMarkup(markup)
+
+      node.openNodes = []
+      pushText(node.openNodes, `<${element}${passed.map(([name, value]) => value === '' ? ` ${name}` : ` ${name}="${value}"`).join('')}>${mode === 'light' ? '' : '<template shadowrootmode="open">'}`)
+
+      // whatever the include was given that is not an <arg> is the component's light dom, which is what a <slot> in its shadow root projects. an <arg> names a value the template reads; this is content, and it belongs to the page rather than to the shadow root
+      node.lightSource = Array.from(dom(el).children()).filter(child => tagNameOf(child) !== 'arg').map(child => dom(child).toString()).join('')
+      // a component told to hydrate is sent the part of the model it renders from, so that the class upgrading it can render the same template again from new data without asking a server for anything. it names what it needs rather than being guessed at, because an argument carries rendered markup and so can only ever be a string: a component reading a list or an object reads it from the model, and only the model can carry it back out again
+      const hydrate = attribValue(attribs, 'hydrate')
+      // a bare hydrate would otherwise do nothing at all, which is not what anyone writing it meant
+      if (!hydrate && attribs.some(([name]) => name === 'hydrate')) throw new Error(`teddy: <include src="${src}" as="${element}" hydrate> does not say what the component needs, so there is nothing to send it. name the model keys it renders from, like hydrate="product"`)
+      if (hydrate) {
+        node.hydrate = hydrate.split(',').map(name => name.trim()).filter(Boolean)
+        for (const name of node.hydrate) {
+          if (name.includes('.')) throw new Error(`teddy: <include src="${src}" as="${element}" hydrate="${hydrate}"> names "${name}", and a component is sent whole model keys rather than paths into them. name the key that holds it instead`)
+        }
+      }
+    }
     slots.push(node)
     dom(el).replaceWith(tokenFor(slots.length - 1))
   }
@@ -612,8 +714,13 @@ export function createCompiler (deps) {
   function hasConstructAncestor (el) {
     let parent = el.parent || el.parentNode
     while (parent) {
+      // a template's children sit in a fragment of its own, so the walk carries on from the template that fragment belongs to: a construct enclosing the template still encloses what is inside it
+      if (parent.teddyTemplateHost) {
+        parent = parent.teddyTemplateHost
+        continue
+      }
       const name = tagNameOf(parent)
-      if (!name || name === 'body' || name === 'html' || name === 'root') return false
+      if (!name || name === 'body' || name === 'html' || name === 'root' || name === '#document-fragment') return false
       // a <pre parse> is asking for its contents to be parsed, so it does not own them
       if ((STRUCTURAL.has(name) && !(name === 'pre' && carriesParse(parent))) || carriesOneLineIf(parent)) return true
       parent = parent.parent || parent.parentNode
@@ -871,11 +978,18 @@ export function createCompiler (deps) {
           break
 
         case 'scope': {
-          if (!node.bindings.length) {
-            out += renderNodes(node.body, model, state)
+          const values = node.bindings.length ? node.bindings.map(binding => renderNodes(binding.body, model, state)) : null
+          const scoped = values ? bindArgs(model, node.bindings, values) : model
+          const inner = renderNodes(node.body, scoped, state)
+          if (node.element === null) {
+            out += inner
             break
           }
-          out += renderNodes(node.body, bindArgs(model, node.bindings, node.bindings.map(binding => renderNodes(binding.body, model, state))), state)
+          // a component is its opening tag, then the shadow root the template rendered into and the fallback copy of it if there is one, then whatever the page put inside it, and then the model it was sent if it asked for one
+          out += renderNodes(node.openNodes, model, state) + inner
+          if (node.mode !== 'light') out += '</template>'
+          if (node.fallbackNodes !== null) out += renderNodes(node.fallbackNodes, scoped, state)
+          out += renderNodes(node.lightNodes, model, state) + (node.hydrate ? componentPayload(node, model) : '') + `</${node.element}>`
           break
         }
 
@@ -950,6 +1064,7 @@ export function createCompiler (deps) {
   }
 
   // which combination of a one line if's outcomes this model calls for, as a bitmask
+  //
   // valueSets, when given, holds what each conditional's conditions look up already looked up, one array per conditional, which is what a compiled template hands in rather than having the lookups done again
   function attrsOutcomes (node, model, valueSets) {
     let outcomes = 0
@@ -987,6 +1102,18 @@ export function createCompiler (deps) {
     const all = []
     for (let outcomes = 0; outcomes < total; outcomes++) all.push(attrsVariant(node, outcomes))
     return all
+  }
+
+  // what closes a hydrating component: the shadow root, then the arguments it was rendered with, then the element itself
+  //
+  // the arguments travel as json in a script the browser will not execute, which is the ordinary way to hand a page some data and needs no permission a strict content security policy withholds. they sit in the light dom rather than the shadow root, so that re-rendering the shadow root does not throw them away
+  function componentPayload (node, model) {
+    const sent = {}
+    for (const name of node.hydrate) sent[name] = getOrSetObjectByDotNotation(model, name)
+    // the closing sequence of a script element is the one thing that could end the script early
+    const json = JSON.stringify(sent).replace(/<\//g, '<\\/')
+    // naming a slot that no component defines is what keeps this out of a default slot: an empty slot attribute means the default slot, the same as writing none at all, while an element naming a slot that is not there is assigned to nothing and rendered nowhere
+    return `<script type="application/json" class="teddy-component-model" slot="teddy-component-model">${json}</script>`
   }
 
   // the model an included template sees: the one the include was reached with, plus its arguments
@@ -1214,6 +1341,7 @@ export function createCompiler (deps) {
       variant: attrsVariant,
       variants: attrsVariants,
       bind: bindArgs,
+      payload: componentPayload,
       render: renderNodes,
       raw: rawBlock,
       inline: inlineBlock,

@@ -3,12 +3,12 @@ export function load (html) {
   const doc = parseTeddyDOMFromString(html) // create a DOM
 
   // return a querySelector function with function chains
+  //
   // e.g. dom('include') or dom(el) from teddy
   const $ = function (query) { // query can be a string, or a dom object
     // if query is a string, we need to create a dom object from the string: an object with elements in it, e.g. a list of include tag objects
     if (typeof query === 'string') {
-      const els = doc.querySelectorAll(query)
-      return els // return the object collection
+      return queryAll(doc, query) // return the object collection
     }
 
     // if query is an object, it's assumed we're trying to perform operations on a single dom node
@@ -17,12 +17,12 @@ export function load (html) {
 
       // e.g. dom(el).children() from teddy
       children: function () {
-        return el.childNodes
+        return childrenOf(el).childNodes
       },
 
       // e.g. dom(el).find() from teddy
       find: function (selector) {
-        return el.querySelectorAll(selector)
+        return queryAll(el, selector)
       },
 
       // e.g. dom(arg).html() from teddy
@@ -89,7 +89,7 @@ function parseTeddyDOMFromString (html) {
   const root = document.createElement('body')
   const dom = [root]
   const openTags = [] // stack to track open tags
-  const tagAndCommentRegex = /<\/?([a-zA-Z0-9]+)([^>]*)>|<!--([\s\S]*?)-->/g
+  const tagAndCommentRegex = /<\/?([a-zA-Z][a-zA-Z0-9-]*)([^>]*)>|<!--([\s\S]*?)-->/g
   const attrRegex = /([a-zA-Z0-9-:._]+)(?:=(["'])(.*?)\2|([^>\s]+))?/g
   let lastIndex = 0
   let match
@@ -102,13 +102,13 @@ function parseTeddyDOMFromString (html) {
     // append text nodes
     if (textBeforeMatch.trim()) {
       const textNode = document.createTextNode(textBeforeMatch)
-      dom[dom.length - 1].appendChild(textNode)
+      childrenOf(dom[dom.length - 1]).appendChild(textNode)
     }
 
     if (match[0].startsWith('<!--')) {
       // handle comments
       const commentNode = document.createComment(match[3])
-      dom[dom.length - 1].appendChild(commentNode)
+      childrenOf(dom[dom.length - 1]).appendChild(commentNode)
     } else {
       // handle tags
       const [fullMatch, tagName, attrString] = match
@@ -118,7 +118,7 @@ function parseTeddyDOMFromString (html) {
         if (selfClosingTags.has(lowerCaseTagName)) {
           // convert incorrect closing tag for self-closing tag to self-closing tag
           const element = document.createElement(tagName)
-          dom[dom.length - 1].appendChild(element)
+          childrenOf(dom[dom.length - 1]).appendChild(element)
         } else {
           // check if the closing tag matches the most recent open tag
           if (openTags.length > 0 && openTags[openTags.length - 1] === lowerCaseTagName) {
@@ -153,6 +153,7 @@ function parseTeddyDOMFromString (html) {
         for (const [name, value] of attrMap) {
           try {
             // replace elements with `src` attributes with `data-teddy-defer-attr-src` so the browser doesn't try to prefetch the asset
+            //
             // this is needed because the value of the `src` attribute could be a {teddyVariable} and that fetch won't resolve
             switch (lowerCaseTagName) {
               case 'img':
@@ -175,8 +176,11 @@ function parseTeddyDOMFromString (html) {
           }
         }
 
+        // a template's children go into a fragment of its own, which has no way back to the template it belongs to. teddy walks up from an element to see what encloses it, so the way back is written here: without it a construct inside a template would look like the outermost one
+        if (isTemplate(element)) element.content.teddyTemplateHost = element
+
         // append the new element to the current parent
-        dom[dom.length - 1].appendChild(element)
+        childrenOf(dom[dom.length - 1]).appendChild(element)
 
         // push the new element to the dom if it's not self-closing
         if (!selfClosingTags.has(lowerCaseTagName) && !fullMatch.endsWith('/>')) {
@@ -194,7 +198,7 @@ function parseTeddyDOMFromString (html) {
     const remainingText = html.slice(lastIndex)
     if (remainingText.trim()) {
       const textNode = document.createTextNode(remainingText)
-      dom[dom.length - 1].appendChild(textNode)
+      childrenOf(dom[dom.length - 1]).appendChild(textNode)
     }
   }
 
@@ -221,10 +225,34 @@ function undoParserArtifacts (html) {
   for (const [pattern, singleEncoded] of entityFixes) html = html.replace(pattern, singleEncoded)
   return html.replace(deferredAttributes, '$1')
 }
+// every element under a root that matches a selector, including the ones inside a template
+//
+// a query never reaches into a template's content fragment, so a teddy tag written inside a template went unclaimed in a browser while node claimed it. asking for the templates in the same query keeps everything in the order it was written in
+function queryAll (root, selector) {
+  const found = []
+  for (const el of root.querySelectorAll(`${selector}, template`)) {
+    if (el.matches(selector)) found.push(el)
+    if (isTemplate(el)) found.push(...queryAll(el.content, selector))
+  }
+  return found
+}
+
+// where the children of a node belong
+//
+// a template element keeps its children in a document fragment of its own rather than among its child nodes, and serializing a template writes that fragment out. so a child appended to the element itself is kept somewhere the markup never shows it, which is how everything inside a <template> used to disappear from a browser render
+function childrenOf (node) {
+  return isTemplate(node) ? node.content : node
+}
+
+// a template element, and not merely something with a content property: <meta content="..."> has one of those and it is a string
+function isTemplate (node) {
+  return node.nodeName === 'TEMPLATE' && node.content
+}
+
 function getTeddyDOMInnerHTML (node) {
   // build html string
   let html = ''
-  for (const child of node.childNodes) {
+  for (const child of childrenOf(node).childNodes) {
     if (child.nodeType === window.Node.ELEMENT_NODE) {
       html += undoParserArtifacts(child.outerHTML)
     } else if (child.nodeType === window.Node.TEXT_NODE) {

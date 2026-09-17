@@ -12,10 +12,15 @@ function testTemplateNames (dir, base = dir, found = []) {
 }
 
 // these tests are shared by both runners: node's own test runner, and playwright
+//
 // to skip test groups or individual tests, add `skip: true` to the group or test object
+//
 // to test an individual group or test, add `only: true` to the group or test object
+//
 // to run a test only in node or only in a browser, use `runNode` or `runPlaywright` instead of `run`
+//
 // if multiple results are acceptable, make `expected` an array of strings rather than a string
+//
 // to see console output from the client-side tests, go to test/loaders/playwright.js and uncomment the debug code
 
 export default [
@@ -340,7 +345,9 @@ export default [
         template: 'conditionals/oneLineMulti',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
         // the middle conditional in that template is `if-something=''`, which asks whether something is the empty string
+        //
         // an empty value cannot be told apart from no value at all, so it reads as a plain truthiness check, and since it supplies only a false outcome it contributes nothing here
+        //
         // the two spellings differ only in how each parser writes an attribute that has no value
         expected: ['<p class="something-is-present" data-should-render>One line if.</p>', '<p class="something-is-present" data-should-render="">One line if.</p>']
       },
@@ -2346,20 +2353,350 @@ export default [
     ]
   },
   {
-    // precompiling writes out the javascript teddy would otherwise have built at runtime, so that a
-    // browser can be handed the fast render rather than the slow one. it only runs in node, where the
-    // emitter is, so these are runNode rather than run
+    // a template element keeps its children in a document fragment of its own rather than among its child nodes. cheerio does not, so node always read them: in a browser everything inside a <template> went missing, and a teddy tag written inside one was never evaluated
     //
-    // test/comparePrecompiled.js does the same across every fixture; these cover the shapes that are
-    // easiest to get wrong and the ways precompiling is meant to refuse
+    // these run in both halves, because agreeing is the whole point of them
+    describe: 'Template elements',
+    tests: [
+      {
+        message: 'should keep the contents of a template element',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render('<template id="t"><p>plain</p></template>', model), expected),
+        expected: '<template id="t"><p>plain</p></template>'
+      },
+      {
+        message: 'should resolve a {variable} inside a template element',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render('<template id="t"><p>{something}</p></template>', model), expected),
+        expected: '<template id="t"><p>Some content</p></template>'
+      },
+      {
+        message: 'should evaluate a teddy tag inside a template element',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render('<template id="t"><if something><b>{something}</b></if></template>', model), expected),
+        expected: '<template id="t"><b>Some content</b></template>'
+      },
+      {
+        message: 'should evaluate a loop inside a template element',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render('<template id="t"><loop through=\'letters\' val=\'letter\'><i>{letter}</i></loop></template>', model), expected),
+        expected: '<template id="t"><i>a</i><i>b</i><i>c</i></template>'
+      },
+      {
+        message: 'should evaluate an <include> inside a template element',
+        run: async (teddy, template, model, assert, expected) => {
+          teddy.setTemplate('templateInclude', '<em>{something}</em>')
+          assert(teddy.render('<template id="t"><include src=\'templateInclude\'></include></template>', model), expected)
+        },
+        expected: '<template id="t"><em>Some content</em></template>'
+      },
+      {
+        // a construct enclosing the template encloses what is inside it, which is only true if the walk up from an element can get out of the fragment its template keeps it in
+        message: 'should treat a construct enclosing a template as enclosing what is inside it',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render('<if something><template id="t"><if something><b>yes</b></if></template></if>', model), expected),
+        expected: '<template id="t"><b>yes</b></template>'
+      },
+      {
+        message: 'should leave out a template that a false construct encloses',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render('<if doesNotExist><template id="t"><p>{something}</p></template></if>', model), expected),
+        expected: ''
+      },
+      {
+        message: 'should keep the contents of a template element nested inside another one',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render('<template id="a"><template id="b"><p>{something}</p></template></template>', model), expected),
+        expected: '<template id="a"><template id="b"><p>Some content</p></template></template>'
+      },
+      {
+        // this is the shape teddy writes for a component, so it has to survive being rendered again
+        message: 'should keep a declarative shadow root written by hand',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render('<my-card><template shadowrootmode="open"><p>{something}</p></template></my-card>', model), expected),
+        expected: '<my-card><template shadowrootmode="open"><p>Some content</p></template></my-card>'
+      }
+    ]
+  },
+  {
+    // an <include> given an `as` renders into a declarative shadow root inside the custom element it names, rather than in place of the include. a browser's parser builds that shadow root as it reads the page, so the markup is encapsulated before any javascript runs, and an element that is later upgraded finds its shadow root already populated
+    describe: 'Components',
+    tests: [
+      {
+        message: 'should render an <include> as a custom element carrying a declarative shadow root and a fallback copy of it (includes/componentAs.html)',
+        template: 'includes/componentAs',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: '<my-card><template shadowrootmode="open"><p>Some content</p></template><p>Some content</p></my-card>'
+      },
+      {
+        message: 'should pass an argument to an <include> rendering as a custom element (includes/componentAsWithArg.html)',
+        template: 'includes/componentAsWithArg',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: '<my-card><template shadowrootmode="open"><p>passed in</p></template><p>passed in</p></my-card>'
+      },
+      {
+        message: 'should evaluate teddy tags inside a component, in the shadow root where they were written',
+        run: async (teddy, template, model, assert, expected) => {
+          teddy.setTemplate('componentBody', '<div><if something><b>yes</b></if><loop through=\'letters\' val=\'letter\'><i>{letter}</i></loop></div>')
+          assert(teddy.render('<include src=\'componentBody\' as=\'my-card\' mode=\'shadow\'></include>', model), expected)
+        },
+        expected: '<my-card><template shadowrootmode="open"><div><b>yes</b><i>a</i><i>b</i><i>c</i></div></template></my-card>'
+      },
+      {
+        message: 'should render a component nested inside another component',
+        run: async (teddy, template, model, assert, expected) => {
+          teddy.setTemplate('componentInner', '<span>{something}</span>')
+          teddy.setTemplate('componentOuter', '<div><include src=\'componentInner\' as=\'my-inner\' mode=\'shadow\'></include></div>')
+          assert(teddy.render('<include src=\'componentOuter\' as=\'my-outer\' mode=\'shadow\'></include>', model), expected)
+        },
+        expected: '<my-outer><template shadowrootmode="open"><div><my-inner><template shadowrootmode="open"><span>Some content</span></template></my-inner></div></template></my-outer>'
+      },
+      {
+        message: "should pass an <include>'s attributes and its light dom to the custom element it renders as (includes/componentAsSlot.html)",
+        template: 'includes/componentAsSlot',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: '<my-card data-theme="dark"><template shadowrootmode="open"><p>in the shadow root</p></template><p>in the shadow root</p><p slot="description">in the light dom</p></my-card>'
+      },
+      {
+        // a <slot> in the shadow root projects what the page put inside the element, so an include that cannot pass anything through leaves every slot showing its fallback forever
+        message: 'should pass whatever is not an <arg> through to the component as its light dom',
+        run: async (teddy, template, model, assert, expected) => {
+          teddy.setTemplate('componentSlotted', '<div><slot name="description">fallback</slot><p>{something}</p></div>')
+          assert(teddy.render('<include src=\'componentSlotted\' as=\'my-card\' mode=\'shadow\'><arg something>shadow</arg><p slot=\'description\'>light</p></include>', model), expected)
+        },
+        expected: '<my-card><template shadowrootmode="open"><div><slot name="description">fallback</slot><p>shadow</p></div></template><p slot="description">light</p></my-card>'
+      },
+      {
+        message: "should render a component's light dom against the model the include was reached with",
+        run: async (teddy, template, model, assert, expected) => {
+          teddy.setTemplate('componentLight', '<p>x</p>')
+          assert(teddy.render('<include src=\'componentLight\' as=\'my-card\' mode=\'shadow\'><b slot=\'d\'>{something}</b></include>', model), expected)
+        },
+        expected: '<my-card><template shadowrootmode="open"><p>x</p></template><b slot="d">Some content</b></my-card>'
+      },
+      {
+        // attributes are how a custom element is configured: a class watches the ones it named in observedAttributes
+        message: 'should put an attribute written on the include onto the element it renders as',
+        run: async (teddy, template, model, assert, expected) => {
+          teddy.setTemplate('componentAttrs', '<p>x</p>')
+          assert(teddy.render('<include src=\'componentAttrs\' as=\'my-card\' mode=\'shadow\' data-theme=\'dark\' hidden></include>', model), expected)
+        },
+        expected: '<my-card data-theme="dark" hidden><template shadowrootmode="open"><p>x</p></template></my-card>'
+      },
+      {
+        message: 'should resolve a {variable} written in an attribute of a component',
+        run: async (teddy, template, model, assert, expected) => {
+          teddy.setTemplate('componentAttrVar', '<p>x</p>')
+          assert(teddy.render('<include src=\'componentAttrVar\' as=\'my-card\' mode=\'shadow\' data-thing=\'{something}\'></include>', model), expected)
+        },
+        expected: '<my-card data-thing="Some content"><template shadowrootmode="open"><p>x</p></template></my-card>'
+      },
+      {
+        message: 'should keep the attributes an include reads for itself off the element it renders as',
+        run: async (teddy, template, model, assert, expected) => {
+          teddy.setTemplate('componentOwnAttrs', '<p>x</p>')
+          const rendered = teddy.render('<include src=\'componentOwnAttrs\' as=\'my-card\' hydrate=\'something\' mode=\'shadow\'></include>', model)
+          const openTag = rendered.match(/<my-card[^>]*>/)[0]
+          assert([/src=/, /\bas=/, /hydrate=/, /\bmode=/].some(pattern => pattern.test(openTag)) ? 'leaked: ' + openTag : 'kept to itself', expected)
+        },
+        expected: 'kept to itself'
+      },
+      {
+        // an empty slot attribute means the default slot, so teddy's own bookkeeping has to name one that no component defines or it would be projected into a component's default slot
+        message: "should keep a hydrating component's model out of the slots its light dom is projected into",
+        run: async (teddy, template, model, assert, expected) => {
+          teddy.setTemplate('componentPayloadSlot', '<p>x</p>')
+          const rendered = teddy.render('<include src=\'componentPayloadSlot\' as=\'my-card\' hydrate=\'something\'></include>', model)
+          assert(/class="teddy-component-model" slot="teddy-component-model"/.test(rendered) ? 'named a slot of its own' : rendered, expected)
+        },
+        expected: 'named a slot of its own'
+      },
+      {
+        message: 'should send a hydrating component the model keys it names (includes/componentAsHydrate.html)',
+        template: 'includes/componentAsHydrate',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: '<my-card><template shadowrootmode="open"><p>Some content</p></template><p>Some content</p><script type="application/json" class="teddy-component-model" slot="teddy-component-model">{"something":"Some content"}</script></my-card>'
+      },
+      {
+        // an argument carries rendered markup, so it could never hand a component a list or an object. naming a model key is what makes those reach the other side intact
+        message: 'should send a hydrating component a list and an object whole',
+        run: async (teddy, template, model, assert, expected) => {
+          teddy.setTemplate('componentList', '<ul><loop through=\'kit.tags\' val=\'tag\'><li>{tag}</li></loop></ul>')
+          const rendered = teddy.render('<include src=\'componentList\' as=\'my-list\' hydrate=\'kit\'></include>', { kit: { tags: ['a', 'b'] } })
+          const payload = rendered.match(/class="teddy-component-model"[^>]*>(.*?)<\/script>/)[1]
+          assert(JSON.stringify(JSON.parse(payload)), expected)
+        },
+        expected: '{"kit":{"tags":["a","b"]}}'
+      },
+      {
+        message: 'should send a hydrating component more than one model key when it names more than one',
+        run: async (teddy, template, model, assert, expected) => {
+          teddy.setTemplate('componentTwo', '<p>{a}{b}</p>')
+          const rendered = teddy.render('<include src=\'componentTwo\' as=\'my-two\' hydrate=\'a, b\'></include>', { a: 'one', b: 'two', c: 'unsent' })
+          const payload = rendered.match(/class="teddy-component-model"[^>]*>(.*?)<\/script>/)[1]
+          assert(JSON.stringify(JSON.parse(payload)), expected)
+        },
+        expected: '{"a":"one","b":"two"}'
+      },
+      {
+        message: 'should keep an argument holding a script closing sequence from ending the payload early',
+        run: async (teddy, template, model, assert, expected) => {
+          teddy.setTemplate('componentEscape', '<p>{danger}</p>')
+          const rendered = teddy.render('<include src=\'componentEscape\' as=\'my-danger\' hydrate=\'danger\'></include>', { danger: 'a</script>b' })
+          const payload = rendered.match(/class="teddy-component-model"[^>]*>(.*?)<\/script>/)[1]
+          assert(JSON.parse(payload).danger, expected)
+        },
+        expected: 'a</script>b'
+      },
+      {
+        message: 'should refuse a hydrate that says nothing, or that names a path rather than a key',
+        run: async (teddy, template, model, assert, expected) => {
+          teddy.setTemplate('componentHydrateCheck', '<p>x</p>')
+          const answers = []
+          for (const attr of ['hydrate', "hydrate='a.b'"]) {
+            try {
+              teddy.render(`<include src='componentHydrateCheck' as='my-card' ${attr}></include>`, model)
+              answers.push('accepted')
+            } catch (err) {
+              answers.push(/does not say what the component needs|rather than paths into them/.test(err.message) ? 'refused' : err.message)
+            }
+          }
+          assert(answers.join(', '), expected)
+        },
+        expected: 'refused, refused'
+      },
+      {
+        // the default is the one arrangement that renders whatever the browser turns out to support: the shadow root where declarative shadow dom is built, the fallback where it is not
+        message: 'should write a shadow root and a fallback copy of it by default',
+        run: async (teddy, template, model, assert, expected) => {
+          teddy.setTemplate('componentDefaultMode', '<p>x</p>')
+          assert(teddy.render('<include src=\'componentDefaultMode\' as=\'my-card\'></include>', model), expected)
+        },
+        expected: '<my-card><template shadowrootmode="open"><p>x</p></template><p>x</p></my-card>'
+      },
+      {
+        message: 'should write the shadow root alone in shadow mode',
+        run: async (teddy, template, model, assert, expected) => {
+          teddy.setTemplate('componentShadowMode', '<p>x</p>')
+          assert(teddy.render('<include src=\'componentShadowMode\' as=\'my-card\' mode=\'shadow\'></include>', model), expected)
+        },
+        expected: '<my-card><template shadowrootmode="open"><p>x</p></template></my-card>'
+      },
+      {
+        message: 'should write the fallback alone, with no shadow root, in light mode',
+        run: async (teddy, template, model, assert, expected) => {
+          teddy.setTemplate('componentLightMode', '<p>x</p>')
+          assert(teddy.render('<include src=\'componentLightMode\' as=\'my-card\' mode=\'light\'></include>', model), expected)
+        },
+        expected: '<my-card><p>x</p></my-card>'
+      },
+      {
+        // none of these can do its job in the light dom: a style would leak to the rest of the page, a slot has no shadow root to project anything into, and a script has already run once as part of the page
+        message: 'should leave the style, script and slot elements out of the fallback',
+        run: async (teddy, template, model, assert, expected) => {
+          teddy.setTemplate('componentFallbackStrip', '<div><style>p{color:red}</style><script>x()</script><slot name="d">fallback</slot><p>x</p></div>')
+          const fallback = teddy.render('<include src=\'componentFallbackStrip\' as=\'my-card\'></include>', model).split('</template>')[1]
+          assert([/<style/, /<script/, /<slot/].some(pattern => pattern.test(fallback)) ? 'left in: ' + fallback : fallback, expected)
+        },
+        expected: '<div><p>x</p></div></my-card>'
+      },
+      {
+        message: 'should leave the shadow root of a component in both mode as it was written',
+        run: async (teddy, template, model, assert, expected) => {
+          teddy.setTemplate('componentShadowKept', '<div><style>p{color:red}</style><slot name="d">fallback</slot></div>')
+          const shadow = teddy.render('<include src=\'componentShadowKept\' as=\'my-card\'></include>', model).split('</template>')[0]
+          assert(/<style/.test(shadow) && /<slot/.test(shadow) ? 'kept' : 'stripped: ' + shadow, expected)
+        },
+        expected: 'kept'
+      },
+      {
+        // a default slot catches every child that names no slot of its own, so the fallback has to name one no component defines or it would be projected back into the component beside the real content
+        message: "should hold the fallback out of a component's default slot",
+        run: async (teddy, template, model, assert, expected) => {
+          teddy.setTemplate('componentDefaultSlot', '<div><slot></slot></div>')
+          assert(teddy.render('<include src=\'componentDefaultSlot\' as=\'my-card\'><p>page</p></include>', model), expected)
+        },
+        expected: '<my-card><template shadowrootmode="open"><div><slot></slot></div></template><div slot="teddy-fallback"><div></div></div><p>page</p></my-card>'
+      },
+      {
+        // a component whose slots are all named leaves the fallback unassigned already, and an unassigned child is not rendered, so there is nothing to hold it out of
+        message: 'should leave the fallback unwrapped when every slot the component has is named',
+        run: async (teddy, template, model, assert, expected) => {
+          teddy.setTemplate('componentNamedSlots', '<div><slot name="d"></slot></div>')
+          const rendered = teddy.render('<include src=\'componentNamedSlots\' as=\'my-card\'></include>', model)
+          assert(rendered.includes('teddy-fallback') ? 'wrapped: ' + rendered : rendered, expected)
+        },
+        expected: '<my-card><template shadowrootmode="open"><div><slot name="d"></slot></div></template><div></div></my-card>'
+      },
+      {
+        message: 'should refuse a mode a component cannot be written in',
+        run: async (teddy, template, model, assert, expected) => {
+          teddy.setTemplate('componentBadMode', '<p>x</p>')
+          const answers = []
+          for (const mode of ['open', 'closed', '']) {
+            try {
+              teddy.render(`<include src='componentBadMode' as='my-card' mode='${mode}'></include>`, model)
+              answers.push(`rendered anyway: ${mode}`)
+            } catch (err) {
+              answers.push(err.message.includes('asks for a mode that is not one of') ? 'refused' : err.message)
+            }
+          }
+          assert(answers.join(', '), expected)
+        },
+        expected: 'refused, refused, refused'
+      },
+      {
+        message: 'should refuse an `as` that cannot name a custom element',
+        run: async (teddy, template, model, assert, expected) => {
+          teddy.setTemplate('componentNameCheck', '<p>x</p>')
+          const answers = []
+          for (const name of ['nohyphen', 'Has-Capitals', '-leading']) {
+            try {
+              teddy.render(`<include src='componentNameCheck' as='${name}'></include>`, model)
+              answers.push('accepted ' + name)
+            } catch (err) {
+              answers.push(err.message.includes('cannot name a custom element') ? 'refused' : err.message)
+            }
+          }
+          assert(answers.join(', '), expected)
+        },
+        expected: 'refused, refused, refused'
+      }
+    ]
+  },
+  {
+    // a custom element's name has to hold a hyphen, so a tag name that stops at a letter or a digit cannot describe one. these run in both halves: node read them correctly all along, and the browser build read <my-card> as a tag called my carrying an attribute called -card
+    describe: 'Custom elements',
+    tests: [
+      {
+        message: 'should render a custom element without splitting its name at the hyphen',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render('<my-card>{something}</my-card>', model), '<my-card>Some content</my-card>'),
+        expected: '<my-card>Some content</my-card>'
+      },
+      {
+        message: 'should render a custom element that carries attributes',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render('<my-card size="large" data-x="1">{something}</my-card>', model), '<my-card size="large" data-x="1">Some content</my-card>'),
+        expected: '<my-card size="large" data-x="1">Some content</my-card>'
+      },
+      {
+        message: 'should render custom elements nested inside one another',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render('<x-outer><x-inner>{something}</x-inner></x-outer>', model), '<x-outer><x-inner>Some content</x-inner></x-outer>'),
+        expected: '<x-outer><x-inner>Some content</x-inner></x-outer>'
+      },
+      {
+        message: 'should evaluate teddy tags inside a custom element',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render('<my-card><if something>yes</if></my-card>', model), '<my-card>yes</my-card>'),
+        expected: '<my-card>yes</my-card>'
+      },
+      {
+        message: 'should render a custom element whose name holds more than one hyphen',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render('<a-b-c>{something}</a-b-c>', model), '<a-b-c>Some content</a-b-c>'),
+        expected: '<a-b-c>Some content</a-b-c>'
+      }
+    ]
+  },
+  {
+    // precompiling writes out the javascript teddy would otherwise have built at runtime, so that a browser can be handed the fast render rather than the slow one. it only runs in node, where the emitter is, so these are runNode rather than run
+    //
+    // test/comparePrecompiled.js does the same across every fixture; these cover the shapes that are easiest to get wrong and the ways precompiling is meant to refuse
     describe: 'Precompiling',
     tests: [
       {
         message: 'should render a precompiled template to the same bytes as compiling it at runtime',
         runNode: async (teddy, template, model, assert, expected) => {
-          // one fixture for each shape the encoder has to survive: an arm that holds the branch that
-          // holds it back, a body reached from more than one place, the arguments an include binds,
-          // the variant lists a selection carries, and the map a dynamic include keeps
+          // one fixture for each shape the encoder has to survive: an arm that holds the branch that holds it back, a body reached from more than one place, the arguments an include binds, the variant lists a selection carries, and the map a dynamic include keeps
           const names = ['conditionals/if', 'looping/nestedLoops', 'includes/includeWithArg', 'looping/selectOptions', 'includes/dynamicInclude', 'misc/variable']
           const answers = []
           for (const name of names) {
@@ -2390,9 +2727,7 @@ export default [
           const scratch = mkdtempSync(join(tmpdir(), 'teddy-formats-'))
           const answers = []
           try {
-            // an es module and a plain script are both valid module bodies, so both can be reached
-            // by importing them: the module one exports what it wrote, the plain one puts it on a
-            // global. commonjs is the one that needs a require, since `module` is not a thing here
+            // an es module and a plain script are both valid module bodies, so both can be reached by importing them: the module one exports what it wrote, the plain one puts it on a global. commonjs is the one that needs a require, since `module` is not a thing here
             for (const format of ['esm', 'global']) {
               const artifact = teddy.precompile(name, { format })
               const loaded = await import('data:text/javascript,' + encodeURIComponent(artifact))

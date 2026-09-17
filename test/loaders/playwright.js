@@ -40,6 +40,7 @@ function registerTemplates (dir) {
 const templates = registerTemplates('test/templates')
 
 // loading the bundle and registering every template costs far more than the assertion each test then makes, and neither depends on anything a test does, so the page is prepared once per worker and reused
+//
 // no test touches the document, they only compare what teddy renders to a string, so sharing one is safe
 const teddyTest = playwrightTest.extend({
   teddyPage: [async ({ browser }, use) => {
@@ -73,8 +74,8 @@ function runPlaywrightAgainstTeddyBundle (teddyPath) {
     const teddyMinified = path.resolve(__dirname, '../../dist/teddy.min.js')
 
     playwrightTest(`Load ${teddyNonMinified}`, async ({ page }) => {
-      // to debug, uncomment this:
-      // page.on('console', (msg) => console.log(msg))
+      // to debug, uncomment this: page.on('console', (msg) => console.log(msg))
+      //
       // for deeper debugging: export DEBUG=pw:browser
 
       await page.addScriptTag({ path: teddyNonMinified }) // add teddy script tag to the browser page
@@ -83,8 +84,8 @@ function runPlaywrightAgainstTeddyBundle (teddyPath) {
       })
     })
     playwrightTest(`Load ${teddyMinified}`, async ({ page }) => {
-      // to debug, uncomment this:
-      // page.on('console', (msg) => console.log(msg))
+      // to debug, uncomment this: page.on('console', (msg) => console.log(msg))
+      //
       // for deeper debugging: export DEBUG=pw:browser
 
       await page.addScriptTag({ path: teddyMinified }) // add teddy script tag to the browser page
@@ -104,8 +105,8 @@ function runPlaywrightAgainstTeddyBundle (teddyPath) {
         if (!test.run) continue
         else {
           teddyTest(`${test.message} (dist/${fileName})`, async ({ teddyPage }) => {
-            // to debug, uncomment this:
-            // teddyPage.on('console', (msg) => console.log(msg))
+            // to debug, uncomment this: teddyPage.on('console', (msg) => console.log(msg))
+            //
             // for deeper debugging: export DEBUG=pw:browser
 
             const model = makeModel()

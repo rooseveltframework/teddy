@@ -1,8 +1,10 @@
 const rooseveltConfig = require('roosevelt/config')
 
 module.exports = {
-  // the docs are a static site: roosevelt builds the pages and http-server serves the result
   makeBuildArtifacts: 'staticsOnly',
+  http: {
+    port: 6589
+  },
   viewEngine: [
     'html:teddy'
   ],

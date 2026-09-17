@@ -64,12 +64,9 @@ for (const [sourcePath, data] of Object.entries(files).sort()) {
     either: total - uncovered.length,
     percent: total ? ((total - uncovered.length) / total * 100) : 100
   })
-  // consecutive lines are reported as one range rather than one by one: a gap is nearly always a
-  // whole function nothing calls, and naming every line of it buried that under a wall of numbers
+  // consecutive lines are reported as one range rather than one by one: a gap is nearly always a whole function nothing calls, and naming every line of it buried that under a wall of numbers
   //
-  // which halves consider a line executable is carried along, because a line only one of them counts
-  // is usually a function's declaration or its closing brace, which the two instrumenters disagree
-  // about. saying so stops that reading as a real gap
+  // which halves consider a line executable is carried along, because a line only one of them counts is usually a function's declaration or its closing brace, which the two instrumenters disagree about. saying so stops that reading as a real gap
   if (uncovered.length) {
     const claimedBy = line => halves.map(h => h.label).filter(label => data.executableByHalf[label]?.has(line)).join('+')
     const runs = []
