@@ -1,0 +1,24 @@
+<ul class="products">
+  <loop through='products' val='product'>
+    <li class="product" data-id="{product.id}">
+      <h3>{product.name}</h3>
+      <p class="price">{product.price}</p>
+      <p class="desc">{product.description}</p>
+      <p class="rating">{product.rating}</p>
+      <if product.inStock>
+        <span class="stock in">In stock</span>
+      </if>
+      <else>
+        <span class="stock out">Out of stock</span>
+      </else>
+      <if product.onSale>
+        <span class="sale">On sale</span>
+      </if>
+      <ul class="tags">
+        <loop through='product.tags' val='tag'>
+          <li>{tag.label}</li>
+        </loop>
+      </ul>
+    </li>
+  </loop>
+</ul>

@@ -1,0 +1,32 @@
+div.dashboard
+  if user.loggedIn
+    p.hello Welcome back, #{user.name}.
+  else
+    p.hello Please sign in.
+  if user.admin
+    p.role You have admin access.
+  else if user.editor
+    p.role You can edit the catalog.
+  else
+    p.role You have read-only access.
+  unless flags.beta
+    p.channel You are on the stable release.
+  else
+    p.channel You are on the beta release.
+  if flags.darkMode && flags.showBanner
+    div.banner.dark Dark mode banner
+  else
+    div.banner.light Light mode banner
+  if flags.compact
+    p.density Compact layout
+  else
+    p.density Comfortable layout
+  if flags.newCheckout
+    p.checkout New checkout enabled
+  else
+    p.checkout Legacy checkout
+  if user.unreadCount
+    p.unread You have #{user.unreadCount} unread messages.
+  else
+    p.unread Nothing unread.
+  p.access(data-role=user.admin ? 'admin' : 'member') Access level.

@@ -1,0 +1,40 @@
+<div class="dashboard">
+  <% if (it.user.loggedIn) { %>
+    <p class="hello">Welcome back, <%= it.user.name %>.</p>
+  <% } else { %>
+    <p class="hello">Please sign in.</p>
+  <% } %>
+  <% if (it.user.admin) { %>
+    <p class="role">You have admin access.</p>
+  <% } else if (it.user.editor) { %>
+    <p class="role">You can edit the catalog.</p>
+  <% } else { %>
+    <p class="role">You have read-only access.</p>
+  <% } %>
+  <% if (!it.flags.beta) { %>
+    <p class="channel">You are on the stable release.</p>
+  <% } else { %>
+    <p class="channel">You are on the beta release.</p>
+  <% } %>
+  <% if (it.flags.darkMode && it.flags.showBanner) { %>
+    <div class="banner dark">Dark mode banner</div>
+  <% } else { %>
+    <div class="banner light">Light mode banner</div>
+  <% } %>
+  <% if (it.flags.compact) { %>
+    <p class="density">Compact layout</p>
+  <% } else { %>
+    <p class="density">Comfortable layout</p>
+  <% } %>
+  <% if (it.flags.newCheckout) { %>
+    <p class="checkout">New checkout enabled</p>
+  <% } else { %>
+    <p class="checkout">Legacy checkout</p>
+  <% } %>
+  <% if (it.user.unreadCount) { %>
+    <p class="unread">You have <%= it.user.unreadCount %> unread messages.</p>
+  <% } else { %>
+    <p class="unread">Nothing unread.</p>
+  <% } %>
+  <p class="access" data-role="<%= it.user.admin ? 'admin' : 'member' %>">Access level.</p>
+</div>

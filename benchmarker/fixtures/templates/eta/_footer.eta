@@ -1,0 +1,9 @@
+<footer class="site-footer">
+  <p class="note"><%= it.footer.note %></p>
+  <ul class="footer-links">
+    <% it.footer.links.forEach(function (link) { %>
+      <li><a href="<%= link.href %>"><%= link.label %></a></li>
+    <% }) %>
+  </ul>
+  <p class="copyright"><%= it.site.copyright %></p>
+</footer>

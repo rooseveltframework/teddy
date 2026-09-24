@@ -1,0 +1,26 @@
+<article class="post">
+  <h1>{{page.title}}</h1>
+  <p class="breadcrumb">{{page.breadcrumb}}</p>
+  <h2>{{page.heading}}</h2>
+  <p class="tagline">{{site.tagline}}</p>
+  <p class="desc">{{page.description}}</p>
+  <p class="escaped">{{page.unsafe}}</p>
+  <div class="blurb">{{@ page.blurb}}</div>
+  <dl class="meta">
+    <dt>Site</dt><dd>{{site.name}}</dd>
+    <dt>URL</dt><dd>{{site.url}}</dd>
+    <dt>Support</dt><dd>{{site.supportEmail}}</dd>
+    <dt>Updated</dt><dd>{{page.updated}}</dd>
+    <dt>User</dt><dd>{{user.name}}</dd>
+    <dt>Email</dt><dd>{{user.email}}</dd>
+    <dt>Plan</dt><dd>{{user.plan}}</dd>
+    <dt>Unread</dt><dd>{{user.unreadCount}}</dd>
+    <dt>Greeting</dt><dd>{{user.greeting}}</dd>
+    <dt>Last seen</dt><dd>{{user.lastSeen}}</dd>
+    <dt>Copyright</dt><dd>{{site.copyright}}</dd>
+    <dt>Note</dt><dd>{{footer.note}}</dd>
+    <dt>Year</dt><dd>{{footer.year}}</dd>
+  </dl>
+  <p class="signoff">{{user.greeting}}, {{user.name}} — you have {{user.unreadCount}} unread messages from {{site.name}}.</p>
+  <footer class="post-footer">{{site.name}} — {{site.tagline}} — {{site.supportEmail}} — {{footer.year}}</footer>
+</article>

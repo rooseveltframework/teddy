@@ -1,0 +1,18 @@
+<table class="roster">
+  <thead>
+    <tr><th>ID</th><th>Name</th><th>Email</th><th>Department</th><th>Title</th><th>Tenure</th><th>Status</th></tr>
+  </thead>
+  <tbody>
+    <% rows.forEach(function (row) { %>
+      <tr>
+        <td><%= row.id %></td>
+        <td><%= row.name %></td>
+        <td><%= row.email %></td>
+        <td><%= row.department %></td>
+        <td><%= row.title %></td>
+        <td><%= row.tenure %></td>
+        <td><% if (row.active) { %>Active<% } else { %>Inactive<% } %></td>
+      </tr>
+    <% }) %>
+  </tbody>
+</table>

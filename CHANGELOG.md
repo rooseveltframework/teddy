@@ -1,3 +1,11 @@
+## 2.0.5
+
+- Fixed a bug that caused markup supplied through a `{variable|s}` to be left out of the page entirely when it contained a `<script>`, `<style>`, `<textarea>`, or `<pre>` holding something that looks like a Teddy tag, such as a script with the string `"<include src=x>"` in it. The check that markup from the model opens and closes its own tags counted tags inside those elements as though they were real, so it judged the markup incomplete. Their contents are now skipped, the same as when those elements are written in the template.
+- Fixed a bug in the client-side build that caused Teddy tags inside a `<script>`, `<style>`, or `<textarea>` to be parsed and run, which garbled the element and could drop the markup after it. Their contents are now read as plain text, the way a browser reads them and the way the server build already did.
+- Fixed a bug in the client-side build that caused an unquoted attribute value such as `class=greeting` to be read as `=greeting`.
+- Fixed a spurious warning about a closing tag the template never opened when that closing tag appeared inside a `<script>`, `<style>`, `<textarea>`, or `<pre>`.
+- Updated dependencies.
+
 ## 2.0.4
 
 - Fixed text written inside an `<include>` that renders as a web component being dropped rather than passed through as the component's light DOM, so a component reading its content through a default `<slot>`, as `<my-button>Click me</my-button>` does, was given nothing to project. Only the elements written inside the include were kept, so an example mixing the two, like `<my-card>before<b>bold</b>after</my-card>`, lost everything but the `<b>`.

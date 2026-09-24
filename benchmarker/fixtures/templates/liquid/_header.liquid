@@ -1,0 +1,16 @@
+<header class="masthead">
+  <p class="brand">{{ site.name | escape }}</p>
+  <p class="tagline">{{ site.tagline | escape }}</p>
+  <nav>
+    <ul>
+      {% for item in nav %}
+        <li class="nav-item"><a href="{{ item.href | escape }}" {% if item.current %}aria-current="page"{% else %}class="plain"{% endif %}>{{ item.label | escape }}</a></li>
+      {% endfor %}
+    </ul>
+  </nav>
+  {% if user.loggedIn %}
+    <p class="session">{{ user.greeting | escape }}, {{ user.name | escape }}.</p>
+  {% else %}
+    <p class="session">Sign in to see your orders.</p>
+  {% endif %}
+</header>

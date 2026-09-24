@@ -1,0 +1,26 @@
+<article class="post">
+  <h1>{{ page.title | escape }}</h1>
+  <p class="breadcrumb">{{ page.breadcrumb | escape }}</p>
+  <h2>{{ page.heading | escape }}</h2>
+  <p class="tagline">{{ site.tagline | escape }}</p>
+  <p class="desc">{{ page.description | escape }}</p>
+  <p class="escaped">{{ page.unsafe | escape }}</p>
+  <div class="blurb">{{ page.blurb }}</div>
+  <dl class="meta">
+    <dt>Site</dt><dd>{{ site.name | escape }}</dd>
+    <dt>URL</dt><dd>{{ site.url | escape }}</dd>
+    <dt>Support</dt><dd>{{ site.supportEmail | escape }}</dd>
+    <dt>Updated</dt><dd>{{ page.updated | escape }}</dd>
+    <dt>User</dt><dd>{{ user.name | escape }}</dd>
+    <dt>Email</dt><dd>{{ user.email | escape }}</dd>
+    <dt>Plan</dt><dd>{{ user.plan | escape }}</dd>
+    <dt>Unread</dt><dd>{{ user.unreadCount | escape }}</dd>
+    <dt>Greeting</dt><dd>{{ user.greeting | escape }}</dd>
+    <dt>Last seen</dt><dd>{{ user.lastSeen | escape }}</dd>
+    <dt>Copyright</dt><dd>{{ site.copyright | escape }}</dd>
+    <dt>Note</dt><dd>{{ footer.note | escape }}</dd>
+    <dt>Year</dt><dd>{{ footer.year | escape }}</dd>
+  </dl>
+  <p class="signoff">{{ user.greeting | escape }}, {{ user.name | escape }} — you have {{ user.unreadCount | escape }} unread messages from {{ site.name | escape }}.</p>
+  <footer class="post-footer">{{ site.name | escape }} — {{ site.tagline | escape }} — {{ site.supportEmail | escape }} — {{ footer.year | escape }}</footer>
+</article>

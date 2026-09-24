@@ -1,0 +1,40 @@
+<div class="dashboard">
+  {{? it.user.loggedIn}}
+    <p class="hello">Welcome back, {{!it.user.name}}.</p>
+  {{??}}
+    <p class="hello">Please sign in.</p>
+  {{?}}
+  {{? it.user.admin}}
+    <p class="role">You have admin access.</p>
+  {{?? it.user.editor}}
+    <p class="role">You can edit the catalog.</p>
+  {{??}}
+    <p class="role">You have read-only access.</p>
+  {{?}}
+  {{? !it.flags.beta}}
+    <p class="channel">You are on the stable release.</p>
+  {{??}}
+    <p class="channel">You are on the beta release.</p>
+  {{?}}
+  {{? it.flags.darkMode && it.flags.showBanner}}
+    <div class="banner dark">Dark mode banner</div>
+  {{??}}
+    <div class="banner light">Light mode banner</div>
+  {{?}}
+  {{? it.flags.compact}}
+    <p class="density">Compact layout</p>
+  {{??}}
+    <p class="density">Comfortable layout</p>
+  {{?}}
+  {{? it.flags.newCheckout}}
+    <p class="checkout">New checkout enabled</p>
+  {{??}}
+    <p class="checkout">Legacy checkout</p>
+  {{?}}
+  {{? it.user.unreadCount}}
+    <p class="unread">You have {{!it.user.unreadCount}} unread messages.</p>
+  {{??}}
+    <p class="unread">Nothing unread.</p>
+  {{?}}
+  <p class="access" data-role="{{!it.user.admin ? 'admin' : 'member'}}">Access level.</p>
+</div>

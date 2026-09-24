@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title><%= page.title %> — <%= site.name %></title>
+    <meta name="description" content="<%= page.description %>">
+  </head>
+  <body class="collection" data-theme="<%= flags.darkMode ? 'dark' : 'light' %>">
+    <%- include('_header') %>
+    <main>
+      <% if (flags.showBanner) { %>
+        <div class="banner">
+          <div class="blurb"><%- page.blurb %></div>
+        </div>
+      <% } %>
+      <h1><%= page.heading %></h1>
+      <p class="breadcrumb"><%= page.breadcrumb %></p>
+      <p class="desc"><%= page.description %></p>
+      <% if (user.admin) { %>
+        <p class="role">You have admin access.</p>
+      <% } else if (user.editor) { %>
+        <p class="role">You can edit the catalog.</p>
+      <% } else { %>
+        <p class="role">You have read-only access.</p>
+      <% } %>
+      <ul class="products">
+        <% products.forEach(function (product) { %>
+          <%- include('_product', { product: product }) %>
+        <% }) %>
+      </ul>
+      <table class="recent">
+        <thead>
+          <tr><th>ID</th><th>Name</th><th>Department</th><th>Tenure</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          <% recent.forEach(function (row) { %>
+            <tr>
+              <td><%= row.id %></td>
+              <td><%= row.name %></td>
+              <td><%= row.department %></td>
+              <td><%= row.tenure %></td>
+              <td><% if (row.active) { %>Active<% } else { %>Inactive<% } %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+      <p class="updated">Last updated <%= page.updated %>.</p>
+    </main>
+    <%- include('_footer') %>
+  </body>
+</html>

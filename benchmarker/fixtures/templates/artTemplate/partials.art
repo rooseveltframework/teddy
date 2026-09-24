@@ -1,0 +1,9 @@
+<div class="shell">
+  {{include './_header.art'}}
+  <ul class="products">
+    {{each products product}}
+      {{include './_product.art' product}}
+    {{/each}}
+  </ul>
+  {{include './_footer.art'}}
+</div>

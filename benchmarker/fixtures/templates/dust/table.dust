@@ -1,0 +1,18 @@
+<table class="roster">
+  <thead>
+    <tr><th>ID</th><th>Name</th><th>Email</th><th>Department</th><th>Title</th><th>Tenure</th><th>Status</th></tr>
+  </thead>
+  <tbody>
+    {#rows}
+      <tr>
+        <td>{id}</td>
+        <td>{name}</td>
+        <td>{email}</td>
+        <td>{department}</td>
+        <td>{title}</td>
+        <td>{tenure}</td>
+        <td>{?active}Active{:else}Inactive{/active}</td>
+      </tr>
+    {/rows}
+  </tbody>
+</table>

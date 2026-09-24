@@ -1,0 +1,9 @@
+<div class="shell">
+  {% include "_header.njk" %}
+  <ul class="products">
+    {% for product in products %}
+      {% include "_product.njk" %}
+    {% endfor %}
+  </ul>
+  {% include "_footer.njk" %}
+</div>

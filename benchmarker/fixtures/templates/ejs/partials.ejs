@@ -1,0 +1,9 @@
+<div class="shell">
+  <%- include('_header') %>
+  <ul class="products">
+    <% products.forEach(function (product) { %>
+      <%- include('_product', { product: product }) %>
+    <% }) %>
+  </ul>
+  <%- include('_footer') %>
+</div>

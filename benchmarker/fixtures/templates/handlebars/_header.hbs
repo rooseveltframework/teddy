@@ -1,0 +1,16 @@
+<header class="masthead">
+  <p class="brand">{{site.name}}</p>
+  <p class="tagline">{{site.tagline}}</p>
+  <nav>
+    <ul>
+      {{#each nav}}
+        <li class="nav-item"><a href="{{href}}" {{#if current}}aria-current="page"{{else}}class="plain"{{/if}}>{{label}}</a></li>
+      {{/each}}
+    </ul>
+  </nav>
+  {{#if user.loggedIn}}
+    <p class="session">{{user.greeting}}, {{user.name}}.</p>
+  {{else}}
+    <p class="session">Sign in to see your orders.</p>
+  {{/if}}
+</header>

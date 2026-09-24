@@ -1,0 +1,17 @@
+<li class="product" data-id=input.product.id>
+  <h3>${input.product.name}</h3>
+  <p class="price">${input.product.price}</p>
+  <p class="desc">${input.product.description}</p>
+  <p class="rating">${input.product.rating}</p>
+  <if=input.product.inStock>
+    <span class="stock in">In stock</span>
+  </if>
+  <else>
+    <span class="stock out">Out of stock</span>
+  </else>
+  <ul class="tags">
+    <for|tag| of=input.product.tags>
+      <li>${tag.label}</li>
+    </for>
+  </ul>
+</li>

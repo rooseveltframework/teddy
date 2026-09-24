@@ -1,0 +1,36 @@
+mixin masthead()
+  header.masthead
+    p.brand= site.name
+    p.tagline= site.tagline
+    nav
+      ul
+        each item in nav
+          li.nav-item
+            a(href=item.href, aria-current=item.current ? 'page' : false, class=item.current ? false : 'plain')= item.label
+    if user.loggedIn
+      p.session #{user.greeting}, #{user.name}.
+    else
+      p.session Sign in to see your orders.
+
+mixin product(product)
+  li.product(data-id=product.id)
+    h3= product.name
+    p.price= product.price
+    p.desc= product.description
+    p.rating= product.rating
+    if product.inStock
+      span.stock.in In stock
+    else
+      span.stock.out Out of stock
+    ul.tags
+      each tag in product.tags
+        li= tag.label
+
+mixin siteFooter()
+  footer.site-footer
+    p.note= footer.note
+    ul.footer-links
+      each link in footer.links
+        li
+          a(href=link.href)= link.label
+    p.copyright= site.copyright

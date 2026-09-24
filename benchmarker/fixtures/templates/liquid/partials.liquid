@@ -1,0 +1,9 @@
+<div class="shell">
+  {% render '_header', site: site, user: user, nav: nav %}
+  <ul class="products">
+    {% for product in products %}
+      {% render '_product', product: product %}
+    {% endfor %}
+  </ul>
+  {% render '_footer', site: site, footer: footer %}
+</div>

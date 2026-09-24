@@ -1,0 +1,26 @@
+<article class="post">
+  <h1>${input.page.title}</h1>
+  <p class="breadcrumb">${input.page.breadcrumb}</p>
+  <h2>${input.page.heading}</h2>
+  <p class="tagline">${input.site.tagline}</p>
+  <p class="desc">${input.page.description}</p>
+  <p class="escaped">${input.page.unsafe}</p>
+  <div class="blurb">$!{input.page.blurb}</div>
+  <dl class="meta">
+    <dt>Site</dt><dd>${input.site.name}</dd>
+    <dt>URL</dt><dd>${input.site.url}</dd>
+    <dt>Support</dt><dd>${input.site.supportEmail}</dd>
+    <dt>Updated</dt><dd>${input.page.updated}</dd>
+    <dt>User</dt><dd>${input.user.name}</dd>
+    <dt>Email</dt><dd>${input.user.email}</dd>
+    <dt>Plan</dt><dd>${input.user.plan}</dd>
+    <dt>Unread</dt><dd>${input.user.unreadCount}</dd>
+    <dt>Greeting</dt><dd>${input.user.greeting}</dd>
+    <dt>Last seen</dt><dd>${input.user.lastSeen}</dd>
+    <dt>Copyright</dt><dd>${input.site.copyright}</dd>
+    <dt>Note</dt><dd>${input.footer.note}</dd>
+    <dt>Year</dt><dd>${input.footer.year}</dd>
+  </dl>
+  <p class="signoff">${input.user.greeting}, ${input.user.name} — you have ${input.user.unreadCount} unread messages from ${input.site.name}.</p>
+  <footer class="post-footer">${input.site.name} — ${input.site.tagline} — ${input.site.supportEmail} — ${input.footer.year}</footer>
+</article>

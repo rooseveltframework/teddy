@@ -57,6 +57,28 @@ const NOTEDDY_PLACEHOLDER = /<noteddy id="\d+"(?: pre="true")?><\/noteddy>/g
 // elements that never carry a closing tag, so an unclosed one of these does not mean the markup is unfinished
 const VOID_ELEMENTS = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr'])
 
+// elements whose contents are not markup as far as teddy is concerned: a browser reads the contents of a script, style, or textarea as plain text, and noteddy, noparse, and a pre without a parse attribute are teddy's own ways of asking for the same
+const UNPARSED_CONTENT = new Set(['script', 'style', 'textarea', 'noteddy', 'noparse', 'pre'])
+
+// the tags in some markup, as matches of [whole, closing slash, name, rest of the tag], skipping over anything inside an element whose contents are not markup
+//
+// counting the tags inside those as though they were real is what made a script holding a string like "<include src=x>" look like markup that opens a tag it never closes
+function * tagsOutsideUnparsedContent (source) {
+  const tag = /<(\/?)([a-zA-Z][a-zA-Z0-9-]*)([^>]*)>/g
+  let match
+  while ((match = tag.exec(source))) {
+    yield match
+    const name = match[2].toLowerCase()
+    if (match[1] || !UNPARSED_CONTENT.has(name) || match[3].trimEnd().endsWith('/')) continue
+    if (name === 'pre' && /(^|\s)parse(\s|=|$)/i.test(match[3])) continue // a <pre parse> asks for its contents to be parsed
+    const close = new RegExp(`</${name}\\s*>`, 'ig')
+    close.lastIndex = tag.lastIndex
+    const found = close.exec(source)
+    if (!found) return // the element runs to the end, so nothing after its opening tag is markup
+    tag.lastIndex = found.index // resume at the closing tag, so that it is matched next
+  }
+}
+
 // stands in for what a variable writes when working that out needs a model, which is the uncommon case
 const NEEDS_MODEL = Symbol('teddy: value needs a model')
 
@@ -629,10 +651,8 @@ export function createCompiler (deps) {
   // only a close with no open at all is reported: html leaves plenty of tags implicitly closed, and complaining about those would be noise
   function reportStrayClosingTags (source) {
     if (params.verbosity < 1 || !source || !source.includes('</')) return
-    const tag = /<(\/?)([a-zA-Z][a-zA-Z0-9-]*)([^>]*)>/g
     const open = []
-    let match
-    while ((match = tag.exec(source))) {
+    for (const match of tagsOutsideUnparsedContent(source)) {
       const name = match[2].toLowerCase()
       if (VOID_ELEMENTS.has(name) || match[3].trimEnd().endsWith('/')) continue
       if (!match[1]) open.push(name)
@@ -873,10 +893,8 @@ export function createCompiler (deps) {
   //
   // a value that opens a construct the surrounding template closes, or closes one the template opened, only means anything joined to that template. teddy renders such a thing because it reparses its own output, and that is the one case a value cannot be compiled on its own
   function isSelfContained (text) {
-    const tag = /<(\/?)([a-zA-Z][a-zA-Z0-9-]*)([^>]*)>/g
     const open = []
-    let match
-    while ((match = tag.exec(text))) {
+    for (const match of tagsOutsideUnparsedContent(text)) {
       const [, closing, rawName, rest] = match
       const name = rawName.toLowerCase()
       if (VOID_ELEMENTS.has(name) || rest.trimEnd().endsWith('/')) continue

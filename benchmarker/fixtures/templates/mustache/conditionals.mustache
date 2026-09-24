@@ -1,0 +1,55 @@
+<div class="dashboard">
+  {{#user.loggedIn}}
+    <p class="hello">Welcome back, {{user.name}}.</p>
+  {{/user.loggedIn}}
+  {{^user.loggedIn}}
+    <p class="hello">Please sign in.</p>
+  {{/user.loggedIn}}
+  {{#user.admin}}
+    <p class="role">You have admin access.</p>
+  {{/user.admin}}
+  {{^user.admin}}
+    {{#user.editor}}
+      <p class="role">You can edit the catalog.</p>
+    {{/user.editor}}
+    {{^user.editor}}
+      <p class="role">You have read-only access.</p>
+    {{/user.editor}}
+  {{/user.admin}}
+  {{^flags.beta}}
+    <p class="channel">You are on the stable release.</p>
+  {{/flags.beta}}
+  {{#flags.beta}}
+    <p class="channel">You are on the beta release.</p>
+  {{/flags.beta}}
+  {{#flags.darkMode}}
+    {{#flags.showBanner}}
+      <div class="banner dark">Dark mode banner</div>
+    {{/flags.showBanner}}
+    {{^flags.showBanner}}
+      <div class="banner light">Light mode banner</div>
+    {{/flags.showBanner}}
+  {{/flags.darkMode}}
+  {{^flags.darkMode}}
+    <div class="banner light">Light mode banner</div>
+  {{/flags.darkMode}}
+  {{#flags.compact}}
+    <p class="density">Compact layout</p>
+  {{/flags.compact}}
+  {{^flags.compact}}
+    <p class="density">Comfortable layout</p>
+  {{/flags.compact}}
+  {{#flags.newCheckout}}
+    <p class="checkout">New checkout enabled</p>
+  {{/flags.newCheckout}}
+  {{^flags.newCheckout}}
+    <p class="checkout">Legacy checkout</p>
+  {{/flags.newCheckout}}
+  {{#user.unreadCount}}
+    <p class="unread">You have {{user.unreadCount}} unread messages.</p>
+  {{/user.unreadCount}}
+  {{^user.unreadCount}}
+    <p class="unread">Nothing unread.</p>
+  {{/user.unreadCount}}
+  <p class="access" data-role="{{#user.admin}}admin{{/user.admin}}{{^user.admin}}member{{/user.admin}}">Access level.</p>
+</div>

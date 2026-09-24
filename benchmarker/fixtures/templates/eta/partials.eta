@@ -1,0 +1,9 @@
+<div class="shell">
+  <%~ include("@_header", it) %>
+  <ul class="products">
+    <% it.products.forEach(function (product) { %>
+      <%~ include("@_product", { ...it, product }) %>
+    <% }) %>
+  </ul>
+  <%~ include("@_footer", it) %>
+</div>

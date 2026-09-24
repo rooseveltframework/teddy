@@ -1,0 +1,9 @@
+<div class="shell">
+  <%= partials._header(obj) %>
+  <ul class="products">
+    <% products.forEach(function (product) { %>
+      <%= partials._product({ ...obj, product: product }) %>
+    <% }) %>
+  </ul>
+  <%= partials._footer(obj) %>
+</div>

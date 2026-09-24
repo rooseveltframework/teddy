@@ -1,0 +1,17 @@
+<header class="masthead">
+  <p class="brand">{{site.name}}</p>
+  <p class="tagline">{{site.tagline}}</p>
+  <nav>
+    <ul>
+      {{#nav}}
+        <li class="nav-item"><a href="{{href}}" {{#current}}aria-current="page"{{/current}}{{^current}}class="plain"{{/current}}>{{label}}</a></li>
+      {{/nav}}
+    </ul>
+  </nav>
+  {{#user.loggedIn}}
+    <p class="session">{{user.greeting}}, {{user.name}}.</p>
+  {{/user.loggedIn}}
+  {{^user.loggedIn}}
+    <p class="session">Sign in to see your orders.</p>
+  {{/user.loggedIn}}
+</header>
