@@ -1,0 +1,9 @@
+<div class="shell">
+  {{@include("_header", it)/}}
+  <ul class="products">
+    {{@each(it.products) => product}}
+      {{@include("_product", {...it, product})/}}
+    {{/each}}
+  </ul>
+  {{@include("_footer", it)/}}
+</div>

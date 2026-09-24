@@ -1,0 +1,40 @@
+<div class="dashboard">
+  {% if user.loggedIn %}
+    <p class="hello">Welcome back, {{ user.name }}.</p>
+  {% else %}
+    <p class="hello">Please sign in.</p>
+  {% endif %}
+  {% if user.admin %}
+    <p class="role">You have admin access.</p>
+  {% elif user.editor %}
+    <p class="role">You can edit the catalog.</p>
+  {% else %}
+    <p class="role">You have read-only access.</p>
+  {% endif %}
+  {% if not flags.beta %}
+    <p class="channel">You are on the stable release.</p>
+  {% else %}
+    <p class="channel">You are on the beta release.</p>
+  {% endif %}
+  {% if flags.darkMode and flags.showBanner %}
+    <div class="banner dark">Dark mode banner</div>
+  {% else %}
+    <div class="banner light">Light mode banner</div>
+  {% endif %}
+  {% if flags.compact %}
+    <p class="density">Compact layout</p>
+  {% else %}
+    <p class="density">Comfortable layout</p>
+  {% endif %}
+  {% if flags.newCheckout %}
+    <p class="checkout">New checkout enabled</p>
+  {% else %}
+    <p class="checkout">Legacy checkout</p>
+  {% endif %}
+  {% if user.unreadCount %}
+    <p class="unread">You have {{ user.unreadCount }} unread messages.</p>
+  {% else %}
+    <p class="unread">Nothing unread.</p>
+  {% endif %}
+  <p class="access" data-role="{% if user.admin %}admin{% else %}member{% endif %}">Access level.</p>
+</div>

@@ -1,0 +1,23 @@
+<ul class="products">
+  {{~it.products :product}}
+    <li class="product" data-id="{{!product.id}}">
+      <h3>{{!product.name}}</h3>
+      <p class="price">{{!product.price}}</p>
+      <p class="desc">{{!product.description}}</p>
+      <p class="rating">{{!product.rating}}</p>
+      {{? product.inStock}}
+        <span class="stock in">In stock</span>
+      {{??}}
+        <span class="stock out">Out of stock</span>
+      {{?}}
+      {{? product.onSale}}
+        <span class="sale">On sale</span>
+      {{?}}
+      <ul class="tags">
+        {{~product.tags :tag}}
+          <li>{{!tag.label}}</li>
+        {{~}}
+      </ul>
+    </li>
+  {{~}}
+</ul>

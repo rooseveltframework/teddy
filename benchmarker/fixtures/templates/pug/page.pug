@@ -1,0 +1,43 @@
+include _mixins.pug
+doctype html
+html(lang='en')
+  head
+    meta(charset='utf-8')
+    title #{page.title} — #{site.name}
+    meta(name='description', content=page.description)
+  body.collection(data-theme=flags.darkMode ? 'dark' : 'light')
+    +masthead()
+    main
+      if flags.showBanner
+        div.banner
+          div.blurb!= page.blurb
+      h1= page.heading
+      p.breadcrumb= page.breadcrumb
+      p.desc= page.description
+      if user.admin
+        p.role You have admin access.
+      else if user.editor
+        p.role You can edit the catalog.
+      else
+        p.role You have read-only access.
+      ul.products
+        each product in products
+          +product(product)
+      table.recent
+        thead
+          tr
+            th ID
+            th Name
+            th Department
+            th Tenure
+            th Status
+        tbody
+          each row in recent
+            tr
+              td= row.id
+              td= row.name
+              td= row.department
+              td= row.tenure
+              td= row.active ? 'Active' : 'Inactive'
+      p.updated Last updated #{page.updated}.
+    +siteFooter()

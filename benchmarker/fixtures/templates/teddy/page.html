@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{page.title} — {site.name}</title>
+    <meta name="description" content="{page.description}">
+  </head>
+  <body class="collection" if-flags.darkMode true="data-theme='dark'" false="data-theme='light'">
+    <include src='_header'></include>
+    <main>
+      <if flags.showBanner>
+        <div class="banner">
+          <div class="blurb">{page.blurb|s}</div>
+        </div>
+      </if>
+      <h1>{page.heading}</h1>
+      <p class="breadcrumb">{page.breadcrumb}</p>
+      <p class="desc">{page.description}</p>
+      <if user.admin>
+        <p class="role">You have admin access.</p>
+      </if>
+      <elseif user.editor>
+        <p class="role">You can edit the catalog.</p>
+      </elseif>
+      <else>
+        <p class="role">You have read-only access.</p>
+      </else>
+      <ul class="products">
+        <loop through='products' val='product'>
+          <include src='_product'></include>
+        </loop>
+      </ul>
+      <table class="recent">
+        <thead>
+          <tr><th>ID</th><th>Name</th><th>Department</th><th>Tenure</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          <loop through='recent' val='row'>
+            <tr>
+              <td>{row.id}</td>
+              <td>{row.name}</td>
+              <td>{row.department}</td>
+              <td>{row.tenure}</td>
+              <td><if row.active>Active</if><else>Inactive</else></td>
+            </tr>
+          </loop>
+        </tbody>
+      </table>
+      <p class="updated">Last updated {page.updated}.</p>
+    </main>
+    <include src='_footer'></include>
+  </body>
+</html>

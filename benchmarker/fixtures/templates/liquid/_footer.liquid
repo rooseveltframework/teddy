@@ -1,0 +1,9 @@
+<footer class="site-footer">
+  <p class="note">{{ footer.note | escape }}</p>
+  <ul class="footer-links">
+    {% for link in footer.links %}
+      <li><a href="{{ link.href | escape }}">{{ link.label | escape }}</a></li>
+    {% endfor %}
+  </ul>
+  <p class="copyright">{{ site.copyright | escape }}</p>
+</footer>

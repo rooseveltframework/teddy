@@ -1,0 +1,18 @@
+<table class="roster">
+  <thead>
+    <tr><th>ID</th><th>Name</th><th>Email</th><th>Department</th><th>Title</th><th>Tenure</th><th>Status</th></tr>
+  </thead>
+  <tbody>
+    {% for row in rows %}
+      <tr>
+        <td>{{ row.id | escape }}</td>
+        <td>{{ row.name | escape }}</td>
+        <td>{{ row.email | escape }}</td>
+        <td>{{ row.department | escape }}</td>
+        <td>{{ row.title | escape }}</td>
+        <td>{{ row.tenure | escape }}</td>
+        <td>{% if row.active %}Active{% else %}Inactive{% endif %}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>

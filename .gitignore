@@ -16,3 +16,9 @@ test/client.*
 coverage
 .nyc_output
 test-results
+
+# the machine-readable companion to the committed benchmarker/BENCHMARKS.md, rewritten by every run
+benchmarker/BENCHMARKS.json
+
+# one developer's own before-and-after reference point, which means nothing on anybody else's machine
+benchmarker/BASELINE.json

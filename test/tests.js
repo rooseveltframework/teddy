@@ -2153,6 +2153,77 @@ export default [
         expected: '<div>AB</div>'
       },
       {
+        message: 'should not parse a teddy tag inside a <script> written in the template',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render('<div>A<script>const a = "<include src=x>"</script>B</div>', {}), expected),
+        expected: '<div>A<script>const a = "<include src=x>"</script>B</div>'
+      },
+      {
+        message: 'should not parse a teddy tag inside a <style> written in the template',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render('<div><style>a::after { content: "<if x>" }</style></div>', {}), expected),
+        expected: '<div><style>a::after { content: "<if x>" }</style></div>'
+      },
+      {
+        message: 'should not parse a teddy tag inside a <textarea> written in the template',
+        run: async (teddy, template, model, assert, expected) => {
+          // a browser writes a textarea's text back out with its angle brackets escaped where the server leaves them as they were. both mean the same text, so the brackets are put back before comparing: what matters is that the teddy tag inside was not run and the textarea survived
+          const unescapeTextarea = html => html.replace(/(<textarea[^>]*>)([\s\S]*?)(<\/textarea>)/g, (m, open, text, close) => open + text.replace(/&lt;/g, '<').replace(/&gt;/g, '>') + close)
+          assert(unescapeTextarea(teddy.render('<div><textarea><unless y></textarea></div>', {})), expected)
+        },
+        expected: '<div><textarea><unless y></textarea></div>'
+      },
+      {
+        message: 'should read an unquoted attribute value as the value itself',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render('<p class=greeting data-count=2>{x}</p>', { x: 'hi' }), expected),
+        expected: '<p class="greeting" data-count="2">hi</p>'
+      },
+      {
+        message: 'should not count a teddy tag inside a <script> in a |s variable as markup that is left open',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render('<div>A{snippet|s}B</div>', { snippet: '<script>const a = "<include src=x>"</script>' }), expected),
+        expected: '<div>A<script>const a = "<include src=x>"</script>B</div>'
+      },
+      {
+        message: 'should not count a teddy tag inside a <style> in a |s variable as markup that is left open',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render('<div>{snippet|s}</div>', { snippet: '<style>a::after { content: "<if x>" }</style>' }), expected),
+        expected: '<div><style>a::after { content: "<if x>" }</style></div>'
+      },
+      {
+        message: 'should not count a teddy tag inside a <textarea> in a |s variable as markup that is left open',
+        run: async (teddy, template, model, assert, expected) => {
+          // a browser writes a textarea's text back out with its angle brackets escaped where the server leaves them as they were. both mean the same text, so the brackets are put back before comparing: what matters is that the teddy tag inside was not run and the textarea survived
+          const unescapeTextarea = html => html.replace(/(<textarea[^>]*>)([\s\S]*?)(<\/textarea>)/g, (m, open, text, close) => open + text.replace(/&lt;/g, '<').replace(/&gt;/g, '>') + close)
+          assert(unescapeTextarea(teddy.render('<div>{snippet|s}</div>', { snippet: '<textarea><unless y></textarea>' })), expected)
+        },
+        expected: '<div><textarea><unless y></textarea></div>'
+      },
+      {
+        message: 'should render a <pre> in a |s variable the same way as a <pre> written in the template',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render('<div>{snippet|s}</div>', { snippet: '<pre><include src=x></pre>' }), expected),
+        expected: '<div><pre><include src="x"></include></pre></div>' // what the same <pre> written in the template renders to
+      },
+      {
+        message: 'should still parse a <pre parse> in a |s variable',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render('<div>{snippet|s}</div>', { x: true, snippet: '<pre parse><if x>yes</if></pre>' }), expected),
+        expected: '<div><pre>yes</pre></div>'
+      },
+      {
+        message: 'should not warn about a closing tag inside a <script> in a template',
+        runNode: async (teddy, template, model, assert, expected) => {
+          const warnings = []
+          const originalWarn = console.warn
+          const originalVerbosity = teddy.params.verbosity
+          console.warn = message => warnings.push(message)
+          teddy.setVerbosity(1)
+          try {
+            teddy.render('<div><script>document.body.innerHTML = "</p>"</script></div>', {})
+          } finally {
+            teddy.setVerbosity(originalVerbosity)
+            console.warn = originalWarn
+          }
+          assert(warnings.filter(message => message.includes('never opened')).length ? 'warned' : 'silent', expected)
+        },
+        expected: 'silent'
+      },
+      {
         message: 'should resolve a variable whose name is built from another variable and which also carries a flag (issue: the value used to be written twice)',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render('<p>{a{b}|s}</p>', { b: 'X', aX: '<em>hi</em>' }), expected),
         expected: '<p><em>hi</em></p>'

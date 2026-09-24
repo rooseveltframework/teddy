@@ -1,0 +1,17 @@
+<header class="masthead">
+  <p class="brand">{site.name}</p>
+  <p class="tagline">{site.tagline}</p>
+  <nav>
+    <ul>
+      <loop through='nav' val='item'>
+        <li class="nav-item"><a href="{item.href}" if-item.current true="aria-current='page'" false="class='plain'">{item.label}</a></li>
+      </loop>
+    </ul>
+  </nav>
+  <if user.loggedIn>
+    <p class="session">{user.greeting}, {user.name}.</p>
+  </if>
+  <else>
+    <p class="session">Sign in to see your orders.</p>
+  </else>
+</header>

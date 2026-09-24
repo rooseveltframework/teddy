@@ -1,0 +1,16 @@
+ul.products
+  each product in products
+    li.product(data-id=product.id)
+      h3= product.name
+      p.price= product.price
+      p.desc= product.description
+      p.rating= product.rating
+      if product.inStock
+        span.stock.in In stock
+      else
+        span.stock.out Out of stock
+      if product.onSale
+        span.sale On sale
+      ul.tags
+        each tag in product.tags
+          li= tag.label

@@ -1,0 +1,16 @@
+<li class="product" data-id="{{ product.id }}">
+  <h3>{{ product.name }}</h3>
+  <p class="price">{{ product.price }}</p>
+  <p class="desc">{{ product.description }}</p>
+  <p class="rating">{{ product.rating }}</p>
+  {% if product.inStock %}
+    <span class="stock in">In stock</span>
+  {% else %}
+    <span class="stock out">Out of stock</span>
+  {% endif %}
+  <ul class="tags">
+    {% for tag in product.tags %}
+      <li>{{ tag.label }}</li>
+    {% endfor %}
+  </ul>
+</li>

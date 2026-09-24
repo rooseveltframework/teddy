@@ -1,0 +1,23 @@
+<ul class="products">
+  {{@each(it.products) => product}}
+    <li class="product" data-id="{{product.id}}">
+      <h3>{{product.name}}</h3>
+      <p class="price">{{product.price}}</p>
+      <p class="desc">{{product.description}}</p>
+      <p class="rating">{{product.rating}}</p>
+      {{@if(product.inStock)}}
+        <span class="stock in">In stock</span>
+      {{#else}}
+        <span class="stock out">Out of stock</span>
+      {{/if}}
+      {{@if(product.onSale)}}
+        <span class="sale">On sale</span>
+      {{/if}}
+      <ul class="tags">
+        {{@each(product.tags) => tag}}
+          <li>{{tag.label}}</li>
+        {{/each}}
+      </ul>
+    </li>
+  {{/each}}
+</ul>

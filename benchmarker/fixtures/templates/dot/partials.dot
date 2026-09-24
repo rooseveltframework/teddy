@@ -1,0 +1,9 @@
+<div class="shell">
+  {{#def._header}}
+  <ul class="products">
+    {{~it.products :product}}
+      {{#def._product}}
+    {{~}}
+  </ul>
+  {{#def._footer}}
+</div>

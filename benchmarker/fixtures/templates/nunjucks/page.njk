@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{ page.title }} — {{ site.name }}</title>
+    <meta name="description" content="{{ page.description }}">
+  </head>
+  <body class="collection" data-theme="{% if flags.darkMode %}dark{% else %}light{% endif %}">
+    {% include "_header.njk" %}
+    <main>
+      {% if flags.showBanner %}
+        <div class="banner">
+          <div class="blurb">{{ page.blurb | safe }}</div>
+        </div>
+      {% endif %}
+      <h1>{{ page.heading }}</h1>
+      <p class="breadcrumb">{{ page.breadcrumb }}</p>
+      <p class="desc">{{ page.description }}</p>
+      {% if user.admin %}
+        <p class="role">You have admin access.</p>
+      {% elif user.editor %}
+        <p class="role">You can edit the catalog.</p>
+      {% else %}
+        <p class="role">You have read-only access.</p>
+      {% endif %}
+      <ul class="products">
+        {% for product in products %}
+          {% include "_product.njk" %}
+        {% endfor %}
+      </ul>
+      <table class="recent">
+        <thead>
+          <tr><th>ID</th><th>Name</th><th>Department</th><th>Tenure</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          {% for row in recent %}
+            <tr>
+              <td>{{ row.id }}</td>
+              <td>{{ row.name }}</td>
+              <td>{{ row.department }}</td>
+              <td>{{ row.tenure }}</td>
+              <td>{% if row.active %}Active{% else %}Inactive{% endif %}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <p class="updated">Last updated {{ page.updated }}.</p>
+    </main>
+    {% include "_footer.njk" %}
+  </body>
+</html>

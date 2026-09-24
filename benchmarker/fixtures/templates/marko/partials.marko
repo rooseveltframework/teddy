@@ -1,0 +1,12 @@
+import masthead from "./_header.marko"
+import productCard from "./_product.marko"
+import siteFooter from "./_footer.marko"
+<div class="shell">
+  <${masthead} ...input/>
+  <ul class="products">
+    <for|product| of=input.products>
+      <${productCard} product=product/>
+    </for>
+  </ul>
+  <${siteFooter} ...input/>
+</div>

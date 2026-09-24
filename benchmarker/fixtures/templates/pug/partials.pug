@@ -1,0 +1,7 @@
+include _mixins.pug
+div.shell
+  +masthead()
+  ul.products
+    each product in products
+      +product(product)
+  +siteFooter()

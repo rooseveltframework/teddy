@@ -1,0 +1,37 @@
+article.post
+  h1= page.title
+  p.breadcrumb= page.breadcrumb
+  h2= page.heading
+  p.tagline= site.tagline
+  p.desc= page.description
+  p.escaped= page.unsafe
+  div.blurb!= page.blurb
+  dl.meta
+    dt Site
+    dd= site.name
+    dt URL
+    dd= site.url
+    dt Support
+    dd= site.supportEmail
+    dt Updated
+    dd= page.updated
+    dt User
+    dd= user.name
+    dt Email
+    dd= user.email
+    dt Plan
+    dd= user.plan
+    dt Unread
+    dd= user.unreadCount
+    dt Greeting
+    dd= user.greeting
+    dt Last seen
+    dd= user.lastSeen
+    dt Copyright
+    dd= site.copyright
+    dt Note
+    dd= footer.note
+    dt Year
+    dd= footer.year
+  p.signoff #{user.greeting}, #{user.name} — you have #{user.unreadCount} unread messages from #{site.name}.
+  footer.post-footer #{site.name} — #{site.tagline} — #{site.supportEmail} — #{footer.year}

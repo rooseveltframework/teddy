@@ -1,0 +1,16 @@
+<header class="masthead">
+  <p class="brand"><%= it.site.name %></p>
+  <p class="tagline"><%= it.site.tagline %></p>
+  <nav>
+    <ul>
+      <% it.nav.forEach(function (item) { %>
+        <li class="nav-item"><a href="<%= item.href %>" <% if (item.current) { %>aria-current="page"<% } else { %>class="plain"<% } %>><%= item.label %></a></li>
+      <% }) %>
+    </ul>
+  </nav>
+  <% if (it.user.loggedIn) { %>
+    <p class="session"><%= it.user.greeting %>, <%= it.user.name %>.</p>
+  <% } else { %>
+    <p class="session">Sign in to see your orders.</p>
+  <% } %>
+</header>

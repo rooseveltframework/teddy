@@ -1,0 +1,9 @@
+<footer class="site-footer">
+  <p class="note">{footer.note}</p>
+  <ul class="footer-links">
+    <loop through='footer.links' val='link'>
+      <li><a href="{link.href}">{link.label}</a></li>
+    </loop>
+  </ul>
+  <p class="copyright">{site.copyright}</p>
+</footer>

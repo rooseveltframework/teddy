@@ -1,0 +1,48 @@
+<div class="dashboard">
+  <if user.loggedIn>
+    <p class="hello">Welcome back, {user.name}.</p>
+  </if>
+  <else>
+    <p class="hello">Please sign in.</p>
+  </else>
+  <if user.admin>
+    <p class="role">You have admin access.</p>
+  </if>
+  <elseif user.editor>
+    <p class="role">You can edit the catalog.</p>
+  </elseif>
+  <else>
+    <p class="role">You have read-only access.</p>
+  </else>
+  <unless flags.beta>
+    <p class="channel">You are on the stable release.</p>
+  </unless>
+  <else>
+    <p class="channel">You are on the beta release.</p>
+  </else>
+  <if flags.darkMode and flags.showBanner>
+    <div class="banner dark">Dark mode banner</div>
+  </if>
+  <else>
+    <div class="banner light">Light mode banner</div>
+  </else>
+  <if flags.compact>
+    <p class="density">Compact layout</p>
+  </if>
+  <else>
+    <p class="density">Comfortable layout</p>
+  </else>
+  <if flags.newCheckout>
+    <p class="checkout">New checkout enabled</p>
+  </if>
+  <else>
+    <p class="checkout">Legacy checkout</p>
+  </else>
+  <if user.unreadCount>
+    <p class="unread">You have {user.unreadCount} unread messages.</p>
+  </if>
+  <else>
+    <p class="unread">Nothing unread.</p>
+  </else>
+  <p class="access" if-user.admin true="data-role='admin'" false="data-role='member'">Access level.</p>
+</div>

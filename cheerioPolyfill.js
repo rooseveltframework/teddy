@@ -95,7 +95,10 @@ function parseTeddyDOMFromString (html) {
   const dom = [root]
   const openTags = [] // stack to track open tags
   const tagAndCommentRegex = /<\/?([a-zA-Z][a-zA-Z0-9-]*)([^>]*)>|<!--([\s\S]*?)-->/g
-  const attrRegex = /([a-zA-Z0-9-:._]+)(?:=(["'])(.*?)\2|([^>\s]+))?/g
+  // the = belongs to both forms of a value. it used to sit inside the quoted form only, so an unquoted value such as src=x was read as the value "=x"
+  const attrRegex = /([a-zA-Z0-9-:._]+)(?:=(?:(["'])(.*?)\2|([^>\s]+)))?/g
+  // elements whose contents a browser reads as plain text rather than as markup, so a tag written inside one is not a tag. teddy leaves their contents alone on the server for the same reason
+  const rawTextTags = new Set(['script', 'style', 'textarea'])
   let lastIndex = 0
   let match
 
@@ -189,8 +192,19 @@ function parseTeddyDOMFromString (html) {
 
         // push the new element to the dom if it's not self-closing
         if (!selfClosingTags.has(lowerCaseTagName) && !fullMatch.endsWith('/>')) {
-          dom.push(element)
-          openTags.push(lowerCaseTagName)
+          if (rawTextTags.has(lowerCaseTagName)) {
+            // everything up to the element's closing tag is its text, however much of it looks like markup
+            const closeTag = new RegExp(`</${lowerCaseTagName}\\s*>`, 'ig')
+            closeTag.lastIndex = tagAndCommentRegex.lastIndex
+            const close = closeTag.exec(html)
+            const end = close ? close.index : html.length
+            const text = html.slice(tagAndCommentRegex.lastIndex, end)
+            if (text) element.appendChild(document.createTextNode(text))
+            tagAndCommentRegex.lastIndex = close ? closeTag.lastIndex : html.length
+          } else {
+            dom.push(element)
+            openTags.push(lowerCaseTagName)
+          }
         }
       }
     }

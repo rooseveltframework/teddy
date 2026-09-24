@@ -1,0 +1,23 @@
+<ul class="products">
+  {#products}
+    <li class="product" data-id="{id}">
+      <h3>{name}</h3>
+      <p class="price">{price}</p>
+      <p class="desc">{description}</p>
+      <p class="rating">{rating}</p>
+      {?inStock}
+        <span class="stock in">In stock</span>
+      {:else}
+        <span class="stock out">Out of stock</span>
+      {/inStock}
+      {?onSale}
+        <span class="sale">On sale</span>
+      {/onSale}
+      <ul class="tags">
+        {#tags}
+          <li>{label}</li>
+        {/tags}
+      </ul>
+    </li>
+  {/products}
+</ul>

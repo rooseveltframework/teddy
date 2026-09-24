@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{!it.page.title}} — {{!it.site.name}}</title>
+    <meta name="description" content="{{!it.page.description}}">
+  </head>
+  <body class="collection" data-theme="{{!it.flags.darkMode ? 'dark' : 'light'}}">
+    {{#def._header}}
+    <main>
+      {{? it.flags.showBanner}}
+        <div class="banner">
+          <div class="blurb">{{=it.page.blurb}}</div>
+        </div>
+      {{?}}
+      <h1>{{!it.page.heading}}</h1>
+      <p class="breadcrumb">{{!it.page.breadcrumb}}</p>
+      <p class="desc">{{!it.page.description}}</p>
+      {{? it.user.admin}}
+        <p class="role">You have admin access.</p>
+      {{?? it.user.editor}}
+        <p class="role">You can edit the catalog.</p>
+      {{??}}
+        <p class="role">You have read-only access.</p>
+      {{?}}
+      <ul class="products">
+        {{~it.products :product}}
+          {{#def._product}}
+        {{~}}
+      </ul>
+      <table class="recent">
+        <thead>
+          <tr><th>ID</th><th>Name</th><th>Department</th><th>Tenure</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          {{~it.recent :row}}
+            <tr>
+              <td>{{!row.id}}</td>
+              <td>{{!row.name}}</td>
+              <td>{{!row.department}}</td>
+              <td>{{!row.tenure}}</td>
+              <td>{{? row.active}}Active{{??}}Inactive{{?}}</td>
+            </tr>
+          {{~}}
+        </tbody>
+      </table>
+      <p class="updated">Last updated {{!it.page.updated}}.</p>
+    </main>
+    {{#def._footer}}
+  </body>
+</html>

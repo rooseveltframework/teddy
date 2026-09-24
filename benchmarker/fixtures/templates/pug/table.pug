@@ -1,0 +1,20 @@
+table.roster
+  thead
+    tr
+      th ID
+      th Name
+      th Email
+      th Department
+      th Title
+      th Tenure
+      th Status
+  tbody
+    each row in rows
+      tr
+        td= row.id
+        td= row.name
+        td= row.email
+        td= row.department
+        td= row.title
+        td= row.tenure
+        td= row.active ? 'Active' : 'Inactive'

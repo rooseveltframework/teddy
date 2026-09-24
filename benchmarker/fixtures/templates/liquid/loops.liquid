@@ -1,0 +1,23 @@
+<ul class="products">
+  {% for product in products %}
+    <li class="product" data-id="{{ product.id | escape }}">
+      <h3>{{ product.name | escape }}</h3>
+      <p class="price">{{ product.price | escape }}</p>
+      <p class="desc">{{ product.description | escape }}</p>
+      <p class="rating">{{ product.rating | escape }}</p>
+      {% if product.inStock %}
+        <span class="stock in">In stock</span>
+      {% else %}
+        <span class="stock out">Out of stock</span>
+      {% endif %}
+      {% if product.onSale %}
+        <span class="sale">On sale</span>
+      {% endif %}
+      <ul class="tags">
+        {% for tag in product.tags %}
+          <li>{{ tag.label | escape }}</li>
+        {% endfor %}
+      </ul>
+    </li>
+  {% endfor %}
+</ul>

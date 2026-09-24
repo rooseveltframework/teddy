@@ -1,0 +1,26 @@
+<article class="post">
+  <h1>{{!it.page.title}}</h1>
+  <p class="breadcrumb">{{!it.page.breadcrumb}}</p>
+  <h2>{{!it.page.heading}}</h2>
+  <p class="tagline">{{!it.site.tagline}}</p>
+  <p class="desc">{{!it.page.description}}</p>
+  <p class="escaped">{{!it.page.unsafe}}</p>
+  <div class="blurb">{{=it.page.blurb}}</div>
+  <dl class="meta">
+    <dt>Site</dt><dd>{{!it.site.name}}</dd>
+    <dt>URL</dt><dd>{{!it.site.url}}</dd>
+    <dt>Support</dt><dd>{{!it.site.supportEmail}}</dd>
+    <dt>Updated</dt><dd>{{!it.page.updated}}</dd>
+    <dt>User</dt><dd>{{!it.user.name}}</dd>
+    <dt>Email</dt><dd>{{!it.user.email}}</dd>
+    <dt>Plan</dt><dd>{{!it.user.plan}}</dd>
+    <dt>Unread</dt><dd>{{!it.user.unreadCount}}</dd>
+    <dt>Greeting</dt><dd>{{!it.user.greeting}}</dd>
+    <dt>Last seen</dt><dd>{{!it.user.lastSeen}}</dd>
+    <dt>Copyright</dt><dd>{{!it.site.copyright}}</dd>
+    <dt>Note</dt><dd>{{!it.footer.note}}</dd>
+    <dt>Year</dt><dd>{{!it.footer.year}}</dd>
+  </dl>
+  <p class="signoff">{{!it.user.greeting}}, {{!it.user.name}} — you have {{!it.user.unreadCount}} unread messages from {{!it.site.name}}.</p>
+  <footer class="post-footer">{{!it.site.name}} — {{!it.site.tagline}} — {{!it.site.supportEmail}} — {{!it.footer.year}}</footer>
+</article>
