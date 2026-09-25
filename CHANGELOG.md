@@ -1,3 +1,8 @@
+## 2.0.6
+
+- Removed the comments naming each module's path from the unminified builds in `dist`. They marked themselves as licenses, so a project bundling this one ended up with a `*.LICENSE.txt` file full of them.
+- Updated dependencies.
+
 ## 2.0.5
 
 - Fixed a bug that caused markup supplied through a `{variable|s}` to be left out of the page entirely when it contained a `<script>`, `<style>`, `<textarea>`, or `<pre>` holding something that looks like a Teddy tag, such as a script with the string `"<include src=x>"` in it. The check that markup from the model opens and closes its own tags counted tags inside those elements as though they were real, so it judged the markup incomplete. Their contents are now skipped, the same as when those elements are written in the template.
