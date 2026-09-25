@@ -14,6 +14,8 @@ export default [
     name: 'main',
     entry: './teddy.js',
     output: {
+      // development mode labels every module in the bundle with a comment naming its path, e.g. /*! ./lib/helpers.js */, which is noise to anyone reading this build and does not survive being bundled again cleanly: the /*! marks it as a license, so the minifier of a project that bundles this one moves every label out into a *.LICENSE.txt file of its own
+      pathinfo: false,
       path: path.join(__dirname, 'dist'),
       filename: 'teddy.mjs',
       library: {
@@ -68,6 +70,8 @@ export default [
     name: 'main',
     entry: './teddy.js',
     output: {
+      // development mode labels every module in the bundle with a comment naming its path, e.g. /*! ./lib/helpers.js */, which is noise to anyone reading this build and does not survive being bundled again cleanly: the /*! marks it as a license, so the minifier of a project that bundles this one moves every label out into a *.LICENSE.txt file of its own
+      pathinfo: false,
       path: path.join(__dirname, 'dist'),
       filename: 'teddy.cjs',
       library: {
@@ -127,6 +131,8 @@ export default [
     name: 'main',
     entry: './teddy.js',
     output: {
+      // development mode labels every module in the bundle with a comment naming its path, e.g. /*! ./lib/helpers.js */, which is noise to anyone reading this build and does not survive being bundled again cleanly: the /*! marks it as a license, so the minifier of a project that bundles this one moves every label out into a *.LICENSE.txt file of its own
+      pathinfo: false,
       path: path.join(__dirname, 'dist'),
       filename: 'teddy.client.mjs',
       library: {
@@ -187,6 +193,8 @@ export default [
     name: 'main',
     entry: './teddy.js',
     output: {
+      // development mode labels every module in the bundle with a comment naming its path, e.g. /*! ./lib/helpers.js */, which is noise to anyone reading this build and does not survive being bundled again cleanly: the /*! marks it as a license, so the minifier of a project that bundles this one moves every label out into a *.LICENSE.txt file of its own
+      pathinfo: false,
       path: path.join(__dirname, 'dist'),
       filename: 'teddy.client.cjs',
       library: {
