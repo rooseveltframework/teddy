@@ -15,7 +15,7 @@
     "lint-fix": "standard --fix"
   },
   "dependencies": {
-    "@marko/compiler": "5.42.5",
+    "@marko/compiler": "5.42.10",
     "art-template": "4.13.4",
     "dot": "1.1.3",
     "dustjs-linkedin": "3.0.1",
