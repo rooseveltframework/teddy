@@ -4,14 +4,14 @@
 //
 // the shapes involved are not plain json. the same node list is reached from more than one place, an arm holds its branch and the branch holds the arm back, and a dynamic include keeps a map. so every object is written once into a table and referred to by its place in it, which handles sharing and circularity alike
 
-export const FORMAT = 1 // precompile version: a template compiled by one version of teddy and loaded by another whose format differs is refused rather than rendered into something wrong
+export const FORMAT = 2 // precompile version: a template compiled by one version of teddy and loaded by another whose format differs is refused rather than rendered into something wrong
 
 const REF = '$r'
 const MAP = '$m'
 const UNDEFINED = '$u'
 
 // the node types the compiler produces. a decoded object is rebuilt as a node when its type is one of these, so that it comes out with the same shape every other node has
-const NODE_TYPES = new Set(['text', 'var', 'arm', 'loop', 'attrs', 'scope', 'raw', 'inline', 'computedVar', 'selection', 'cache', 'dynamicInclude'])
+const NODE_TYPES = new Set(['text', 'var', 'arm', 'loop', 'attrs', 'scope', 'raw', 'inline', 'computedVar', 'selection', 'dynamicInclude'])
 
 // true for an object that came out of the compiler's node factory. checking the type alone is not enough: a binding also has a name, and a conditional also has a type of sorts
 function isNode (value) {

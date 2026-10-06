@@ -1,3 +1,9 @@
+## 2.1.0
+
+- Breaking: Removed the `<cache>` element and `teddy.setCache`, `teddy.clearCache`, `teddy.caches`, and `teddy.templateCaches`. They only suited pages that render the same for every visitor and are keyed by one model variable: a page carrying a session, a CSRF token, or a flash message would serve one visitor's markup to the next, and a key that missed a variable served stale pages without warning. Cache rendered pages outside the app instead, with a CDN, a reverse proxy such as nginx's `proxy_cache`, or `Cache-Control` headers. A `<cache>` element left in a template is now rendered as an ordinary unknown element. `teddy.setCacheTemplates` and the `cache` render option, which keep templates in memory rather than reading them again, are unchanged.
+- Breaking: Bumped the precompiled format to `2`, so templates precompiled with an earlier version must be precompiled again.
+- Updated dependencies.
+
 ## 2.0.6
 
 - Removed the comments naming each module's path from the unminified builds in `dist`. They marked themselves as licenses, so a project bundling this one ended up with a `*.LICENSE.txt` file full of them.
