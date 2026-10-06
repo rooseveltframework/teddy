@@ -7,7 +7,7 @@
 // this is used in node.js only. emitting javascript means building a function at runtime, which a page served under a strict content security policy is not allowed to do, so browser builds swap this module for a stub and walk the tree instead, which is slower, but more secure in browser contexts
 
 // every node kind the compiler can produce
-const EMITTABLE = new Set(['text', 'var', 'arm', 'loop', 'attrs', 'scope', 'raw', 'inline', 'computedVar', 'selection', 'cache', 'dynamicInclude'])
+const EMITTABLE = new Set(['text', 'var', 'arm', 'loop', 'attrs', 'scope', 'raw', 'inline', 'computedVar', 'selection', 'dynamicInclude'])
 
 export function canEmit (nodes) {
   if (nodes === null) return false
@@ -127,9 +127,6 @@ function walk (nodes, state, out) {
         break
       case 'selection':
         js += emitSelection(node, state, out)
-        break
-      case 'cache':
-        js += emitCache(node, state, out)
         break
       case 'dynamicInclude':
         js += emitDynamicInclude(node, state, out)
@@ -325,17 +322,6 @@ function emitSelection (node, state, out) {
   js += `${out} += r.render(${ref}.variants[${marked}], ${state.model}, s)\n`
   js += walk(node.body, state, out)
   js += `${out} += ${JSON.stringify(node.closeTag)}\n`
-  return js
-}
-
-// a <cache> writes what its body rendered to last time, so the body is emitted behind a function the helper only calls on a miss
-function emitCache (node, state, out) {
-  const acc = `q${state.uid++}`
-  let js = `${out} += r.cache(${nodeRef(node, state)}, ${state.model}, () => {\n`
-  js += `let ${acc} = ''\n`
-  js += walk(node.body, state, acc)
-  js += `return ${acc}\n`
-  js += '})\n'
   return js
 }
 

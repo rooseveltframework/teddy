@@ -4,8 +4,8 @@ These benchmarks were ran on the following hardware:
 
 | | |
 | --- | --- |
-| Node | v24.19.0 (V8 13.6.233.17-node.51) |
-| Platform | Linux 7.0.0-34-generic x64 |
+| Node | v26.9.0 (V8 14.6.202.34-node.32) |
+| Platform | Linux 7.0.0-38-generic x64 |
 | CPU | AMD Ryzen 9 9900X 12-Core Processor, 24 cores |
 | Memory | 121 GB |
 | Time per measurement | 1000 ms |
@@ -20,20 +20,20 @@ Geometric mean of the per scenario ratios to Teddy.
 | Engine | Scenarios | vs Teddy |
 | --- | --: | --- |
 | Teddy | 6 | same |
-| Pug | 6 | 1.20× slower |
-| Eta | 6 | 1.28× slower |
-| Squirrelly | 6 | 1.38× slower |
-| Marko | 6 | 1.94× slower |
-| doT | 6 | 2.30× slower |
-| art-template | 6 | 3.20× slower |
-| Dust.js | 6 | 5.21× slower |
-| Handlebars | 6 | 6.72× slower |
-| Lodash template | 6 | 7.32× slower |
-| Nunjucks | 6 | 9.28× slower |
-| Mustache | 6 | 10.46× slower |
-| EJS | 6 | 17.06× slower |
-| PHP (node-php-runner) | 6 | 29.50× slower |
-| LiquidJS | 6 | 83.10× slower |
+| Pug | 6 | 1.29× slower |
+| Eta | 6 | 1.31× slower |
+| Squirrelly | 6 | 1.39× slower |
+| Marko | 6 | 1.96× slower |
+| doT | 6 | 2.77× slower |
+| art-template | 6 | 3.07× slower |
+| Dust.js | 6 | 5.94× slower |
+| Handlebars | 6 | 6.42× slower |
+| Lodash template | 6 | 7.60× slower |
+| Mustache | 6 | 9.14× slower |
+| Nunjucks | 6 | 9.69× slower |
+| EJS | 6 | 17.63× slower |
+| PHP (node-php-runner) | 6 | 27.76× slower |
+| LiquidJS | 6 | 83.86× slower |
 
 ### In Node, cold
 
@@ -41,21 +41,21 @@ Geometric mean of the per scenario ratios to Teddy.
 
 | Engine | Scenarios | vs Teddy |
 | --- | --: | --- |
-| doT | 6 | 13.44× faster |
-| Eta | 6 | 9.43× faster |
-| Squirrelly | 6 | 8.20× faster |
-| Mustache | 6 | 3.60× faster |
-| art-template | 6 | 3.21× faster |
-| Lodash template | 6 | 2.97× faster |
-| EJS | 6 | 2.67× faster |
-| Dust.js | 6 | 1.57× faster |
-| Nunjucks | 6 | 1.38× faster |
-| Handlebars | 6 | 1.29× faster |
+| doT | 6 | 15.45× faster |
+| Eta | 6 | 12.67× faster |
+| Squirrelly | 6 | 9.65× faster |
+| art-template | 6 | 3.85× faster |
+| Mustache | 6 | 3.78× faster |
+| Lodash template | 6 | 3.47× faster |
+| EJS | 6 | 3.10× faster |
+| Handlebars | 6 | 1.48× faster |
+| Nunjucks | 6 | 1.44× faster |
+| Dust.js | 6 | 1.35× faster |
 | Teddy | 6 | same |
-| LiquidJS | 6 | 1.12× slower |
-| PHP (node-php-runner) | 6 | 2.57× slower |
-| Pug | 6 | 3.12× slower |
-| Marko | 6 | 7.22× slower |
+| LiquidJS | 6 | 1.02× slower |
+| PHP (node-php-runner) | 6 | 1.03× slower |
+| Pug | 6 | 2.87× slower |
+| Marko | 6 | 6.24× slower |
 
 ### In a browser, cached
 
@@ -63,21 +63,21 @@ Ratios to **Teddy (emitted js)**. Teddy is listed twice because it is the only e
 
 | Engine | Scenarios | vs Teddy |
 | --- | --: | --- |
-| Pug | 6 | 1.30× faster |
-| Eta | 6 | 1.23× faster |
+| Pug | 6 | 1.31× faster |
+| Eta | 6 | 1.26× faster |
 | Squirrelly | 6 | 1.13× faster |
 | Teddy (emitted js) | 6 | same |
-| doT | 6 | 1.20× slower |
-| Marko | 6 | 1.56× slower |
-| art-template | 6 | 1.57× slower |
-| Dust.js | 6 | 2.57× slower |
-| Handlebars | 6 | 3.36× slower |
-| Mustache | 6 | 4.00× slower |
-| Lodash template | 6 | 4.19× slower |
-| Teddy (tree walk) | 6 | 4.34× slower |
-| Nunjucks | 6 | 4.64× slower |
-| EJS | 6 | 8.89× slower |
-| LiquidJS | 6 | 119.73× slower |
+| doT | 6 | 1.19× slower |
+| Marko | 6 | 1.55× slower |
+| art-template | 6 | 1.56× slower |
+| Dust.js | 6 | 2.55× slower |
+| Handlebars | 6 | 3.37× slower |
+| Mustache | 6 | 3.98× slower |
+| Lodash template | 6 | 4.16× slower |
+| Teddy (tree walk) | 6 | 4.27× slower |
+| Nunjucks | 6 | 4.56× slower |
+| EJS | 6 | 8.80× slower |
+| LiquidJS | 6 | 116.68× slower |
 | PHP (node-php-runner) | 0 | cannot run client-side |
 
 ### In a browser, cold
@@ -86,18 +86,18 @@ Geometric mean of the per scenario ratios to Teddy.
 
 | Engine | Scenarios | vs Teddy |
 | --- | --: | --- |
-| doT | 6 | 14.17× faster |
-| Eta | 6 | 9.21× faster |
-| Squirrelly | 6 | 6.15× faster |
-| Lodash template | 6 | 5.28× faster |
-| art-template | 6 | 3.54× faster |
-| EJS | 6 | 3.01× faster |
-| Mustache | 6 | 2.79× faster |
-| Nunjucks | 6 | 1.59× faster |
+| doT | 6 | 15.13× faster |
+| Eta | 6 | 9.76× faster |
+| Squirrelly | 6 | 6.73× faster |
+| Lodash template | 6 | 5.25× faster |
+| art-template | 6 | 3.49× faster |
+| EJS | 6 | 2.97× faster |
+| Mustache | 6 | 2.75× faster |
+| Nunjucks | 6 | 1.56× faster |
 | Dust.js | 6 | 1.19× faster |
-| Handlebars | 6 | 1.16× faster |
+| Handlebars | 6 | 1.13× faster |
 | Teddy | 6 | same |
-| LiquidJS | 6 | 2.88× slower |
+| LiquidJS | 6 | 2.91× slower |
 | Pug | 0 | compiles ahead of time |
 | Marko | 0 | compiles ahead of time |
 | PHP (node-php-runner) | 0 | cannot run client-side |
@@ -110,21 +110,21 @@ Geometric mean of the per scenario ratios to Teddy.
 
 | Engine | Version | Renders/sec | Mean ms | ± % | vs Teddy | Output bytes |
 | --- | --- | --: | --: | --: | --- | --: |
-| art-template | 4.13.4 | 1,021,441 | 1.0e-3 | 0.3 | 1.31× faster | 1,259 |
-| Pug | 3.0.4 | 832,126 | 1.2e-3 | 0.1 | 1.07× faster | 1,158 |
-| Teddy | 2.0.5 | 776,791 | 1.3e-3 | 0.4 | same | 1,258 |
-| Eta | 4.6.0 | 613,907 | 1.7e-3 | 0.4 | 1.27× slower | 1,258 |
-| Marko | 6.3.51 | 530,497 | 1.9e-3 | 0.2 | 1.46× slower | 1,140 |
-| Squirrelly | 9.1.1 | 529,499 | 1.9e-3 | 0.1 | 1.47× slower | 1,258 |
-| doT | 1.1.3 | 429,026 | 2.3e-3 | 0.1 | 1.81× slower | 1,275 |
-| Handlebars | 4.7.9 | 338,353 | 3.0e-3 | 0.2 | 2.30× slower | 1,258 |
-| Nunjucks | 3.2.4 | 285,152 | 3.5e-3 | 0.1 | 2.72× slower | 1,258 |
-| Dust.js | 3.0.1 | 274,940 | 3.7e-3 | 0.1 | 2.83× slower | 1,258 |
-| Lodash template | 4.18.1 | 227,957 | 4.4e-3 | 0.1 | 3.41× slower | 1,258 |
-| Mustache | 4.2.0 | 132,403 | 7.6e-3 | 0.1 | 5.87× slower | 1,278 |
-| EJS | 6.0.1 | 121,846 | 8.3e-3 | 0.1 | 6.38× slower | 1,258 |
-| PHP (node-php-runner) | 2.0.0 | 39,798 | 0.026 | 0.2 | 19.52× slower | 1,258 |
-| LiquidJS | 10.29.0 | 26,447 | 0.038 | 0.2 | 29.37× slower | 1,258 |
+| art-template | 4.13.4 | 1,204,579 | 8.4e-4 | 0.1 | 1.64× faster | 1,259 |
+| Teddy | 2.1.0 | 732,766 | 1.4e-3 | 0.2 | same | 1,258 |
+| Eta | 4.6.0 | 650,347 | 1.6e-3 | 0.1 | 1.13× slower | 1,258 |
+| Pug | 3.0.4 | 613,966 | 1.6e-3 | 0.1 | 1.19× slower | 1,158 |
+| Squirrelly | 9.1.1 | 588,569 | 1.7e-3 | 0.1 | 1.24× slower | 1,258 |
+| Marko | 6.3.51 | 543,349 | 1.9e-3 | 0.1 | 1.35× slower | 1,140 |
+| doT | 1.1.3 | 392,802 | 2.6e-3 | 0.1 | 1.87× slower | 1,275 |
+| Handlebars | 4.7.9 | 352,661 | 2.9e-3 | 0.1 | 2.08× slower | 1,258 |
+| Nunjucks | 3.2.4 | 296,720 | 3.4e-3 | 0.1 | 2.47× slower | 1,258 |
+| Dust.js | 3.0.1 | 239,861 | 4.2e-3 | 0.2 | 3.05× slower | 1,258 |
+| Lodash template | 4.18.1 | 230,493 | 4.4e-3 | 0.1 | 3.18× slower | 1,258 |
+| Mustache | 4.2.0 | 167,924 | 6.0e-3 | 0.1 | 4.36× slower | 1,278 |
+| EJS | 6.0.1 | 124,491 | 8.1e-3 | 0.1 | 5.89× slower | 1,258 |
+| PHP (node-php-runner) | 2.0.0 | 45,195 | 0.023 | 0.3 | 16.21× slower | 1,258 |
+| LiquidJS | 10.29.0 | 26,928 | 0.038 | 0.2 | 27.21× slower | 1,258 |
 
 ### Conditionals
 
@@ -132,21 +132,21 @@ Geometric mean of the per scenario ratios to Teddy.
 
 | Engine | Version | Renders/sec | Mean ms | ± % | vs Teddy | Output bytes |
 | --- | --- | --: | --: | --: | --- | --: |
-| Squirrelly | 9.1.1 | 9,561,164 | 1.1e-4 | 1.6 | 1.37× faster | 478 |
-| Eta | 4.6.0 | 9,402,076 | 1.1e-4 | 2.0 | 1.35× faster | 478 |
-| Pug | 3.0.4 | 9,091,635 | 1.2e-4 | 2.6 | 1.31× faster | 410 |
-| art-template | 4.13.4 | 8,484,780 | 1.2e-4 | 1.4 | 1.22× faster | 492 |
-| Teddy | 2.0.5 | 6,958,458 | 1.5e-4 | 0.2 | same | 516 |
-| doT | 1.1.3 | 5,409,593 | 1.9e-4 | 0.1 | 1.29× slower | 492 |
-| Marko | 6.3.51 | 1,686,764 | 6.0e-4 | 0.1 | 4.13× slower | 392 |
-| Nunjucks | 3.2.4 | 1,187,645 | 8.5e-4 | 0.1 | 5.86× slower | 492 |
-| Dust.js | 3.0.1 | 959,232 | 1.1e-3 | 0.4 | 7.25× slower | 516 |
-| Lodash template | 4.18.1 | 522,558 | 1.9e-3 | 0.1 | 13.32× slower | 492 |
-| Handlebars | 4.7.9 | 423,965 | 2.4e-3 | 0.2 | 16.41× slower | 453 |
-| EJS | 6.0.1 | 372,900 | 2.7e-3 | 0.1 | 18.66× slower | 492 |
-| Mustache | 4.2.0 | 275,078 | 3.7e-3 | 0.1 | 25.30× slower | 454 |
-| LiquidJS | 10.29.0 | 65,752 | 0.015 | 0.2 | 105.83× slower | 492 |
-| PHP (node-php-runner) | 2.0.0 | 62,002 | 0.017 | 0.2 | 112.23× slower | 478 |
+| Squirrelly | 9.1.1 | 10,206,129 | 1.0e-4 | 0.1 | 1.42× faster | 478 |
+| Eta | 4.6.0 | 9,763,368 | 1.1e-4 | 0.2 | 1.36× faster | 478 |
+| art-template | 4.13.4 | 9,602,343 | 1.1e-4 | 0.2 | 1.34× faster | 492 |
+| Pug | 3.0.4 | 9,131,117 | 1.2e-4 | 0.2 | 1.27× faster | 410 |
+| Teddy | 2.1.0 | 7,190,271 | 1.5e-4 | 1.4 | same | 516 |
+| doT | 1.1.3 | 4,876,032 | 2.1e-4 | 0.6 | 1.47× slower | 492 |
+| Marko | 6.3.51 | 1,700,387 | 6.1e-4 | 0.8 | 4.23× slower | 392 |
+| Nunjucks | 3.2.4 | 1,172,069 | 8.6e-4 | 0.1 | 6.13× slower | 492 |
+| Dust.js | 3.0.1 | 939,251 | 1.1e-3 | 0.2 | 7.66× slower | 516 |
+| Mustache | 4.2.0 | 528,173 | 1.9e-3 | 0.1 | 13.61× slower | 454 |
+| Lodash template | 4.18.1 | 514,542 | 2.0e-3 | 0.1 | 13.97× slower | 492 |
+| Handlebars | 4.7.9 | 484,384 | 2.1e-3 | 0.2 | 14.84× slower | 453 |
+| EJS | 6.0.1 | 378,499 | 2.7e-3 | 0.1 | 19.00× slower | 492 |
+| PHP (node-php-runner) | 2.0.0 | 69,044 | 0.015 | 0.3 | 104.14× slower | 478 |
+| LiquidJS | 10.29.0 | 68,192 | 0.015 | 0.1 | 105.44× slower | 492 |
 
 ### Loops
 
@@ -154,21 +154,21 @@ Geometric mean of the per scenario ratios to Teddy.
 
 | Engine | Version | Renders/sec | Mean ms | ± % | vs Teddy | Output bytes |
 | --- | --- | --: | --: | --: | --- | --: |
-| Teddy | 2.0.5 | 292,775 | 3.4e-3 | 0.1 | same | 11,795 |
-| Eta | 4.6.0 | 227,105 | 4.5e-3 | 0.2 | 1.29× slower | 11,425 |
-| art-template | 4.13.4 | 226,986 | 4.5e-3 | 0.2 | 1.29× slower | 11,627 |
-| Pug | 3.0.4 | 200,970 | 5.1e-3 | 0.3 | 1.46× slower | 7,782 |
-| Squirrelly | 9.1.1 | 178,366 | 5.7e-3 | 0.2 | 1.64× slower | 11,425 |
-| Marko | 6.3.51 | 159,472 | 6.3e-3 | 0.1 | 1.84× slower | 7,474 |
-| doT | 1.1.3 | 98,551 | 0.010 | 0.3 | 2.97× slower | 11,627 |
-| Dust.js | 3.0.1 | 45,058 | 0.022 | 0.1 | 6.50× slower | 11,627 |
-| Mustache | 4.2.0 | 41,140 | 0.024 | 0.2 | 7.12× slower | 10,121 |
-| Handlebars | 4.7.9 | 41,070 | 0.025 | 0.2 | 7.13× slower | 10,121 |
-| Lodash template | 4.18.1 | 36,683 | 0.027 | 0.1 | 7.98× slower | 11,627 |
-| EJS | 6.0.1 | 17,218 | 0.058 | 0.1 | 17.00× slower | 11,627 |
-| Nunjucks | 3.2.4 | 16,714 | 0.060 | 0.3 | 17.52× slower | 11,627 |
-| PHP (node-php-runner) | 2.0.0 | 12,091 | 0.085 | 0.4 | 24.21× slower | 11,425 |
-| LiquidJS | 10.29.0 | 2,485 | 0.404 | 0.3 | 117.82× slower | 11,627 |
+| Teddy | 2.1.0 | 308,877 | 3.3e-3 | 0.2 | same | 11,795 |
+| art-template | 4.13.4 | 237,903 | 4.3e-3 | 0.2 | 1.30× slower | 11,627 |
+| Eta | 4.6.0 | 235,893 | 4.4e-3 | 0.3 | 1.31× slower | 11,425 |
+| Pug | 3.0.4 | 207,651 | 4.9e-3 | 0.2 | 1.49× slower | 7,782 |
+| Squirrelly | 9.1.1 | 180,318 | 5.6e-3 | 0.2 | 1.71× slower | 11,425 |
+| Marko | 6.3.51 | 164,121 | 6.2e-3 | 0.2 | 1.88× slower | 7,474 |
+| doT | 1.1.3 | 82,019 | 0.012 | 0.2 | 3.77× slower | 11,627 |
+| Handlebars | 4.7.9 | 46,963 | 0.022 | 0.2 | 6.58× slower | 10,121 |
+| Dust.js | 3.0.1 | 39,214 | 0.026 | 0.1 | 7.88× slower | 11,627 |
+| Mustache | 4.2.0 | 38,049 | 0.026 | 0.1 | 8.12× slower | 10,121 |
+| Lodash template | 4.18.1 | 36,179 | 0.028 | 0.1 | 8.54× slower | 11,627 |
+| Nunjucks | 3.2.4 | 17,613 | 0.057 | 0.2 | 17.54× slower | 11,627 |
+| EJS | 6.0.1 | 17,513 | 0.057 | 0.1 | 17.64× slower | 11,627 |
+| PHP (node-php-runner) | 2.0.0 | 13,241 | 0.077 | 0.3 | 23.33× slower | 11,425 |
+| LiquidJS | 10.29.0 | 2,678 | 0.374 | 0.2 | 115.34× slower | 11,627 |
 
 ### Large table
 
@@ -176,21 +176,21 @@ Geometric mean of the per scenario ratios to Teddy.
 
 | Engine | Version | Renders/sec | Mean ms | ± % | vs Teddy | Output bytes |
 | --- | --- | --: | --: | --: | --- | --: |
-| Teddy | 2.0.5 | 9,099 | 0.113 | 0.6 | same | 238,758 |
-| art-template | 4.13.4 | 7,628 | 0.134 | 0.6 | 1.19× slower | 238,758 |
-| Eta | 4.6.0 | 7,471 | 0.136 | 0.4 | 1.22× slower | 237,757 |
-| Marko | 6.3.51 | 6,439 | 0.157 | 0.4 | 1.41× slower | 156,732 |
-| Squirrelly | 9.1.1 | 6,304 | 0.160 | 0.3 | 1.44× slower | 237,757 |
-| Pug | 3.0.4 | 6,155 | 0.165 | 0.5 | 1.48× slower | 156,734 |
-| doT | 1.1.3 | 3,147 | 0.323 | 0.7 | 2.89× slower | 238,758 |
-| Handlebars | 4.7.9 | 2,348 | 0.432 | 0.7 | 3.88× slower | 233,753 |
-| Dust.js | 3.0.1 | 1,818 | 0.554 | 0.5 | 5.01× slower | 238,758 |
-| Lodash template | 4.18.1 | 1,700 | 0.592 | 0.4 | 5.35× slower | 238,758 |
-| Mustache | 4.2.0 | 1,501 | 0.669 | 0.4 | 6.06× slower | 233,753 |
-| Nunjucks | 3.2.4 | 1,284 | 0.780 | 0.2 | 7.09× slower | 238,758 |
-| EJS | 6.0.1 | 683 | 1.47 | 0.5 | 13.33× slower | 238,758 |
-| PHP (node-php-runner) | 2.0.0 | 542 | 1.90 | 1.9 | 16.79× slower | 237,757 |
-| LiquidJS | 10.29.0 | 100 | 10.05 | 1.8 | 90.97× slower | 238,758 |
+| Teddy | 2.1.0 | 10,217 | 0.100 | 0.5 | same | 238,758 |
+| Eta | 4.6.0 | 7,967 | 0.127 | 0.3 | 1.28× slower | 237,757 |
+| art-template | 4.13.4 | 7,535 | 0.135 | 0.5 | 1.36× slower | 238,758 |
+| Marko | 6.3.51 | 6,904 | 0.146 | 0.3 | 1.48× slower | 156,732 |
+| Squirrelly | 9.1.1 | 6,538 | 0.154 | 0.3 | 1.56× slower | 237,757 |
+| Pug | 3.0.4 | 6,497 | 0.157 | 0.5 | 1.57× slower | 156,734 |
+| Handlebars | 4.7.9 | 2,782 | 0.364 | 0.5 | 3.67× slower | 233,753 |
+| doT | 1.1.3 | 2,651 | 0.381 | 0.5 | 3.85× slower | 238,758 |
+| Lodash template | 4.18.1 | 1,747 | 0.574 | 0.3 | 5.85× slower | 238,758 |
+| Dust.js | 3.0.1 | 1,737 | 0.577 | 0.2 | 5.88× slower | 238,758 |
+| Mustache | 4.2.0 | 1,374 | 0.731 | 0.4 | 7.44× slower | 233,753 |
+| Nunjucks | 3.2.4 | 1,134 | 0.884 | 0.3 | 9.01× slower | 238,758 |
+| EJS | 6.0.1 | 684 | 1.46 | 0.4 | 14.94× slower | 238,758 |
+| PHP (node-php-runner) | 2.0.0 | 597 | 1.71 | 1.6 | 17.11× slower | 237,757 |
+| LiquidJS | 10.29.0 | 103 | 9.71 | 0.7 | 99.13× slower | 238,758 |
 
 ### Partials
 
@@ -198,21 +198,21 @@ a shell that pulls in a header and a footer once and a product partial 24 times.
 
 | Engine | Version | Renders/sec | Mean ms | ± % | vs Teddy | Output bytes |
 | --- | --- | --: | --: | --: | --- | --: |
-| Teddy | 2.0.5 | 208,155 | 4.9e-3 | 0.2 | same | 10,958 |
-| Pug | 3.0.4 | 149,618 | 6.9e-3 | 0.2 | 1.39× slower | 8,611 |
-| Squirrelly | 9.1.1 | 118,599 | 8.6e-3 | 0.3 | 1.76× slower | 10,672 |
-| Eta | 4.6.0 | 112,236 | 9.1e-3 | 0.2 | 1.85× slower | 10,672 |
-| Marko | 6.3.51 | 106,055 | 9.6e-3 | 0.2 | 1.96× slower | 8,247 |
-| doT | 1.1.3 | 74,736 | 0.014 | 0.2 | 2.79× slower | 10,931 |
-| Dust.js | 3.0.1 | 37,340 | 0.027 | 0.3 | 5.57× slower | 10,883 |
-| Lodash template | 4.18.1 | 21,258 | 0.047 | 0.2 | 9.79× slower | 10,883 |
-| Handlebars | 4.7.9 | 19,602 | 0.052 | 0.3 | 10.62× slower | 11,648 |
-| Mustache | 4.2.0 | 13,552 | 0.075 | 0.3 | 15.36× slower | 11,708 |
-| Nunjucks | 3.2.4 | 10,269 | 0.113 | 4.5 | 20.27× slower | 10,883 |
-| PHP (node-php-runner) | 2.0.0 | 7,230 | 0.141 | 0.4 | 28.79× slower | 10,672 |
-| EJS | 6.0.1 | 6,011 | 0.168 | 0.3 | 34.63× slower | 10,883 |
-| art-template | 4.13.4 | 5,031 | 0.208 | 2.0 | 41.37× slower | 10,883 |
-| LiquidJS | 10.29.0 | 1,999 | 0.507 | 0.9 | 104.15× slower | 10,883 |
+| Teddy | 2.1.0 | 224,083 | 4.5e-3 | 0.2 | same | 10,958 |
+| Pug | 3.0.4 | 157,723 | 6.4e-3 | 0.2 | 1.42× slower | 8,611 |
+| Squirrelly | 9.1.1 | 124,315 | 8.1e-3 | 0.1 | 1.80× slower | 10,672 |
+| Marko | 6.3.51 | 112,811 | 9.0e-3 | 0.2 | 1.99× slower | 8,247 |
+| Eta | 4.6.0 | 109,276 | 9.3e-3 | 0.2 | 2.05× slower | 10,672 |
+| doT | 1.1.3 | 65,931 | 0.015 | 0.2 | 3.40× slower | 10,931 |
+| Dust.js | 3.0.1 | 34,959 | 0.029 | 0.2 | 6.41× slower | 10,883 |
+| Lodash template | 4.18.1 | 22,782 | 0.044 | 0.1 | 9.84× slower | 10,883 |
+| Handlebars | 4.7.9 | 20,949 | 0.048 | 0.2 | 10.70× slower | 11,648 |
+| Mustache | 4.2.0 | 16,145 | 0.062 | 0.1 | 13.88× slower | 11,708 |
+| Nunjucks | 3.2.4 | 10,118 | 0.113 | 3.0 | 22.15× slower | 10,883 |
+| PHP (node-php-runner) | 2.0.0 | 8,305 | 0.121 | 0.2 | 26.98× slower | 10,672 |
+| EJS | 6.0.1 | 6,265 | 0.160 | 0.4 | 35.77× slower | 10,883 |
+| art-template | 4.13.4 | 5,802 | 0.180 | 1.4 | 38.62× slower | 10,883 |
+| LiquidJS | 10.29.0 | 2,126 | 0.473 | 0.4 | 105.39× slower | 10,883 |
 
 ### Full page
 
@@ -220,21 +220,21 @@ a complete document: head, header, banner, else-if chain, 24 products, a 25 row 
 
 | Engine | Version | Renders/sec | Mean ms | ± % | vs Teddy | Output bytes |
 | --- | --- | --: | --: | --: | --- | --: |
-| Teddy | 2.0.5 | 137,074 | 7.4e-3 | 0.2 | same | 17,397 |
-| Pug | 3.0.4 | 98,497 | 0.010 | 0.2 | 1.39× slower | 11,824 |
-| Squirrelly | 9.1.1 | 87,136 | 0.012 | 0.4 | 1.57× slower | 17,067 |
-| Eta | 4.6.0 | 86,925 | 0.012 | 0.4 | 1.58× slower | 17,067 |
-| Marko | 6.3.51 | 79,133 | 0.013 | 0.4 | 1.73× slower | 11,438 |
-| doT | 1.1.3 | 52,079 | 0.019 | 0.2 | 2.63× slower | 17,364 |
-| Dust.js | 3.0.1 | 25,586 | 0.040 | 0.3 | 5.36× slower | 17,328 |
-| Lodash template | 4.18.1 | 16,871 | 0.060 | 0.2 | 8.12× slower | 17,308 |
-| Handlebars | 4.7.9 | 16,501 | 0.062 | 0.4 | 8.31× slower | 18,765 |
-| Mustache | 4.2.0 | 10,302 | 0.098 | 0.2 | 13.31× slower | 18,837 |
-| Nunjucks | 3.2.4 | 8,616 | 0.135 | 4.6 | 15.91× slower | 17,308 |
-| PHP (node-php-runner) | 2.0.0 | 5,338 | 0.190 | 0.4 | 25.68× slower | 17,067 |
-| EJS | 6.0.1 | 5,185 | 0.194 | 0.2 | 26.44× slower | 17,308 |
-| art-template | 4.13.4 | 5,056 | 0.206 | 1.7 | 27.11× slower | 17,308 |
-| LiquidJS | 10.29.0 | 1,444 | 0.699 | 0.6 | 94.92× slower | 17,308 |
+| Teddy | 2.1.0 | 151,635 | 6.7e-3 | 0.2 | same | 17,397 |
+| Pug | 3.0.4 | 104,036 | 9.8e-3 | 0.2 | 1.46× slower | 11,824 |
+| Squirrelly | 9.1.1 | 89,137 | 0.011 | 0.2 | 1.70× slower | 17,067 |
+| Eta | 4.6.0 | 85,606 | 0.012 | 0.2 | 1.77× slower | 17,067 |
+| Marko | 6.3.51 | 84,858 | 0.012 | 0.2 | 1.79× slower | 11,438 |
+| doT | 1.1.3 | 45,541 | 0.022 | 0.2 | 3.33× slower | 17,364 |
+| Dust.js | 3.0.1 | 24,076 | 0.042 | 0.2 | 6.30× slower | 17,328 |
+| Lodash template | 4.18.1 | 17,213 | 0.058 | 0.1 | 8.81× slower | 17,308 |
+| Handlebars | 4.7.9 | 17,207 | 0.058 | 0.2 | 8.81× slower | 18,765 |
+| Mustache | 4.2.0 | 12,989 | 0.077 | 0.1 | 11.67× slower | 18,837 |
+| Nunjucks | 3.2.4 | 9,738 | 0.118 | 3.1 | 15.57× slower | 17,308 |
+| PHP (node-php-runner) | 2.0.0 | 6,027 | 0.170 | 0.6 | 25.16× slower | 17,067 |
+| art-template | 4.13.4 | 5,654 | 0.183 | 1.3 | 26.82× slower | 17,308 |
+| EJS | 6.0.1 | 5,325 | 0.188 | 0.1 | 28.48× slower | 17,308 |
+| LiquidJS | 10.29.0 | 1,507 | 0.666 | 0.3 | 100.60× slower | 17,308 |
 
 ## cold (compile and render together, engine cache off)
 
@@ -244,21 +244,21 @@ a complete document: head, header, banner, else-if chain, 24 products, a 25 row 
 
 | Engine | Version | Renders/sec | Mean ms | ± % | vs Teddy | Output bytes |
 | --- | --- | --: | --: | --: | --- | --: |
-| doT | 1.1.3 | 38,310 | 0.026 | 0.1 | 10.23× faster | 1,275 |
-| EJS | 6.0.1 | 17,409 | 0.058 | 0.2 | 4.65× faster | 1,258 |
-| Eta | 4.6.0 | 17,095 | 0.059 | 0.1 | 4.57× faster | 1,258 |
-| Squirrelly | 9.1.1 | 14,825 | 0.068 | 0.3 | 3.96× faster | 1,258 |
-| art-template | 4.13.4 | 10,931 | 0.093 | 0.6 | 2.92× faster | 1,259 |
-| Mustache | 4.2.0 | 9,905 | 0.102 | 0.2 | 2.65× faster | 1,278 |
-| Lodash template | 4.18.1 | 8,237 | 0.124 | 1.0 | 2.20× faster | 1,258 |
-| LiquidJS | 10.29.0 | 7,736 | 0.135 | 1.1 | 2.07× faster | 1,258 |
-| Nunjucks | 3.2.4 | 6,112 | 0.165 | 0.3 | 1.63× faster | 1,258 |
-| Teddy | 2.0.5 | 3,744 | 0.275 | 1.1 | same | 1,258 |
-| Handlebars | 4.7.9 | 2,644 | 0.385 | 0.7 | 1.42× slower | 1,258 |
-| Dust.js | 3.0.1 | 2,632 | 0.383 | 0.4 | 1.42× slower | 1,258 |
-| PHP (node-php-runner) | 2.0.0 | 689 | 1.49 | 1.5 | 5.44× slower | 1,258 |
-| Pug | 3.0.4 | 419 | 2.40 | 0.7 | 8.94× slower | 1,158 |
-| Marko | 6.3.51 | 307 | 3.65 | 8.8 | 12.18× slower | 1,140 |
+| doT | 1.1.3 | 41,140 | 0.025 | 0.2 | 13.52× faster | 1,275 |
+| Eta | 4.6.0 | 20,737 | 0.048 | 0.2 | 6.82× faster | 1,258 |
+| EJS | 6.0.1 | 18,556 | 0.054 | 0.2 | 6.10× faster | 1,258 |
+| Squirrelly | 9.1.1 | 15,488 | 0.065 | 0.2 | 5.09× faster | 1,258 |
+| art-template | 4.13.4 | 11,969 | 0.086 | 0.9 | 3.93× faster | 1,259 |
+| Mustache | 4.2.0 | 9,277 | 0.109 | 0.2 | 3.05× faster | 1,278 |
+| Lodash template | 4.18.1 | 8,628 | 0.120 | 1.4 | 2.84× faster | 1,258 |
+| LiquidJS | 10.29.0 | 7,061 | 0.147 | 1.0 | 2.32× faster | 1,258 |
+| Nunjucks | 3.2.4 | 6,665 | 0.151 | 0.3 | 2.19× faster | 1,258 |
+| Teddy | 2.1.0 | 3,042 | 0.341 | 1.1 | same | 1,258 |
+| Handlebars | 4.7.9 | 2,503 | 0.403 | 0.4 | 1.22× slower | 1,258 |
+| PHP (node-php-runner) | 2.0.0 | 2,316 | 0.876 | 2.3 | 1.31× slower | 1,258 |
+| Dust.js | 3.0.1 | 1,878 | 0.534 | 0.3 | 1.62× slower | 1,258 |
+| Pug | 3.0.4 | 405 | 2.48 | 0.8 | 7.50× slower | 1,158 |
+| Marko | 6.3.51 | 312 | 3.37 | 3.5 | 9.74× slower | 1,140 |
 
 ### Conditionals
 
@@ -266,21 +266,21 @@ a complete document: head, header, banner, else-if chain, 24 products, a 25 row 
 
 | Engine | Version | Renders/sec | Mean ms | ± % | vs Teddy | Output bytes |
 | --- | --- | --: | --: | --: | --- | --: |
-| doT | 1.1.3 | 46,942 | 0.022 | 0.2 | 42.81× faster | 492 |
-| EJS | 6.0.1 | 23,103 | 0.044 | 0.2 | 21.07× faster | 492 |
-| Eta | 4.6.0 | 18,995 | 0.053 | 0.2 | 17.32× faster | 478 |
-| Squirrelly | 9.1.1 | 16,142 | 0.062 | 0.2 | 14.72× faster | 478 |
-| art-template | 4.13.4 | 15,163 | 0.067 | 0.5 | 13.83× faster | 492 |
-| LiquidJS | 10.29.0 | 12,539 | 0.086 | 1.9 | 11.44× faster | 492 |
-| Mustache | 4.2.0 | 9,669 | 0.105 | 0.3 | 8.82× faster | 454 |
-| Lodash template | 4.18.1 | 8,831 | 0.116 | 1.0 | 8.05× faster | 492 |
-| Nunjucks | 3.2.4 | 7,459 | 0.135 | 0.3 | 6.80× faster | 492 |
-| Dust.js | 3.0.1 | 2,620 | 0.385 | 0.4 | 2.39× faster | 516 |
-| Handlebars | 4.7.9 | 2,585 | 0.393 | 0.7 | 2.36× faster | 453 |
-| Teddy | 2.0.5 | 1,096 | 0.935 | 1.3 | same | 516 |
-| Pug | 3.0.4 | 706 | 1.43 | 0.7 | 1.55× slower | 410 |
-| PHP (node-php-runner) | 2.0.0 | 687 | 1.49 | 1.5 | 1.60× slower | 478 |
-| Marko | 6.3.51 | 187 | 5.74 | 5.6 | 5.88× slower | 392 |
+| doT | 1.1.3 | 52,548 | 0.019 | 0.2 | 53.58× faster | 492 |
+| EJS | 6.0.1 | 24,837 | 0.041 | 0.2 | 25.32× faster | 492 |
+| Eta | 4.6.0 | 23,527 | 0.043 | 0.2 | 23.99× faster | 478 |
+| Squirrelly | 9.1.1 | 16,629 | 0.060 | 0.2 | 16.96× faster | 478 |
+| art-template | 4.13.4 | 16,478 | 0.062 | 0.6 | 16.80× faster | 492 |
+| LiquidJS | 10.29.0 | 12,005 | 0.089 | 1.5 | 12.24× faster | 492 |
+| Lodash template | 4.18.1 | 9,509 | 0.109 | 1.5 | 9.70× faster | 492 |
+| Mustache | 4.2.0 | 8,454 | 0.119 | 0.3 | 8.62× faster | 454 |
+| Nunjucks | 3.2.4 | 5,807 | 0.174 | 0.3 | 5.92× faster | 492 |
+| PHP (node-php-runner) | 2.0.0 | 5,427 | 0.642 | 3.3 | 5.53× faster | 478 |
+| Handlebars | 4.7.9 | 2,457 | 0.412 | 0.5 | 2.51× faster | 453 |
+| Dust.js | 3.0.1 | 1,916 | 0.524 | 0.3 | 1.95× faster | 516 |
+| Teddy | 2.1.0 | 981 | 1.04 | 1.4 | same | 516 |
+| Pug | 3.0.4 | 724 | 1.39 | 0.5 | 1.35× slower | 410 |
+| Marko | 6.3.51 | 196 | 5.30 | 3.4 | 5.01× slower | 392 |
 
 ### Loops
 
@@ -288,21 +288,21 @@ a complete document: head, header, banner, else-if chain, 24 products, a 25 row 
 
 | Engine | Version | Renders/sec | Mean ms | ± % | vs Teddy | Output bytes |
 | --- | --- | --: | --: | --: | --- | --: |
-| doT | 1.1.3 | 34,847 | 0.029 | 0.2 | 13.23× faster | 11,627 |
-| art-template | 4.13.4 | 20,575 | 0.049 | 0.4 | 7.81× faster | 11,627 |
-| Eta | 4.6.0 | 19,156 | 0.053 | 0.2 | 7.27× faster | 11,425 |
-| Squirrelly | 9.1.1 | 16,568 | 0.061 | 0.2 | 6.29× faster | 11,425 |
-| EJS | 6.0.1 | 11,756 | 0.085 | 0.2 | 4.46× faster | 11,627 |
-| Mustache | 4.2.0 | 10,409 | 0.097 | 0.2 | 3.95× faster | 10,121 |
-| Lodash template | 4.18.1 | 6,726 | 0.152 | 0.9 | 2.55× faster | 11,627 |
-| Nunjucks | 3.2.4 | 6,372 | 0.159 | 0.3 | 2.42× faster | 11,627 |
-| Handlebars | 4.7.9 | 3,838 | 0.268 | 0.9 | 1.46× faster | 10,121 |
-| Dust.js | 3.0.1 | 3,270 | 0.308 | 0.4 | 1.24× faster | 11,627 |
-| Teddy | 2.0.5 | 2,633 | 0.390 | 1.1 | same | 11,795 |
-| LiquidJS | 10.29.0 | 2,156 | 0.469 | 0.5 | 1.22× slower | 11,627 |
-| Pug | 3.0.4 | 781 | 1.29 | 0.6 | 3.37× slower | 7,782 |
-| PHP (node-php-runner) | 2.0.0 | 675 | 1.51 | 1.4 | 3.90× slower | 11,425 |
-| Marko | 6.3.51 | 396 | 2.76 | 7.6 | 6.65× slower | 7,474 |
+| doT | 1.1.3 | 34,805 | 0.029 | 0.1 | 15.29× faster | 11,627 |
+| Eta | 4.6.0 | 23,596 | 0.043 | 0.2 | 10.36× faster | 11,425 |
+| art-template | 4.13.4 | 20,977 | 0.049 | 0.6 | 9.21× faster | 11,627 |
+| Squirrelly | 9.1.1 | 17,071 | 0.059 | 0.3 | 7.50× faster | 11,425 |
+| EJS | 6.0.1 | 11,792 | 0.085 | 0.2 | 5.18× faster | 11,627 |
+| Mustache | 4.2.0 | 9,065 | 0.111 | 0.1 | 3.98× faster | 10,121 |
+| Lodash template | 4.18.1 | 6,930 | 0.149 | 1.1 | 3.04× faster | 11,627 |
+| Nunjucks | 3.2.4 | 5,781 | 0.174 | 0.4 | 2.54× faster | 11,627 |
+| Handlebars | 4.7.9 | 3,803 | 0.270 | 0.7 | 1.67× faster | 10,121 |
+| Dust.js | 3.0.1 | 2,468 | 0.407 | 0.3 | 1.08× faster | 11,627 |
+| Teddy | 2.1.0 | 2,277 | 0.449 | 1.0 | same | 11,795 |
+| LiquidJS | 10.29.0 | 2,214 | 0.459 | 0.7 | 1.03× slower | 11,627 |
+| PHP (node-php-runner) | 2.0.0 | 1,219 | 0.963 | 1.2 | 1.87× slower | 11,425 |
+| Pug | 3.0.4 | 717 | 1.40 | 0.5 | 3.18× slower | 7,782 |
+| Marko | 6.3.51 | 403 | 2.66 | 4.4 | 5.65× slower | 7,474 |
 
 ### Large table
 
@@ -310,21 +310,21 @@ a complete document: head, header, banner, else-if chain, 24 products, a 25 row 
 
 | Engine | Version | Renders/sec | Mean ms | ± % | vs Teddy | Output bytes |
 | --- | --- | --: | --: | --: | --- | --: |
-| art-template | 4.13.4 | 5,782 | 0.177 | 0.7 | 2.19× faster | 238,758 |
-| Eta | 4.6.0 | 5,226 | 0.195 | 0.6 | 1.98× faster | 237,757 |
-| Squirrelly | 9.1.1 | 4,481 | 0.230 | 0.7 | 1.70× faster | 237,757 |
-| doT | 1.1.3 | 2,950 | 0.344 | 0.6 | 1.12× faster | 238,758 |
-| Teddy | 2.0.5 | 2,636 | 0.391 | 1.2 | same | 238,758 |
-| Handlebars | 4.7.9 | 1,531 | 0.663 | 0.8 | 1.72× slower | 233,753 |
-| Mustache | 4.2.0 | 1,321 | 0.765 | 0.7 | 2.00× slower | 233,753 |
-| Lodash template | 4.18.1 | 1,147 | 1.17 | 14.9 | 2.30× slower | 238,758 |
-| Nunjucks | 3.2.4 | 1,092 | 0.919 | 0.4 | 2.41× slower | 238,758 |
-| Dust.js | 3.0.1 | 1,039 | 0.973 | 0.7 | 2.54× slower | 238,758 |
-| Pug | 3.0.4 | 772 | 1.31 | 0.8 | 3.42× slower | 156,734 |
-| EJS | 6.0.1 | 676 | 1.48 | 0.2 | 3.90× slower | 238,758 |
-| Marko | 6.3.51 | 484 | 2.18 | 3.7 | 5.45× slower | 156,732 |
-| PHP (node-php-runner) | 2.0.0 | 425 | 2.40 | 1.7 | 6.20× slower | 237,757 |
-| LiquidJS | 10.29.0 | 97.1 | 10.36 | 1.9 | 27.15× slower | 238,758 |
+| Eta | 4.6.0 | 5,929 | 0.173 | 0.6 | 2.42× faster | 237,757 |
+| art-template | 4.13.4 | 5,895 | 0.174 | 0.6 | 2.40× faster | 238,758 |
+| Squirrelly | 9.1.1 | 4,855 | 0.209 | 0.5 | 1.98× faster | 237,757 |
+| doT | 1.1.3 | 2,631 | 0.383 | 0.5 | 1.07× faster | 238,758 |
+| Teddy | 2.1.0 | 2,452 | 0.420 | 1.0 | same | 238,758 |
+| Handlebars | 4.7.9 | 1,814 | 0.557 | 0.6 | 1.35× slower | 233,753 |
+| Mustache | 4.2.0 | 1,257 | 0.800 | 0.5 | 1.95× slower | 233,753 |
+| Lodash template | 4.18.1 | 1,151 | 1.27 | 13.4 | 2.13× slower | 238,758 |
+| Nunjucks | 3.2.4 | 1,036 | 0.968 | 0.3 | 2.37× slower | 238,758 |
+| Dust.js | 3.0.1 | 963 | 1.04 | 0.6 | 2.55× slower | 238,758 |
+| Pug | 3.0.4 | 741 | 1.36 | 0.6 | 3.31× slower | 156,734 |
+| EJS | 6.0.1 | 633 | 1.58 | 0.4 | 3.88× slower | 238,758 |
+| PHP (node-php-runner) | 2.0.0 | 534 | 1.91 | 2.2 | 4.59× slower | 237,757 |
+| Marko | 6.3.51 | 514 | 2.05 | 3.0 | 4.77× slower | 156,732 |
+| LiquidJS | 10.29.0 | 102 | 9.87 | 0.9 | 24.16× slower | 238,758 |
 
 ### Partials
 
@@ -332,21 +332,21 @@ a shell that pulls in a header and a footer once and a product partial 24 times.
 
 | Engine | Version | Renders/sec | Mean ms | ± % | vs Teddy | Output bytes |
 | --- | --- | --: | --: | --: | --- | --: |
-| doT | 1.1.3 | 24,225 | 0.042 | 0.3 | 21.50× faster | 10,931 |
-| Eta | 4.6.0 | 19,186 | 0.053 | 0.2 | 17.03× faster | 10,672 |
-| Squirrelly | 9.1.1 | 17,620 | 0.057 | 0.2 | 15.64× faster | 10,672 |
-| Mustache | 4.2.0 | 5,581 | 0.181 | 0.3 | 4.95× faster | 11,708 |
-| Lodash template | 4.18.1 | 4,406 | 0.232 | 0.8 | 3.91× faster | 10,883 |
-| Dust.js | 3.0.1 | 3,725 | 0.272 | 0.5 | 3.31× faster | 10,883 |
-| Handlebars | 4.7.9 | 1,590 | 0.641 | 0.9 | 1.41× faster | 11,648 |
-| EJS | 6.0.1 | 1,254 | 0.800 | 0.3 | 1.11× faster | 10,883 |
-| Teddy | 2.0.5 | 1,127 | 0.915 | 1.5 | same | 10,958 |
-| art-template | 4.13.4 | 878 | 1.16 | 1.1 | 1.28× slower | 10,883 |
-| LiquidJS | 10.29.0 | 589 | 1.71 | 0.6 | 1.91× slower | 10,883 |
-| PHP (node-php-runner) | 2.0.0 | 578 | 1.76 | 1.4 | 1.95× slower | 10,672 |
-| Nunjucks | 3.2.4 | 538 | 1.88 | 1.1 | 2.09× slower | 10,883 |
-| Pug | 3.0.4 | 360 | 2.81 | 1.3 | 3.13× slower | 8,611 |
-| Marko | 6.3.51 | 104 | 10.02 | 4.8 | 10.86× slower | 8,247 |
+| doT | 1.1.3 | 25,350 | 0.040 | 0.2 | 24.11× faster | 10,931 |
+| Eta | 4.6.0 | 23,170 | 0.044 | 0.2 | 22.04× faster | 10,672 |
+| Squirrelly | 9.1.1 | 18,447 | 0.054 | 0.2 | 17.54× faster | 10,672 |
+| Mustache | 4.2.0 | 5,420 | 0.185 | 0.2 | 5.15× faster | 11,708 |
+| Lodash template | 4.18.1 | 4,749 | 0.216 | 1.2 | 4.52× faster | 10,883 |
+| Dust.js | 3.0.1 | 2,903 | 0.346 | 0.3 | 2.76× faster | 10,883 |
+| Handlebars | 4.7.9 | 1,607 | 0.628 | 0.6 | 1.53× faster | 11,648 |
+| EJS | 6.0.1 | 1,327 | 0.754 | 0.2 | 1.26× faster | 10,883 |
+| Teddy | 2.1.0 | 1,051 | 0.967 | 1.0 | same | 10,958 |
+| art-template | 4.13.4 | 961 | 1.05 | 0.9 | 1.09× slower | 10,883 |
+| PHP (node-php-runner) | 2.0.0 | 815 | 1.24 | 0.7 | 1.29× slower | 10,672 |
+| LiquidJS | 10.29.0 | 579 | 1.73 | 0.4 | 1.82× slower | 10,883 |
+| Nunjucks | 3.2.4 | 461 | 2.18 | 0.6 | 2.28× slower | 10,883 |
+| Pug | 3.0.4 | 364 | 2.76 | 0.5 | 2.89× slower | 8,611 |
+| Marko | 6.3.51 | 106 | 9.76 | 4.1 | 9.92× slower | 8,247 |
 
 ### Full page
 
@@ -354,21 +354,21 @@ a complete document: head, header, banner, else-if chain, 24 products, a 25 row 
 
 | Engine | Version | Renders/sec | Mean ms | ± % | vs Teddy | Output bytes |
 | --- | --- | --: | --: | --: | --- | --: |
-| doT | 1.1.3 | 16,060 | 0.064 | 0.4 | 42.30× faster | 17,364 |
-| Eta | 4.6.0 | 13,786 | 0.074 | 0.3 | 36.31× faster | 17,067 |
-| Squirrelly | 9.1.1 | 11,852 | 0.086 | 0.3 | 31.21× faster | 17,067 |
-| Mustache | 4.2.0 | 3,641 | 0.279 | 0.5 | 9.59× faster | 18,837 |
-| Lodash template | 4.18.1 | 3,403 | 0.298 | 0.8 | 8.96× faster | 17,308 |
-| Dust.js | 3.0.1 | 2,054 | 0.492 | 0.5 | 5.41× faster | 17,328 |
-| EJS | 6.0.1 | 1,105 | 0.907 | 0.3 | 2.91× faster | 17,308 |
-| Handlebars | 4.7.9 | 900 | 1.13 | 1.0 | 2.37× faster | 18,765 |
-| art-template | 4.13.4 | 767 | 1.33 | 1.3 | 2.02× faster | 17,308 |
-| PHP (node-php-runner) | 2.0.0 | 535 | 1.91 | 1.5 | 1.41× faster | 17,067 |
-| LiquidJS | 10.29.0 | 519 | 1.93 | 0.6 | 1.37× faster | 17,308 |
-| Nunjucks | 3.2.4 | 489 | 2.07 | 1.1 | 1.29× faster | 17,308 |
-| Teddy | 2.0.5 | 380 | 2.69 | 1.7 | same | 17,397 |
-| Pug | 3.0.4 | 205 | 4.90 | 0.6 | 1.86× slower | 11,824 |
-| Marko | 6.3.51 | 75.8 | 14.23 | 10.7 | 5.01× slower | 11,438 |
+| doT | 1.1.3 | 16,804 | 0.060 | 0.2 | 47.51× faster | 17,364 |
+| Eta | 4.6.0 | 16,201 | 0.063 | 0.3 | 45.81× faster | 17,067 |
+| Squirrelly | 9.1.1 | 12,701 | 0.079 | 0.2 | 35.91× faster | 17,067 |
+| Mustache | 4.2.0 | 3,739 | 0.269 | 0.3 | 10.57× faster | 18,837 |
+| Lodash template | 4.18.1 | 3,481 | 0.291 | 0.8 | 9.84× faster | 17,308 |
+| Dust.js | 3.0.1 | 1,495 | 0.674 | 0.5 | 4.23× faster | 17,328 |
+| EJS | 6.0.1 | 1,203 | 0.833 | 0.3 | 3.40× faster | 17,308 |
+| Handlebars | 4.7.9 | 943 | 1.07 | 0.5 | 2.67× faster | 18,765 |
+| art-template | 4.13.4 | 856 | 1.19 | 1.1 | 2.42× faster | 17,308 |
+| PHP (node-php-runner) | 2.0.0 | 791 | 1.27 | 0.5 | 2.24× faster | 17,067 |
+| Nunjucks | 3.2.4 | 525 | 1.92 | 0.9 | 1.48× faster | 17,308 |
+| LiquidJS | 10.29.0 | 502 | 1.99 | 0.4 | 1.42× faster | 17,308 |
+| Teddy | 2.1.0 | 354 | 2.86 | 1.2 | same | 17,397 |
+| Pug | 3.0.4 | 194 | 5.15 | 0.7 | 1.82× slower | 11,824 |
+| Marko | 6.3.51 | 78.6 | 12.94 | 3.2 | 4.50× slower | 11,438 |
 
 ## In a browser, cached (chromium)
 
@@ -387,21 +387,21 @@ Ratios are against **Teddy (emitted js)**, since that is the like for like again
 
 | Engine | Compiled | Renders/sec | Mean ms | vs Teddy | Output bytes |
 | --- | --- | --: | --: | --- | --: |
-| art-template | in page | 1,116,119 | 9.0e-4 | 2.08× faster | 1,259 |
-| Pug | ahead of time | 836,930 | 1.2e-3 | 1.56× faster | 1,158 |
-| Eta | in page | 741,376 | 1.3e-3 | 1.38× faster | 1,258 |
-| Squirrelly | in page | 698,065 | 1.4e-3 | 1.30× faster | 1,258 |
-| doT | in page | 547,704 | 1.8e-3 | 1.02× faster | 1,275 |
-| Teddy (emitted js) | ahead of time | 536,695 | 1.9e-3 | same | 1,258 |
-| Handlebars | in page | 416,067 | 2.4e-3 | 1.29× slower | 1,258 |
-| Marko | ahead of time | 406,791 | 2.5e-3 | 1.32× slower | 1,140 |
-| Nunjucks | in page | 338,705 | 3.0e-3 | 1.58× slower | 1,258 |
-| Teddy (tree walk) | in page | 331,239 | 3.0e-3 | 1.62× slower | 1,158 |
-| Dust.js | in page | 318,567 | 3.1e-3 | 1.68× slower | 1,258 |
-| Lodash template | in page | 278,153 | 3.6e-3 | 1.93× slower | 1,258 |
-| Mustache | in page | 247,356 | 4.0e-3 | 2.17× slower | 1,278 |
-| EJS | in page | 143,065 | 7.0e-3 | 3.75× slower | 1,258 |
-| LiquidJS | in page | 13,902 | 0.072 | 38.61× slower | 1,258 |
+| art-template | in page | 1,116,919 | 9.0e-4 | 2.06× faster | 1,259 |
+| Pug | ahead of time | 862,398 | 1.2e-3 | 1.59× faster | 1,158 |
+| Eta | in page | 744,133 | 1.3e-3 | 1.37× faster | 1,258 |
+| Squirrelly | in page | 686,439 | 1.5e-3 | 1.26× faster | 1,258 |
+| doT | in page | 548,351 | 1.8e-3 | 1.01× faster | 1,275 |
+| Teddy (emitted js) | ahead of time | 543,503 | 1.8e-3 | same | 1,258 |
+| Handlebars | in page | 420,572 | 2.4e-3 | 1.29× slower | 1,258 |
+| Marko | ahead of time | 406,656 | 2.5e-3 | 1.34× slower | 1,140 |
+| Nunjucks | in page | 338,949 | 3.0e-3 | 1.60× slower | 1,258 |
+| Teddy (tree walk) | in page | 338,634 | 3.0e-3 | 1.60× slower | 1,158 |
+| Dust.js | in page | 313,367 | 3.2e-3 | 1.73× slower | 1,258 |
+| Lodash template | in page | 280,337 | 3.6e-3 | 1.94× slower | 1,258 |
+| Mustache | in page | 244,672 | 4.1e-3 | 2.22× slower | 1,278 |
+| EJS | in page | 145,491 | 6.9e-3 | 3.74× slower | 1,258 |
+| LiquidJS | in page | 13,453 | 0.074 | 40.40× slower | 1,258 |
 | PHP (node-php-runner) | — | — | — | cannot run client-side | — |
 
 ### Conditionals
@@ -410,21 +410,21 @@ Ratios are against **Teddy (emitted js)**, since that is the like for like again
 
 | Engine | Compiled | Renders/sec | Mean ms | vs Teddy | Output bytes |
 | --- | --- | --: | --: | --- | --: |
-| art-template | in page | 5,752,111 | 1.7e-4 | 1.81× faster | 492 |
-| Eta | in page | 5,638,284 | 1.8e-4 | 1.77× faster | 478 |
-| Squirrelly | in page | 5,607,290 | 1.8e-4 | 1.76× faster | 478 |
-| Pug | ahead of time | 5,514,342 | 1.8e-4 | 1.73× faster | 410 |
-| doT | in page | 4,788,837 | 2.1e-4 | 1.51× faster | 492 |
-| Teddy (emitted js) | ahead of time | 3,180,708 | 3.1e-4 | same | 516 |
-| Nunjucks | in page | 1,123,724 | 8.9e-4 | 2.83× slower | 492 |
-| Dust.js | in page | 1,010,562 | 9.9e-4 | 3.15× slower | 516 |
-| Marko | ahead of time | 701,561 | 1.4e-3 | 4.53× slower | 392 |
-| Teddy (tree walk) | in page | 691,981 | 1.4e-3 | 4.60× slower | 410 |
-| Mustache | in page | 609,854 | 1.6e-3 | 5.22× slower | 454 |
-| Handlebars | in page | 536,128 | 1.9e-3 | 5.93× slower | 453 |
-| Lodash template | in page | 533,266 | 1.9e-3 | 5.96× slower | 492 |
-| EJS | in page | 402,213 | 2.5e-3 | 7.91× slower | 492 |
-| LiquidJS | in page | 29,160 | 0.034 | 109.08× slower | 492 |
+| art-template | in page | 5,802,463 | 1.7e-4 | 2.00× faster | 492 |
+| Eta | in page | 5,731,135 | 1.7e-4 | 1.98× faster | 478 |
+| Squirrelly | in page | 5,659,570 | 1.8e-4 | 1.95× faster | 478 |
+| Pug | ahead of time | 5,361,562 | 1.9e-4 | 1.85× faster | 410 |
+| doT | in page | 4,747,000 | 2.1e-4 | 1.64× faster | 492 |
+| Teddy (emitted js) | ahead of time | 2,899,954 | 3.4e-4 | same | 516 |
+| Nunjucks | in page | 1,125,960 | 8.9e-4 | 2.58× slower | 492 |
+| Dust.js | in page | 1,001,326 | 1.0e-3 | 2.90× slower | 516 |
+| Marko | ahead of time | 733,926 | 1.4e-3 | 3.95× slower | 392 |
+| Teddy (tree walk) | in page | 681,331 | 1.5e-3 | 4.26× slower | 410 |
+| Mustache | in page | 608,571 | 1.6e-3 | 4.77× slower | 454 |
+| Lodash template | in page | 550,392 | 1.8e-3 | 5.27× slower | 492 |
+| Handlebars | in page | 477,822 | 2.1e-3 | 6.07× slower | 453 |
+| EJS | in page | 408,252 | 2.4e-3 | 7.10× slower | 492 |
+| LiquidJS | in page | 31,916 | 0.031 | 90.86× slower | 492 |
 | PHP (node-php-runner) | — | — | — | cannot run client-side | — |
 
 ### Loops
@@ -433,21 +433,21 @@ Ratios are against **Teddy (emitted js)**, since that is the like for like again
 
 | Engine | Compiled | Renders/sec | Mean ms | vs Teddy | Output bytes |
 | --- | --- | --: | --: | --- | --: |
-| art-template | in page | 272,548 | 3.7e-3 | 1.32× faster | 11,627 |
-| Eta | in page | 261,651 | 3.8e-3 | 1.27× faster | 11,425 |
-| Pug | ahead of time | 222,993 | 4.5e-3 | 1.08× faster | 7,782 |
-| Teddy (emitted js) | ahead of time | 205,870 | 4.9e-3 | same | 11,795 |
-| Squirrelly | in page | 184,867 | 5.4e-3 | 1.11× slower | 11,425 |
-| Marko | ahead of time | 126,711 | 7.9e-3 | 1.62× slower | 7,474 |
-| doT | in page | 124,925 | 8.0e-3 | 1.65× slower | 11,627 |
-| Dust.js | in page | 65,234 | 0.015 | 3.16× slower | 11,627 |
-| Handlebars | in page | 53,324 | 0.019 | 3.86× slower | 10,121 |
-| Mustache | in page | 50,737 | 0.020 | 4.06× slower | 10,121 |
-| Lodash template | in page | 39,455 | 0.025 | 5.22× slower | 11,627 |
-| Nunjucks | in page | 25,478 | 0.039 | 8.08× slower | 11,627 |
-| Teddy (tree walk) | in page | 23,147 | 0.043 | 8.89× slower | 7,782 |
-| EJS | in page | 19,094 | 0.052 | 10.78× slower | 11,627 |
-| LiquidJS | in page | 1,282 | 0.780 | 160.60× slower | 11,627 |
+| art-template | in page | 276,681 | 3.6e-3 | 1.36× faster | 11,627 |
+| Eta | in page | 266,114 | 3.8e-3 | 1.31× faster | 11,425 |
+| Pug | ahead of time | 221,572 | 4.5e-3 | 1.09× faster | 7,782 |
+| Teddy (emitted js) | ahead of time | 203,907 | 4.9e-3 | same | 11,795 |
+| Squirrelly | in page | 188,478 | 5.3e-3 | 1.08× slower | 11,425 |
+| Marko | ahead of time | 132,136 | 7.6e-3 | 1.54× slower | 7,474 |
+| doT | in page | 131,727 | 7.6e-3 | 1.55× slower | 11,627 |
+| Dust.js | in page | 65,463 | 0.015 | 3.11× slower | 11,627 |
+| Handlebars | in page | 54,412 | 0.018 | 3.75× slower | 10,121 |
+| Mustache | in page | 51,681 | 0.019 | 3.95× slower | 10,121 |
+| Lodash template | in page | 39,329 | 0.025 | 5.18× slower | 11,627 |
+| Nunjucks | in page | 26,231 | 0.038 | 7.77× slower | 11,627 |
+| Teddy (tree walk) | in page | 24,045 | 0.042 | 8.48× slower | 7,782 |
+| EJS | in page | 19,346 | 0.052 | 10.54× slower | 11,627 |
+| LiquidJS | in page | 1,320 | 0.757 | 154.42× slower | 11,627 |
 | PHP (node-php-runner) | — | — | — | cannot run client-side | — |
 
 ### Large table
@@ -456,21 +456,21 @@ Ratios are against **Teddy (emitted js)**, since that is the like for like again
 
 | Engine | Compiled | Renders/sec | Mean ms | vs Teddy | Output bytes |
 | --- | --- | --: | --: | --- | --: |
-| Eta | in page | 8,063 | 0.124 | 1.19× faster | 237,757 |
-| art-template | in page | 7,438 | 0.134 | 1.10× faster | 238,758 |
-| Pug | ahead of time | 6,970 | 0.143 | 1.03× faster | 156,734 |
-| Teddy (emitted js) | ahead of time | 6,763 | 0.148 | same | 238,758 |
-| Marko | ahead of time | 6,662 | 0.150 | 1.02× slower | 156,732 |
-| Squirrelly | in page | 6,501 | 0.154 | 1.04× slower | 237,757 |
-| doT | in page | 3,949 | 0.253 | 1.71× slower | 238,758 |
-| Handlebars | in page | 2,965 | 0.337 | 2.28× slower | 233,753 |
-| Dust.js | in page | 2,548 | 0.392 | 2.65× slower | 238,758 |
-| Teddy (tree walk) | in page | 1,969 | 0.508 | 3.43× slower | 156,734 |
-| Mustache | in page | 1,867 | 0.536 | 3.62× slower | 233,753 |
-| Lodash template | in page | 1,845 | 0.542 | 3.66× slower | 238,758 |
-| Nunjucks | in page | 1,621 | 0.617 | 4.17× slower | 238,758 |
-| EJS | in page | 750 | 1.33 | 9.01× slower | 238,758 |
-| LiquidJS | in page | 48.1 | 20.81 | 140.74× slower | 238,758 |
+| Eta | in page | 8,329 | 0.120 | 1.21× faster | 237,757 |
+| art-template | in page | 7,611 | 0.131 | 1.10× faster | 238,758 |
+| Pug | ahead of time | 6,917 | 0.145 | same | 156,734 |
+| Teddy (emitted js) | ahead of time | 6,892 | 0.145 | same | 238,758 |
+| Squirrelly | in page | 6,639 | 0.151 | 1.04× slower | 237,757 |
+| Marko | ahead of time | 6,589 | 0.152 | 1.05× slower | 156,732 |
+| doT | in page | 4,080 | 0.245 | 1.69× slower | 238,758 |
+| Handlebars | in page | 3,090 | 0.324 | 2.23× slower | 233,753 |
+| Dust.js | in page | 2,596 | 0.385 | 2.66× slower | 238,758 |
+| Teddy (tree walk) | in page | 2,035 | 0.491 | 3.39× slower | 156,734 |
+| Lodash template | in page | 1,883 | 0.531 | 3.66× slower | 238,758 |
+| Mustache | in page | 1,877 | 0.533 | 3.67× slower | 233,753 |
+| Nunjucks | in page | 1,724 | 0.580 | 4.00× slower | 238,758 |
+| EJS | in page | 762 | 1.31 | 9.05× slower | 238,758 |
+| LiquidJS | in page | 50.5 | 19.79 | 136.38× slower | 238,758 |
 | PHP (node-php-runner) | — | — | — | cannot run client-side | — |
 
 ### Partials
@@ -479,21 +479,21 @@ a shell that pulls in a header and a footer once and a product partial 24 times.
 
 | Engine | Compiled | Renders/sec | Mean ms | vs Teddy | Output bytes |
 | --- | --- | --: | --: | --- | --: |
-| Pug | ahead of time | 165,706 | 6.0e-3 | 1.31× faster | 8,611 |
-| Squirrelly | in page | 127,084 | 7.9e-3 | same | 10,672 |
-| Teddy (emitted js) | ahead of time | 126,718 | 7.9e-3 | same | 10,958 |
-| Eta | in page | 111,184 | 9.0e-3 | 1.14× slower | 10,672 |
-| Marko | ahead of time | 105,589 | 9.5e-3 | 1.20× slower | 8,247 |
-| doT | in page | 100,878 | 9.9e-3 | 1.26× slower | 10,931 |
-| Dust.js | in page | 52,078 | 0.019 | 2.43× slower | 10,883 |
-| Lodash template | in page | 24,686 | 0.041 | 5.13× slower | 10,883 |
-| Handlebars | in page | 24,669 | 0.041 | 5.14× slower | 11,648 |
-| Mustache | in page | 24,364 | 0.041 | 5.20× slower | 11,708 |
-| Teddy (tree walk) | in page | 21,669 | 0.046 | 5.85× slower | 8,611 |
-| Nunjucks | in page | 14,453 | 0.069 | 8.77× slower | 10,883 |
-| art-template | in page | 11,988 | 0.083 | 10.57× slower | 10,883 |
-| EJS | in page | 9,048 | 0.111 | 14.00× slower | 10,883 |
-| LiquidJS | in page | 694 | 1.44 | 182.59× slower | 10,883 |
+| Pug | ahead of time | 167,410 | 6.0e-3 | 1.24× faster | 8,611 |
+| Teddy (emitted js) | ahead of time | 134,945 | 7.4e-3 | same | 10,958 |
+| Squirrelly | in page | 126,414 | 7.9e-3 | 1.07× slower | 10,672 |
+| Eta | in page | 119,547 | 8.4e-3 | 1.13× slower | 10,672 |
+| Marko | ahead of time | 101,033 | 9.9e-3 | 1.34× slower | 8,247 |
+| doT | in page | 100,065 | 1.0e-2 | 1.35× slower | 10,931 |
+| Dust.js | in page | 51,575 | 0.019 | 2.62× slower | 10,883 |
+| Handlebars | in page | 25,342 | 0.039 | 5.32× slower | 11,648 |
+| Mustache | in page | 25,306 | 0.040 | 5.33× slower | 11,708 |
+| Lodash template | in page | 24,444 | 0.041 | 5.52× slower | 10,883 |
+| Teddy (tree walk) | in page | 21,934 | 0.046 | 6.15× slower | 8,611 |
+| Nunjucks | in page | 14,389 | 0.069 | 9.38× slower | 10,883 |
+| art-template | in page | 11,768 | 0.085 | 11.47× slower | 10,883 |
+| EJS | in page | 9,075 | 0.110 | 14.87× slower | 10,883 |
+| LiquidJS | in page | 699 | 1.43 | 193.17× slower | 10,883 |
 | PHP (node-php-runner) | — | — | — | cannot run client-side | — |
 
 ### Full page
@@ -502,21 +502,21 @@ a complete document: head, header, banner, else-if chain, 24 products, a 25 row 
 
 | Engine | Compiled | Renders/sec | Mean ms | vs Teddy | Output bytes |
 | --- | --- | --: | --: | --- | --: |
-| Pug | ahead of time | 110,487 | 9.1e-3 | 1.24× faster | 11,824 |
-| Eta | in page | 94,251 | 0.011 | 1.05× faster | 17,067 |
-| Squirrelly | in page | 92,307 | 0.011 | 1.03× faster | 17,067 |
-| Teddy (emitted js) | ahead of time | 89,429 | 0.011 | same | 17,397 |
-| Marko | ahead of time | 73,585 | 0.014 | 1.22× slower | 11,438 |
-| doT | in page | 69,506 | 0.014 | 1.29× slower | 17,364 |
-| Dust.js | in page | 33,446 | 0.030 | 2.67× slower | 17,328 |
-| Handlebars | in page | 21,412 | 0.047 | 4.18× slower | 18,765 |
-| Mustache | in page | 18,801 | 0.053 | 4.76× slower | 18,837 |
-| Lodash template | in page | 18,707 | 0.053 | 4.78× slower | 17,308 |
-| Teddy (tree walk) | in page | 17,751 | 0.056 | 5.04× slower | 11,825 |
-| Nunjucks | in page | 11,944 | 0.084 | 7.49× slower | 17,308 |
-| art-template | in page | 11,578 | 0.086 | 7.72× slower | 17,308 |
-| EJS | in page | 7,324 | 0.137 | 12.21× slower | 17,308 |
-| LiquidJS | in page | 528 | 1.90 | 169.49× slower | 17,308 |
+| Pug | ahead of time | 112,070 | 8.9e-3 | 1.25× faster | 11,824 |
+| Eta | in page | 95,484 | 0.010 | 1.06× faster | 17,067 |
+| Squirrelly | in page | 93,323 | 0.011 | 1.04× faster | 17,067 |
+| Teddy (emitted js) | ahead of time | 89,785 | 0.011 | same | 17,397 |
+| Marko | ahead of time | 72,308 | 0.014 | 1.24× slower | 11,438 |
+| doT | in page | 68,615 | 0.015 | 1.31× slower | 17,364 |
+| Dust.js | in page | 35,767 | 0.028 | 2.51× slower | 17,328 |
+| Handlebars | in page | 21,285 | 0.047 | 4.22× slower | 18,765 |
+| Lodash template | in page | 18,535 | 0.054 | 4.84× slower | 17,308 |
+| Mustache | in page | 18,460 | 0.054 | 4.86× slower | 18,837 |
+| Teddy (tree walk) | in page | 17,905 | 0.056 | 5.01× slower | 11,825 |
+| Nunjucks | in page | 11,998 | 0.083 | 7.48× slower | 17,308 |
+| art-template | in page | 11,486 | 0.087 | 7.82× slower | 17,308 |
+| EJS | in page | 7,280 | 0.137 | 12.33× slower | 17,308 |
+| LiquidJS | in page | 531 | 1.88 | 169.01× slower | 17,308 |
 | PHP (node-php-runner) | — | — | — | cannot run client-side | — |
 
 Engines with nothing a browser can run:
@@ -533,18 +533,18 @@ The same scenarios in a browser, timing the compile and one render together, wit
 
 | Engine | Renders/sec | Mean ms | vs Teddy | Output bytes |
 | --- | --: | --: | --- | --: |
-| doT | 93,358 | 0.011 | 15.01× faster | 1,275 |
-| Eta | 34,779 | 0.029 | 5.59× faster | 1,258 |
-| Lodash template | 27,965 | 0.036 | 4.50× faster | 1,258 |
-| EJS | 27,211 | 0.037 | 4.38× faster | 1,258 |
-| Squirrelly | 22,984 | 0.044 | 3.70× faster | 1,258 |
-| Mustache | 13,912 | 0.072 | 2.24× faster | 1,278 |
-| art-template | 13,648 | 0.073 | 2.19× faster | 1,259 |
-| Nunjucks | 7,355 | 0.136 | 1.18× faster | 1,258 |
-| Teddy | 6,218 | 0.161 | same | 1,158 |
-| LiquidJS | 5,314 | 0.188 | 1.17× slower | 1,258 |
-| Handlebars | 4,324 | 0.231 | 1.44× slower | 1,258 |
-| Dust.js | 3,357 | 0.298 | 1.85× slower | 1,258 |
+| doT | 93,563 | 0.011 | 14.85× faster | 1,275 |
+| Eta | 34,421 | 0.029 | 5.46× faster | 1,258 |
+| Lodash template | 28,442 | 0.035 | 4.51× faster | 1,258 |
+| EJS | 26,599 | 0.038 | 4.22× faster | 1,258 |
+| Squirrelly | 23,495 | 0.043 | 3.73× faster | 1,258 |
+| Mustache | 13,660 | 0.073 | 2.17× faster | 1,278 |
+| art-template | 13,463 | 0.074 | 2.14× faster | 1,259 |
+| Nunjucks | 7,242 | 0.138 | 1.15× faster | 1,258 |
+| Teddy | 6,300 | 0.159 | same | 1,158 |
+| LiquidJS | 5,268 | 0.190 | 1.20× slower | 1,258 |
+| Handlebars | 4,237 | 0.236 | 1.49× slower | 1,258 |
+| Dust.js | 3,366 | 0.297 | 1.87× slower | 1,258 |
 | Pug | — | — | compiles ahead of time | — |
 | Marko | — | — | compiles ahead of time | — |
 | PHP (node-php-runner) | — | — | cannot run client-side | — |
@@ -555,18 +555,18 @@ The same scenarios in a browser, timing the compile and one render together, wit
 
 | Engine | Renders/sec | Mean ms | vs Teddy | Output bytes |
 | --- | --: | --: | --- | --: |
-| doT | 141,271 | 7.1e-3 | 40.33× faster | 492 |
-| Lodash template | 41,276 | 0.024 | 11.78× faster | 492 |
-| EJS | 38,708 | 0.026 | 11.05× faster | 492 |
-| Eta | 27,577 | 0.036 | 7.87× faster | 478 |
-| Squirrelly | 20,676 | 0.048 | 5.90× faster | 478 |
-| art-template | 19,557 | 0.051 | 5.58× faster | 492 |
-| Mustache | 13,809 | 0.072 | 3.94× faster | 454 |
-| LiquidJS | 8,468 | 0.118 | 2.42× faster | 492 |
-| Nunjucks | 8,231 | 0.121 | 2.35× faster | 492 |
-| Handlebars | 4,271 | 0.234 | 1.22× faster | 453 |
-| Teddy | 3,503 | 0.285 | same | 410 |
-| Dust.js | 3,404 | 0.294 | 1.03× slower | 516 |
+| doT | 143,528 | 7.0e-3 | 40.46× faster | 492 |
+| Eta | 42,489 | 0.024 | 11.98× faster | 478 |
+| Lodash template | 41,454 | 0.024 | 11.69× faster | 492 |
+| EJS | 39,491 | 0.025 | 11.13× faster | 492 |
+| Squirrelly | 26,467 | 0.038 | 7.46× faster | 478 |
+| art-template | 19,825 | 0.050 | 5.59× faster | 492 |
+| Mustache | 13,636 | 0.073 | 3.84× faster | 454 |
+| LiquidJS | 8,844 | 0.113 | 2.49× faster | 492 |
+| Nunjucks | 8,421 | 0.119 | 2.37× faster | 492 |
+| Handlebars | 4,240 | 0.236 | 1.20× faster | 453 |
+| Teddy | 3,547 | 0.282 | same | 410 |
+| Dust.js | 3,438 | 0.291 | 1.03× slower | 516 |
 | Pug | — | — | compiles ahead of time | — |
 | Marko | — | — | compiles ahead of time | — |
 | PHP (node-php-runner) | — | — | cannot run client-side | — |
@@ -577,18 +577,18 @@ The same scenarios in a browser, timing the compile and one render together, wit
 
 | Engine | Renders/sec | Mean ms | vs Teddy | Output bytes |
 | --- | --: | --: | --- | --: |
-| doT | 77,042 | 0.013 | 14.97× faster | 11,627 |
-| Eta | 41,574 | 0.024 | 8.08× faster | 11,425 |
-| Squirrelly | 26,397 | 0.038 | 5.13× faster | 11,425 |
-| art-template | 25,929 | 0.039 | 5.04× faster | 11,627 |
-| Lodash template | 22,416 | 0.045 | 4.36× faster | 11,627 |
-| EJS | 14,798 | 0.068 | 2.88× faster | 11,627 |
-| Mustache | 14,206 | 0.070 | 2.76× faster | 10,121 |
-| Nunjucks | 8,066 | 0.124 | 1.57× faster | 11,627 |
-| Handlebars | 6,645 | 0.150 | 1.29× faster | 10,121 |
-| Teddy | 5,145 | 0.194 | same | 7,782 |
-| Dust.js | 4,377 | 0.228 | 1.18× slower | 11,627 |
-| LiquidJS | 1,150 | 0.869 | 4.47× slower | 11,627 |
+| doT | 77,577 | 0.013 | 14.96× faster | 11,627 |
+| Eta | 41,856 | 0.024 | 8.07× faster | 11,425 |
+| Squirrelly | 27,082 | 0.037 | 5.22× faster | 11,425 |
+| art-template | 25,802 | 0.039 | 4.97× faster | 11,627 |
+| Lodash template | 22,200 | 0.045 | 4.28× faster | 11,627 |
+| EJS | 14,723 | 0.068 | 2.84× faster | 11,627 |
+| Mustache | 14,626 | 0.068 | 2.82× faster | 10,121 |
+| Nunjucks | 7,946 | 0.126 | 1.53× faster | 11,627 |
+| Handlebars | 6,368 | 0.157 | 1.23× faster | 10,121 |
+| Teddy | 5,187 | 0.193 | same | 7,782 |
+| Dust.js | 4,416 | 0.226 | 1.17× slower | 11,627 |
+| LiquidJS | 1,119 | 0.893 | 4.63× slower | 11,627 |
 | Pug | — | — | compiles ahead of time | — |
 | Marko | — | — | compiles ahead of time | — |
 | PHP (node-php-runner) | — | — | cannot run client-side | — |
@@ -599,18 +599,18 @@ The same scenarios in a browser, timing the compile and one render together, wit
 
 | Engine | Renders/sec | Mean ms | vs Teddy | Output bytes |
 | --- | --: | --: | --- | --: |
-| Eta | 7,145 | 0.140 | 4.85× faster | 237,757 |
-| art-template | 6,299 | 0.159 | 4.28× faster | 238,758 |
-| Squirrelly | 5,418 | 0.185 | 3.68× faster | 237,757 |
-| doT | 3,873 | 0.258 | 2.63× faster | 238,758 |
-| Handlebars | 2,231 | 0.448 | 1.51× faster | 233,753 |
-| Lodash template | 1,798 | 0.556 | 1.22× faster | 238,758 |
-| Mustache | 1,720 | 0.581 | 1.17× faster | 233,753 |
-| Dust.js | 1,700 | 0.588 | 1.15× faster | 238,758 |
-| Nunjucks | 1,520 | 0.658 | 1.03× faster | 238,758 |
-| Teddy | 1,473 | 0.679 | same | 156,734 |
-| EJS | 754 | 1.33 | 1.96× slower | 238,758 |
-| LiquidJS | 48.7 | 20.51 | 30.23× slower | 238,758 |
+| Eta | 7,225 | 0.138 | 4.77× faster | 237,757 |
+| art-template | 6,120 | 0.163 | 4.04× faster | 238,758 |
+| Squirrelly | 5,374 | 0.186 | 3.55× faster | 237,757 |
+| doT | 3,935 | 0.254 | 2.60× faster | 238,758 |
+| Handlebars | 2,178 | 0.459 | 1.44× faster | 233,753 |
+| Lodash template | 1,814 | 0.551 | 1.20× faster | 238,758 |
+| Dust.js | 1,740 | 0.575 | 1.15× faster | 238,758 |
+| Mustache | 1,685 | 0.593 | 1.11× faster | 233,753 |
+| Teddy | 1,515 | 0.660 | same | 156,734 |
+| Nunjucks | 1,509 | 0.663 | same | 238,758 |
+| EJS | 752 | 1.33 | 2.01× slower | 238,758 |
+| LiquidJS | 49.4 | 20.25 | 30.68× slower | 238,758 |
 | Pug | — | — | compiles ahead of time | — |
 | Marko | — | — | compiles ahead of time | — |
 | PHP (node-php-runner) | — | — | cannot run client-side | — |
@@ -621,18 +621,18 @@ a shell that pulls in a header and a footer once and a product partial 24 times.
 
 | Engine | Renders/sec | Mean ms | vs Teddy | Output bytes |
 | --- | --: | --: | --- | --: |
-| Eta | 39,327 | 0.025 | 13.03× faster | 10,672 |
-| doT | 33,726 | 0.030 | 11.17× faster | 10,931 |
-| Squirrelly | 20,334 | 0.049 | 6.74× faster | 10,672 |
-| Lodash template | 17,107 | 0.058 | 5.67× faster | 10,883 |
-| Mustache | 8,632 | 0.116 | 2.86× faster | 11,708 |
-| EJS | 6,201 | 0.161 | 2.05× faster | 10,883 |
-| Dust.js | 5,491 | 0.182 | 1.82× faster | 10,883 |
-| art-template | 5,394 | 0.185 | 1.79× faster | 10,883 |
-| Nunjucks | 4,003 | 0.250 | 1.33× faster | 10,883 |
-| Teddy | 3,019 | 0.331 | same | 8,611 |
-| Handlebars | 2,824 | 0.354 | 1.07× slower | 11,648 |
-| LiquidJS | 660 | 1.52 | 4.58× slower | 10,883 |
+| doT | 49,071 | 0.020 | 16.69× faster | 10,931 |
+| Eta | 39,355 | 0.025 | 13.38× faster | 10,672 |
+| Squirrelly | 28,503 | 0.035 | 9.69× faster | 10,672 |
+| Lodash template | 17,473 | 0.057 | 5.94× faster | 10,883 |
+| Mustache | 8,823 | 0.113 | 3.00× faster | 11,708 |
+| EJS | 6,368 | 0.157 | 2.17× faster | 10,883 |
+| Dust.js | 5,535 | 0.181 | 1.88× faster | 10,883 |
+| art-template | 5,496 | 0.182 | 1.87× faster | 10,883 |
+| Nunjucks | 4,024 | 0.249 | 1.37× faster | 10,883 |
+| Teddy | 2,940 | 0.340 | same | 8,611 |
+| Handlebars | 2,779 | 0.360 | 1.06× slower | 11,648 |
+| LiquidJS | 649 | 1.54 | 4.53× slower | 10,883 |
 | Pug | — | — | compiles ahead of time | — |
 | Marko | — | — | compiles ahead of time | — |
 | PHP (node-php-runner) | — | — | cannot run client-side | — |
@@ -643,18 +643,18 @@ a complete document: head, header, banner, else-if chain, 24 products, a 25 row 
 
 | Engine | Renders/sec | Mean ms | vs Teddy | Output bytes |
 | --- | --: | --: | --- | --: |
-| doT | 27,889 | 0.036 | 30.39× faster | 17,364 |
-| Eta | 24,894 | 0.040 | 27.13× faster | 17,067 |
-| Squirrelly | 17,976 | 0.056 | 19.59× faster | 17,067 |
-| Lodash template | 12,396 | 0.081 | 13.51× faster | 17,308 |
-| Mustache | 5,304 | 0.189 | 5.78× faster | 18,837 |
-| EJS | 4,652 | 0.215 | 5.07× faster | 17,308 |
-| art-template | 3,845 | 0.260 | 4.19× faster | 17,308 |
-| Dust.js | 2,847 | 0.351 | 3.10× faster | 17,328 |
-| Nunjucks | 2,473 | 0.404 | 2.69× faster | 17,308 |
-| Handlebars | 1,477 | 0.677 | 1.61× faster | 18,765 |
-| Teddy | 918 | 1.09 | same | 11,825 |
-| LiquidJS | 478 | 2.09 | 1.92× slower | 17,308 |
+| doT | 29,882 | 0.033 | 30.75× faster | 17,364 |
+| Eta | 24,890 | 0.040 | 25.61× faster | 17,067 |
+| Squirrelly | 18,013 | 0.056 | 18.54× faster | 17,067 |
+| Lodash template | 12,702 | 0.079 | 13.07× faster | 17,308 |
+| Mustache | 5,383 | 0.186 | 5.54× faster | 18,837 |
+| EJS | 4,663 | 0.214 | 4.80× faster | 17,308 |
+| art-template | 3,932 | 0.254 | 4.05× faster | 17,308 |
+| Dust.js | 2,840 | 0.352 | 2.92× faster | 17,328 |
+| Nunjucks | 2,491 | 0.401 | 2.56× faster | 17,308 |
+| Handlebars | 1,497 | 0.668 | 1.54× faster | 18,765 |
+| Teddy | 972 | 1.03 | same | 11,825 |
+| LiquidJS | 489 | 2.04 | 1.99× slower | 17,308 |
 | Pug | — | — | compiles ahead of time | — |
 | Marko | — | — | compiles ahead of time | — |
 | PHP (node-php-runner) | — | — | cannot run client-side | — |

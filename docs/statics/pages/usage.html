@@ -540,45 +540,6 @@
 
       <p>Note: Teddy tags will also not be parsed if they appear inside of elements that interpret child text as plain text, e.g. <code><!--#<style>--></code>, <code><!--#<script>--></code>, <code><!--#<textarea>--></code>, etc. Teddy will also not parse anything in a <code><!--#<pre>--></code> tag unless you add a <code>parse</code> attribute to the <code><!--#<pre>--></code> tag like <code><!--#<pre parse>--></code>.</p>
 
-      <h2 id="cacheblocks">Caching blocks</h2>
-
-      <p>You can use a <code><!--#<cache>--></code> element to prevent Teddy from having to continuously re-render blocks of template code that frequently resolve to the same markup in order to improve template parsing performance.</p>
-
-      <p>Here's an example:</p>
-
-      <pre><code class="language-html"><escape>
-<p>Dynamic: Welcome {user}!</p>
-<cache name="weather" key="city" maxCaches="3">
-  <p>Cached: High temperature today in {city} is {value}.</p>
-</cache>
-      </escape></code></pre>
-
-      <p>In the above example, assume that there are a large number of values that <code>{user}</code> could resolve to, but there are a limited number of values that <code>{city}</code> and <code>{value}</code> could resolve to. In that case, we can cache the block of code that doesn't need re-rendering as often by enclosing it in a <code><!--#<cache>--></code> element to improve the performance of template parsing while still allowing other parts of the template to be parsed dynamically at each render.</p>
-
-      <p>Here's what the attributes mean:</p>
-
-      <ul>
-        <li>
-          <p><code>name</code>: What you want to name your cache. The name is necessary so you can manually clear the cache from JavaScript later if you like via <code>teddy.clearCache()</code>:</p>
-          <ul>
-            <li><code>teddy.clearCache(name)</code> will delete the whole cache at that <code>name</code>, e.g. all values for <code>{city}</code>.</li>
-            <li><code>teddy.clearCache(name, keyVal)</code> will delete just the value at that <code>keyVal</code>, e.g. just the cache for when <code>{city}</code> resolves to "NY" if you set <code>keyVal</code> to "NY".</li>
-          </ul>
-        </li>
-        <li>
-          <p><code>key</code>: The model value to use to index new caches.</p>
-          <ul>
-            <li>Example: Suppose <code>city</code> in the above example could resolve to three possible values: "NY", "SF", and "LA". In that case, the caching feature will create 3 caches using the <code>city</code> key: one for each of the three possible values.</li>
-          </ul>
-        </li>
-        <li>
-          <p><code>maxAge</code>: How old the cache can be in milliseconds before it is invalidated and will be re-rendered. Default: <code>0</code> (no limit).</p>
-        </li>
-        <li>
-          <p><code>maxCaches</code>: The maximum number of caches that Teddy will be allowed to create for a given <code><!--#<cache>--></code> element. If the maximum is reached, Teddy will remove the oldest cache in the stack, where oldest is defined as the least recently created <em>or</em> accessed. Default: <code>1000</code>.</p>
-        </li>
-      </ul>
-
       <h2 id="precompiling">Precompiling templates for the browser</h2>
 
       <p>In Node.js, Teddy renders templates by converting the template code to JavaScript and running that. In a browser it cannot do that, because it would violate a strict <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CSP">content security policy</a>. Browser builds thus render templates on-demand using a slower parser and compiler instead. You can safely use the faster JS converter method on the client too though if you precompile your templates in Node.js first and serve the precompiled JS to the browser instead of serving template code to the browser.</p>

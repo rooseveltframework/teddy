@@ -15,7 +15,6 @@ let templates = {} // templates registered by hand with setTemplate, e.g. { "myT
 let fileCache = {} // templates that were read from the filesystem, kept only when template caching is switched on
 let compiledCache = new Map() // node trees built by the compiler, kept on the same terms as fileCache: only when template caching is switched on, so that editing a template still takes effect without a restart
 const maxCompiledCache = 10000 // a caller that renders markup passed in as a string rather than by name must not grow this without bound
-const caches = {} // a place to store cached portions of templates
 // building a regular expression costs far more than using one, and a loop substitutes the same variables out of the same body on every iteration, so the patterns are compiled once and kept
 const varPatterns = new Map()
 function varPattern (source, escape) {
@@ -28,7 +27,6 @@ function varPattern (source, escape) {
   }
   return pattern
 }
-const templateCaches = {} // a place to store cached full templates
 
 // #endregion
 
@@ -577,7 +575,6 @@ const compiler = createCompiler({
   conditionPath,
   evaluateConditional,
   loadTemplate,
-  caches,
   parseVars,
   getAttribs,
   getOrSetObjectByDotNotation
@@ -643,41 +640,6 @@ function clearTemplates () {
   compiledCache = new Map()
 }
 
-function setCache (params) {
-  if (!templateCaches[params.template]) templateCaches[params.template] = {}
-  if (params.key) {
-    templateCaches[params.template][params.key] = {
-      maxAge: params.maxAge || params.maxage,
-      maxCaches: (params.maxCaches || params.maxcaches) || 1000,
-      entries: {}
-    }
-  } else {
-    templateCaches[params.template].none = {
-      maxAge: params.maxAge || params.maxage,
-      markup: null,
-      created: null
-    }
-  }
-}
-
-// delete one or more cached templates
-//
-// 1 string argument deletes the whole cache at that name for template partial caches
-//
-// 2 arguments deletes just the value at that keyVal for template partial caches
-//
-// 1 object argument assumes we're clearing whole template level cache
-function clearCache (name, keyVal) {
-  if (typeof name === 'string') {
-    if (keyVal) delete caches[name].entries[keyVal]
-    else delete caches[name]
-  } else if (typeof name === 'object') {
-    const params = name
-    if (params.key) delete templateCaches[params.template][params.key]
-    else delete templateCaches[params.template]
-  } else if (params.verbosity > 0) console.error('teddy: invalid params passed to clearCache.')
-}
-
 // parses a template
 function render (template, model, callback) {
   // ensure template is a string
@@ -709,45 +671,6 @@ function render (template, model, callback) {
   // remove templateRoot from template name if necessary
   if (template.slice(params.templateRoot.length) === params.templateRoot) template = template.replace(params.templateRoot, '')
 
-  // whole template caching
-  const templateCache = templateCaches[template]
-  let cacheKey = null
-  let cacheKeyModelVal = null
-  if (templateCache) {
-    const singletonCache = templateCache.none
-    if (singletonCache) {
-      // an entry with no max age set never goes stale
-      if (!singletonCache.created) cacheKey = 'none'
-      else if (singletonCache.maxAge && singletonCache.created + singletonCache.maxAge < Date.now()) cacheKey = 'none' // it has gone stale, so render it again and keep the new markup
-      else {
-        if (typeof callback === 'function') return callback(null, singletonCache.markup)
-        else return singletonCache.markup
-      }
-    } else {
-      for (const key in templateCache) {
-        const modelVal = getOrSetObjectByDotNotation(model, key)
-        // the model says nothing about this key, so this render is not cached under it. saying zero, or an empty string, is still saying something
-        if (modelVal === false || modelVal === null || modelVal === undefined) continue
-
-        // the value names an entry, and the name of anything is a string: a number used as one becomes its own digits, so it has to be read back the same way it was written. searching the entries for it instead would cost as much as the cache is wide, and would never match a value that was not a string to begin with
-        cacheKeyModelVal = String(modelVal)
-        const templateCacheAtThisKey = templateCache[key]
-        const entry = templateCacheAtThisKey.entries[cacheKeyModelVal]
-        const maxAge = templateCacheAtThisKey.maxAge
-
-        // an entry with no max age set never goes stale
-        if (entry && (!maxAge || entry.created + maxAge >= Date.now())) {
-          if (typeof callback === 'function') return callback(null, entry.markup)
-          else return entry.markup
-        }
-
-        // either nothing is cached for this value yet or what was there has gone stale
-        cacheKey = key
-        break
-      }
-    }
-  }
-
   // everything about a template that does not depend on the model is done once and kept together against the argument the caller passed, whether that was a name or the markup itself
   //
   // the entry is looked for before anything else happens, because reading the template and stripping its comments are template level work too
@@ -777,21 +700,6 @@ function render (template, model, callback) {
     //
     // what is left is the double encoding, which can still arrive in a value the model supplied rather than through the parser. asking whether there is any is far cheaper than rewriting a page that has none, and nearly every page has none
     if (renderedTemplate.includes('&amp;')) renderedTemplate = reverseDoubleEncodedEntities(renderedTemplate)
-  }
-
-  // cache the template
-  if (cacheKey === 'none') {
-    templateCaches[template].none.markup = renderedTemplate
-    templateCaches[template].none.created = Date.now()
-  } else if (cacheKey) {
-    if (!templateCaches[template][cacheKey].entries[cacheKeyModelVal]) templateCaches[template][cacheKey].entries[cacheKeyModelVal] = {}
-    templateCaches[template][cacheKey].entries[cacheKeyModelVal].markup = renderedTemplate
-    templateCaches[template][cacheKey].entries[cacheKeyModelVal].created = Date.now()
-    // invalidate oldest cache if we've reached max caches limit
-    if (Object.keys(templateCaches[template][cacheKey].entries).length > templateCaches[template][cacheKey].maxCaches) {
-      const lowestKeyVal = Object.keys(templateCaches[template][cacheKey].entries).reduce((a, b) => templateCaches[template][cacheKey].entries[a].created < templateCaches[template][cacheKey].entries[b].created ? a : b)
-      delete templateCaches[template][cacheKey].entries[lowestKeyVal]
-    }
   }
 
   if (typeof callback === 'function') return callback(null, renderedTemplate)
@@ -857,8 +765,6 @@ function registerPrecompiled (artifact) {
 
 export default {
   params,
-  caches,
-  templateCaches,
 
   // functions
   compile,
@@ -871,8 +777,6 @@ export default {
   getTemplates,
   setTemplate,
   clearTemplates,
-  setCache,
-  clearCache,
   render,
   precompile,
   registerPrecompiled,

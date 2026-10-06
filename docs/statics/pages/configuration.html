@@ -67,44 +67,6 @@ templateFunction({ hello: 'world' }) // returns "<p>world</p>"
             <li>Templates registered with <code>teddy.setTemplate</code> are not affected. Those are always kept, since registering one by hand is the only way to supply a template in the browser, where there is no filesystem to read from.</li>
           </ul>
         </li>
-        <li>
-          <p><code>teddy.setCache(params)</code>: Declare a template-level cache.</p>
-          <ul>
-            <li>Params:
-              <ul>
-                <li><code>template</code>: Name of the template to cache.</li>
-                <li><code>key</code>: Model variable to cache it by. Set to <code>'none'</code> to cache the first render for all model values.</li>
-                <li><code>maxAge</code>: How old the cache can be in milliseconds before it is invalidated and will be re-rendered. Default: <code>0</code> (no limit).</li>
-                <li><code>maxCaches</code>: The maximum number of caches that Teddy will be allowed to create for a given template/key combination. If the maximum is reached, Teddy will remove the oldest cache in the stack, where oldest is defined as the least recently created <em>or</em> accessed. Does not apply to caches where <code>key</code> is not also set. Default: <code>1000</code>.</li>
-              </ul>
-            </li>
-            <li>
-              Example:
-                  <pre><code class="language-javascript" lang="javascript">teddy.setCache({
-  template: 'someTemplate.html',
-  key: 'city',
-  maxAge: 1000
-})</code></pre>
-            </li>
-          </ul>
-        </li>
-        <li>
-          <p><code>teddy.clearCache(name)</code>: If <code>name</code> is a string, it will delete the whole cache at that name.</p>
-        </li>
-        <li>
-          <p><code>teddy.clearCache(name, keyVal)</code>: Deletes just the value at that <code>keyVal</code>. Assumes <code>name</code> will be a string.</p>
-        </li>
-        <li>
-          <p><code>teddy.clearCache(params)</code>: If <code>params</code> is an object, it will delete a whole template-level cache.</p>
-          <ul>
-            <li>Params:
-              <ul>
-                <li><code>template</code>: Name of the template to delete the cache of.</li>
-                <li><code>key</code>: Model variable cache index to delete it by. If <code>key</code> is not provided, it will delete all caches of that template.</li>
-              </ul>
-            </li>
-          </ul>
-        </li>
       </ul>
     </article>
   </arg>

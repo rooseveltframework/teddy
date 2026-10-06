@@ -26,7 +26,7 @@ const TOKEN_CANDIDATES = ['\u0001', '\u0002', '\u0003', '\u0004', '\u0005', '\u0
 const SELECTION_ATTRS = [['selected-value', 'option[value]', 'selected'], ['checked-value', 'input[type="checkbox"][value], input[type="radio"][value]', 'checked']]
 
 // tags whose presence around a construct means an enclosing construct owns it, so it is compiled as part of that one's body rather than on its own
-const STRUCTURAL = new Set(['if', 'unless', 'elseif', 'elseunless', 'else', 'loop', 'include', 'arg', 'noteddy', 'noparse', 'pre', 'cache'])
+const STRUCTURAL = new Set(['if', 'unless', 'elseif', 'elseunless', 'else', 'loop', 'include', 'arg', 'noteddy', 'noparse', 'pre'])
 const ARM_TAGS = new Set(['elseif', 'elseunless', 'else'])
 
 // teddy tags that can be left over once every construct has been claimed, because they only mean anything next to something else
@@ -38,7 +38,7 @@ const OUTCOMES = new Set(['true', 'false'])
 // every construct that owns the markup inside it, found in one pass so the outermost of them can be picked out. a one line if is in here through its outcome attributes, which is also how the interpreter finds them
 //
 // a <noteddy> or <pre> carrying an id is teddy's own marker for content it has already lifted out, not something in the template, so it is left alone here exactly as the old renderer left it alone
-const CONSTRUCTS = 'if, unless, loop, include, inline, cache, noteddy:not([id]), noparse:not([id]), pre:not([id]), [true], [false]'
+const CONSTRUCTS = 'if, unless, loop, include, inline, noteddy:not([id]), noparse:not([id]), pre:not([id]), [true], [false]'
 
 // a sequence of one line ifs on one element needs the element's opening tag worked out for whichever combination of outcomes a render arrives at. there are two to the power of however many conditions there are, so each is built as a render first calls for it and then kept, rather than all of them up front
 
@@ -46,10 +46,10 @@ const CONSTRUCTS = 'if, unless, loop, include, inline, cache, noteddy:not([id]),
 const VALID_VARIABLE = /^(\d+|[a-zA-Z_$][a-zA-Z0-9_$|{}.-]*(\.[a-zA-Z_$][a-zA-Z0-9_$|{}.-]*)*)$/
 
 // what a value has to contain before anything further needs doing with it. deliberately specific: a value carrying ordinary markup such as <strong> is finished as it stands, and treating it otherwise would cost every template that injects safe html
-const LOOKS_LIKE_TEDDY = /\{|<\/?(?:if|unless|elseif|elseunless|else|loop|include|arg|cache|inline|noteddy|noparse)\b|\s(?:true|false|selected-value|checked-value)=|\sif-/i
+const LOOKS_LIKE_TEDDY = /\{|<\/?(?:if|unless|elseif|elseunless|else|loop|include|arg|inline|noteddy|noparse)\b|\s(?:true|false|selected-value|checked-value)=|\sif-/i
 
 // whether a value carries teddy tags, as opposed to only carrying {variables}. a value of only variables and text cannot affect the shape of the document, so nothing about it has to be checked before compiling it
-const HAS_TEDDY_TAGS = /<\/?(?:if|unless|elseif|elseunless|else|loop|include|arg|cache|inline|noteddy|noparse)\b|\s(?:true|false|selected-value|checked-value)=|\sif-/i
+const HAS_TEDDY_TAGS = /<\/?(?:if|unless|elseif|elseunless|else|loop|include|arg|inline|noteddy|noparse)\b|\s(?:true|false|selected-value|checked-value)=|\sif-/i
 
 // teddy's marker for a block it has lifted out of the markup. one of these turns up inside a value whenever a rendered fragment is passed on through another variable, which is what a layout taking its page as an argument does, and it is not something to look at a second time
 const NOTEDDY_PLACEHOLDER = /<noteddy id="\d+"(?: pre="true")?><\/noteddy>/g
@@ -106,7 +106,6 @@ export function createCompiler (deps) {
     conditionPath,
     evaluateConditional,
     loadTemplate,
-    caches,
     parseVars,
     getAttribs,
     getOrSetObjectByDotNotation
@@ -175,9 +174,6 @@ export function createCompiler (deps) {
       valueSource: null,
       ownValue: null,
       name: null,
-      key: null,
-      maxAge: 0,
-      maxCaches: 0,
       css: null,
       js: null,
       element: null,
@@ -213,7 +209,6 @@ export function createCompiler (deps) {
       else if (name === 'loop') claimLoop(dom, el, slots, stack)
       else if (name === 'include') claimInclude(dom, el, slots, stack)
       else if (name === 'inline') claimInline(dom, el, slots)
-      else if (name === 'cache') claimCache(dom, el, slots, stack)
       else if (name === 'noteddy' || name === 'noparse') claimNoParse(dom, el, slots, false)
       else if (name === 'pre') claimPre(dom, el, slots)
       else claimOneLineIf(dom, el, slots, stack)
@@ -609,21 +604,6 @@ export function createCompiler (deps) {
     return !!el.attribs && Object.prototype.hasOwnProperty.call(el.attribs, 'parse')
   }
 
-  // a <cache> keeps the markup its body rendered to and writes that instead of rendering again. the interpreter does this in two halves, marking the element on the way in and storing what it produced once the output has gone stable; a compiled render knows when the body is finished, so it is one step here
-  function claimCache (dom, el, slots, stack) {
-    const attribs = readAttribs(el)
-    const node = makeNode('cache')
-    node.name = attribValue(attribs, 'name')
-    // an absent key means the whole body is cached under one entry, which teddy calls 'none'
-    node.key = attribValue(attribs, 'key')
-    node.maxAge = parseInt(attribValue(attribs, 'maxAge') || attribValue(attribs, 'maxage')) || 0
-    node.maxCaches = parseInt(attribValue(attribs, 'maxCaches') || attribValue(attribs, 'maxcaches')) || 1000
-    node.bodySource = dom(el).html()
-    node.stack = stack
-    slots.push(node)
-    dom(el).replaceWith(tokenFor(slots.length - 1))
-  }
-
   function claimInline (dom, el, slots) {
     const attribs = readAttribs(el)
     const node = makeNode('inline')
@@ -987,10 +967,6 @@ export function createCompiler (deps) {
           out += node.closeTag
           break
 
-        case 'cache':
-          out += cacheBlock(node, model, () => renderNodes(node.body, model, state))
-          break
-
         case 'dynamicInclude':
           out += renderNodes(dynamicBody(node, model), node.bindings.length ? bindArgs(model, node.bindings, node.bindings.map(binding => renderNodes(binding.body, model, state))) : model, state)
           break
@@ -1272,36 +1248,6 @@ export function createCompiler (deps) {
     return localModel
   }
 
-  // a <cache> writes the markup its body rendered to last time rather than rendering it again. renderBody is only called on a miss
-  function cacheBlock (node, model, renderBody) {
-    const name = node.name && node.name.includes('{') ? parseVars(node.name, model) : node.name
-    const keySource = node.key && node.key.includes('{') ? parseVars(node.key, model) : node.key
-    // a name or key that still holds a variable never resolved, and teddy leaves such an element alone until the stray tag sweep takes it away, contents and all
-    if (!name || name.includes('{') || (keySource && keySource.includes('{'))) return ''
-    const keyVal = keySource ? getOrSetObjectByDotNotation(model, keySource) : 'none'
-    const existing = caches[name]
-    const entry = existing && existing.entries && existing.entries[keyVal]
-    if (entry) {
-      const now = Date.now()
-      // an entry with no max age set never goes stale
-      if (!existing.maxAge || entry.lastAccessed + existing.maxAge > now) {
-        entry.lastAccessed = now
-        return entry.markup
-      }
-      delete existing.entries[keyVal]
-    }
-    const markup = renderBody()
-    if (!caches[name]) caches[name] = { key: keySource || 'none', maxAge: node.maxAge, maxCaches: node.maxCaches, entries: {} }
-    const stamp = Date.now()
-    caches[name].entries[keyVal] = { lastAccessed: stamp, created: stamp, markup }
-    // drop the least recently used entry once there are more than the element asked to keep
-    const entries = caches[name].entries
-    if (Object.keys(entries).length > node.maxCaches) {
-      delete entries[Object.keys(entries).reduce((a, b) => entries[a].lastAccessed < entries[b].lastAccessed ? a : b)]
-    }
-    return markup
-  }
-
   // the compiled body of an <include> whose src is only known once there is a model to read it from, compiled the first time a render asks for that name and kept against it
   function dynamicBody (node, model) {
     const src = parseVars(node.src, model)
@@ -1365,7 +1311,6 @@ export function createCompiler (deps) {
       inline: inlineBlock,
       computed: computedVariable,
       marked: selectionMarked,
-      cache: cacheBlock,
       dynamic: dynamicBody,
       iterable,
       walk: loopWalk,
