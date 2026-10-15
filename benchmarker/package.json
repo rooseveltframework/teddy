@@ -31,7 +31,7 @@
     "pug": "3.0.4",
     "squirrelly": "9.1.1",
     "teddy": "file:..",
-    "tinybench": "6.2.0"
+    "tinybench": "6.2.2"
   },
   "devDependencies": {
     "esbuild": "0.28.2",
