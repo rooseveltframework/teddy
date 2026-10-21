@@ -11,7 +11,7 @@
     "roosevelt": "0.34.5",
     "teddy": "../",
     "sass": "1.105.1",
-    "webpack": "5.111.1"
+    "webpack": "5.112.0"
   },
   "devDependencies": {
     "standard": "17.1.2",
