@@ -9,5 +9,12 @@
   ],
   "configMigration": true,
   "description": "new releases are left alone for a few days so that a compromised package has time to be caught and pulled before it ever reaches a pull request here; security updates skip the wait and are raised as soon as they are found",
-  "minimumReleaseAge": "5 days"
+  "minimumReleaseAge": "5 days",
+  "packageRules": [
+    {
+      "description": "the roosevelt framework's own modules are exempt from the wait",
+      "matchSourceUrls": ["https://github.com/rooseveltframework/**"],
+      "minimumReleaseAge": "0 days"
+    }
+  ]
 }

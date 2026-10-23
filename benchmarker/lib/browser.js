@@ -26,7 +26,7 @@ function templatesFor (engine, scenario) {
 // what an engine's runtime has to be for a page to load it: a path to a script it ships, or a function that builds one. an engine that publishes only es modules has no script to point at, so getting it into a page means bundling it, which is what an app using it would have to do too
 async function addBundle (page, bundle) {
   if (typeof bundle === 'function') return page.addScriptTag({ content: await bundle() })
-  const full = path.join(benchmarkRoot, 'node_modules', bundle)
+  const full = path.isAbsolute(bundle) ? bundle : path.join(benchmarkRoot, 'node_modules', bundle) // (an absolute path is a build of teddy from another checkout; see lib/engines/teddy.js)
   if (!fs.existsSync(full)) throw new Error(`cannot find ${bundle}`)
   return page.addScriptTag({ path: full })
 }

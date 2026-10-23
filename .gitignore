@@ -22,3 +22,6 @@ benchmarker/BENCHMARKS.json
 
 # one developer's own before-and-after reference point, which means nothing on anybody else's machine
 benchmarker/BASELINE.json
+
+# what `npm run benchmark:compare` found, which is as particular to one machine as the baseline is
+benchmarker/COMPARISON.md

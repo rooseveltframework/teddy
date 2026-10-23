@@ -112,6 +112,8 @@ function runPlaywrightAgainstTeddyBundle (teddyPath) {
             const model = makeModel()
             const page = teddyPage
             test.run = test.run?.toString() || '' // can't pass functions to page.evaluate, so we need to stringify the test.run function
+            delete test.runPlaywright // (the run function it was, already copied into test.run, and nothing page.evaluate can pass along either)
+            delete test.runNode
 
             await page.evaluate(async (params) => {
               const { test, model } = params

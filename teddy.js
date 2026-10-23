@@ -3,7 +3,7 @@
 import fs from 'fs' // node filesystem module
 import path from 'path' // node path module
 import { load as cheerioLoad } from 'cheerio/slim' // dom parser
-import { createCompiler } from './compiler.js' // walks a template once so a render does not have to
+import { createCompiler, aboutTemplate, collectWarnings } from './compiler.js' // walks a template once so a render does not have to
 import { canEmit, emit } from './codegen.js' // turns what the compiler worked out into javascript; browser builds swap this for a stub
 import { encode, decode, FORMAT } from './precompiled.js' // reads and writes the data a template compiled ahead of time carries
 
@@ -277,6 +277,12 @@ function variableFlags (match) {
   }
 }
 
+// content a render holds out of its markup, so nothing parses it, and puts back once the markup is finished. it's kept here rather than on the model, which belongs to whoever called render and may well be frozen, and a render saves and restores it around itself, so one render starting while another is underway holds out its own
+let heldOut = []
+function holdOut (content) {
+  return heldOut.push(content) - 1
+}
+
 // what a variable writes, given its flags and the value the model had for it
 //
 // the rules here are not obvious: a value of false or null resolves to the variable's own text, 0 writes as "0" when escaped but resolves to its own text when raw, an object writes as [Object] when escaped and as its own toString when raw, and |h blanks all of them. this is the one place they are implemented, so every caller agrees about them
@@ -290,7 +296,9 @@ function formatVariable (flags, value, model) {
     if (!parsed && !display && (params.emptyVarBehavior === 'hide' || hide)) parsed = '' // display empty string instead of the variable text verbatim if this setting is set
     if (typeof parsed === 'string' && parsed.startsWith('{') && parsed.includes('|d')) parsed = parsed.replace('|d', '')
     if (!parsed && parsed !== '') return null
-    const id = model._noTeddyBlocks.push(parsed) - 1
+    // |p only stops the value being parsed: it is still escaped unless |s says otherwise too. the flags are read from the variable as written, which a precompiled template keeps, rather than from a flag of their own a template precompiled before this would not carry
+    if (typeof parsed === 'string' && !match.slice(-6).includes('|s')) parsed = escapeEntities(parsed)
+    const id = holdOut(parsed)
     return { name: match, text: `<noteddy id="${id}"></noteddy>`, skipTemplateLiteralReplacement: false }
   }
 
@@ -303,7 +311,7 @@ function formatVariable (flags, value, model) {
     }
   } else {
     if (!parsed && !display && (params.emptyVarBehavior === 'hide' || hide)) parsed = '' // display empty string instead of the variable text verbatim if this setting is set
-    else if (parsed || parsed === '') parsed = escapeEntities(parsed)
+    else if (parsed || parsed === '') parsed = withoutRawFlags(escapeEntities(parsed))
     else if (parsed === 0) parsed = '0'
     else {
       skipTemplateLiteralReplacement = true
@@ -312,6 +320,13 @@ function formatVariable (flags, value, model) {
   }
   if (typeof parsed === 'string' && parsed.startsWith('{') && parsed.includes('|d')) parsed = parsed.replace('|d', '')
   return { name: match, text: parsed, skipTemplateLiteralReplacement }
+}
+
+// an escaped value is still parsed for {variables} of its own, but what it holds came from the model, and nothing in the model gets to decide that something is written unescaped: a {variable|s} inside it is written escaped like the value around it
+const variableInValue = /\{([^{}]*)\}/g
+function withoutRawFlags (text) {
+  if (typeof text !== 'string' || !text.includes('|s')) return text
+  return text.replace(variableInValue, (variable, inside) => `{${inside.replace(/\|s(?=\||$)/g, '')}}`)
 }
 
 // escapes sensitive characters to prevent xss
@@ -352,11 +367,6 @@ function escapeEntities (value) {
   } while (match !== null)
 
   return escaped + value.slice(copiedTo)
-}
-
-// if an entity is double-encoded, this will fix that
-function reverseDoubleEncodedEntities (str) {
-  return str.replace(/&amp;(#\d+;|#x[0-9A-Fa-f]+;|[A-Za-z]+;)/g, '&$1')
 }
 
 // match strings by a custom delimiter
@@ -571,24 +581,22 @@ const compiler = createCompiler({
   params,
   variableFlags,
   formatVariable,
+  holdOut,
   escapeEntities,
   conditionPath,
   evaluateConditional,
-  loadTemplate,
+  loadTemplate: (template) => { // (for the templates others include, whose repeated attributes need renaming as the including template's had: see prepareTemplate)
+    const markup = loadTemplate(template)
+    return markup === null ? null : renameRepeatedAttributes(markup)
+  },
   parseVars,
   getAttribs,
   getOrSetObjectByDotNotation
 })
 
-// everything about a template that does not depend on the model: its markup with repeated attributes renamed, and the node tree the compiler built from it
-//
-// nodes is null for a template the compiler does not handle, and that answer is kept too, so a template it has already turned down is not walked again on every render only to be turned down again
-//
-// keyIsMarkup says the key is the template's own markup rather than a name it was looked up by. such an entry can never go stale, because the key is the content, so it is always kept: that is what makes teddy.compile() compile once even in development. an entry keyed by a name can go stale, since the file behind the name may change, so it is kept only on the same terms as the template source itself
-function prepareTemplate (cacheKey, markup, keyIsMarkup, emittedOut) {
-  const keep = keyIsMarkup || params.cacheTemplates
-  // give every repeated attribute name a unique one before the markup is parsed since html parsers strip duplicate attributes
-  const prepared = markup.replace(/<([a-zA-Z][a-zA-Z0-9-]*)([^>]*)>/g, (match, tagName, attributes) => {
+// gives every repeated attribute name on an element a unique one, before the markup is parsed, since html parsers keep only the first of an element's attributes with the same name, and teddy writes several on purpose, such as the true attribute of each of an element's one line ifs. it's done to a template's markup, and to every template it includes, as they're included
+function renameRepeatedAttributes (markup) {
+  return markup.replace(/<([a-zA-Z][a-zA-Z0-9-]*)([^>]*)>/g, (match, tagName, attributes) => {
     const attrRegex = /([a-zA-Z0-9-:._]+)(?:=(["'])(.*?)\2|([^>\s]+))?/g
     const attrMap = new Map()
     let count = 1
@@ -603,6 +611,20 @@ function prepareTemplate (cacheKey, markup, keyIsMarkup, emittedOut) {
     })
     return `<${tagName}${processedAttributes}>`
   })
+}
+
+// everything about a template that does not depend on the model: its markup with repeated attributes renamed, and the node tree the compiler built from it
+//
+// nodes is null for a template the compiler does not handle, and that answer is kept too, so a template it has already turned down is not walked again on every render only to be turned down again
+//
+// keyIsMarkup says the key is the template's own markup rather than a name it was looked up by. such an entry can never go stale, because the key is the content, so it is always kept: that is what makes teddy.compile() compile once even in development
+//
+// registered says the key is the name of a template registered with teddy.setTemplate. such an entry can't go stale either, since setTemplate throws away whatever was compiled under a name it's given new markup for, so it's always kept too: that is what lets a browser, which only ever has registered templates, render a template again without compiling it again
+//
+// an entry keyed by any other name can go stale, since the file behind the name may change, so it is kept only on the same terms as the template source itself
+function prepareTemplate (cacheKey, markup, keyIsMarkup, emittedOut, registered = false) {
+  const keep = keyIsMarkup || registered || params.cacheTemplates
+  const prepared = renameRepeatedAttributes(markup)
   const nodes = compiler.compileTemplate(prepared)
   // emitting javascript is faster than walking the tree, and needs to build a function from a string to do it, which a page under a strict content security policy may not do. browser builds therefore walk the tree, and so does any template holding a construct the emitter does not write code for
   let render = null
@@ -617,12 +639,18 @@ function prepareTemplate (cacheKey, markup, keyIsMarkup, emittedOut) {
       render = null
     }
   }
-  const entry = { markup: prepared, nodes, render, keyIsMarkup }
+  const entry = { markup: prepared, nodes, render, keyIsMarkup, registered }
   if (keep) {
     if (compiledCache.size > maxCompiledCache) compiledCache = new Map()
     compiledCache.set(cacheKey, entry)
   }
   return entry
+}
+
+// whether a name is that of a template registered with setTemplate, with or without its .html, which is how loadTemplate looks it up
+function isRegistered (name) {
+  if (name.includes('<')) return false
+  return typeof templates[name] === 'string' || typeof templates[name.slice(-5) === '.html' ? name : name + '.html'] === 'string'
 }
 
 // mutator method to cache template
@@ -640,13 +668,70 @@ function clearTemplates () {
   compiledCache = new Map()
 }
 
-// parses a template
-function render (template, model, callback) {
+// renders a template, given by name or as markup, against a model, and returns the markup it makes
+//
+// options apply to this render alone, and mean the same as the setters of the same names: verbosity, emptyVarBehavior, and cache (setCacheTemplates). a callback is called with the markup as well as it being returned, as express expects; express passes it third, in place of options, and it can come fourth after them
+function render (template, model, options, callback) {
+  if (typeof options === 'function') {
+    callback = options
+    options = null
+  }
+  const name = typeof template === 'string' && !template.includes('<') ? template : null
+  const rendered = options ? withOptions(options, () => aboutTemplate(name, renderTemplate, template, model)) : aboutTemplate(name, renderTemplate, template, model)
+  if (typeof callback === 'function') return callback(null, rendered)
+  return rendered
+}
+
+// does some work with render options in place, and puts the settings back as they were afterwards
+const RENDER_OPTIONS = { verbosity: setVerbosity, emptyVarBehavior: setEmptyVarBehavior, cache: setCacheTemplates }
+function withOptions (options, work) {
+  if (!options) return work()
+  const before = { verbosity: params.verbosity, emptyVarBehavior: params.emptyVarBehavior, cacheTemplates: params.cacheTemplates }
+  for (const [name, set] of Object.entries(RENDER_OPTIONS)) if (options[name] !== undefined) set(options[name])
+  try {
+    return work()
+  } finally {
+    Object.assign(params, before)
+  }
+}
+
+// renders a template, as render does, but into a DocumentFragment rather than a string of markup, ready to insert into a page. it's only for the browser, or anywhere else with a DOM
+//
+// an element written with a ref attribute is handed back by name in the fragment's refs, with the attribute taken off, so the code inserting the fragment has the elements it needs without querying for them: <button ref="ok"> is fragment.refs.ok. a name names one element; if more than one has the same name, the first is the one in refs
+function renderFragment (template, model, options) {
+  const doc = globalThis.document
+  if (!doc) throw new Error('teddy: renderFragment builds a DocumentFragment, which needs a DOM, and there is none here. use teddy.render, which returns the markup as a string')
+  const holder = doc.createElement('template')
+  holder.innerHTML = render(template, model, options)
+  const fragment = holder.content
+  fragment.refs = {}
+  for (const el of fragment.querySelectorAll('[ref]')) {
+    const name = el.getAttribute('ref')
+    if (fragment.refs[name]) {
+      if (params.verbosity > 0) console.warn(`teddy: more than one element in the fragment has the ref "${name}", and refs holds the first of them`)
+    } else fragment.refs[name] = el
+    el.removeAttribute('ref')
+  }
+  return fragment
+}
+
+// compiles a template, given by name or as markup, without rendering it, and returns what compiling it turned up: the warnings teddy would otherwise print, each naming the template, or an empty array if there's nothing wrong with it. a build can run this over its templates and fail on anything it returns
+//
+// only what can be told from the template alone is reported; what depends on a model, such as a loop over something the model doesn't have, is said when the template is rendered
+function check (template) {
+  if (typeof template !== 'string') return ['the template to check is not a string']
+  const markup = template.includes('<')
+  const source = loadTemplate(template)
+  if (source === null) return [`${template}: there is no template by this name`]
+  return collectWarnings(() => aboutTemplate(markup ? null : template, () => prepareTemplate(template, source, markup, undefined, isRegistered(template))))
+}
+
+// renders a template, returning the markup it makes
+function renderTemplate (template, model) {
   // ensure template is a string
   if (typeof template !== 'string') {
     if (params.verbosity > 1) console.warn('teddy.render attempted to render a template which is not a string.')
-    if (typeof callback === 'function') return callback(null, '')
-    else return ''
+    return ''
   }
 
   // ensure model is an object
@@ -657,7 +742,6 @@ function render (template, model, callback) {
 
   // declare vars
   let renderedTemplate
-  model._noTeddyBlocks = [] // will store code blocks exempt from teddy parsing
 
   // express.js support
   if (model.settings && model.settings.views && path) params.templateRoot = path.resolve(model.settings.views)
@@ -675,35 +759,33 @@ function render (template, model, callback) {
   //
   // the entry is looked for before anything else happens, because reading the template and stripping its comments are template level work too
   let prepared = compiledCache.get(template)
-  // a name may point at different markup than it did last time, so an entry keyed by one is only trusted on the same terms as the template source itself. an entry keyed by markup cannot go stale, because the key is the content
-  if (prepared && !prepared.keyIsMarkup && !prepared.precompiled && !params.cacheTemplates) prepared = undefined
+  // a name may point at different markup than it did last time, so an entry keyed by one is only trusted on the same terms as the template source itself. an entry keyed by markup cannot go stale, because the key is the content, and neither can one keyed by the name of a registered template, because registering new markup under that name throws the entry away
+  if (prepared && !prepared.keyIsMarkup && !prepared.registered && !prepared.precompiled && !params.cacheTemplates) prepared = undefined
   if (!prepared) {
     let source = loadTemplate(template)
     // a name that resolves to nothing falls back to being rendered as though it were markup
     if (source === null) source = template.slice(-5) === '.html' ? template.substring(0, template.length - 5) : template
-    prepared = prepareTemplate(template, source, template.includes('<'))
+    prepared = prepareTemplate(template, source, template.includes('<'), undefined, isRegistered(template))
   }
   renderedTemplate = prepared.markup
 
   // render from what the compiler worked out about this template: emitted javascript where that was possible, and a walk of the node tree otherwise. neither reparses the markup
   const state = { values: [] }
-  renderedTemplate = prepared.render ? prepared.render(model, state) : compiler.renderNodes(prepared.nodes, model, state)
+  const outerHeldOut = heldOut
+  heldOut = []
+  try {
+    renderedTemplate = prepared.render ? prepared.render(model, state) : compiler.renderNodes(prepared.nodes, model, state)
 
-  // replace <noteddy> blocks with the hidden code
-  for (const blockId in model._noTeddyBlocks) {
-    renderedTemplate = renderedTemplate.replace(`<noteddy id="${blockId}"></noteddy>`, () => model._noTeddyBlocks[blockId])
-    renderedTemplate = renderedTemplate.replace(`<noteddy id="${blockId}" pre="true"></noteddy>`, () => model._noTeddyBlocks[blockId])
+    // put back what was held out of the markup
+    for (const blockId in heldOut) {
+      renderedTemplate = renderedTemplate.replace(`<noteddy id="${blockId}"></noteddy>`, () => heldOut[blockId])
+      renderedTemplate = renderedTemplate.replace(`<noteddy id="${blockId}" pre="true"></noteddy>`, () => heldOut[blockId])
+    }
+  } finally {
+    heldOut = outerHeldOut
   }
 
-  if (browser) {
-    // the renamed src and href attributes are put back as the markup leaves the dom now, so a render no longer sweeps its whole output for them
-    //
-    // what is left is the double encoding, which can still arrive in a value the model supplied rather than through the parser. asking whether there is any is far cheaper than rewriting a page that has none, and nearly every page has none
-    if (renderedTemplate.includes('&amp;')) renderedTemplate = reverseDoubleEncodedEntities(renderedTemplate)
-  }
-
-  if (typeof callback === 'function') return callback(null, renderedTemplate)
-  else return renderedTemplate
+  return renderedTemplate
 }
 
 // #endregion
@@ -778,6 +860,8 @@ export default {
   setTemplate,
   clearTemplates,
   render,
+  renderFragment,
+  check,
   precompile,
   registerPrecompiled,
   __express: render
