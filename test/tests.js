@@ -1060,6 +1060,69 @@ export default [
         expected: '<p>Variable with a variable inside: {subVar}</p>'
       },
       {
+        // a value from the model is still parsed for {variables} of its own, but it doesn't get to unescape anything: a {variable|s} inside it is written escaped, as the value around it is
+        message: 'should write a {variable|s} that sits inside an escaped variable\'s value escaped (misc/rawFlagInsideEscapedVar.html)',
+        template: 'misc/rawFlagInsideEscapedVar',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: '<p>Before &lt;span&gt;raw html&lt;/span&gt; after</p>'
+      },
+      {
+        message: 'should render a frozen model, leaving the model it was given as it was',
+        run: async (teddy, template, model, assert, expected) => {
+          const frozen = Object.freeze({ name: 'world', markup: '<b>{name}</b>' })
+          const rendered = teddy.render('<p>Hello {name}</p><noteddy>{name}</noteddy><p>{markup|p}</p>', frozen)
+          assert(`${rendered} ${Object.keys(frozen).join(',')}`, expected)
+        },
+        expected: '<p>Hello world</p>{name}<p>&lt;b&gt;{name}&lt;/b&gt;</p> name,markup'
+      },
+      {
+        // the test runners compare renders with their whitespace taken out, so this one looks for the space itself
+        message: 'should keep the whitespace between two elements',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render('<p><span>A</span> <span>B</span></p>', {}).includes('</span> <span>'), true),
+        expected: 'true'
+      },
+      {
+        // escaped, an &amp; in a value is &amp;amp;, which a browser displays as the &amp; the value holds
+        message: 'should escape an entity in a variable\'s value, so it displays as the value has it',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render('<p>{entityInValue}</p>', { entityInValue: 'Tom &amp; Jerry' }), expected),
+        expected: '<p>Tom &amp;amp; Jerry</p>'
+      },
+      {
+        message: 'should apply every one line if on an element in an included template, as in the template including it',
+        run: async (teddy, template, model, assert, expected) => {
+          teddy.setTemplate('kethitestOneLineIfs', '<div if-first true="data-first" if-second true="data-second"></div>')
+          assert(teddy.render('<loop through="rows" val="row"><include src="kethitestOneLineIfs"></include></loop>', { rows: [1], first: true, second: true }), expected)
+        },
+        expected: ['<div data-first data-second></div>', '<div data-first="" data-second=""></div>']
+      },
+      {
+        message: 'should select the option whose value matches a selected-value, whatever flags either value is written with',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render('<select selected-value="{chosen|p}"><loop through="choices" val="choice"><option value="{choice.value|p}">{choice.label|p}</option></loop></select>', { chosen: 'b {x}', choices: [{ value: 'a', label: 'A' }, { value: 'b {x}', label: 'B {x}' }] }), expected),
+        expected: '<select><option value="a">A</option><option value="b {x}" selected="selected">B {x}</option></select>'
+      },
+      {
+        message: 'should keep the entities written in a template as they are, inside elements and in attributes',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render('<p title="&quot;A&quot; &amp; B">&nbsp;A&mdash;B &#169; &#x2122;</p>', {}), expected),
+        expected: ['<p title="&quot;A&quot; &amp; B">&nbsp;A&mdash;B &#169; &#x2122;</p>', '<p title="&quot;A&quot; &amp; B">&nbsp;A—B © ™</p>', '<p title="&#34;A&#34; &amp; B">&nbsp;A&mdash;B &#169; &#x2122;</p>']
+      },
+      {
+        message: 'should escape an entity-like value in a variable, so it displays as the value has it rather than as the character',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render('<p>{value}</p>', { value: '&nbsp; &#169;' }), expected),
+        expected: '<p>&amp;nbsp; &amp;#169;</p>'
+      },
+      {
+        // svg's names have capitals in them, which an html parser keeps for elements inside an <svg>. node writes an empty svg element as self-closing and a browser doesn't, so either is right
+        message: 'should keep the case of svg element and attribute names, around teddy tags inside them',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render('<svg viewBox="0 0 10 10"><defs><linearGradient id="g"></linearGradient></defs><if something><rect width="1"></rect></if></svg>', model), expected),
+        expected: ['<svg viewBox="0 0 10 10"><defs><linearGradient id="g"/></defs><rect width="1"></rect></svg>', '<svg viewBox="0 0 10 10"><defs><linearGradient id="g"></linearGradient></defs><rect width="1"></rect></svg>']
+      },
+      {
+        message: 'should escape a {variable|p} while leaving the {variables} in it unparsed (misc/noParseFlagEscapes.html)',
+        template: 'misc/noParseFlagEscapes',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: '<p>&lt;b&gt;{something}&lt;/b&gt;</p>'
+      },
+      {
         message: 'should properly escape HTML entities present in {variables} (misc/varEscaping.html)',
         template: 'misc/varEscaping',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
@@ -1300,7 +1363,7 @@ export default [
         message: 'should render special characters correctly when piped through a teddy noparse flagged variable (misc/specialChars.html)',
         template: 'misc/specialChars',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
-        expected: '<p>special .$&@. chars</p>'
+        expected: '<p>special .$&amp;@. chars</p>' // (escaped, since |p only stops the value being parsed)
       },
       {
         message: 'should render empty strings as is for |p or |s variables that are empty strings (misc/emptyStringVariableFlags.html)',
@@ -1415,12 +1478,125 @@ export default [
           assert(rendered.includes('from setTemplate'), true)
         },
         expected: ''
+      },
+      {
+        // a registered template can't go stale behind teddy's back, since setTemplate throws away what was compiled under a name it's given new markup for, so it's kept whether or not caching is on. its markup is changed here without setTemplate, which nothing should do, only to see that the second render comes from what the first one compiled
+        message: 'should render a registered template again from what it compiled the first time, even with caching off',
+        run: async (teddy, template, model, assert, expected) => {
+          teddy.setCacheTemplates(false)
+          teddy.setTemplate('misc/registeredCompiledOnce', '<p>first</p>')
+          teddy.render('misc/registeredCompiledOnce', {})
+          teddy.getTemplates()['misc/registeredCompiledOnce'] = '<p>changed without setTemplate</p>'
+          const second = teddy.render('misc/registeredCompiledOnce', {})
+          delete teddy.getTemplates()['misc/registeredCompiledOnce']
+          assert(second, expected)
+        },
+        expected: '<p>first</p>'
+      },
+      {
+        message: 'should render a registered template\'s new markup once setTemplate replaces it, when it was rendered by its name without .html',
+        run: async (teddy, template, model, assert, expected) => {
+          teddy.setCacheTemplates(false)
+          teddy.setTemplate('misc/registeredReplaced.html', '<p>first</p>')
+          const first = teddy.render('misc/registeredReplaced', {})
+          teddy.setTemplate('misc/registeredReplaced.html', '<p>second</p>')
+          const second = teddy.render('misc/registeredReplaced', {})
+          delete teddy.getTemplates()['misc/registeredReplaced.html']
+          assert(`${first} ${second}`, expected)
+        },
+        expected: '<p>first</p> <p>second</p>'
       }
     ]
   },
   {
     describe: 'Public API',
     tests: [
+      {
+        message: 'should apply render options to that render alone',
+        run: async (teddy, template, model, assert, expected) => {
+          const hidden = teddy.render('<p>[{notInTheModel}]</p>', {}, { emptyVarBehavior: 'hide' })
+          const shown = teddy.render('<p>[{notInTheModel}]</p>', {})
+          assert(`${hidden} ${shown}`, expected)
+        },
+        expected: '<p>[]</p> <p>[{notInTheModel}]</p>'
+      },
+      {
+        message: 'should call a callback passed in place of options, as express does, or after them',
+        run: async (teddy, template, model, assert, expected) => {
+          let third = ''
+          let fourth = ''
+          teddy.render('<p>{hello}</p>', { hello: 'world' }, (err, html) => { if (!err) third = html })
+          teddy.render('<p>[{nope}]</p>', {}, { emptyVarBehavior: 'hide' }, (err, html) => { if (!err) fourth = html })
+          assert(`${third} ${fourth}`, expected)
+        },
+        expected: '<p>world</p> <p>[]</p>'
+      },
+      {
+        message: 'should render into a DocumentFragment, handing back the elements with a ref by name, without the attribute',
+        runPlaywright: async (teddy, template, model, assert, expected) => {
+          const fragment = teddy.renderFragment('<form><p ref="greeting">Hello {name}</p><button ref="ok">OK</button></form>', { name: 'world' })
+          const holder = document.createElement('div')
+          holder.append(fragment)
+          assert(`${fragment.refs.greeting.textContent} ${fragment.refs.ok.tagName} ${holder.innerHTML}`, expected)
+        },
+        expected: 'Hello world BUTTON <form><p>Hello world</p><button>OK</button></form>'
+      },
+      {
+        message: 'should say renderFragment needs a DOM where there is none',
+        runNode: async (teddy, template, model, assert, expected) => {
+          let said = ''
+          try {
+            teddy.renderFragment('<p>hi</p>', {})
+          } catch (err) {
+            said = err.message.includes('needs a DOM') ? 'threw' : err.message
+          }
+          assert(said, expected)
+        },
+        expected: 'threw'
+      },
+      {
+        message: 'should check a template without rendering it or printing anything, returning its warnings, each naming the template',
+        run: async (teddy, template, model, assert, expected) => {
+          const said = []
+          const warn = console.warn
+          const verbosity = teddy.params.verbosity
+          console.warn = message => said.push(message)
+          teddy.setVerbosity(1) // (so a warning would be printed, were check printing them)
+          let found
+          try {
+            teddy.setTemplate('checkProbe', '<div><p>fine</p></span></div>')
+            found = teddy.check('checkProbe')
+          } finally {
+            teddy.setVerbosity(verbosity)
+            console.warn = warn
+            delete teddy.getTemplates().checkProbe
+          }
+          const clean = teddy.check('<p>{fine}</p>')
+          const missing = teddy.check('noTemplateCalledThis')
+          assert(`${found.length} ${found[0].startsWith('checkProbe: ') && found[0].includes('never opened')} ${clean.length} ${missing[0]} ${said.length}`, expected)
+        },
+        expected: '1 true 0 noTemplateCalledThis: there is no template by this name 0'
+      },
+      {
+        message: 'should name the template a warning is about',
+        run: async (teddy, template, model, assert, expected) => {
+          const said = []
+          const warn = console.warn
+          const verbosity = teddy.params.verbosity
+          console.warn = message => said.push(message)
+          teddy.setVerbosity(1)
+          try {
+            teddy.setTemplate('namedWarningProbe', '<div><p>fine</p></span></div>')
+            teddy.render('namedWarningProbe', {})
+          } finally {
+            teddy.setVerbosity(verbosity)
+            console.warn = warn
+            delete teddy.getTemplates().namedWarningProbe
+          }
+          assert(said.some(message => message.startsWith('teddy: namedWarningProbe: ') && message.includes('never opened')), expected)
+        },
+        expected: true
+      },
       {
         message: 'should render an include whose src cannot be found as nothing when includeNotFoundBehavior is hide',
         run: async (teddy, template, model, assert, expected) => {
@@ -1639,6 +1815,18 @@ export default [
         message: 'should apply a checked-value whose value comes from the model',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render("<div checked-value='{pick}'><input type='checkbox' value='a'><input type='checkbox' value='b'></div>", { pick: 'b' }), expected),
         expected: '<div><input type="checkbox" value="a"><input type="checkbox" value="b" checked="checked"></div>'
+      },
+      {
+        message: 'should apply a one line if to options a selected-value from the model marks (misc/selectedValueOneLineIf.html)',
+        template: 'misc/selectedValueOneLineIf',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: ['<select><option value="a">a</option><option value="b" selected="selected">b</option><option value="c" disabled>c</option></select>', '<select><option value="a">a</option><option value="b" selected="selected">b</option><option value="c" disabled="">c</option></select>'] // (a browser writes an attribute with no value as ="")
+      },
+      {
+        message: 'should apply a one line if to inputs a checked-value from the model marks (misc/checkedValueOneLineIf.html)',
+        template: 'misc/checkedValueOneLineIf',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: ['<p><input type="radio" name="r" value="a" required><input type="radio" name="r" value="b" checked="checked"></p>', '<p><input type="radio" name="r" value="a" required=""><input type="radio" name="r" value="b" checked="checked"></p>']
       },
       {
         message: 'should apply a selected-value to options generated by a loop',

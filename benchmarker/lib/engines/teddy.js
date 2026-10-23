@@ -1,5 +1,11 @@
+import path from 'path'
+import { createRequire } from 'module'
 import { packageVersion } from '../version.js'
-import teddy from 'teddy'
+
+// the teddy being measured is this checkout's own build, unless TEDDY_BENCHMARK_ROOT names another checkout, which is how compare.js measures two versions of teddy with the same suite: everything else about the two runs is identical, so a difference between them is teddy's
+const root = process.env.TEDDY_BENCHMARK_ROOT
+const teddy = root ? createRequire(import.meta.url)(path.join(root, 'dist', 'teddy.cjs')) : (await import('teddy')).default
+const browserBundle = root ? path.join(root, 'dist', 'teddy.min.js') : 'teddy/dist/teddy.min.js'
 
 export default {
   id: 'teddy',
@@ -8,7 +14,7 @@ export default {
   ext: 'html',
   version: packageVersion('teddy'),
   browser: {
-    bundle: 'teddy/dist/teddy.min.js',
+    bundle: browserBundle,
     factory: `(templates, scenario) => {
       teddy.setVerbosity(0)
       teddy.clearTemplates()
@@ -21,7 +27,7 @@ export default {
   },
   browserPrecompiled: {
     // the standalone build, which carries the helpers the precompiled code calls into
-    bundle: 'teddy/dist/teddy.min.js',
+    bundle: browserBundle,
     precompile (scenario, ctx) {
       teddy.setVerbosity(0)
       teddy.setTemplateRoot(ctx.dir)

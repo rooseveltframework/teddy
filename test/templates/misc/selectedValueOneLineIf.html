@@ -1,0 +1,5 @@
+{!
+  should apply a one line if to options a selected-value from the model marks
+!}
+
+<select selected-value="{selectionChosen}"><loop through="selectionChoices" val="choice"><option value="{choice}" if-choice="{selectionOff}" true="disabled">{choice}</option></loop></select>

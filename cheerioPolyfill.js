@@ -99,6 +99,14 @@ function parseTeddyDOMFromString (html) {
   const attrRegex = /([a-zA-Z0-9-:._]+)(?:=(?:(["'])(.*?)\2|([^>\s]+)))?/g
   // elements whose contents a browser reads as plain text rather than as markup, so a tag written inside one is not a tag. teddy leaves their contents alone on the server for the same reason
   const rawTextTags = new Set(['script', 'style', 'textarea'])
+  // svg and mathml elements are made in their own namespaces, as a browser parsing the page would make them, which is what keeps the case of names like viewBox and linearGradient: an element made in the html namespace has its name and its attributes' names lowercased. what's inside a foreignObject is html again, and so are teddy's own tags wherever they're written, since teddy looks for them as html elements
+  const namespaces = { svg: 'http://www.w3.org/2000/svg', math: 'http://www.w3.org/1998/Math/MathML' }
+  const teddyTags = new Set(['if', 'unless', 'elseif', 'elseunless', 'else', 'loop', 'include', 'arg', 'inline', 'noteddy', 'noparse'])
+  const namespaceOf = (parent) => parent.namespaceURI === namespaces.svg && parent.localName === 'foreignObject' ? null : (parent.namespaceURI !== 'http://www.w3.org/1999/xhtml' ? parent.namespaceURI : null)
+  const makeElement = (tagName, lowerCaseTagName, parent) => {
+    const namespace = namespaces[lowerCaseTagName] || namespaceOf(parent)
+    return namespace && !teddyTags.has(lowerCaseTagName) ? document.createElementNS(namespace, tagName) : document.createElement(tagName)
+  }
   let lastIndex = 0
   let match
 
@@ -107,8 +115,8 @@ function parseTeddyDOMFromString (html) {
     if (!dom[dom.length - 1]) throw new Error('Error parsing your template. There may be a coding mistake in your HTML. Look for extra closing </tags> and other common mistakes.')
     const textBeforeMatch = html.slice(lastIndex, match.index)
 
-    // append text nodes
-    if (textBeforeMatch.trim()) {
+    // append text nodes, including ones that are only whitespace, which is part of the markup like any other text: the space between two inline elements is what keeps them apart
+    if (textBeforeMatch) {
       const textNode = document.createTextNode(textBeforeMatch)
       childrenOf(dom[dom.length - 1]).appendChild(textNode)
     }
@@ -136,7 +144,7 @@ function parseTeddyDOMFromString (html) {
         }
       } else {
         // create a new element
-        const element = document.createElement(tagName)
+        const element = makeElement(tagName, lowerCaseTagName, dom[dom.length - 1])
 
         // set attributes
         let attrMatch
@@ -215,7 +223,7 @@ function parseTeddyDOMFromString (html) {
   // append any remaining text after the last match
   if (lastIndex < html.length) {
     const remainingText = html.slice(lastIndex)
-    if (remainingText.trim()) {
+    if (remainingText) {
       const textNode = document.createTextNode(remainingText)
       childrenOf(dom[dom.length - 1]).appendChild(textNode)
     }
@@ -224,26 +232,19 @@ function parseTeddyDOMFromString (html) {
   return root
 }
 
-// custom functions to get inner/outer HTML without escaping various things to prevent teddy from infinitely escaping them
-const doublyEncodedEntities = {
-  '&amp;amp;': '&amp;',
-  '&amp;lt;': '&lt;',
-  '&amp;gt;': '&gt;',
-  '&amp;quot;': '&quot;',
-  '&amp;#39;': '&#39;',
-  '&amp;#x2F;': '&#x2F;'
-}
-// built once rather than on every node of every serialization
-const entityFixes = Object.entries(doublyEncodedEntities).map(([doublyEncoded, singleEncoded]) => [new RegExp(doublyEncoded, 'g'), singleEncoded])
-
 // teddy renames src and href while the markup is a live dom, so that the browser does not try to fetch a url that is still a {variable}. a string is not a dom and cannot fetch anything, so the real attribute name goes back on as the markup leaves the dom. doing it here rather than at the end of a render is what saves every render a sweep of its whole output looking for these
 const deferredAttributes = /data-teddy-defer-attr-(src|href)/g
 
-// undoes what parsing the markup into a dom did to it: the double encoding a browser's serializer applies, and the attribute names teddy renamed on the way in
+// an entity as it comes out of a browser's serializer: the markup's text is put into the dom as it was written, entities and all, so serializing an element encodes the & of every entity in it once more
+const serializedEntity = /&amp;(#\d+;|#x[0-9A-Fa-f]+;|[A-Za-z][A-Za-z0-9]*;)/g
+
+// undoes what parsing the markup into a dom did to an element's markup: the extra encoding of its entities, and the attribute names teddy renamed on the way in
+//
+// each entity loses exactly the one & the serializer added, so an entity that was itself escaped in the markup, such as &amp;nbsp; for a value that reads &nbsp;, stays escaped. text and comments outside an element are read back as they were written, so they have nothing to undo
 function undoParserArtifacts (html) {
-  for (const [pattern, singleEncoded] of entityFixes) html = html.replace(pattern, singleEncoded)
-  return html.replace(deferredAttributes, '$1')
+  return html.replace(serializedEntity, '&$1').replace(deferredAttributes, '$1')
 }
+
 // every element under a root that matches a selector, including the ones inside a template
 //
 // a query never reaches into a template's content fragment, so a teddy tag written inside a template went unclaimed in a browser while node claimed it. asking for the templates in the same query keeps everything in the order it was written in
@@ -275,9 +276,9 @@ function getTeddyDOMInnerHTML (node) {
     if (child.nodeType === window.Node.ELEMENT_NODE) {
       html += undoParserArtifacts(child.outerHTML)
     } else if (child.nodeType === window.Node.TEXT_NODE) {
-      html += undoParserArtifacts(child.textContent)
+      html += child.textContent
     } else if (child.nodeType === window.Node.COMMENT_NODE) {
-      html += `<!--${undoParserArtifacts(child.textContent)}-->`
+      html += `<!--${child.textContent}-->`
     }
   }
 
@@ -288,12 +289,12 @@ function getTeddyDOMOuterHTML (node) {
   let outerHTML = ''
 
   if (node.nodeType === window.Node.ELEMENT_NODE) {
-    outerHTML = node.outerHTML
+    outerHTML = undoParserArtifacts(node.outerHTML)
   } else if (node.nodeType === window.Node.TEXT_NODE) {
     outerHTML = node.textContent
   } else if (node.nodeType === window.Node.COMMENT_NODE) {
     outerHTML = `<!--${node.textContent}-->`
   }
 
-  return undoParserArtifacts(outerHTML)
+  return outerHTML
 }

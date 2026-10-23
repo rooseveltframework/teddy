@@ -1,3 +1,23 @@
+## 2.2.0
+
+- Added `teddy.renderFragment(template, model, options)`, which renders into a `DocumentFragment` rather than a string. An element written with a `ref` attribute is handed back by name in the fragment's `refs`.
+- Added `teddy.check(template)`, which compiles a template without rendering it and returns its warnings, so a build step can fail on them.
+- Added render options: `teddy.render(template, model, options)` takes `verbosity`, `emptyVarBehavior`, and `cache` for that render alone. A callback can still be passed third, as Express does, or fourth after options.
+- Added `npm run benchmark:compare`, which measures how fast teddy is at two versions, by default this checkout against `main`, and says which scenarios got faster or slower, by how much, and whether that's more than the measurements disagree with themselves. See `benchmarker/BENCHMARKER.md`.
+- Improved client-side rendering performance. Precompiled templates now render about 1.5× as fast, and cached templates up to a quarter faster.
+- Altered warnings to now name the template they're about. Warnings that only printed at a higher verbosity are worded to say what was removed.
+- Altered `npm run benchmark` to rebuild teddy if its build is older than its source, rather than only if it's missing, so a run never measures a build left over from another branch.
+- Fixed `{varName|p}` writing its value unescaped. `|p` is meant only to stop the value being parsed, so it's now escaped like any other variable. Combine it with `|s` (`{varName|s|p}`) to write a value unescaped and unparsed.
+- Fixed `teddy.render` adding a `_noTeddyBlocks` property to the model it was given, which threw on a frozen model. A render now keeps what it holds out of the markup to itself.
+- Fixed an element in an included template keeping only the first of its one-line ifs: an element can carry several, but in a template brought in by `<include>`, the ones after the first were dropped.
+- Fixed `selected-value` and `checked-value` never matching a value written with the `|p` flag, on either side, such as `<option value="{choice|p}">`.
+- Fixed one-line ifs being written out as they are, as `if-x true="disabled"` attributes, on the `<option>` and `<input>` elements a `selected-value` or `checked-value` from the model marks.
+- Fixed the client-side build dropping whitespace that sits on its own between elements, so `<span>A</span> <span>B</span>` rendered as `AB` rather than `A B`. Node builds were unaffected.
+- Fixed the client-side build writing an entity in a variable's value unescaped. A value of `Tom &amp; Jerry` was written as `Tom &amp; Jerry` and displayed as `Tom & Jerry`, where node writes `Tom &amp;amp; Jerry`, which displays as the value has it.
+- Fixed the client-side build lowercasing the names of SVG and MathML elements and attributes, so `viewBox` came out as `viewbox` and `linearGradient` as `lineargradient`, which XML consumers of the output and anything comparing it to node's don't accept. Node builds were unaffected.
+- Fixed an escaped variable's value being able to write markup unescaped. A value is still parsed for `{variables}` of its own, but a `{variable|s}` inside it was written raw, so a model value of `{otherVar|s}` let `otherVar` through unescaped. Variables inside an escaped value are now always escaped.
+- Updated dependencies.
+
 ## 2.1.0
 
 - Breaking: Removed the `<cache>` element and `teddy.setCache`, `teddy.clearCache`, `teddy.caches`, and `teddy.templateCaches`. They only suited pages that render the same for every visitor and are keyed by one model variable: a page carrying a session, a CSRF token, or a flash message would serve one visitor's markup to the next, and a key that missed a variable served stale pages without warning. Cache rendered pages outside the app instead, with a CDN, a reverse proxy such as nginx's `proxy_cache`, or `Cache-Control` headers. A `<cache>` element left in a template is now rendered as an ordinary unknown element. `teddy.setCacheTemplates` and the `cache` render option, which keep templates in memory rather than reading them again, are unchanged.

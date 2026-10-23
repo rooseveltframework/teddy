@@ -14,10 +14,25 @@
           <p><code>teddy.clearTemplates()</code>: Clear the template cache.</p>
         </li>
         <li>
-          <p><code>teddy.render(template, model)</code>: Render a template by supplying either source code or a file name (in Node.js).</p>
+          <p><code>teddy.render(template, model, options)</code>: Render a template by supplying either source code or a file name (in Node.js).</p>
           <ul>
             <li>Returns fully rendered HTML.</li>
             <li>Removes <code>&lt;!--! teddy comments --&gt;</code> and <code>&#123;! teddy comments !&#125;</code></li>
+            <li><code>options</code> is optional, and applies to this render alone: <code>verbosity</code>, <code>emptyVarBehavior</code>, and <code>cache</code>, which mean the same as <code>teddy.setVerbosity</code>, <code>teddy.setEmptyVarBehavior</code>, and <code>teddy.setCacheTemplates</code>. E.g. <code>teddy.render(template, model, &#123; emptyVarBehavior: 'hide' &#125;)</code>.</li>
+            <li>A callback can be passed after <code>options</code>, or in place of them, as Express does; it's called with <code>(err, html)</code>.</li>
+          </ul>
+        </li>
+        <li>
+          <p><code>teddy.renderFragment(template, model, options)</code>: Render a template into a <code>DocumentFragment</code> rather than a string, ready to insert into the page. Only where there's a DOM, such as in the browser.</p>
+          <ul>
+            <li>An element written with a <code>ref</code> attribute is handed back by name in the fragment's <code>refs</code>, with the attribute taken off, so you have the elements you need without querying for them. E.g. for <code>&lt;button ref="ok"&gt;OK&lt;/button&gt;</code>, <code>fragment.refs.ok</code> is the button.</li>
+            <li>A ref names one element. If more than one has the same name, <code>refs</code> holds the first of them.</li>
+          </ul>
+        </li>
+        <li>
+          <p><code>teddy.check(template)</code>: Compile a template, by source code or name, without rendering it, and return an array of what's wrong with it: the warnings Teddy would otherwise print, each naming the template, or an empty array if there's nothing. Nothing is printed. A build step can run this over its templates and fail on anything it returns.</p>
+          <ul>
+            <li>Only what can be told from the template alone is reported. What depends on a model, such as a loop over something the model doesn't have, is reported when the template is rendered.</li>
           </ul>
         </li>
         <li>
@@ -64,7 +79,7 @@ templateFunction({ hello: 'world' }) // returns "<p>world</p>"
             <li>Caching is off by default so that editing a template takes effect without restarting, which is how <a href="https://ejs.co">ejs</a> and <a href="https://pugjs.org">pug</a> treat their own caching too.</li>
             <li>You can also set this per render by passing <code>cache</code> in the model, e.g. <code>teddy.render(template, { cache: true })</code>. That takes precedence over this setting.</li>
             <li>When Teddy is used as an Express view engine you do not need to set any of this: Express supplies its own <code>view cache</code> setting, which it enables in production and disables in development, and Teddy uses it. An explicit <code>cache</code> in the model still wins.</li>
-            <li>Templates registered with <code>teddy.setTemplate</code> are not affected. Those are always kept, since registering one by hand is the only way to supply a template in the browser, where there is no filesystem to read from.</li>
+            <li>Templates registered with <code>teddy.setTemplate</code> are not affected. Those are always kept, and kept compiled, since registering one by hand is the only way to supply a template in the browser, where there is no filesystem to read from, and registering new markup under a name replaces what was compiled for it.</li>
           </ul>
         </li>
       </ul>

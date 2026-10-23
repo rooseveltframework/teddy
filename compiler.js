@@ -14,8 +14,32 @@ function internalError (detail) {
   return new Error(`teddy: internal compiler error: ${detail}. this is a bug in teddy, not in your template.`)
 }
 
-function warn (params, message) {
-  if (params.verbosity > 0) console.warn(`teddy: ${message}`)
+// everything teddy has to say about a template goes through here, so a warning names the template it's about, and teddy.check can collect what compiling a template turns up instead of it being printed. level is the verbosity a warning needs before it's printed
+let templateName = null // the template being compiled or rendered, if it has a name
+let collected = null // the warnings teddy.check is collecting, while it is
+export function aboutTemplate (name, work, a, b) {
+  const outer = templateName
+  templateName = name
+  try {
+    return work(a, b) // (handed its arguments rather than closing over them, since render calls this every time and a closure is an allocation)
+  } finally {
+    templateName = outer
+  }
+}
+export function collectWarnings (work) {
+  const outer = collected
+  collected = []
+  try {
+    work()
+    return collected
+  } finally {
+    collected = outer
+  }
+}
+const collecting = () => collected !== null
+function warn (params, message, level = 1) {
+  if (collected) return collected.push(templateName ? `${templateName}: ${message}` : message)
+  if (params.verbosity >= level) console.warn(`teddy: ${templateName ? `${templateName}: ` : ''}${message}`)
 }
 
 // marks where a construct's output goes. it contains no character a parser treats as special, so it survives being parsed and serialized again. the browser build swaps cheerio for a small polyfill over the native dom, so the compiler uses only the parts both of them provide
@@ -102,6 +126,7 @@ export function createCompiler (deps) {
     params,
     variableFlags,
     formatVariable,
+    holdOut,
     escapeEntities,
     conditionPath,
     evaluateConditional,
@@ -420,7 +445,7 @@ export function createCompiler (deps) {
 
     // the interpreter drops an include with no src rather than leaving anything behind
     if (!src) {
-      if (params.verbosity > 1) console.warn('teddy encountered an include tag with no src attribute.')
+      warn(params, 'an <include> has no src attribute, so it has been removed.', 2)
       dom(el).replaceWith('')
       return
     }
@@ -445,7 +470,7 @@ export function createCompiler (deps) {
     const included = loadTemplate(src)
     let markup = included
     if (included === null) {
-      if (params.verbosity > 1) console.warn(`teddy encountered an include tag with a src set to a template that could not be found: ${src}`)
+      warn(params, `an <include> has a src set to a template that could not be found: ${src}`, 2)
       markup = params.includeNotFoundBehavior === 'display' ? `Template "${src}" not found!` : ''
     }
 
@@ -574,12 +599,25 @@ export function createCompiler (deps) {
     const node = makeNode('selection')
     node.valueSource = valueSource
     node.ownValue = ownValue
-    node.variants = [plain, marked]
+    // a candidate carrying a one line if has it settled in either version of its opening tag, so each is compiled as markup rather than kept as text, which would write the if- attributes out as they are
+    const markedTag = closeTag && rebuilt.endsWith(closeTag) ? rebuilt.slice(0, rebuilt.length - closeTag.length) : rebuilt
+    node.variants = readAttribs(el).some(([name]) => name.startsWith('if-')) ? [compileOpeningTag(openTag, closeTag), compileOpeningTag(markedTag, closeTag)] : [plain, marked]
     node.closeTag = closeTag
     node.bodySource = dom(el).html()
     node.stack = []
     slots.push(node)
     dom(el).replaceWith(tokenFor(slots.length - 1))
+  }
+
+  // an opening tag compiled on its own, for a selection candidate: the element is compiled with nothing in it, and is marked to be written without its closing tag, since the selection writes the candidate's body and closing tag itself. a selection's versions are always walked rather than emitted, so the walker is the only thing that has to honor the mark
+  //
+  // compiling it chooses a placeholder token of its own, which the template being compiled around it is still using, so that is put back afterwards
+  function compileOpeningTag (tag, closeTag) {
+    const outerToken = token
+    const nodes = compileTemplate(tag + closeTag)
+    token = outerToken
+    for (const node of nodes) if (node.type === 'attrs') node.openingTagOnly = true
+    return nodes
   }
 
   // <noteddy> and <noparse> keep their contents out of teddy's hands. the interpreter lifts them out of the markup, renders everything else, and puts them back at the very end; here they simply become a piece of text nothing further is done to, which is the same thing said more directly
@@ -630,7 +668,7 @@ export function createCompiler (deps) {
   //
   // only a close with no open at all is reported: html leaves plenty of tags implicitly closed, and complaining about those would be noise
   function reportStrayClosingTags (source) {
-    if (params.verbosity < 1 || !source || !source.includes('</')) return
+    if ((params.verbosity < 1 && !collecting()) || !source || !source.includes('</')) return
     const open = []
     for (const match of tagsOutsideUnparsedContent(source)) {
       const name = match[2].toLowerCase()
@@ -638,7 +676,7 @@ export function createCompiler (deps) {
       if (!match[1]) open.push(name)
       else if (open.includes(name)) open.splice(open.lastIndexOf(name), 1)
       else {
-        console.warn(`teddy: the template closes a <${name}> it never opened. templates are parsed on their own, so a closing tag cannot be paired up by markup arriving through the model, and this one will be dropped.`)
+        warn(params, `the template closes a <${name}> it never opened. templates are parsed on their own, so a closing tag cannot be paired up by markup arriving through the model, and this one will be dropped.`)
         return
       }
     }
@@ -945,6 +983,7 @@ export function createCompiler (deps) {
 
         case 'attrs':
           out += renderNodes(attrsVariant(node, attrsOutcomes(node, model)), model, state)
+          if (node.openingTagOnly) break
           out += renderNodes(node.body, model, state)
           out += node.closeTag
           break
@@ -1119,7 +1158,7 @@ export function createCompiler (deps) {
 
   // content exempt from parsing is held out of the markup rather than written into it, because the stray tag sweep at the end of a render reparses the finished page and would strip a teddy tag out of it. the same restoration at the end of the render puts it back
   function rawBlock (node, model) {
-    return `<noteddy id="${model._noTeddyBlocks.push(node.value) - 1}"></noteddy>`
+    return `<noteddy id="${holdOut(node.value)}"></noteddy>`
   }
 
   function inlineBlock (node, model) {
@@ -1128,7 +1167,7 @@ export function createCompiler (deps) {
     if (css) return `<style>${css}</style>`
     if (js) return `<script>${js}</script>`
     // teddy drops an inline that names neither
-    if (params.verbosity > 1) console.warn('teddy encountered an <inline> element without a css or js attribute.')
+    warn(params, 'an <inline> has no css or js attribute, so it has been removed.', 2)
     return ''
   }
 
@@ -1141,13 +1180,17 @@ export function createCompiler (deps) {
   }
 
   // whether this candidate for a selected-value or checked-value is the one that carries the matching value
+  //
+  // the values are compared as the model has them, so a |p or |s on either side, which only says how the value is written, makes no difference to whether they match: a |p value is held out of the markup until the render is finished, and would otherwise be compared as the placeholder it's held out as
   function selectionMarked (node, model) {
     // teddy falls back to the attribute as written when the variable in it resolves to nothing
-    const target = parseVars(node.valueSource, model) || node.valueSource
+    const valueSource = withoutWritingFlags(node.valueSource)
+    const target = parseVars(valueSource, model) || valueSource
     // a candidate written inside a loop has had its own value substituted by the time it is compared, so it is compared substituted here too
-    const own = node.ownValue && node.ownValue.includes('{') ? parseVars(node.ownValue, model) : node.ownValue
+    const own = node.ownValue && node.ownValue.includes('{') ? parseVars(withoutWritingFlags(node.ownValue), model) : node.ownValue
     return own === target
   }
+  const withoutWritingFlags = (text) => text.includes('|') ? text.replace(/\|[ps](?=\||\})/g, '') : text
 
   // whether one arm of a conditional chain is the one that applies
   //
@@ -1218,11 +1261,11 @@ export function createCompiler (deps) {
   // whether what a loop was pointed at can be iterated, given a value already looked up. teddy drops a loop it cannot run rather than leaving its body behind
   function iterable (collection, keyName, valName) {
     if (!collection) {
-      if (params.verbosity > 1) console.warn('teddy encountered a loop without a through attribute.')
+      warn(params, 'a <loop> has no through attribute, or what it names is not in the model, so it has been removed.', 2)
       return null
     }
     if (!keyName && !valName) {
-      if (params.verbosity > 1) console.warn('teddy encountered a loop without a key or a val attribute.')
+      warn(params, 'a <loop> has no key or val attribute, so it has been removed.', 2)
       return null
     }
     if (collection instanceof Set) return [...collection]

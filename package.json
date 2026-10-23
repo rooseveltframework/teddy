@@ -8,7 +8,7 @@
       "url": "https://github.com/rooseveltframework/teddy/graphs/contributors"
     }
   ],
-  "version": "2.1.0",
+  "version": "2.2.0",
   "files": [
     "dist",
     "docs/statics/pages",
@@ -42,14 +42,14 @@
   },
   "devDependencies": {
     "@jsdevtools/coverage-istanbul-loader": "3.0.5",
-    "@playwright/test": "1.63.0",
+    "@playwright/test": "1.64.1",
     "c8": "12.0.0",
     "cross-env": "10.1.0",
     "eslint-plugin-html": "8.2.1",
     "nyc": "18.0.0",
     "standard": "17.1.2",
     "terser-webpack-plugin": "5.6.1",
-    "webpack": "5.111.1",
+    "webpack": "5.112.2",
     "webpack-cli": "7.2.3"
   },
   "standard": {
@@ -71,6 +71,7 @@
   },
   "scripts": {
     "benchmark": "node benchmarker/run.js",
+    "benchmark:compare": "node benchmarker/compare.js",
     "build": "webpack",
     "coverage": "npm run coverage-server && npm run coverage-client && npm run coverage-report",
     "coverage-server": "npm run build && cross-env NODE_ENV=cover c8 --reporter=json --report-dir=coverage/raw/server node --test --test-timeout=60000 test/loaders/node.js test/docs.js",

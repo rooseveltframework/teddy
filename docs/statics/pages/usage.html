@@ -344,7 +344,7 @@
 
       <p>It's important to note that whichever type of quotes you use on the outside of your <code>true</code> or <code>false</code> attributes must be reversed on the inside. So if you use single quotes on the outside, then you must use double quotes on the inside.</p>
 
-      <p>Also note you can only have one one-line if statement per element.</p>
+      <p>An element can carry several one-line ifs, each a condition followed by its own <code>true</code> and <code>false</code> outcomes: <code>&lt;p if-a true='class="a"' if-b true='id="b"'&gt;</code>.</p>
 
       <form class="semanticForms teddy-live-demo">
         <fieldset>
@@ -537,6 +537,10 @@
       <p>You can also instruct the contents of a variable to not be parsed after that variable is rendered using the <code>|p</code> flag:</p>
 
       <pre><code class="language-html"><escape><p>{this_var_will_be_parsed_but_its_contents_will_not_be|p}</p></escape></code></pre>
+
+      <p>A <code>|p</code> variable is still escaped. To write its contents unescaped as well as unparsed, combine the two flags: <code>{varName|s|p}</code>.</p>
+
+      <p>A variable's contents are parsed for <code>{variables}</code> of their own, so a value like <code>Hello {name}</code> writes the model's <code>name</code> in its place. Those nested variables are escaped along with the value around them, even when they're written with <code>|s</code>, so a value from the model can't make anything be written unescaped. Use <code>|p</code> for text that should be written exactly as it is, braces included, such as text a user typed.</p>
 
       <p>Note: Teddy tags will also not be parsed if they appear inside of elements that interpret child text as plain text, e.g. <code><!--#<style>--></code>, <code><!--#<script>--></code>, <code><!--#<textarea>--></code>, etc. Teddy will also not parse anything in a <code><!--#<pre>--></code> tag unless you add a <code>parse</code> attribute to the <code><!--#<pre>--></code> tag like <code><!--#<pre parse>--></code>.</p>
 
