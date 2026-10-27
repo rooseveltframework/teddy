@@ -1876,6 +1876,31 @@ export default [
         expected: '<p>from an arg</p>'
       },
       {
+        message: 'should resolve {variables} in <loop> key and val attributes, <inline> css and js attributes, <include> as/mode/hydrate attributes, and <arg> names',
+        run: async (teddy, template, model, assert, expected) => {
+          teddy.setTemplate('compilerDynamicWidget', '<p>{greeting}</p>')
+          const rendered = teddy.render(
+            '<loop through="items" key="{keyAttr}" val="{valAttr}"><span>{k}:{v}</span></loop><inline css="styles.{theme}"></inline><inline js="scripts.{theme}"></inline><include src="{partial}" as="my-{widget}" mode="{renderMode}" hydrate="{hydrateKey}"><arg {argAttr}>hi</arg></include><if rawText="{rawText|p}"><i>ok</i></if>',
+            {
+              items: { a: 1 },
+              keyAttr: 'k',
+              valAttr: 'v',
+              theme: 'dark',
+              styles: { dark: 'body{color:#fff}' },
+              scripts: { dark: 'console.log(1)' },
+              partial: 'compilerDynamicWidget',
+              widget: 'card',
+              renderMode: 'light',
+              hydrateKey: 'theme',
+              argAttr: 'greeting',
+              rawText: 'b {x}'
+            }
+          )
+          return assert(rendered, expected)
+        },
+        expected: '<span>a:1</span><style>body{color:#fff}</style><script>console.log(1)</script><my-card><p>hi</p><script type="application/json" class="teddy-component-model" slot="teddy-component-model">{"theme":"dark"}</script></my-card><i>ok</i>'
+      },
+      {
         message: 'should write out a value that refers back to itself rather than resolving forever, and say which values led round the loop',
         runNode: async (teddy, template, model, assert, expected) => {
           const said = []
