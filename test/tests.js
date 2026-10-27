@@ -1165,9 +1165,10 @@ export default [
         expected: '<p>{missing}</p>'
       },
       {
-        message: 'should resolve present variables normally when flagged with |h or |d',
-        run: async (teddy, template, model, assert, expected) => assert(teddy.render('<p>{something|h}</p><p>{something|d}</p><p>{names.{nameReference}|h}</p>', model), expected),
-        expected: '<p>Some content</p><p>Some content</p><p>guy</p>'
+        message: 'should resolve present variables normally when flagged with |h or |d (misc/varForceEmptyFlagsPresent.html)',
+        template: 'misc/varForceEmptyFlagsPresent',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: '<p>Some content</p><p>Some content</p><p>guy</p><p>guy</p>'
       },
       {
         message: 'should render <inline> tags (misc/inlineTag.html)',
