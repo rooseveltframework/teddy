@@ -266,6 +266,9 @@ function emitChain (nodes, start, state, out) {
 // an arm's conditions are looked up here, inline, rather than inside the shared reduction, which is what stops a dotted name being split apart again on every render
 function armTest (branch, id, index, state) {
   const arm = branch.arms[index]
+  if (arm.attribs.some(([name]) => name.includes('{'))) {
+    return { setup: '', test: `r.arm(r.branches[${id}].arms[${index}], ${state.model}, ${index === 0})` }
+  }
   let setup = ''
   const values = []
   for (const path of armPaths(arm)) {
@@ -286,8 +289,8 @@ function armTest (branch, id, index, state) {
     return { setup, test: `${inverted ? '!' : ''}r.present(${values[0]})` }
   }
 
-  // the values above are every lookup the arm makes, so the one thing left that a model could be wanted for is a {variable} standing in for a condition's value, which only the opening arm of a chain resolves. the variable may sit anywhere in the value, so what counts as one has to be decided the same way conditionArgs decides it, or the model it needs will not have been passed
-  const wantsModel = index === 0 && arm.attribs.some(([, value]) => value && value.includes('{'))
+  // the values above are every lookup the arm makes, so the one thing left that a model could be wanted for is a {variable} standing in for a condition's value. the variable may sit anywhere in the value, so what counts as one has to be decided the same way conditionArgs decides it, or the model it needs will not have been passed
+  const wantsModel = arm.attribs.some(([, value]) => value && value.includes('{'))
   return { setup, test: `r.arm(r.branches[${id}].arms[${index}], ${wantsModel ? state.model : 'null'}, ${index === 0}, [${values.join(', ')}])` }
 }
 

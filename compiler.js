@@ -260,13 +260,13 @@ export function createCompiler (deps) {
       let name = rawName
       const not = name.startsWith('not:')
       if (not) name = name.slice(4)
-      // a colon anywhere but the not: prefix, or an equals sign in the name, is something the general path rejects outright and warns about
-      if (!name || name.includes(':') || name.includes('=')) return null
+      // a colon anywhere but the not: prefix, or an equals sign in the name, is something the general path rejects outright and warns about, and a name holding a {variable} is not known until there is a model to read it from
+      if (!name || name.includes(':') || name.includes('=') || name.includes('{')) return null
       if (!rawValue) {
         checks.push({ path: name, not, compare: null })
         continue
       }
-      // a value carrying a colon or an equals sign is also rejected by the general path, in its own particular way, and a value holding a {variable} is only resolved on the opening arm of a chain. all three are left where their behavior is already written down
+      // a value carrying a colon or an equals sign is also rejected by the general path, in its own particular way, and a value holding a {variable} is not known until there is a model to read it from. all three are left where their behavior is already written down
       if (rawValue.includes(':') || rawValue.includes('=') || rawValue.includes('{')) return null
       checks.push({ path: name, not, compare: rawValue })
     }
@@ -351,8 +351,8 @@ export function createCompiler (deps) {
         // split the way the interpreter splits it rather than by length, so an attribute name containing if- more than once is read identically
         const condition = name.split('if-')[1]
         current.argSources.push([condition, value])
-        // a condition whose value names a variable is not known until there is a model to read it from, exactly as for an <if> tag. the variable may sit anywhere in the value rather than at its head, so any brace means the value has to be resolved
-        if (value && value.includes('{')) current.dynamic = true
+        // a condition whose name or value holds a variable is not known until there is a model to read it from, exactly as for an <if> tag. the variable may sit anywhere in the name or value rather than at its head, so any brace means it has to be resolved
+        if ((condition && condition.includes('{')) || (value && value.includes('{'))) current.dynamic = true
       } else if (OUTCOMES.has(name)) {
         if (current) current[name === 'true' ? 'ifTrue' : 'ifFalse'] = value.replaceAll('&quot;', '"')
       } else if (JOINERS.has(name)) {
@@ -1203,8 +1203,7 @@ export function createCompiler (deps) {
       const result = settleChecks(arm.checks, model, values)
       return inverted ? !result : result
     }
-    // only the opening if or unless resolves a {variable} in a condition's value; elseif and elseunless read the value as written. that is inconsistent, and it is preserved here because changing it would change what existing templates render
-    const result = evaluateConditional(conditionArgs(arm.attribs, model, isFirst), model, values)
+    const result = evaluateConditional(conditionArgs(arm.attribs, model), model, values)
     return inverted ? !result : result
   }
 
@@ -1227,10 +1226,11 @@ export function createCompiler (deps) {
     return arm.attribs.map(([name, value]) => conditionPath(value ? `${name}=${value}` : name))
   }
 
-  // a one line if's conditions in the form evaluateConditional wants them. a joiner is stored with no value and goes in on its own; a condition whose value is a variable is resolved against the model, which is only ever needed when the compile could not settle it
+  // a one line if's conditions in the form evaluateConditional wants them. a joiner is stored with no value and goes in on its own; a condition whose name or value is a variable is resolved against the model, which is only ever needed when the compile could not settle it
   function oneLineArgs (argSources, model) {
     const args = []
-    for (const [name, value] of argSources) {
+    for (const [rawName, value] of argSources) {
+      const name = model && rawName && rawName.includes('{') ? parseVars(rawName, model) : rawName
       if (value === null) args.push(name)
       else if (!value) args.push(name)
       else args.push(`${name}=${model && value.includes('{') ? parseVars(value, model) : value}`)
@@ -1238,12 +1238,13 @@ export function createCompiler (deps) {
     return args
   }
 
-  function conditionArgs (attribs, model, resolveValues) {
+  function conditionArgs (attribs, model) {
     const args = []
-    for (const [name, raw] of attribs) {
+    for (const [rawName, raw] of attribs) {
+      const name = model && rawName.includes('{') ? parseVars(rawName, model) : rawName
       let value = raw
       if (value) {
-        if (resolveValues && value.includes('{')) value = parseVars(value, model)
+        if (model && value.includes('{')) value = parseVars(value, model)
         args.push(`${name}=${value}`)
       } else args.push(name)
     }

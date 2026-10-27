@@ -385,6 +385,24 @@ export default [
         expected: '<p class="matched">Some content</p>'
       },
       {
+        message: 'should evaluate <if> and <elseif> conditions whose names contain a {variable} (conditionals/conditionalVarInName.html)',
+        template: 'conditionals/conditionalVarInName',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: '<p>jack: guy</p><p>jill: girl</p><p>hill: landscape</p>'
+      },
+      {
+        message: 'should evaluate one line if whose condition name contains a {variable} (conditionals/oneLineVarInName.html)',
+        template: 'conditionals/oneLineVarInName',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: '<span class="unmatched">guy</span><span class="matched">girl</span><span class="unmatched">landscape</span>'
+      },
+      {
+        message: 'should evaluate <elseif> and <elseunless> conditions whose values contain a {variable} (conditionals/elseIfValueVar.html)',
+        template: 'conditionals/elseIfValueVar',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: '<p>elseif</p><p>elseunless</p>'
+      },
+      {
         message: 'should evaluate <if something> as true and the nested <if not:somethingElse> as false, triggering the nested <else> condition (conditionals/nestedConditional.html)',
         template: 'conditionals/nestedConditional',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
@@ -1145,6 +1163,11 @@ export default [
         template: 'misc/varForceEmptyDisplay',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
         expected: '<p>{missing}</p>'
+      },
+      {
+        message: 'should resolve present variables normally when flagged with |h or |d',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render('<p>{something|h}</p><p>{something|d}</p><p>{names.{nameReference}|h}</p>', model), expected),
+        expected: '<p>Some content</p><p>Some content</p><p>guy</p>'
       },
       {
         message: 'should render <inline> tags (misc/inlineTag.html)',

@@ -96,7 +96,7 @@ function parseTeddyDOMFromString (html) {
   const openTags = [] // stack to track open tags
   const tagAndCommentRegex = /<\/?([a-zA-Z][a-zA-Z0-9-]*)([^>]*)>|<!--([\s\S]*?)-->/g
   // the = belongs to both forms of a value. it used to sit inside the quoted form only, so an unquoted value such as src=x was read as the value "=x"
-  const attrRegex = /([a-zA-Z0-9-:._]+)(?:=(?:(["'])(.*?)\2|([^>\s]+)))?/g
+  const attrRegex = /([a-zA-Z0-9-:._${}]+)(?:=(?:(["'])(.*?)\2|([^>\s]+)))?/g
   // elements whose contents a browser reads as plain text rather than as markup, so a tag written inside one is not a tag. teddy leaves their contents alone on the server for the same reason
   const rawTextTags = new Set(['script', 'style', 'textarea'])
   // svg and mathml elements are made in their own namespaces, as a browser parsing the page would make them, which is what keeps the case of names like viewBox and linearGradient: an element made in the html namespace has its name and its attributes' names lowercased. what's inside a foreignObject is html again, and so are teddy's own tags wherever they're written, since teddy looks for them as html elements

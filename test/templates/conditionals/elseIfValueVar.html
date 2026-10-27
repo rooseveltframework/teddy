@@ -1,0 +1,16 @@
+{!
+  should evaluate <elseif> and <elseunless> conditions whose values contain a {variable}
+!}
+
+<if something="nope">
+  <p>if</p>
+</if>
+<elseif something="Some {contentWord}">
+  <p>elseif</p>
+</elseif>
+<if something="nope">
+  <p>if</p>
+</if>
+<elseunless something="Other {contentWord}">
+  <p>elseunless</p>
+</elseunless>
