@@ -69,6 +69,9 @@ const CONSTRUCTS = 'if, unless, loop, include, inline, noteddy:not([id]), nopars
 // teddy's rule for what counts as a variable name
 const VALID_VARIABLE = /^(\d+|[a-zA-Z_$][a-zA-Z0-9_$|{}.-]*(\.[a-zA-Z_$][a-zA-Z0-9_$|{}.-]*)*)$/
 
+// the flags written at the end of a variable, such as the |s in {a{b}|s}
+const FLAG_SUFFIX = /(?:\|[pshd])*$/
+
 // what a value has to contain before anything further needs doing with it. deliberately specific: a value carrying ordinary markup such as <strong> is finished as it stands, and treating it otherwise would cost every template that injects safe html
 const LOOKS_LIKE_TEDDY = /\{|<\/?(?:if|unless|elseif|elseunless|else|loop|include|arg|inline|noteddy|noparse)\b|\s(?:true|false|selected-value|checked-value)=|\sif-/i
 
@@ -895,10 +898,13 @@ export function createCompiler (deps) {
       const spanStart = open > literalFrom && text[open - 1] === '$' ? open - 1 : open
       if (spanStart > literalFrom) pushTextNode(nodes, text.slice(literalFrom, spanStart))
       if (computed) {
+        // its flags are the ones written after the name in the template, settled here. they are never read off the name once it is rendered: the part of it a value supplied could end in |s, and a value doesn't get to decide that something is written unescaped
+        const suffix = inner.match(FLAG_SUFFIX)[0]
         const nameNodes = []
-        pushText(nameNodes, inner)
+        pushText(nameNodes, inner.slice(0, inner.length - suffix.length))
         const node = makeNode('computedVar')
         node.nameNodes = nameNodes
+        node.flags = { ...variableFlags(`_${suffix}`), suffix }
         node.source = text.slice(spanStart, close + 1)
         node.dollar = spanStart !== open
         nodes.push(node)
@@ -1030,7 +1036,7 @@ export function createCompiler (deps) {
           break
 
         case 'computedVar':
-          out += computedVariable(renderNodes(node.nameNodes, model, state), model, state, node.dollar)
+          out += computedVariable(renderNodes(node.nameNodes, model, state), node.flags, model, state, node.dollar)
           break
 
         case 'selection':
@@ -1210,10 +1216,12 @@ export function createCompiler (deps) {
   }
 
   // a variable whose name was built from other variables: the name is rendered first, then looked up, so {a{b}} with b of X asks the model for aX
-  function computedVariable (name, model, state, dollar = false) {
-    const flags = VALID_VARIABLE.test(name) ? variableFlags(name) : null
-    const resolved = flags ? formatVariable(flags, getOrSetObjectByDotNotation(model, flags.name), model) : null
-    if (!resolved) return `${dollar ? '$' : ''}{${name}}`
+  //
+  // the flags are the ones the template wrote, worked out when it was compiled. the rendered name is looked up as it stands, so a |s that a value put into it is part of the name rather than a flag, and a name carrying one is not in the model
+  function computedVariable (name, written, model, state, dollar = false) {
+    const flags = VALID_VARIABLE.test(name) ? { ...written, match: name + written.suffix, name } : null
+    const resolved = flags ? formatVariable(flags, getOrSetObjectByDotNotation(model, name), model) : null
+    if (!resolved) return `${dollar ? '$' : ''}{${name}${written.suffix}}`
     const prefix = dollar && resolved.skipTemplateLiteralReplacement ? '$' : ''
     return prefix + writeValue(resolved, flags.raw, model, state)
   }

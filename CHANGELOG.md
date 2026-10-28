@@ -1,3 +1,9 @@
+## 2.3.1
+
+- Breaking: Bumped the precompiled format to `4`, so templates precompiled with an earlier version must be precompiled again.
+- Fixed a variable whose name is built from another variable, such as `{names.{key}}`, taking its flags from the value it was built from. A model value ending in `|s` or `|p|s` made the variable write its value unescaped. Its flags now come only from the template, such as the `|s` in `{names.{key}|s}`.
+- Updated dependencies.
+
 ## 2.3.0
 
 - Breaking: Bumped the precompiled format to `3`, so templates precompiled with an earlier version must be precompiled again.

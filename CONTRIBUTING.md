@@ -23,6 +23,7 @@ If you are a maintainer, please follow the following release procedure:
 
 - Merge all desired pull requests into main.
 - Run `npm run build` to generate a new dist bundle.
+- Run `npm run benchmark:compare` to see if your changes significantly affect performance.
 - Run `npm run benchmark` to refresh `benchmarker/BENCHMARKS.md`.
 - Bump `package.json` to a new version and run `npm i` to generate a new `package-lock.json`.
 - Add new version to CHANGELOG.
