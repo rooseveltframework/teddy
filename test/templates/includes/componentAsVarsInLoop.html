@@ -1,0 +1,5 @@
+{!
+  should render an <include> as a different custom element on each pass of a loop when its as attribute holds a {variable}
+!}
+
+<loop through="componentTags" val="tag"><include src="misc/variable" as="my-{tag}" mode="light"></include></loop>

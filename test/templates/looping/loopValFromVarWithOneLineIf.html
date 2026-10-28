@@ -1,0 +1,5 @@
+{!
+  should resolve a {variable} in a <loop>'s val and read it from a one line if inside the loop
+!}
+
+<loop through="objects" val="{loopValName}"><b if-v.a="4" true='class="four"'>{v.a}</b></loop>

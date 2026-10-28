@@ -63,6 +63,8 @@
 
       <p>All variable names are case-insensitive, both in <code>{varName}</code> form and when referenced in Teddy tags described below. This is to comply with the rules of HTML grammar which mandate that HTML tags and attributes be case insensitive.</p>
 
+      <p>Variables can also be used inside the attributes of the Teddy tags described below, in both their names and their values, to build what the tag refers to from the model. For example <code><!--#<if names.{person}="guy">--></code> checks the entry in <code>names</code> named by <code>person</code>, <code><!--#<loop through="sections.{current}" val="{itemName}">--></code> walks a collection chosen by <code>current</code> and names each item after <code>itemName</code>, and <code><!--#<include src="{partial}" as="my-{widget}">--></code> picks both the template and the custom element it renders as.</p>
+
       <h3 id="varescape">Variables escape HTML entities by default</h3>
 
       <p>HTML entities such as <code>&lt;</code>, <code>&gt;</code>, <code>&amp;</code>, <code>'</code>, and <code>"</code> will be escaped by default as a safeguard against <a href="https://en.wikipedia.org/wiki/Cross-site_scripting">cross-site scripting</a>.</p>

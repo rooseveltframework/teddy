@@ -1,0 +1,5 @@
+{!
+  should evaluate <if> and one line if conditions whose names contain a template literal ${variable}
+!}
+
+<loop through="nameList" val="person"><if names.${person}="guy"><p>{person}: guy</p></if><else><p class="other" if-names.${person}="girl" true='title="girl"'>{person}</p></else></loop>

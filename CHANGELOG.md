@@ -1,9 +1,14 @@
-## 2.2.1
+## 2.3.0
 
-- Fixed a condition whose name contains a `{variable}`, such as `<if event.{column.name}.icon>` or a one-line `if-names.{person}="girl"`, looking up the name as written rather than resolving the variable first, and being split at the braces when parsed in the client-side build.
-- Fixed `<elseif>` and `<elseunless>` conditions whose value contains a `{variable}` comparing against the value as written rather than against what the variable resolved to, as `<if>` and `<unless>` already did.
-- Fixed `<loop>` `key` and `val` attributes, `<inline>` `css` and `js` attributes, `<include>` `as`, `mode`, and `hydrate` attributes, and `<arg>` names not resolving `{variables}` the way `<loop>` `through` and `<include>` `src` do, and unified `{variable}` evaluation across all Teddy element attributes.
+- Breaking: Bumped the precompiled format to `3`, so templates precompiled with an earlier version must be precompiled again.
+- Breaking: Changed `<elseif>` and `<elseunless>` conditions whose value contains a `{variable}` to now compare against what the variable resolves to, as `<if>` and `<unless>` always have. They used to compare against the value as written, so a template relying on that will render differently.
+- Added support for `{variables}` in every attribute of a Teddy element: `<loop>` `key` and `val`, `<inline>` `css` and `js`, `<include>` `as`, `mode`, and `hydrate`, and the names of `<arg>` elements, as `<loop>` `through` and `<include>` `src` already did. An `as`, `mode`, or `hydrate` holding a variable is checked once a render has resolved it, with the same rules and errors as one written out.
+- Added support for `{variables}` and `${variables}` in a condition's name, such as `<if event.{column.name}.icon>` or a one-line `if-names.{person}="girl"`.
+- Altered conditions to compare a value written with `|p` or `|s`, such as `<if x="{y|p}">`, against the variable's value. `|p` used to make it compare against the placeholder the value is held out as.
 - Fixed `{variable|h}` and `{variable|d}` looking up the variable with the flag still attached to its name, so a variable that was present in the model was treated as missing and rendered as empty under `|h` or as `{variable}` under `|d`.
+- Fixed a `${variable}` whose name is built from another variable, such as `${names.{key}}`, dropping its `$` when it didn't resolve. A plain `${variable}` already kept it.
+- Fixed the client-side build splitting an attribute name at a `{`, `}`, or `$`, which broke one-line ifs and `<arg>` names holding a variable.
+- Updated dependencies.
 
 ## 2.2.0
 

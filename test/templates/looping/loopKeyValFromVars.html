@@ -1,0 +1,5 @@
+{!
+  should resolve {variables} in a <loop>'s key and val, including in a loop nested inside it that walks the outer val
+!}
+
+<loop through="objectOfObjects" key="{loopKeyName}" val="{loopValName}"><p>{k}</p><loop through="v" key="{loopKeyName}2" val="{loopValName}2"><span>{k2}={v2}</span></loop></loop>

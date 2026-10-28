@@ -4,7 +4,7 @@
 //
 // the shapes involved are not plain json. the same node list is reached from more than one place, an arm holds its branch and the branch holds the arm back, and a dynamic include keeps a map. so every object is written once into a table and referred to by its place in it, which handles sharing and circularity alike
 
-export const FORMAT = 2 // precompile version: a template compiled by one version of teddy and loaded by another whose format differs is refused rather than rendered into something wrong
+export const FORMAT = 3 // precompile version: a template compiled by one version of teddy and loaded by another whose format differs is refused rather than rendered into something wrong
 
 const REF = '$r'
 const MAP = '$m'
