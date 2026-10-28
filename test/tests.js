@@ -391,6 +391,12 @@ export default [
         expected: '<p>jack: guy</p><p>jill: girl</p><p>hill: landscape</p>'
       },
       {
+        message: 'should evaluate <if> and one line if conditions whose names contain a template literal ${variable} (conditionals/conditionalTemplateLiteralVarInName.html)', // eslint-disable-line
+        template: 'conditionals/conditionalTemplateLiteralVarInName',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: '<p>jack: guy</p><p class="other" title="girl">jill</p><p class="other">hill</p>'
+      },
+      {
         message: 'should evaluate one line if whose condition name contains a {variable} (conditionals/oneLineVarInName.html)',
         template: 'conditionals/oneLineVarInName',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
@@ -581,6 +587,12 @@ export default [
         template: 'includes/dynamicInclude',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
         expected: '<p>Some content</p>'
+      },
+      {
+        message: 'should resolve a {variable} in the name of an <arg> passed to an <include> whose src is written out (includes/includeArgNameVar.html)',
+        template: 'includes/includeArgNameVar',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: '<p>from an arg</p>'
       },
       {
         message: 'should populate <include> <arg> in the child template; the class should render (includes/includeArgCheckedByOneLineIfWrapper.html)',
@@ -839,6 +851,18 @@ export default [
         expected: '<p id="first">First</p><span>one</span><span>two</span><p id="second">Second</p><span>three</span>'
       },
       {
+        message: 'should resolve {variables} in a <loop>\'s key and val, including in a loop nested inside it that walks the outer val (looping/loopKeyValFromVars.html)',
+        template: 'looping/loopKeyValFromVars',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: '<p>one</p><span>a=1</span><span>b=2</span><span>c=3</span><p>two</p><span>a=4</span><span>b=5</span><span>c=6</span><p>three</p><span>a=7</span><span>b=8</span><span>c=9</span>'
+      },
+      {
+        message: 'should resolve a {variable} in a <loop>\'s val and read it from a one line if inside the loop (looping/loopValFromVarWithOneLineIf.html)',
+        template: 'looping/loopValFromVarWithOneLineIf',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: '<b>1</b><b class="four">4</b><b>7</b>'
+      },
+      {
         message: 'should not render the loop (looping/commentedLoopInLoop.html)',
         template: 'looping/commentedLoopInLoop',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
@@ -1060,6 +1084,12 @@ export default [
         expected: '<p>Some content</p>'
       },
       {
+        message: 'should keep the dollar of a template literal ${variable} whose name is built from another variable when it does not resolve (misc/computedVarTemplateLiteralMissing.html)', // eslint-disable-line
+        template: 'misc/computedVarTemplateLiteralMissing',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: '<p>${names.jackx}</p>' // eslint-disable-line
+      },
+      {
         message: 'should render template literal ${variables} as text if the variable is not populated (misc/variableVarWithTemplateLiteralContents.html)', // eslint-disable-line
         template: 'misc/variableVarWithTemplateLiteralContents',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
@@ -1175,6 +1205,12 @@ export default [
         template: 'misc/inlineTag',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
         expected: '<div><style>body{font-family:sans-serif;}</style><script>console.log("hello")</script></div>'
+      },
+      {
+        message: 'should resolve {variables} in an <inline> tag\'s css and js attributes (misc/inlineTagVars.html)',
+        template: 'misc/inlineTagVars',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: '<style>p{color:red}</style><script>let a = 1</script>'
       },
       {
         message: 'should not parse any code in <noteddy> tags (misc/varNoParsing.html)',
@@ -2126,6 +2162,18 @@ export default [
         expected: '<my-card><template shadowrootmode="open"><p>Some content</p></template><p>Some content</p></my-card>'
       },
       {
+        message: 'should resolve {variables} in an <include>\'s as, mode, and hydrate attributes (includes/componentAsVars.html)',
+        template: 'includes/componentAsVars',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: '<my-card><template shadowrootmode="open"><p>Some content</p></template><p>Some content</p></my-card><my-card><template shadowrootmode="open"><p>Some content</p></template><script type="application/json" class="teddy-component-model" slot="teddy-component-model">{"something":"Some content"}</script></my-card>'
+      },
+      {
+        message: 'should render an <include> as a different custom element on each pass of a loop when its as attribute holds a {variable} (includes/componentAsVarsInLoop.html)',
+        template: 'includes/componentAsVarsInLoop',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: '<my-card><p>Some content</p></my-card><my-list><p>Some content</p></my-list>'
+      },
+      {
         message: 'should pass an argument to an <include> rendering as a custom element (includes/componentAsWithArg.html)',
         template: 'includes/componentAsWithArg',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
@@ -2270,6 +2318,25 @@ export default [
           assert(answers.join(', '), expected)
         },
         expected: 'refused, refused'
+      },
+      {
+        // an as, mode, or hydrate holding a {variable} cannot be checked until a render resolves it, so it is checked then, with the same rules as one written out
+        message: 'should refuse an as, mode, or hydrate that only turns out to be invalid once its {variable} is resolved',
+        run: async (teddy, template, model, assert, expected) => {
+          teddy.setTemplate('componentResolvedCheck', '<p>x</p>')
+          const values = { badTag: 'card', tag: 'card', badMode: 'sideways', dotted: 'names.jack' }
+          const answers = []
+          for (const attrs of ["as='{badTag}'", "as='my-{tag}' mode='{badMode}'", "as='my-{tag}' hydrate='{dotted}'"]) {
+            try {
+              teddy.render(`<include src='componentResolvedCheck' ${attrs}></include>`, values)
+              answers.push('accepted')
+            } catch (err) {
+              answers.push(/cannot name a custom element|asks for a mode|rather than paths into them/.test(err.message) ? 'refused' : err.message)
+            }
+          }
+          assert(answers.join(', '), expected)
+        },
+        expected: 'refused, refused, refused'
       },
       {
         // the default is the one arrangement that renders whatever the browser turns out to support: the shadow root where declarative shadow dom is built, the fallback where it is not

@@ -446,12 +446,22 @@ function emitLoop (node, state, out) {
   const key = `k${state.uid++}`
   const val = `u${state.uid++}`
 
-  const keyName = JSON.stringify(node.keyName ?? null)
-  const valName = JSON.stringify(node.valName ?? null)
   const dynamicVars = (node.keyName && node.keyName.includes('{')) || (node.valName && node.valName.includes('{'))
+  let keyName = JSON.stringify(node.keyName ?? null)
+  let valName = JSON.stringify(node.valName ?? null)
+  let js = ''
+
+  // a key or val naming a {variable} is not known until there is a model to read it from, so it is resolved once here, before the loop starts, rather than once for every item
+  if (dynamicVars) {
+    const resolvedKey = `kn${state.uid++}`
+    const resolvedVal = `vn${state.uid++}`
+    js += `const ${resolvedKey} = r.vars(${keyName}, ${state.model})\n`
+    js += `const ${resolvedVal} = r.vars(${valName}, ${state.model})\n`
+    keyName = resolvedKey
+    valName = resolvedVal
+  }
 
   // a through, key, or val naming a {variable} anywhere in its path is not known until there is a model to read it from, so that one goes through the helper; anything else is a path this code can read directly, which matters for a loop nested inside another whose collection is the outer loop's val
-  let js = ''
   if ((node.through && node.through.includes('{')) || dynamicVars) {
     js += `const ${collection} = r.collection(${JSON.stringify(node.through)}, ${keyName}, ${valName}, ${state.model})\n`
   } else {

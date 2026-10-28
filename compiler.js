@@ -457,9 +457,28 @@ export function createCompiler (deps) {
     return held ? `<div slot="${FALLBACK_SLOT}">${stripped}</div>` : stripped
   }
 
-  function validateComponent (src, element, mode) {
+  // what a component's as and mode are allowed to be. each is checked when the template is compiled if it is written out, and when it is rendered if it holds a {variable}, so these are the one place the rules and the way they are reported live
+  function checkElementName (src, element) {
     if (!CUSTOM_ELEMENT_NAME.test(element)) throw new Error(`teddy: "${element}" cannot name a custom element, so <include src="${src}" as="${element}"> has nothing it could render as. the name has to be lower case and hold a hyphen, like "my-card"`)
+  }
+  function checkMode (src, element, mode) {
     if (!COMPONENT_MODES.has(mode)) throw new Error(`teddy: <include src="${src}" as="${element}" mode="${mode}"> asks for a mode that is not one of ${[...COMPONENT_MODES].join(', ')}`)
+  }
+  function checkHydrateKey (src, element, hydrate, name) {
+    if (name.includes('.')) throw new Error(`teddy: <include src="${src}" as="${element}" hydrate="${hydrate}"> names "${name}", and a component is sent whole model keys rather than paths into them. name the key that holds it instead`)
+  }
+
+  // a template that includes itself would otherwise be compiled forever
+  function checkNotCycling (stack, src) {
+    if (stack.includes(src)) throw new Error(`teddy: the template "${src}" includes itself, directly or through the templates it includes, so it can never finish compiling. include stack: ${stack.concat(src).map(name => JSON.stringify(name)).join(' -> ')}`)
+  }
+
+  // the markup an include renders: the template it names, or what teddy writes in place of one it could not find
+  function includedMarkup (src) {
+    const markup = loadTemplate(src)
+    if (markup !== null) return markup
+    warn(params, `an <include> has a src set to a template that could not be found: ${src}`, 2)
+    return params.includeNotFoundBehavior === 'display' ? `Template "${src}" not found!` : ''
   }
 
   function claimInclude (dom, el, slots, stack) {
@@ -480,15 +499,15 @@ export function createCompiler (deps) {
     let lightSource = null
 
     if (element) {
-      if (!hasVars(element) && !CUSTOM_ELEMENT_NAME.test(element)) throw new Error(`teddy: "${element}" cannot name a custom element, so <include src="${src}" as="${element}"> has nothing it could render as. the name has to be lower case and hold a hyphen, like "my-card"`)
-      if (!hasVars(mode) && !COMPONENT_MODES.has(mode)) throw new Error(`teddy: <include src="${src}" as="${element}" mode="${mode}"> asks for a mode that is not one of ${[...COMPONENT_MODES].join(', ')}`)
+      if (!hasVars(element)) checkElementName(src, element)
+      if (!hasVars(mode)) checkMode(src, element, mode)
       lightSource = Array.from(dom(el).contents()).filter(child => tagNameOf(child) !== 'arg').map(child => dom(child).toString()).join('')
       const hydrate = attribValue(attribs, 'hydrate')
       if (!hydrate && attribs.some(([name]) => name === 'hydrate')) throw new Error(`teddy: <include src="${src}" as="${element}" hydrate> does not say what the component needs, so there is nothing to send it. name the model keys it renders from, like hydrate="product"`)
       if (hydrate) {
         hydrateList = hydrate.split(',').map(name => name.trim()).filter(Boolean)
         for (const name of hydrateList) {
-          if (!hasVars(name) && name.includes('.')) throw new Error(`teddy: <include src="${src}" as="${element}" hydrate="${hydrate}"> names "${name}", and a component is sent whole model keys rather than paths into them. name the key that holds it instead`)
+          if (!hasVars(name)) checkHydrateKey(src, element, hydrate, name)
         }
       }
     }
@@ -512,17 +531,8 @@ export function createCompiler (deps) {
       return
     }
 
-    // a template that includes itself would otherwise be compiled forever
-    if (stack.includes(src)) {
-      throw new Error(`teddy: the template "${src}" includes itself, directly or through the templates it includes, so it can never finish compiling. include stack: ${stack.concat(src).map(name => JSON.stringify(name)).join(' -> ')}`)
-    }
-
-    const included = loadTemplate(src)
-    let markup = included
-    if (included === null) {
-      warn(params, `an <include> has a src set to a template that could not be found: ${src}`, 2)
-      markup = params.includeNotFoundBehavior === 'display' ? `Template "${src}" not found!` : ''
-    }
+    checkNotCycling(stack, src)
+    const markup = includedMarkup(src)
 
     const node = makeNode('scope')
     node.src = src
@@ -1167,7 +1177,8 @@ export function createCompiler (deps) {
     const sent = {}
     for (const raw of node.hydrate) {
       const name = resolveVars(raw, model)
-      if (name.includes('.')) throw new Error(`teddy: <include src="${resolveVars(node.src, model)}" as="${resolveVars(node.element, model)}" hydrate="${node.hydrate.join(', ')}"> names "${name}", and a component is sent whole model keys rather than paths into them. name the key that holds it instead`)
+      // a name written out was checked when the template was compiled, so only one that held a {variable} can still turn out to be a path
+      if (name !== raw) checkHydrateKey(resolveVars(node.src, model), resolveVars(node.element, model), node.hydrate.join(', '), name)
       sent[name] = getOrSetObjectByDotNotation(model, name)
     }
     // the closing sequence of a script element is the one thing that could end the script early
@@ -1286,19 +1297,21 @@ export function createCompiler (deps) {
   }
 
   // what a loop iterates when its attributes hold {variables} that are only known once there is a model to read them from
+  //
+  // the key and val names are handed in already resolved, since the caller needs them resolved for every iteration's scope too, and resolving them here as well would do the work twice
   function loopCollection (through, keyName, valName, model) {
-    return iterable(lookupVar(through, model), resolveVars(keyName, model), resolveVars(valName, model))
+    return iterable(lookupVar(through, model), keyName, valName)
   }
 
   // the model as a loop's body sees it: the model it was reached with, plus this iteration's key and val. emitted code needs this for the helpers it calls, which take a model rather than the javascript variables the emitted code keeps its locals in
   //
   // the enclosing model is reached through the prototype chain rather than copied. a loop of a thousand rows copied the whole model a thousand times, and because every copy started out owning nothing, writing this iteration's names into it also searched it for keys differing only in case each time round. an object made this way owns nothing but those two names, so neither cost is paid; a name holding a dot is left alone because setting one never did anything, and a value of undefined is left unset so that the enclosing model still answers for that name
+  //
+  // a key or val written with a {variable} in it is resolved by the caller once per loop rather than here once per item
   function loopScope (model, keyName, key, valName, value) {
-    const resolvedKey = resolveVars(keyName, model)
-    const resolvedVal = resolveVars(valName, model)
     const localModel = Object.create(model || null)
-    if (resolvedKey && key !== undefined && !resolvedKey.includes('.')) localModel[resolvedKey] = key
-    if (resolvedVal && value !== undefined && !resolvedVal.includes('.')) localModel[resolvedVal] = value
+    if (keyName && key !== undefined && !keyName.includes('.')) localModel[keyName] = key
+    if (valName && value !== undefined && !valName.includes('.')) localModel[valName] = value
     return localModel
   }
 
@@ -1306,9 +1319,7 @@ export function createCompiler (deps) {
   function dynamicBody (node, model, src = resolveVars(node.src, model)) {
     let body = node.compiled.get(src)
     if (body !== undefined) return body
-    if (node.stack.includes(src)) {
-      throw new Error(`teddy: the template "${src}" includes itself, directly or through the templates it includes, so it can never finish compiling. include stack: ${node.stack.concat(src).map(name => JSON.stringify(name)).join(' -> ')}`)
-    }
+    checkNotCycling(node.stack, src)
     const markup = loadTemplate(src)
     body = markup === null
       ? notFoundBody(src)
@@ -1323,19 +1334,13 @@ export function createCompiler (deps) {
 
     const element = resolveVars(node.element, model)
     const mode = resolveVars(node.mode, model)
-    validateComponent(src, element, mode)
+    checkElementName(src, element)
+    checkMode(src, element, mode)
     const key = `${src}|${element}|${mode}`
     let entry = node.compiled.get(key)
     if (entry === undefined) {
-      if (node.stack.includes(src)) {
-        throw new Error(`teddy: the template "${src}" includes itself, directly or through the templates it includes, so it can never finish compiling. include stack: ${node.stack.concat(src).map(name => JSON.stringify(name)).join(' -> ')}`)
-      }
-      const included = loadTemplate(src)
-      let markup = included
-      if (included === null) {
-        warn(params, `an <include> has a src set to a template that could not be found: ${src}`, 2)
-        markup = params.includeNotFoundBehavior === 'display' ? `Template "${src}" not found!` : ''
-      }
+      checkNotCycling(node.stack, src)
+      const markup = includedMarkup(src)
       const nextStack = node.stack.concat(src)
       const openNodes = []
       pushText(openNodes, `<${element}${node.openTag}>${mode === 'light' ? '' : '<template shadowrootmode="open">'}`)
@@ -1407,7 +1412,8 @@ export function createCompiler (deps) {
       iterable,
       walk: loopWalk,
       collection: loopCollection,
-      scope: loopScope
+      scope: loopScope,
+      vars: resolveVars
     }
   }
 }

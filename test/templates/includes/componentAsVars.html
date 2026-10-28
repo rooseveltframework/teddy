@@ -1,0 +1,6 @@
+{!
+  should resolve {variables} in an <include>'s as, mode, and hydrate attributes
+!}
+
+<include src="misc/variable" as="my-{componentTag}"></include>
+<include src="misc/variable" as="my-{componentTag}" mode="{componentMode}" hydrate="{componentHydrate}"></include>

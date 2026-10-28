@@ -110,6 +110,17 @@ export default function makeModel () {
     hello: 'world',
     number: 10,
     nameReference: 'jack',
+    // names teddy element attributes are built from, so that a template can write each attribute with a {variable} in it
+    loopKeyName: 'k',
+    loopValName: 'v',
+    inlineTheme: 'dark',
+    themedStyles: { dark: 'p{color:red}' },
+    themedScripts: { dark: 'let a = 1' },
+    argName: 'something',
+    componentTag: 'card',
+    componentTags: ['card', 'list'],
+    componentMode: 'shadow',
+    componentHydrate: 'something',
     4: 'STRING!',
     largeDataSet: [],
     teddyObject: {
