@@ -266,6 +266,9 @@ function emitChain (nodes, start, state, out) {
 // an arm's conditions are looked up here, inline, rather than inside the shared reduction, which is what stops a dotted name being split apart again on every render
 function armTest (branch, id, index, state) {
   const arm = branch.arms[index]
+  if (arm.attribs.some(([name]) => name.includes('{'))) {
+    return { setup: '', test: `r.arm(r.branches[${id}].arms[${index}], ${state.model})` }
+  }
   let setup = ''
   const values = []
   for (const path of armPaths(arm)) {
@@ -286,9 +289,9 @@ function armTest (branch, id, index, state) {
     return { setup, test: `${inverted ? '!' : ''}r.present(${values[0]})` }
   }
 
-  // the values above are every lookup the arm makes, so the one thing left that a model could be wanted for is a {variable} standing in for a condition's value, which only the opening arm of a chain resolves. the variable may sit anywhere in the value, so what counts as one has to be decided the same way conditionArgs decides it, or the model it needs will not have been passed
-  const wantsModel = index === 0 && arm.attribs.some(([, value]) => value && value.includes('{'))
-  return { setup, test: `r.arm(r.branches[${id}].arms[${index}], ${wantsModel ? state.model : 'null'}, ${index === 0}, [${values.join(', ')}])` }
+  // the values above are every lookup the arm makes, so the one thing left that a model could be wanted for is a {variable} standing in for a condition's value. the variable may sit anywhere in the value, so what counts as one has to be decided the same way conditionArgs decides it, or the model it needs will not have been passed
+  const wantsModel = arm.attribs.some(([, value]) => value && value.includes('{'))
+  return { setup, test: `r.arm(r.branches[${id}].arms[${index}], ${wantsModel ? state.model : 'null'}, [${values.join(', ')}])` }
 }
 
 function emitPick (branch, id, winner, state) {
@@ -310,7 +313,7 @@ function emitComputedVar (node, state, out) {
   const name = `n${state.uid++}`
   let js = `let ${name} = ''\n`
   js += walk(node.nameNodes, state, name)
-  js += `${out} += r.computed(${name}, ${state.model}, s)\n`
+  js += `${out} += r.computed(${name}, ${state.model}, s, ${!!node.dollar})\n`
   return js
 }
 
@@ -325,7 +328,7 @@ function emitSelection (node, state, out) {
   return js
 }
 
-// an <include> whose src is only known at render: the body it resolves to is compiled the first time a render asks for that name, and is walked rather than emitted since it is not known when this code is written
+// an <include> whose src, as, or mode is only known at render: the body it resolves to is compiled the first time a render asks for that combination, and is walked rather than emitted since it is not known when this code is written
 function emitDynamicInclude (node, state, out) {
   const ref = nodeRef(node, state)
   let js = ''
@@ -342,7 +345,7 @@ function emitDynamicInclude (node, state, out) {
     js += `const ${scope} = r.bind(${state.model}, ${ref}.bindings, [${values.join(', ')}])\n`
     model = scope
   }
-  js += `${out} += r.render(r.dynamic(${ref}, ${state.model}), ${model}, s)\n`
+  js += `${out} += r.dynamic(${ref}, ${state.model}, ${model}, s)\n`
   return js
 }
 
@@ -445,10 +448,11 @@ function emitLoop (node, state, out) {
 
   const keyName = JSON.stringify(node.keyName ?? null)
   const valName = JSON.stringify(node.valName ?? null)
+  const dynamicVars = (node.keyName && node.keyName.includes('{')) || (node.valName && node.valName.includes('{'))
 
-  // a through naming a {variable} anywhere in its path is not known until there is a model to read it from, so that one goes through the helper; anything else is a path this code can read directly, which matters for a loop nested inside another whose collection is the outer loop's val
+  // a through, key, or val naming a {variable} anywhere in its path is not known until there is a model to read it from, so that one goes through the helper; anything else is a path this code can read directly, which matters for a loop nested inside another whose collection is the outer loop's val
   let js = ''
-  if (node.through && node.through.includes('{')) {
+  if ((node.through && node.through.includes('{')) || dynamicVars) {
     js += `const ${collection} = r.collection(${JSON.stringify(node.through)}, ${keyName}, ${valName}, ${state.model})\n`
   } else {
     const source = access(node.through, state)
@@ -471,16 +475,24 @@ function emitLoop (node, state, out) {
 
   const outerLocals = state.locals
   const outerModel = state.model
+  const outerBase = state.base
   const scope = `l${state.uid++}`
-  // the body reads the key and the val out of the javascript variables above, and reads everything else out of the model the loop was reached with, so the model a loop's body sees exists only for the helpers that take one. those are the minority, so it is built on first use and not before: a body of plain markup, variables and conditionals never builds one at all, which is one object copy per item of every loop on the page saved
-  js += `let ${scope}\n`
   state.locals = new Map(outerLocals)
-  if (node.keyName) state.locals.set(node.keyName.toLowerCase(), key)
-  if (node.valName) state.locals.set(node.valName.toLowerCase(), val)
-  state.model = `(${scope} || (${scope} = r.scope(${outerModel}, ${keyName}, ${key}, ${valName}, ${val})))`
+  if (dynamicVars) {
+    js += `const ${scope} = r.scope(${outerModel}, ${keyName}, ${key}, ${valName}, ${val})\n`
+    state.model = scope
+    state.base = scope
+  } else {
+    // the body reads the key and the val out of the javascript variables above, and reads everything else out of the model the loop was reached with, so the model a loop's body sees exists only for the helpers that take one. those are the minority, so it is built on first use and not before: a body of plain markup, variables and conditionals never builds one at all, which is one object copy per item of every loop on the page saved
+    js += `let ${scope}\n`
+    if (node.keyName) state.locals.set(node.keyName.toLowerCase(), key)
+    if (node.valName) state.locals.set(node.valName.toLowerCase(), val)
+    state.model = `(${scope} || (${scope} = r.scope(${outerModel}, ${keyName}, ${key}, ${valName}, ${val})))`
+  }
   js += walk(node.body, state, out)
   state.locals = outerLocals
   state.model = outerModel
+  state.base = outerBase
 
   js += '}\n'
   return js

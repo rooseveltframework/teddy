@@ -1,0 +1,5 @@
+{!
+  should evaluate <if> and <elseif> conditions whose names contain a {variable}
+!}
+
+<loop through="nameList" val="person"><if names.{person}="guy"><p>{person}: guy</p></if><elseif names.{person}><p>{person}: {names.{person}}</p></elseif></loop>

@@ -267,13 +267,15 @@ function variableFlags (match) {
   const flagCount = lastSixChars.split('|').length - 1
   const noparse = lastSixChars.includes('|p')
   const raw = !noparse && lastSixChars.includes('|s')
+  const hide = lastSixChars.includes('|h')
+  const display = lastSixChars.includes('|d')
   return {
     match,
-    name: noparse || raw ? match.substring(0, match.length - flagCount * 2) : match,
+    name: noparse || raw || hide || display ? match.substring(0, match.length - flagCount * 2) : match,
     noparse,
     raw,
-    hide: lastSixChars.includes('|h'),
-    display: lastSixChars.includes('|d')
+    hide,
+    display
   }
 }
 
@@ -597,7 +599,7 @@ const compiler = createCompiler({
 // gives every repeated attribute name on an element a unique one, before the markup is parsed, since html parsers keep only the first of an element's attributes with the same name, and teddy writes several on purpose, such as the true attribute of each of an element's one line ifs. it's done to a template's markup, and to every template it includes, as they're included
 function renameRepeatedAttributes (markup) {
   return markup.replace(/<([a-zA-Z][a-zA-Z0-9-]*)([^>]*)>/g, (match, tagName, attributes) => {
-    const attrRegex = /([a-zA-Z0-9-:._]+)(?:=(["'])(.*?)\2|([^>\s]+))?/g
+    const attrRegex = /([a-zA-Z0-9-:._${}]+)(?:=(["'])(.*?)\2|([^>\s]+))?/g
     const attrMap = new Map()
     let count = 1
     const processedAttributes = attributes.replace(attrRegex, (attrMatch, attrName, quote, attrValue) => {

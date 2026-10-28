@@ -245,6 +245,23 @@ export function createCompiler (deps) {
     return buildNodes(dom.html(), slots)
   }
 
+  // whether an attribute name or value on a teddy element holds a {variable}
+  const hasVars = text => typeof text === 'string' && text.includes('{')
+
+  // resolves any {variables} written in a teddy element's attribute name or value against the model
+  //
+  // |p and |s only say how a variable is written into the markup, and a |p variable is held out as a placeholder until the render finishes, so they are stripped before resolving a value that a teddy construct is about to read or compare
+  const withoutWritingFlags = text => text.includes('|') ? text.replace(/\|[ps](?=\||\})/g, '') : text
+  function resolveVars (text, model) {
+    return hasVars(text) && model ? parseVars(withoutWritingFlags(text), model) : text
+  }
+
+  // looks up a model path written in a teddy element's attribute, resolving any {variables} in the path first
+  function lookupVar (path, model) {
+    const resolved = resolveVars(path, model)
+    return resolved ? getOrSetObjectByDotNotation(model, resolved) : undefined
+  }
+
   // what a set of conditions asks, worked out while the template is compiled: for each one the name it looks up, whether it is negated, and what it compares against
   //
   // this covers one condition on its own and two joined by a single operator, which between them is nearly every conditional anyone writes. anything else, and anything with a quirk in it that the general path handles specially, comes back null and is left to that path
@@ -260,14 +277,14 @@ export function createCompiler (deps) {
       let name = rawName
       const not = name.startsWith('not:')
       if (not) name = name.slice(4)
-      // a colon anywhere but the not: prefix, or an equals sign in the name, is something the general path rejects outright and warns about
-      if (!name || name.includes(':') || name.includes('=')) return null
+      // a colon anywhere but the not: prefix, or an equals sign in the name, is something the general path rejects outright and warns about, and a name holding a {variable} is not known until there is a model to read it from
+      if (!name || name.includes(':') || name.includes('=') || hasVars(name)) return null
       if (!rawValue) {
         checks.push({ path: name, not, compare: null })
         continue
       }
-      // a value carrying a colon or an equals sign is also rejected by the general path, in its own particular way, and a value holding a {variable} is only resolved on the opening arm of a chain. all three are left where their behavior is already written down
-      if (rawValue.includes(':') || rawValue.includes('=') || rawValue.includes('{')) return null
+      // a value carrying a colon or an equals sign is also rejected by the general path, in its own particular way, and a value holding a {variable} is not known until there is a model to read it from. all three are left where their behavior is already written down
+      if (rawValue.includes(':') || rawValue.includes('=') || hasVars(rawValue)) return null
       checks.push({ path: name, not, compare: rawValue })
     }
     const shapeIsOne = checks.length === 1 && typeof checks[0] === 'object'
@@ -351,8 +368,8 @@ export function createCompiler (deps) {
         // split the way the interpreter splits it rather than by length, so an attribute name containing if- more than once is read identically
         const condition = name.split('if-')[1]
         current.argSources.push([condition, value])
-        // a condition whose value names a variable is not known until there is a model to read it from, exactly as for an <if> tag. the variable may sit anywhere in the value rather than at its head, so any brace means the value has to be resolved
-        if (value && value.includes('{')) current.dynamic = true
+        // a condition whose name or value holds a variable is not known until there is a model to read it from, exactly as for an <if> tag. the variable may sit anywhere in the name or value rather than at its head, so any brace means it has to be resolved
+        if (hasVars(condition) || hasVars(value)) current.dynamic = true
       } else if (OUTCOMES.has(name)) {
         if (current) current[name === 'true' ? 'ifTrue' : 'ifFalse'] = value.replaceAll('&quot;', '"')
       } else if (JOINERS.has(name)) {
@@ -367,14 +384,14 @@ export function createCompiler (deps) {
 
     // a condition holding nothing model dependent is reduced to its finished form once, here, rather than being rebuilt on every render
     for (const conditional of conditionals) {
-      if (!conditional.dynamic) conditional.args = oneLineArgs(conditional.argSources, null)
+      if (!conditional.dynamic) conditional.args = conditionArgs(conditional.argSources, null)
       conditional.checks = conditional.dynamic ? null : conditionChecks(conditional.argSources)
     }
 
     const { openTag, closeTag } = splitTag(dom, el)
     // whether either half of a one line if has anything to ask a model about, settled here so that emitted code inside a <loop> knows not to build one. working out which outcomes apply needs a model only for a condition this could not settle, and writing the opening tag needs one only if the tag or an outcome holds a {variable}
     const outcomesNeedModel = conditionals.some(conditional => !conditional.checks)
-    const variantNeedsModel = openTag.includes('{') || conditionals.some(conditional => (conditional.ifTrue || '').includes('{') || (conditional.ifFalse || '').includes('{'))
+    const variantNeedsModel = hasVars(openTag) || conditionals.some(conditional => hasVars(conditional.ifTrue) || hasVars(conditional.ifFalse))
     const node = makeNode('attrs')
     node.conditionals = conditionals
     node.outcomesNeedModel = outcomesNeedModel
@@ -440,8 +457,14 @@ export function createCompiler (deps) {
     return held ? `<div slot="${FALLBACK_SLOT}">${stripped}</div>` : stripped
   }
 
+  function validateComponent (src, element, mode) {
+    if (!CUSTOM_ELEMENT_NAME.test(element)) throw new Error(`teddy: "${element}" cannot name a custom element, so <include src="${src}" as="${element}"> has nothing it could render as. the name has to be lower case and hold a hyphen, like "my-card"`)
+    if (!COMPONENT_MODES.has(mode)) throw new Error(`teddy: <include src="${src}" as="${element}" mode="${mode}"> asks for a mode that is not one of ${[...COMPONENT_MODES].join(', ')}`)
+  }
+
   function claimInclude (dom, el, slots, stack) {
-    const src = attribValue(readAttribs(el), 'src')
+    const attribs = readAttribs(el)
+    const src = attribValue(attribs, 'src')
 
     // the interpreter drops an include with no src rather than leaving anything behind
     if (!src) {
@@ -450,13 +473,40 @@ export function createCompiler (deps) {
       return
     }
 
-    // a src that names a variable is not known until there is a model to read it from, so the partial behind it is loaded and compiled on the first render that asks for it and kept against that name
-    if (src.includes('{')) {
+    const element = attribValue(attribs, 'as')
+    const mode = attribs.some(([name]) => name === 'mode') ? attribValue(attribs, 'mode') : 'both'
+    const passed = element ? attribs.filter(([name]) => !COMPONENT_ATTRIBUTES.has(name)).map(([name, value]) => value === '' ? ` ${name}` : ` ${name}="${value}"`).join('') : ''
+    let hydrateList = null
+    let lightSource = null
+
+    if (element) {
+      if (!hasVars(element) && !CUSTOM_ELEMENT_NAME.test(element)) throw new Error(`teddy: "${element}" cannot name a custom element, so <include src="${src}" as="${element}"> has nothing it could render as. the name has to be lower case and hold a hyphen, like "my-card"`)
+      if (!hasVars(mode) && !COMPONENT_MODES.has(mode)) throw new Error(`teddy: <include src="${src}" as="${element}" mode="${mode}"> asks for a mode that is not one of ${[...COMPONENT_MODES].join(', ')}`)
+      lightSource = Array.from(dom(el).contents()).filter(child => tagNameOf(child) !== 'arg').map(child => dom(child).toString()).join('')
+      const hydrate = attribValue(attribs, 'hydrate')
+      if (!hydrate && attribs.some(([name]) => name === 'hydrate')) throw new Error(`teddy: <include src="${src}" as="${element}" hydrate> does not say what the component needs, so there is nothing to send it. name the model keys it renders from, like hydrate="product"`)
+      if (hydrate) {
+        hydrateList = hydrate.split(',').map(name => name.trim()).filter(Boolean)
+        for (const name of hydrateList) {
+          if (!hasVars(name) && name.includes('.')) throw new Error(`teddy: <include src="${src}" as="${element}" hydrate="${hydrate}"> names "${name}", and a component is sent whole model keys rather than paths into them. name the key that holds it instead`)
+        }
+      }
+    }
+
+    // a src, as, or mode that names a variable is not known until there is a model to read it from, so the partial behind it is loaded and compiled on the first render that asks for it and kept against that name
+    if (hasVars(src) || hasVars(element) || hasVars(mode)) {
       const node = makeNode('dynamicInclude')
       node.src = src
       node.bindings = readArgs(dom, el)
       node.compiled = new Map()
       node.stack = stack
+      if (element) {
+        node.element = element
+        node.mode = mode
+        node.openTag = passed
+        node.lightSource = lightSource
+        node.hydrate = hydrateList
+      }
       slots.push(node)
       dom(el).replaceWith(tokenFor(slots.length - 1))
       return
@@ -475,47 +525,19 @@ export function createCompiler (deps) {
     }
 
     const node = makeNode('scope')
+    node.src = src
     node.bindings = readArgs(dom, el)
     node.bodySource = markup
     node.stack = stack.concat(src)
-    // an include asked to render as a custom element writes its markup into a declarative shadow root inside that element, rather than in place of it. a browser's parser builds the shadow root as it reads the page, so the markup is there, encapsulated, before any javascript runs; and when the element is upgraded its shadow root is already populated, so nothing has to be rendered again
-    //
-    // both halves of the wrapper are settled here, so that walking the tree and running emitted code cannot disagree about what a component looks like
-    const attribs = readAttribs(el)
-    const element = attribValue(attribs, 'as')
     if (element) {
-      if (!CUSTOM_ELEMENT_NAME.test(element)) throw new Error(`teddy: "${element}" cannot name a custom element, so <include src="${src}" as="${element}"> has nothing it could render as. the name has to be lower case and hold a hyphen, like "my-card"`)
       node.element = element
-
-      // every other attribute written on the include belongs to the element it renders as, which is how a custom element is configured: a class watches the attributes it named in observedAttributes, and teddy has nothing to say about which those are
-      //
-      // the opening tag is compiled rather than written out as it stands, so that an attribute whose value holds a {variable} resolves the way it would anywhere else
-      const passed = attribs.filter(([name]) => !COMPONENT_ATTRIBUTES.has(name))
-
-      // where the markup goes. a component is written into a declarative shadow root with a fallback copy beside it unless it asks for something else, that being the only arrangement which renders whatever the browser turns out to support
-      const mode = attribs.some(([name]) => name === 'mode') ? attribValue(attribs, 'mode') : 'both'
-      if (!COMPONENT_MODES.has(mode)) throw new Error(`teddy: <include src="${src}" as="${element}" mode="${mode}"> asks for a mode that is not one of ${[...COMPONENT_MODES].join(', ')}`)
       node.mode = mode
-
-      // a component rendering into the light dom alone has no shadow root to hold its styles or fill its slots, so what it writes is the fallback markup rather than the template as it stands
       if (mode === 'light') node.bodySource = fallbackMarkup(markup)
       else if (mode === 'both') node.fallbackSource = fallbackMarkup(markup)
-
       node.openNodes = []
-      pushText(node.openNodes, `<${element}${passed.map(([name, value]) => value === '' ? ` ${name}` : ` ${name}="${value}"`).join('')}>${mode === 'light' ? '' : '<template shadowrootmode="open">'}`)
-
-      // whatever the include was given that is not an <arg> is the component's light dom, which is what a <slot> in its shadow root projects. an <arg> names a value the template reads; this is content, and it belongs to the page rather than to the shadow root
-      node.lightSource = Array.from(dom(el).contents()).filter(child => tagNameOf(child) !== 'arg').map(child => dom(child).toString()).join('')
-      // a component told to hydrate is sent the part of the model it renders from, so that the class upgrading it can render the same template again from new data without asking a server for anything. it names what it needs rather than being guessed at, because an argument carries rendered markup and so can only ever be a string: a component reading a list or an object reads it from the model, and only the model can carry it back out again
-      const hydrate = attribValue(attribs, 'hydrate')
-      // a bare hydrate would otherwise do nothing at all, which is not what anyone writing it meant
-      if (!hydrate && attribs.some(([name]) => name === 'hydrate')) throw new Error(`teddy: <include src="${src}" as="${element}" hydrate> does not say what the component needs, so there is nothing to send it. name the model keys it renders from, like hydrate="product"`)
-      if (hydrate) {
-        node.hydrate = hydrate.split(',').map(name => name.trim()).filter(Boolean)
-        for (const name of node.hydrate) {
-          if (name.includes('.')) throw new Error(`teddy: <include src="${src}" as="${element}" hydrate="${hydrate}"> names "${name}", and a component is sent whole model keys rather than paths into them. name the key that holds it instead`)
-        }
-      }
+      pushText(node.openNodes, `<${element}${passed}>${mode === 'light' ? '' : '<template shadowrootmode="open">'}`)
+      node.lightSource = lightSource
+      node.hydrate = hydrateList
     }
     slots.push(node)
     dom(el).replaceWith(tokenFor(slots.length - 1))
@@ -547,7 +569,7 @@ export function createCompiler (deps) {
             if (browser) child.attribs = getAttribs(child)
             const ownValue = child.attribs.value
             // both sides have to be written out before the match can be settled here
-            if (!valueSource.includes('{') && !(ownValue && ownValue.includes('{'))) {
+            if (!hasVars(valueSource) && !hasVars(ownValue)) {
               if (ownValue === valueSource) dom(child).attr(marker, marker)
               continue
             }
@@ -570,7 +592,7 @@ export function createCompiler (deps) {
       if (!includes.length) return true
       for (const el of includes) {
         const src = attribValue(readAttribs(el), 'src')
-        if (!src || src.includes('{')) return false
+        if (!src || hasVars(src)) return false
         for (const child of Array.from(dom(el).children())) if (tagNameOf(child) === 'arg') return false
         const markup = loadTemplate(src)
         if (markup === null) return false
@@ -868,6 +890,7 @@ export function createCompiler (deps) {
         const node = makeNode('computedVar')
         node.nameNodes = nameNodes
         node.source = text.slice(spanStart, close + 1)
+        node.dollar = spanStart !== open
         nodes.push(node)
       } else {
         // a variable's flags are the same for every render, so they are settled here rather than read off the end of its name every time
@@ -997,7 +1020,7 @@ export function createCompiler (deps) {
           break
 
         case 'computedVar':
-          out += computedVariable(renderNodes(node.nameNodes, model, state), model, state)
+          out += computedVariable(renderNodes(node.nameNodes, model, state), model, state, node.dollar)
           break
 
         case 'selection':
@@ -1007,7 +1030,7 @@ export function createCompiler (deps) {
           break
 
         case 'dynamicInclude':
-          out += renderNodes(dynamicBody(node, model), node.bindings.length ? bindArgs(model, node.bindings, node.bindings.map(binding => renderNodes(binding.body, model, state))) : model, state)
+          out += renderDynamicInclude(node, model, node.bindings.length ? bindArgs(model, node.bindings, node.bindings.map(binding => renderNodes(binding.body, model, state))) : model, state)
           break
 
         case 'scope': {
@@ -1108,7 +1131,7 @@ export function createCompiler (deps) {
         continue
       }
       // evaluateConditional reduces the array it is handed to booleans as it goes, so a settled condition gets a copy: these have to survive to the next render
-      const args = conditional.dynamic ? oneLineArgs(conditional.argSources, model) : conditional.args.slice()
+      const args = conditional.dynamic ? conditionArgs(conditional.argSources, model) : conditional.args.slice()
       if (evaluateConditional(args, model)) outcomes |= 1 << i
     }
     return outcomes
@@ -1142,7 +1165,11 @@ export function createCompiler (deps) {
   // the arguments travel as json in a script the browser will not execute, which is the ordinary way to hand a page some data and needs no permission a strict content security policy withholds. they sit in the light dom rather than the shadow root, so that re-rendering the shadow root does not throw them away
   function componentPayload (node, model) {
     const sent = {}
-    for (const name of node.hydrate) sent[name] = getOrSetObjectByDotNotation(model, name)
+    for (const raw of node.hydrate) {
+      const name = resolveVars(raw, model)
+      if (name.includes('.')) throw new Error(`teddy: <include src="${resolveVars(node.src, model)}" as="${resolveVars(node.element, model)}" hydrate="${node.hydrate.join(', ')}"> names "${name}", and a component is sent whole model keys rather than paths into them. name the key that holds it instead`)
+      sent[name] = getOrSetObjectByDotNotation(model, name)
+    }
     // the closing sequence of a script element is the one thing that could end the script early
     const json = JSON.stringify(sent).replace(/<\//g, '<\\/')
     // naming a slot that no component defines is what keeps this out of a default slot: an empty slot attribute means the default slot, the same as writing none at all, while an element naming a slot that is not there is assigned to nothing and rendered nowhere
@@ -1152,7 +1179,7 @@ export function createCompiler (deps) {
   // the model an included template sees: the one the include was reached with, plus its arguments
   function bindArgs (model, bindings, values) {
     const localModel = Object.create(model || null)
-    for (let i = 0; i < bindings.length; i++) getOrSetObjectByDotNotation(localModel, bindings[i].name, values[i])
+    for (let i = 0; i < bindings.length; i++) getOrSetObjectByDotNotation(localModel, resolveVars(bindings[i].name, model), values[i])
     return localModel
   }
 
@@ -1162,8 +1189,8 @@ export function createCompiler (deps) {
   }
 
   function inlineBlock (node, model) {
-    const css = node.css && getOrSetObjectByDotNotation(model, node.css)
-    const js = node.js && getOrSetObjectByDotNotation(model, node.js)
+    const css = lookupVar(node.css, model)
+    const js = lookupVar(node.js, model)
     if (css) return `<style>${css}</style>`
     if (js) return `<script>${js}</script>`
     // teddy drops an inline that names neither
@@ -1172,11 +1199,12 @@ export function createCompiler (deps) {
   }
 
   // a variable whose name was built from other variables: the name is rendered first, then looked up, so {a{b}} with b of X asks the model for aX
-  function computedVariable (name, model, state) {
+  function computedVariable (name, model, state, dollar = false) {
     const flags = VALID_VARIABLE.test(name) ? variableFlags(name) : null
     const resolved = flags ? formatVariable(flags, getOrSetObjectByDotNotation(model, flags.name), model) : null
-    if (!resolved) return `{${name}}`
-    return writeValue(resolved, name.slice(-6).includes('|s'), model, state)
+    if (!resolved) return `${dollar ? '$' : ''}{${name}}`
+    const prefix = dollar && resolved.skipTemplateLiteralReplacement ? '$' : ''
+    return prefix + writeValue(resolved, flags.raw, model, state)
   }
 
   // whether this candidate for a selected-value or checked-value is the one that carries the matching value
@@ -1184,18 +1212,16 @@ export function createCompiler (deps) {
   // the values are compared as the model has them, so a |p or |s on either side, which only says how the value is written, makes no difference to whether they match: a |p value is held out of the markup until the render is finished, and would otherwise be compared as the placeholder it's held out as
   function selectionMarked (node, model) {
     // teddy falls back to the attribute as written when the variable in it resolves to nothing
-    const valueSource = withoutWritingFlags(node.valueSource)
-    const target = parseVars(valueSource, model) || valueSource
+    const target = resolveVars(node.valueSource, model) || node.valueSource
     // a candidate written inside a loop has had its own value substituted by the time it is compared, so it is compared substituted here too
-    const own = node.ownValue && node.ownValue.includes('{') ? parseVars(withoutWritingFlags(node.ownValue), model) : node.ownValue
+    const own = resolveVars(node.ownValue, model)
     return own === target
   }
-  const withoutWritingFlags = (text) => text.includes('|') ? text.replace(/\|[ps](?=\||\})/g, '') : text
 
   // whether one arm of a conditional chain is the one that applies
   //
   // values, when given, holds what each of the arm's conditions looks up, already looked up, which is what a compiled template hands in rather than having the lookups done again
-  function armMatches (arm, model, isFirst, values) {
+  function armMatches (arm, model, values) {
     if (arm.kind === 'else') return true
     const inverted = arm.kind === 'unless' || arm.kind === 'elseunless'
     // an arm of a shape settled at compile time is answered without building or reducing anything
@@ -1203,14 +1229,13 @@ export function createCompiler (deps) {
       const result = settleChecks(arm.checks, model, values)
       return inverted ? !result : result
     }
-    // only the opening if or unless resolves a {variable} in a condition's value; elseif and elseunless read the value as written. that is inconsistent, and it is preserved here because changing it would change what existing templates render
-    const result = evaluateConditional(conditionArgs(arm.attribs, model, isFirst), model, values)
+    const result = evaluateConditional(conditionArgs(arm.attribs, model), model, values)
     return inverted ? !result : result
   }
 
   function pickArm (branch, model) {
     for (let i = 0; i < branch.arms.length; i++) {
-      if (armMatches(branch.arms[i], model, i === 0, undefined)) return i
+      if (armMatches(branch.arms[i], model, undefined)) return i
     }
     return -1
   }
@@ -1227,25 +1252,13 @@ export function createCompiler (deps) {
     return arm.attribs.map(([name, value]) => conditionPath(value ? `${name}=${value}` : name))
   }
 
-  // a one line if's conditions in the form evaluateConditional wants them. a joiner is stored with no value and goes in on its own; a condition whose value is a variable is resolved against the model, which is only ever needed when the compile could not settle it
-  function oneLineArgs (argSources, model) {
+  // a conditional's conditions in the form evaluateConditional wants them. a joiner is stored with no value and goes in on its own; a condition whose name or value holds a {variable} is resolved against the model
+  function conditionArgs (pairs, model) {
     const args = []
-    for (const [name, value] of argSources) {
-      if (value === null) args.push(name)
-      else if (!value) args.push(name)
-      else args.push(`${name}=${model && value.includes('{') ? parseVars(value, model) : value}`)
-    }
-    return args
-  }
-
-  function conditionArgs (attribs, model, resolveValues) {
-    const args = []
-    for (const [name, raw] of attribs) {
-      let value = raw
-      if (value) {
-        if (resolveValues && value.includes('{')) value = parseVars(value, model)
-        args.push(`${name}=${value}`)
-      } else args.push(name)
+    for (const [rawName, rawValue] of pairs) {
+      const name = resolveVars(rawName, model)
+      const value = resolveVars(rawValue, model)
+      args.push(value ? `${name}=${value}` : name)
     }
     return args
   }
@@ -1272,28 +1285,25 @@ export function createCompiler (deps) {
     return collection
   }
 
-  // what a loop iterates when the name it was pointed at is only known once there is a model to read it from
-  //
-  // a {variable} may sit anywhere in the path rather than at its head, so any brace means the path has to be resolved before it is looked up
+  // what a loop iterates when its attributes hold {variables} that are only known once there is a model to read them from
   function loopCollection (through, keyName, valName, model) {
-    let source = through
-    if (source && source.includes('{')) source = parseVars(source, model)
-    return iterable(source ? getOrSetObjectByDotNotation(model, source) : undefined, keyName, valName)
+    return iterable(lookupVar(through, model), resolveVars(keyName, model), resolveVars(valName, model))
   }
 
   // the model as a loop's body sees it: the model it was reached with, plus this iteration's key and val. emitted code needs this for the helpers it calls, which take a model rather than the javascript variables the emitted code keeps its locals in
   //
   // the enclosing model is reached through the prototype chain rather than copied. a loop of a thousand rows copied the whole model a thousand times, and because every copy started out owning nothing, writing this iteration's names into it also searched it for keys differing only in case each time round. an object made this way owns nothing but those two names, so neither cost is paid; a name holding a dot is left alone because setting one never did anything, and a value of undefined is left unset so that the enclosing model still answers for that name
   function loopScope (model, keyName, key, valName, value) {
+    const resolvedKey = resolveVars(keyName, model)
+    const resolvedVal = resolveVars(valName, model)
     const localModel = Object.create(model || null)
-    if (keyName && key !== undefined && !keyName.includes('.')) localModel[keyName] = key
-    if (valName && value !== undefined && !valName.includes('.')) localModel[valName] = value
+    if (resolvedKey && key !== undefined && !resolvedKey.includes('.')) localModel[resolvedKey] = key
+    if (resolvedVal && value !== undefined && !resolvedVal.includes('.')) localModel[resolvedVal] = value
     return localModel
   }
 
-  // the compiled body of an <include> whose src is only known once there is a model to read it from, compiled the first time a render asks for that name and kept against it
-  function dynamicBody (node, model) {
-    const src = parseVars(node.src, model)
+  // the compiled body of an <include> whose src, as, or mode is only known once there is a model to read it from, compiled the first time a render asks for that combination and kept against it
+  function dynamicBody (node, model, src = resolveVars(node.src, model)) {
     let body = node.compiled.get(src)
     if (body !== undefined) return body
     if (node.stack.includes(src)) {
@@ -1307,16 +1317,55 @@ export function createCompiler (deps) {
     return body
   }
 
+  function renderDynamicInclude (node, model, scoped, state) {
+    const src = resolveVars(node.src, model)
+    if (node.element === null) return renderNodes(dynamicBody(node, model, src), scoped, state)
+
+    const element = resolveVars(node.element, model)
+    const mode = resolveVars(node.mode, model)
+    validateComponent(src, element, mode)
+    const key = `${src}|${element}|${mode}`
+    let entry = node.compiled.get(key)
+    if (entry === undefined) {
+      if (node.stack.includes(src)) {
+        throw new Error(`teddy: the template "${src}" includes itself, directly or through the templates it includes, so it can never finish compiling. include stack: ${node.stack.concat(src).map(name => JSON.stringify(name)).join(' -> ')}`)
+      }
+      const included = loadTemplate(src)
+      let markup = included
+      if (included === null) {
+        warn(params, `an <include> has a src set to a template that could not be found: ${src}`, 2)
+        markup = params.includeNotFoundBehavior === 'display' ? `Template "${src}" not found!` : ''
+      }
+      const nextStack = node.stack.concat(src)
+      const openNodes = []
+      pushText(openNodes, `<${element}${node.openTag}>${mode === 'light' ? '' : '<template shadowrootmode="open">'}`)
+      entry = {
+        openNodes,
+        body: compileTemplate(mode === 'light' ? fallbackMarkup(markup) : markup, nextStack),
+        fallbackNodes: mode === 'both' ? compileTemplate(fallbackMarkup(markup), nextStack) : null
+      }
+      node.compiled.set(key, entry)
+    }
+
+    let out = renderNodes(entry.openNodes, model, state) + renderNodes(entry.body, scoped, state)
+    if (mode !== 'light') out += '</template>'
+    if (entry.fallbackNodes !== null) out += renderNodes(entry.fallbackNodes, scoped, state)
+    out += renderNodes(node.lightNodes, model, state) + (node.hydrate ? componentPayload(node, model) : '') + `</${element}>`
+    return out
+  }
+
   function renderLoop (node, model, state) {
-    const collection = loopCollection(node.through, node.keyName, node.valName, model)
+    const keyName = resolveVars(node.keyName, model)
+    const valName = resolveVars(node.valName, model)
+    const collection = loopCollection(node.through, keyName, valName, model)
     if (!collection) return ''
 
     let out = ''
-    const needsKey = !!node.keyName
+    const needsKey = !!keyName
     const items = loopWalk(collection, needsKey)
     for (let i = 0; i < items.length; i++) {
       const key = needsKey ? items[i] : null
-      out += renderNodes(node.body, loopScope(model, node.keyName, key, node.valName, needsKey ? collection[key] : items[i]), state)
+      out += renderNodes(node.body, loopScope(model, keyName, key, valName, needsKey ? collection[key] : items[i]), state)
     }
     return out
   }
@@ -1354,7 +1403,7 @@ export function createCompiler (deps) {
       inline: inlineBlock,
       computed: computedVariable,
       marked: selectionMarked,
-      dynamic: dynamicBody,
+      dynamic: renderDynamicInclude,
       iterable,
       walk: loopWalk,
       collection: loopCollection,

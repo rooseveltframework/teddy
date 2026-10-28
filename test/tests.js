@@ -385,6 +385,24 @@ export default [
         expected: '<p class="matched">Some content</p>'
       },
       {
+        message: 'should evaluate <if> and <elseif> conditions whose names contain a {variable} (conditionals/conditionalVarInName.html)',
+        template: 'conditionals/conditionalVarInName',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: '<p>jack: guy</p><p>jill: girl</p><p>hill: landscape</p>'
+      },
+      {
+        message: 'should evaluate one line if whose condition name contains a {variable} (conditionals/oneLineVarInName.html)',
+        template: 'conditionals/oneLineVarInName',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: '<span class="unmatched">guy</span><span class="matched">girl</span><span class="unmatched">landscape</span>'
+      },
+      {
+        message: 'should evaluate <elseif> and <elseunless> conditions whose values contain a {variable} (conditionals/elseIfValueVar.html)',
+        template: 'conditionals/elseIfValueVar',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: '<p>elseif</p><p>elseunless</p>'
+      },
+      {
         message: 'should evaluate <if something> as true and the nested <if not:somethingElse> as false, triggering the nested <else> condition (conditionals/nestedConditional.html)',
         template: 'conditionals/nestedConditional',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
@@ -1147,6 +1165,12 @@ export default [
         expected: '<p>{missing}</p>'
       },
       {
+        message: 'should resolve present variables normally when flagged with |h or |d (misc/varForceEmptyFlagsPresent.html)',
+        template: 'misc/varForceEmptyFlagsPresent',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
+        expected: '<p>Some content</p><p>Some content</p><p>guy</p><p>guy</p>'
+      },
+      {
         message: 'should render <inline> tags (misc/inlineTag.html)',
         template: 'misc/inlineTag',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),
@@ -1850,6 +1874,31 @@ export default [
           return assert(teddy.render("<include src='{which}'><arg label>from an arg</arg></include>", { which: 'compilerDynamicPartial' }), expected)
         },
         expected: '<p>from an arg</p>'
+      },
+      {
+        message: 'should resolve {variables} in <loop> key and val attributes, <inline> css and js attributes, <include> as/mode/hydrate attributes, and <arg> names',
+        run: async (teddy, template, model, assert, expected) => {
+          teddy.setTemplate('compilerDynamicWidget', '<p>{greeting}</p>')
+          const rendered = teddy.render(
+            '<loop through="items" key="{keyAttr}" val="{valAttr}"><span>{k}:{v}</span></loop><inline css="styles.{theme}"></inline><inline js="scripts.{theme}"></inline><include src="{partial}" as="my-{widget}" mode="{renderMode}" hydrate="{hydrateKey}"><arg {argAttr}>hi</arg></include><if rawText="{rawText|p}"><i>ok</i></if>',
+            {
+              items: { a: 1 },
+              keyAttr: 'k',
+              valAttr: 'v',
+              theme: 'dark',
+              styles: { dark: 'body{color:#fff}' },
+              scripts: { dark: 'console.log(1)' },
+              partial: 'compilerDynamicWidget',
+              widget: 'card',
+              renderMode: 'light',
+              hydrateKey: 'theme',
+              argAttr: 'greeting',
+              rawText: 'b {x}'
+            }
+          )
+          return assert(rendered, expected)
+        },
+        expected: '<span>a:1</span><style>body{color:#fff}</style><script>console.log(1)</script><my-card><p>hi</p><script type="application/json" class="teddy-component-model" slot="teddy-component-model">{"theme":"dark"}</script></my-card><i>ok</i>'
       },
       {
         message: 'should write out a value that refers back to itself rather than resolving forever, and say which values led round the loop',

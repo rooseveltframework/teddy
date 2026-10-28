@@ -1,3 +1,10 @@
+## 2.2.1
+
+- Fixed a condition whose name contains a `{variable}`, such as `<if event.{column.name}.icon>` or a one-line `if-names.{person}="girl"`, looking up the name as written rather than resolving the variable first, and being split at the braces when parsed in the client-side build.
+- Fixed `<elseif>` and `<elseunless>` conditions whose value contains a `{variable}` comparing against the value as written rather than against what the variable resolved to, as `<if>` and `<unless>` already did.
+- Fixed `<loop>` `key` and `val` attributes, `<inline>` `css` and `js` attributes, `<include>` `as`, `mode`, and `hydrate` attributes, and `<arg>` names not resolving `{variables}` the way `<loop>` `through` and `<include>` `src` do, and unified `{variable}` evaluation across all Teddy element attributes.
+- Fixed `{variable|h}` and `{variable|d}` looking up the variable with the flag still attached to its name, so a variable that was present in the model was treated as missing and rendered as empty under `|h` or as `{variable}` under `|d`.
+
 ## 2.2.0
 
 - Added `teddy.renderFragment(template, model, options)`, which renders into a `DocumentFragment` rather than a string. An element written with a `ref` attribute is handed back by name in the fragment's `refs`.
