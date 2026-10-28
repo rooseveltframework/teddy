@@ -1862,6 +1862,26 @@ export default [
         expected: '<p><em>hi</em></p>'
       },
       {
+        message: 'should not take a |s flag from the value a variable whose name is built from another variable was given (GHSA-c7m5-3w9v-5c92)',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render('<p>{names.{key}}</p>', { key: 'about|s', names: { about: '<img src=x onerror=alert(1)>' } }), expected),
+        expected: '<p>{names.about|s}</p>'
+      },
+      {
+        message: 'should not take |p|s flags from the value a variable whose name is built from another variable was given',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render('<p>{names.{key}}</p>', { key: 'about|p|s', names: { about: '<img src=x>' } }), expected),
+        expected: '<p>{names.about|p|s}</p>'
+      },
+      {
+        message: 'should not take a |s flag from the value a ${variable} whose name is built from another variable was given', // eslint-disable-line
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render('<p>${names.{key}}</p>', { key: 'about|s', names: { about: '<img src=x>' } }), expected), // eslint-disable-line
+        expected: '<p>${names.about|s}</p>' // eslint-disable-line
+      },
+      {
+        message: 'should escape the value of a variable whose name is built from another variable and which carries no flag',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render('<p>{names.{key}}</p>', { key: 'about', names: { about: '<img src=x>' } }), expected),
+        expected: '<p>&lt;img src=x&gt;</p>'
+      },
+      {
         message: 'should resolve a variable whose name is built from another variable to nothing when the name it spells is not in the model',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render('<p>{a{b}}</p>', { b: 'X' }), expected),
         expected: '<p>{aX}</p>'

@@ -313,7 +313,7 @@ function emitComputedVar (node, state, out) {
   const name = `n${state.uid++}`
   let js = `let ${name} = ''\n`
   js += walk(node.nameNodes, state, name)
-  js += `${out} += r.computed(${name}, ${state.model}, s, ${!!node.dollar})\n`
+  js += `${out} += r.computed(${name}, ${nodeRef(node, state)}.flags, ${state.model}, s, ${!!node.dollar})\n`
   return js
 }
 
