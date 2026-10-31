@@ -1115,6 +1115,32 @@ export default [
         expected: '<p>Before &lt;span&gt;raw html&lt;/span&gt; after</p>'
       },
       {
+        // a variable counts as raw when a |s turns up anywhere among its last few characters, so taking out only a |s that ends the variable left {x||ss} and {x||sh} raw
+        message: 'should write a {variable||ss} or {variable||sh} that sits inside an escaped variable\'s value escaped',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render('<p>{a}</p><p>{b}</p>', { a: '{evil||ss}', b: '{evil||sh}', evil: '<img src=x onerror=alert(1)>' }), expected),
+        expected: '<p>&lt;img src=x onerror=alert(1)&gt;</p><p>&lt;img src=x onerror=alert(1)&gt;</p>'
+      },
+      {
+        message: 'should write a variable whose name is built from another variable and that sits inside an escaped variable\'s value escaped',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render('<p>{bio}</p>', { bio: '{names.{key}|s}', key: 'about', names: { about: '<img src=x onerror=alert(1)>' } }), expected),
+        expected: '<p>&lt;img src=x onerror=alert(1)&gt;</p>'
+      },
+      {
+        message: 'should leave the text of an escaped variable\'s value that is not a {variable} as it is when taking the |s flags out of the {variables} in it',
+        run: async (teddy, template, model, assert, expected) => assert(teddy.render('<p>{bio}</p>', { bio: 'cmd|sort {x {a|s} |s', a: 'A' }), expected),
+        expected: '<p>cmd|sort {x {a} |s</p>'
+      },
+      {
+        // the value is the model's to choose, so one made of braces or of pipes and esses, built to make a scan go back over itself, must not hold up the render
+        message: 'should take the |s flags out of an escaped variable\'s value in one pass however the value is built',
+        run: async (teddy, template, model, assert, expected) => {
+          const started = Date.now()
+          teddy.render('<p>{a}</p><p>{b}</p>', { a: '{'.repeat(200000) + '|s', b: '{' + '|'.repeat(100000) + 's'.repeat(100000) + '}' })
+          return assert(Date.now() - started < 2000, expected)
+        },
+        expected: true
+      },
+      {
         message: 'should render a frozen model, leaving the model it was given as it was',
         run: async (teddy, template, model, assert, expected) => {
           const frozen = Object.freeze({ name: 'world', markup: '<b>{name}</b>' })
@@ -1864,17 +1890,51 @@ export default [
       {
         message: 'should not take a |s flag from the value a variable whose name is built from another variable was given (GHSA-c7m5-3w9v-5c92)',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render('<p>{names.{key}}</p>', { key: 'about|s', names: { about: '<img src=x onerror=alert(1)>' } }), expected),
-        expected: '<p>{names.about|s}</p>'
+        expected: '<p>{names.about}</p>'
       },
       {
         message: 'should not take |p|s flags from the value a variable whose name is built from another variable was given',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render('<p>{names.{key}}</p>', { key: 'about|p|s', names: { about: '<img src=x>' } }), expected),
-        expected: '<p>{names.about|p|s}</p>'
+        expected: '<p>{names.about|p}</p>'
       },
       {
         message: 'should not take a |s flag from the value a ${variable} whose name is built from another variable was given', // eslint-disable-line
         run: async (teddy, template, model, assert, expected) => assert(teddy.render('<p>${names.{key}}</p>', { key: 'about|s', names: { about: '<img src=x>' } }), expected), // eslint-disable-line
-        expected: '<p>${names.about|s}</p>' // eslint-disable-line
+        expected: '<p>${names.about}</p>' // eslint-disable-line
+      },
+      {
+        // a name that is not in the model is written back as a variable, and a layout taking the page as an argument parses it again, by which time a |s the value put into it would be a flag
+        message: 'should not take a |s flag from the value a variable whose name is built from another variable was given when the page is passed on through a layout',
+        run: async (teddy, template, model, assert, expected) => {
+          teddy.setTemplate('computedNameLayout', '<main>{pageContent|s}</main>')
+          return assert(teddy.render('<include src="computedNameLayout"><arg pageContent><p>{names.{key}}</p></arg></include>', { key: 'about|p|s', names: { about: '<img src=x onerror=alert(1)>' } }), expected)
+        },
+        expected: '<main><p>&lt;img src=x onerror=alert(1)&gt;</p></main>'
+      },
+      {
+        message: 'should not take a |s flag from the value a variable whose name is built from another variable was given when it spells the flag in a way that is not at the end',
+        run: async (teddy, template, model, assert, expected) => {
+          teddy.setTemplate('computedNameLayout2', '<main>{pageContent|s}</main>')
+          return assert(teddy.render('<include src="computedNameLayout2"><arg pageContent><p>{names.{key}}</p></arg></include>', { key: 'about||ss', names: { about: '<img src=x onerror=alert(1)>' } }), expected)
+        },
+        expected: '<main><p>&lt;img src=x onerror=alert(1)&gt;</p></main>'
+      },
+      {
+        // a value closing the variable early would otherwise point the template's own |s at any variable it liked once a layout parsed the page again
+        message: 'should not let the value a variable whose name is built from another variable was given close the variable early and take the template\'s |s flag elsewhere',
+        run: async (teddy, template, model, assert, expected) => {
+          teddy.setTemplate('computedNameLayout3', '<main>{pageContent|s}</main>')
+          return assert(teddy.render('<include src="computedNameLayout3"><arg pageContent><p>{names.{key}|s}</p></arg></include>', { key: 'x}{evil', names: { about: '<b>ok</b>' }, evil: '<img src=x onerror=alert(1)>' }), expected)
+        },
+        expected: '<main><p>{names.x}&lt;img src=x onerror=alert(1)&gt;</p></main>'
+      },
+      {
+        message: 'should keep the template\'s own |s flag on a variable whose name is built from another variable when the name is not in the model, so a layout can still resolve it',
+        run: async (teddy, template, model, assert, expected) => {
+          teddy.setTemplate('computedNameLayout4', '<main>{pageContent|s}</main>')
+          return assert(teddy.render('<include src="computedNameLayout4"><arg pageContent><p>{names.{key}|s}</p></arg></include>', { key: 'nope', names: { about: '<b>ok</b>' } }), expected)
+        },
+        expected: '<main><p>{names.nope|s}</p></main>'
       },
       {
         message: 'should escape the value of a variable whose name is built from another variable and which carries no flag',
@@ -2063,6 +2123,40 @@ export default [
           return assert(teddy.render("<include src='compilerLayout2'><arg pageContent><p><noteddy>{notAVariable}</noteddy></p></arg></include>", {}), expected)
         },
         expected: '<body><p>{notAVariable}</p></body>'
+      },
+      {
+        // a {variable|p} in an attribute leaves teddy's marker for its value inside that attribute, and a variable left unresolved makes the page go through the layout as markup to be parsed again. the marker's own quotes used to end the attribute early, which threw out the whole page
+        message: 'should keep a {variable|p} in an attribute when the markup holding it is passed on through another variable alongside an unresolved {variable}',
+        run: async (teddy, template, model, assert, expected) => {
+          teddy.setTemplate('compilerLayout3', '<main>{pageContent|s}</main>')
+          return assert(teddy.render('<include src="compilerLayout3"><arg pageContent><p title="{missing}">x</p><p title="{t|p}">y</p></arg></include>', { t: 'Saltmere' }), expected)
+        },
+        expected: '<main><p title="{missing}">x</p><p title="Saltmere">y</p></main>'
+      },
+      {
+        message: 'should keep a {variable|p} in an attribute when the markup holding it is passed on through another variable alongside an unresolved {variable} in text',
+        run: async (teddy, template, model, assert, expected) => {
+          teddy.setTemplate('compilerLayout4', '<main>{pageContent|s}</main>')
+          return assert(teddy.render('<include src="compilerLayout4"><arg pageContent><p>{missing}</p><p title="{t|p}">y</p></arg></include>', { t: 'Saltmere' }), expected)
+        },
+        expected: '<main><p>{missing}</p><p title="Saltmere">y</p></main>'
+      },
+      {
+        message: 'should keep a {variable|p} in an attribute when the markup holding it is passed on through another variable alongside a null {variable}',
+        run: async (teddy, template, model, assert, expected) => {
+          teddy.setTemplate('compilerLayout5', '<main>{pageContent|s}</main>')
+          return assert(teddy.render('<include src="compilerLayout5"><arg pageContent><input value="{n}"><p data-confirm="Delete {t|p}?">y</p></arg></include>', { t: 'Saltmere', n: null }), expected)
+        },
+        expected: '<main><input value="{n}"><p data-confirm="Delete Saltmere?">y</p></main>'
+      },
+      {
+        // while the page is parsed again, teddy's markers for its held out blocks stand in as text, and a value from the model must not be able to write one of those stand-ins and move a block of trusted markup somewhere else, such as into an attribute it could break out of
+        message: 'should not let a value from the model move a held out block when the markup holding it is passed on through another variable',
+        run: async (teddy, template, model, assert, expected) => {
+          teddy.setTemplate('compilerLayout6', '<main><h1>{title}</h1>{pageContent|s}</main>')
+          return assert(teddy.render('<include src="compilerLayout6"><arg title>{userTitle}</arg><arg pageContent><a title="{bio}">x</a>{missing}<div>{widget|s|p}</div></arg></include>', { bio: '{title}', userTitle: '<0 0', widget: '<b class="w">trusted</b>' }), expected)
+        },
+        expected: '<main><h1>&amp;lt;0 0</h1><a title="&amp;lt;0 0">x</a>{missing}<div><b class="w">trusted</b></div></main>'
       },
       {
         message: 'should say so when a selected-value cannot reach the elements it would mark',

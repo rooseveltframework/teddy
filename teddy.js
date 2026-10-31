@@ -325,10 +325,42 @@ function formatVariable (flags, value, model) {
 }
 
 // an escaped value is still parsed for {variables} of its own, but what it holds came from the model, and nothing in the model gets to decide that something is written unescaped: a {variable|s} inside it is written escaped like the value around it
-const variableInValue = /\{([^{}]*)\}/g
+//
+// each {variable} is taken whole, braces inside it and all, so that one built from another, such as {a{b}|s}, loses its |s too. a { that is never closed is not a variable, though one opened after it can be. text outside the braces is the value's own and is left as it is
+//
+// both of these go over the text once. a value is the model's to choose, and one built to make a slower scan go back over itself again and again would hold up the render
 function withoutRawFlags (text) {
   if (typeof text !== 'string' || !text.includes('|s')) return text
-  return text.replace(variableInValue, (variable, inside) => `{${inside.replace(/\|s(?=\||$)/g, '')}}`)
+  // a } closes the latest { still open, and a span starts where a pair that no other pair holds opens
+  const opens = []
+  const spans = []
+  for (let i = 0; i < text.length; i++) {
+    if (text[i] === '{') opens.push(i)
+    else if (text[i] === '}' && opens.length > 0) {
+      const open = opens.pop()
+      // a pair closing after the ones inside it takes their place, since it holds them
+      while (spans.length > 0 && spans[spans.length - 1][0] > open) spans.pop()
+      spans.push([open, i + 1])
+    }
+  }
+  let out = ''
+  let from = 0
+  for (const [open, close] of spans) {
+    out += text.slice(from, open) + withoutAnyRawFlag(text.slice(open, close))
+    from = close
+  }
+  return out + text.slice(from)
+}
+
+// takes out every |s, not only one that ends the text: a variable counts as raw when a |s turns up anywhere among its last few characters, so {x||ss} was raw as well. taking one out can leave another behind, as ||ss does, so an s that follows a | still standing cancels it, which is what taking them out until none is left comes to
+function withoutAnyRawFlag (text) {
+  if (!text.includes('|s')) return text
+  const kept = []
+  for (const character of text) {
+    if (character === 's' && kept[kept.length - 1] === '|') kept.pop()
+    else kept.push(character)
+  }
+  return kept.join('')
 }
 
 // escapes sensitive characters to prevent xss
@@ -583,6 +615,7 @@ const compiler = createCompiler({
   params,
   variableFlags,
   formatVariable,
+  withoutAnyRawFlag,
   holdOut,
   escapeEntities,
   conditionPath,
