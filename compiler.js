@@ -128,6 +128,7 @@ export function createCompiler (deps) {
     browser,
     params,
     variableFlags,
+    withoutAnyRawFlag,
     formatVariable,
     holdOut,
     escapeEntities,
@@ -143,6 +144,10 @@ export function createCompiler (deps) {
 
   let token = TOKEN_CANDIDATES[0]
   const tokenFor = index => token + index + token
+
+  // what renderValue writes a held out block's placeholder as while a value is parsed: a character from the private use area, which no parser or serializer does anything with, around a secret made once for this compiler. a value from the model never sees the secret, so it cannot write a stand-in of its own and move a held out block somewhere else, such as into an attribute it could break out of
+  const standInSecret = Array.from(globalThis.crypto.getRandomValues(new Uint32Array(4)), n => n.toString(36)).join('')
+  const STAND_IN = new RegExp(`\ue000${standInSecret}(\\d+)\ue000`, 'g')
 
   // returns a node tree, or null if the template contains anything this compiler does not handle yet, which means the caller should interpret it instead
   function compileTemplate (source, stack = []) {
@@ -973,15 +978,20 @@ export function createCompiler (deps) {
       }
       return text
     }
-    const nodes = compileValue(text)
+    // a placeholder for a block teddy held out is markup with quotes of its own, so one that a |p variable left inside an attribute value would end that value early once the value is parsed. each is swapped for a stand-in that parses as plain text and put back once the value has rendered
+    const placeholders = []
+    let source = text
+    if (text.includes('<noteddy id="')) source = text.replace(NOTEDDY_PLACEHOLDER, placeholder => `\ue000${standInSecret}${placeholders.push(placeholder) - 1}\ue000`)
+    const nodes = compileValue(source)
     // markup arriving through the model has to make sense on its own. one that opens a teddy tag it does not close, or closes one it did not open, only means something joined to the template it landed in, and a template is no longer reparsed once its values are in place
     if (nodes === null) {
       warn(params, `a variable was given markup that is not complete on its own, so it has been left out. markup coming from the model has to open and close its own tags: ${JSON.stringify(text.length > 120 ? text.slice(0, 120) + '...' : text)}`)
       return ''
     }
     state.values.push(text)
-    const out = renderNodes(nodes, model, state)
+    let out = renderNodes(nodes, model, state)
     state.values.pop()
+    if (placeholders.length > 0) out = out.replace(STAND_IN, (whole, index) => placeholders[index])
     return out
   }
 
@@ -1215,13 +1225,27 @@ export function createCompiler (deps) {
     return ''
   }
 
+  // whether every brace in a variable's name closes one opened before it in the name and every one opened there is closed, so that the name stays inside the braces written around it
+  function bracesPairUp (name) {
+    let depth = 0
+    for (const character of name) {
+      if (character === '{') depth++
+      else if (character === '}' && --depth < 0) return false
+    }
+    return depth === 0
+  }
+
   // a variable whose name was built from other variables: the name is rendered first, then looked up, so {a{b}} with b of X asks the model for aX
   //
   // the flags are the ones the template wrote, worked out when it was compiled. the rendered name is looked up as it stands, so a |s that a value put into it is part of the name rather than a flag, and a name carrying one is not in the model
+  //
+  // a name that is not in the model is written back as a variable, which a layout taking the page as an argument will parse again. a |s that a value put into the name would be a flag by then, so none is written back. nor is the template's own |s when the braces in the name do not pair up: a value closing the variable early, as x}{evil does, would otherwise point that |s at whatever it liked
   function computedVariable (name, written, model, state, dollar = false) {
-    const flags = VALID_VARIABLE.test(name) ? { ...written, match: name + written.suffix, name } : null
+    // the variable as it is written back, by formatVariable as much as here
+    const match = bracesPairUp(name) ? withoutAnyRawFlag(name) + written.suffix : withoutAnyRawFlag(name + written.suffix)
+    const flags = VALID_VARIABLE.test(name) ? { ...written, match, name } : null
     const resolved = flags ? formatVariable(flags, getOrSetObjectByDotNotation(model, name), model) : null
-    if (!resolved) return `${dollar ? '$' : ''}{${name}${written.suffix}}`
+    if (!resolved) return `${dollar ? '$' : ''}{${match}}`
     const prefix = dollar && resolved.skipTemplateLiteralReplacement ? '$' : ''
     return prefix + writeValue(resolved, flags.raw, model, state)
   }

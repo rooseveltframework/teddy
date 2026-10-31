@@ -1,3 +1,9 @@
+## 2.3.2
+
+- Fixed a variable whose name is built from another variable, such as `{names.{key}}`, writing its value unescaped when the page went through a layout. A name not in the model was written back with flags the model supplied, and the layout parsed it again.
+- Fixed a `{variable}` inside an escaped value being written unescaped when its `|s` flag was spelled oddly, such as `{x||ss}`, or when its name was built from another variable.
+- Updated dependencies.
+
 ## 2.3.1
 
 - Breaking: Bumped the precompiled format to `4`, so templates precompiled with an earlier version must be precompiled again.
