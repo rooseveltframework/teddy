@@ -1,3 +1,8 @@
+## 2.3.3
+
+- Shrank production bundle
+- Updated dependencies.
+
 ## 2.3.2
 
 - Fixed a variable whose name is built from another variable, such as `{names.{key}}`, writing its value unescaped when the page went through a layout. A name not in the model was written back with flags the model supplied, and the layout parsed it again.
