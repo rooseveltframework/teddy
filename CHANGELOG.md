@@ -1,3 +1,8 @@
+## 2.3.4
+
+- Breaking: Changed an `<include>` whose `src` comes from a `{variable}`, such as `<include src="{page}">`, to only load files inside the template root. A value from the model that climbed out with `..` or was an absolute path could read and render any `.html` file on the server. A `src` with no variable in it, such as `<include src="../shared/header">`, can still point outside the root.
+- Updated dependencies.
+
 ## 2.3.3
 
 - Shrank production bundle

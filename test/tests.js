@@ -589,6 +589,31 @@ export default [
         expected: '<p>Some content</p>'
       },
       {
+        message: 'should not let a dynamic <include> whose src comes from the model read a file outside the template root',
+        runNode: async (teddy, template, model, assert, expected) => {
+          const { resolve } = await import('path')
+          teddy.setTemplateRoot('test/templates/misc')
+          teddy.clearTemplates()
+          const answers = []
+          try {
+            const render = (markup, page) => teddy.render(markup, { ...structuredClone(model), page })
+            const plain = '<include src="{page}"></include>'
+            const component = '<include src="{page}" as="my-card" mode="light"></include>'
+            answers.push(render(plain, 'variable').includes('<p>Some content</p>') ? 'inside root loads' : 'inside root FAILED')
+            for (const page of ['../conditionals/if', resolve('test/templates/conditionals/if'), '../../../package', 'variable/../../conditionals/if']) {
+              answers.push(render(plain, page).includes('not found') && render(component, page).includes('not found') ? 'blocked' : `LEAKED ${page}`)
+            }
+            // a src written into the template by its author is not the model's to choose, so it may still reach outside the root
+            answers.push(teddy.render('<include src="../conditionals/if"></include>', structuredClone(model)).includes('is present') ? 'static allowed' : 'static FAILED')
+          } finally {
+            teddy.setTemplateRoot('test/templates')
+            teddy.clearTemplates()
+          }
+          assert(answers.join(', '), 'inside root loads, blocked, blocked, blocked, blocked, static allowed')
+        },
+        expected: 'inside root loads, blocked, blocked, blocked, blocked, static allowed'
+      },
+      {
         message: 'should resolve a {variable} in the name of an <arg> passed to an <include> whose src is written out (includes/includeArgNameVar.html)',
         template: 'includes/includeArgNameVar',
         run: async (teddy, template, model, assert, expected) => assert(teddy.render(template, model), expected),

@@ -37,7 +37,9 @@ function varPattern (source, escape) {
 // a template may be the markup itself, the name of a template registered with setTemplate, or the path of a file to read
 //
 // returns null when a name is neither registered nor readable, so that callers can tell a template that is missing apart from one that legitimately rendered to nothing
-function loadTemplate (template) {
+//
+// a confined load is one whose name came from the model, as a dynamic <include src="{page}"> does. the model is often built from the request, so such a name is never markup and is only ever read from inside the template root: a name like ../../secret or /etc/app/secret must not reach a file the app never meant to serve as a template
+function loadTemplate (template, { confined = false } = {}) {
   // ensure template is a string
   if (typeof template !== 'string') {
     if (params.verbosity > 1) console.warn('teddy.loadTemplate attempted to load a template which is not a string.')
@@ -45,22 +47,34 @@ function loadTemplate (template) {
   }
 
   // markup passed in directly rather than a name to look up
-  if (template.includes('<')) return removeTeddyComments(template)
+  if (template.includes('<')) {
+    if (confined) return null
+    return removeTeddyComments(template)
+  }
 
   const name = template
   const withExtension = name.slice(-5) === '.html' ? name : name + '.html'
+  const confinedPath = confined ? pathWithinTemplateRoot(withExtension) : null
 
   // a template registered by hand wins over anything on the filesystem, which is what makes the same template work in the browser
   for (const key of [name, withExtension]) {
     if (typeof templates[key] === 'string') return removeTeddyComments(templates[key])
   }
 
+  // a confined name that does not land inside the template root is not looked for any further, not even in the cache, which may hold a file a static include was allowed to read from outside it
+  if (confined && confinedPath === null) {
+    if (params.verbosity > 1) console.warn(`teddy: a dynamic <include> named "${name}", which is outside the template root, so it was not loaded.`)
+    return null
+  }
+
   // then whatever was read from the filesystem last time, if the caller asked for templates to be cached
-  if (params.cacheTemplates && typeof fileCache[name] === 'string') return fileCache[name]
+  const cacheKey = confined ? confinedPath : name
+  if (params.cacheTemplates && typeof fileCache[cacheKey] === 'string') return fileCache[cacheKey]
 
   // then the filesystem itself
   if (fs && fs.readFileSync) {
-    for (const candidate of [withExtension, params.templateRoot + withExtension, params.templateRoot + '/' + withExtension]) {
+    const candidates = confined ? [confinedPath] : [withExtension, params.templateRoot + withExtension, params.templateRoot + '/' + withExtension]
+    for (const candidate of candidates) {
       let contents
       try {
         contents = fs.readFileSync(candidate, 'utf8')
@@ -68,12 +82,20 @@ function loadTemplate (template) {
         continue // try the next place it might be
       }
       contents = removeTeddyComments(contents)
-      if (params.cacheTemplates) fileCache[name] = contents
+      if (params.cacheTemplates) fileCache[cacheKey] = contents
       return contents
     }
   }
 
   return null // it is not a registered template and there is no file by that name
+}
+
+// the absolute path a confined name points at inside the template root, or null when it points anywhere else, whether by climbing out with .. or by being absolute
+function pathWithinTemplateRoot (name) {
+  if (!path || !path.resolve || name.includes('\0')) return null
+  const root = path.resolve(params.templateRoot)
+  const resolved = path.resolve(root, name)
+  return resolved.startsWith(root.endsWith(path.sep) ? root : root + path.sep) ? resolved : null
 }
 
 // remove teddy {! comments !} and <!--! comments -->; also replace <escape>tags</escape> and <!--# content -->
@@ -620,8 +642,8 @@ const compiler = createCompiler({
   escapeEntities,
   conditionPath,
   evaluateConditional,
-  loadTemplate: (template) => { // (for the templates others include, whose repeated attributes need renaming as the including template's had: see prepareTemplate)
-    const markup = loadTemplate(template)
+  loadTemplate: (template, options) => { // (for the templates others include, whose repeated attributes need renaming as the including template's had: see prepareTemplate)
+    const markup = loadTemplate(template, options)
     return markup === null ? null : renameRepeatedAttributes(markup)
   },
   parseVars,

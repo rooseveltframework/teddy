@@ -482,8 +482,10 @@ export function createCompiler (deps) {
   }
 
   // the markup an include renders: the template it names, or what teddy writes in place of one it could not find
-  function includedMarkup (src) {
-    const markup = loadTemplate(src)
+  //
+  // confined is set for a src that came from the model, which is only ever read from inside the template root: see loadTemplate
+  function includedMarkup (src, confined = false) {
+    const markup = loadTemplate(src, { confined })
     if (markup !== null) return markup
     warn(params, `an <include> has a src set to a template that could not be found: ${src}`, 2)
     return params.includeNotFoundBehavior === 'display' ? `Template "${src}" not found!` : ''
@@ -1352,7 +1354,7 @@ export function createCompiler (deps) {
     let body = node.compiled.get(src)
     if (body !== undefined) return body
     checkNotCycling(node.stack, src)
-    const markup = loadTemplate(src)
+    const markup = loadTemplate(src, { confined: true })
     body = markup === null
       ? notFoundBody(src)
       : compileTemplate(markup, node.stack.concat(src))
@@ -1372,7 +1374,7 @@ export function createCompiler (deps) {
     let entry = node.compiled.get(key)
     if (entry === undefined) {
       checkNotCycling(node.stack, src)
-      const markup = includedMarkup(src)
+      const markup = includedMarkup(src, true)
       const nextStack = node.stack.concat(src)
       const openNodes = []
       pushText(openNodes, `<${element}${node.openTag}>${mode === 'light' ? '' : '<template shadowrootmode="open">'}`)
