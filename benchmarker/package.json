@@ -15,27 +15,27 @@
     "lint-fix": "standard --fix"
   },
   "dependencies": {
-    "@marko/compiler": "5.42.5",
+    "@marko/compiler": "5.43.6",
     "art-template": "4.13.4",
     "dot": "1.1.3",
     "dustjs-linkedin": "3.0.1",
-    "ejs": "6.0.1",
+    "ejs": "7.0.2",
     "eta": "4.6.0",
-    "handlebars": "4.7.9",
-    "liquidjs": "10.29.0",
+    "handlebars": "4.7.10",
+    "liquidjs": "10.30.1",
     "lodash": "4.18.1",
-    "marko": "6.3.51",
+    "marko": "6.5.2",
     "mustache": "4.2.0",
     "nunjucks": "3.2.4",
     "php": "file:../../node-php-runner",
     "pug": "3.0.4",
     "squirrelly": "9.1.1",
     "teddy": "file:..",
-    "tinybench": "6.2.0"
+    "tinybench": "6.2.5"
   },
   "devDependencies": {
     "esbuild": "0.28.2",
-    "playwright": "1.63.0",
+    "playwright": "1.65.1",
     "standard": "17.1.2"
   },
   "standard": {
